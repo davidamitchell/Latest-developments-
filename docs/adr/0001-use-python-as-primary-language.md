@@ -21,11 +21,10 @@ Use **Python 3.11+** as the sole implementation language.
 ## Consequences
 
 ### Positive
-- The `anthropic` SDK, `youtube-transcript-api`, `feedparser`, and `smtplib` are all mature, well-documented Python libraries
-- GitHub Actions Codespaces have Python 3.11 available by default — no custom runtime setup required
-- The Anthropic official SDK is Python-first; feature parity is highest there
-- Wide ecosystem for future extensions (e.g., `whisper` for audio, `trafilatura` for article extraction)
-- Lowest barrier for most contributors to this kind of automation project
+- All required libraries (`anthropic`, `youtube-transcript-api`, `feedparser`, `trafilatura`) have mature Python packages
+- GitHub Actions runners have Python 3.11 available by default; no custom runtime setup needed
+- The Anthropic SDK is Python-first with the highest feature parity of any supported language
+- Strong ecosystem for likely extension points: `openai-whisper` for audio, `httpx` for async HTTP
 
 ### Negative / Trade-offs
 - Python is slower than compiled languages, but this is irrelevant for a daily batch job with negligible volume

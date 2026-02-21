@@ -1,145 +1,74 @@
 # Latest Developments
 
-A daily digest pipeline that monitors YouTube channels, blogs, and Hacker News in the LLM/AI space — then emails you a concise, configurable summary every morning.
+Watches YouTube channels, blogs, and Hacker News for new AI/ML content, summarises it with Claude, and sends one email per day.
 
-Runs entirely on **GitHub Codespaces** via a scheduled GitHub Actions workflow. No server required.
-
----
-
-## What It Does
-
-1. Fetches new content from configured sources (YouTube channels, RSS blogs, Hacker News)
-2. Transcribes YouTube videos (using available transcripts; falls back to audio)
-3. Summarises content using Anthropic Claude
-4. Emails you one digest per day
-5. Tracks what it has already processed so nothing is repeated across runs
+Runs on GitHub Actions. The workflow, config, and deduplication state all live in this repository — no external infrastructure required.
 
 ---
 
-## Quick Start
+## Setup
 
-### Prerequisites
+### 1. Configure sources
 
-- A GitHub account with Codespaces enabled
-- An [Anthropic API key](https://console.anthropic.com/)
-- An email account for sending (Gmail App Password or SendGrid API key)
+Edit `config/sources.yaml` to choose which YouTube channels, RSS feeds, and HN filters to watch.
 
-### Setup
+### 2. Add GitHub Secrets
 
-1. **Fork or clone this repository**
+Settings → Secrets and variables → Actions:
 
-2. **Add GitHub Secrets** (Settings → Secrets and variables → Actions):
+| Secret | Value |
+|---|---|
+| `ANTHROPIC_API_KEY` | Anthropic console API key |
+| `EMAIL_SENDER` | Sending address |
+| `EMAIL_PASSWORD` | Gmail App Password or SendGrid key |
+| `EMAIL_RECIPIENT` | Destination address |
+| `EMAIL_PROVIDER` | `gmail` or `sendgrid` |
 
-   | Secret | Description |
-   |---|---|
-   | `ANTHROPIC_API_KEY` | Your Anthropic Claude API key |
-   | `EMAIL_SENDER` | Address to send from |
-   | `EMAIL_PASSWORD` | Gmail App Password or SendGrid key |
-   | `EMAIL_RECIPIENT` | Address to send the digest to |
-   | `EMAIL_PROVIDER` | `gmail` or `sendgrid` |
+Gmail requires an [App Password](https://support.google.com/accounts/answer/185833), not your account password. Enable 2FA first.
 
-3. **Configure your sources** — edit `config/sources.yaml`:
+### 3. Enable the workflow
 
-   ```yaml
-   youtube:
-     channels:
-       - name: "Andrej Karpathy"
-         channel_id: "UCbXgNpp0jedKWcQiULLbDTA"
-   blogs:
-     rss:
-       - name: "Simon Willison's Weblog"
-         url: "https://simonwillison.net/atom/everything/"
-   hacker_news:
-     enabled: true
-     min_score: 100
-     keywords: ["LLM", "AI", "Claude", "GPT"]
-   ```
-
-4. **Enable the workflow** — GitHub Actions → `Daily Digest` → Enable
-
-The workflow runs daily at 07:00 UTC by default. You can also trigger it manually.
+GitHub Actions → `Daily Digest` → Enable. Runs at 07:00 UTC by default; adjust the cron in `.github/workflows/daily-digest.yml`.
 
 ---
 
-## Configuration
-
-### Sources (`config/sources.yaml`)
-
-- **YouTube channels** — fetches recent videos and their transcripts
-- **RSS blogs** — fetches new entries since last run
-- **Hacker News** — filters stories by keyword and minimum score
-
-### Summary Prompt (`config/sources.yaml` → `summary.prompt`)
-
-Customise what Claude looks for in the digest. Example:
-
-```yaml
-summary:
-  prompt: |
-    Focus on: new model releases, benchmark results, research papers,
-    and practical developer tools. Ignore marketing announcements.
-  max_items_per_source: 5
-  max_tokens: 2000
-```
-
----
-
-## Running Locally / in Codespaces
+## Local development
 
 ```bash
-# Install dependencies
-pip install -r requirements.txt
-
-# Run in debug mode (verbose logging, no email sent)
-python -m src.main --debug --dry-run
-
-# Run normally
-python -m src.main
+make dev-install   # install with dev dependencies
+make dry-run       # run pipeline without sending email
+make test          # run test suite
+make lint          # ruff check
 ```
 
----
-
-## Project Structure
-
-```
-├── README.md                   # This file
-├── AGENTS.md                   # Instructions for AI coding agents
-├── BACKLOG.md                  # Prioritised feature backlog
-├── PROGRESS.md                 # Current progress and status
-├── config/
-│   └── sources.yaml            # Sources and prompt configuration
-├── docs/
-│   └── adr/                    # Architecture Decision Records
-├── src/
-│   ├── main.py                 # Entry point
-│   ├── fetchers/               # Source-specific fetchers
-│   ├── summariser.py           # Claude summarisation
-│   ├── emailer.py              # Email delivery
-│   ├── state.py                # Deduplication state management
-│   └── logger.py               # Logging setup
-├── tests/
-├── .github/
-│   └── workflows/
-│       └── daily-digest.yml    # Scheduled GitHub Actions workflow
-└── requirements.txt
-```
+Copy `.env.example` to `.env` and fill in credentials before running locally.
 
 ---
 
 ## Deduplication
 
-The pipeline stores a `state/processed.json` file tracking every item it has summarised (by URL or video ID). Items are never processed twice, even if they remain the most recent entry on a source.
+After each run, processed item IDs are written to `state/processed.json` and committed back to the repo by the workflow. The next run loads this file and skips anything already seen.
+
+To reset: delete `state/processed.json`.
 
 ---
 
-## Debug Mode
+## Customising the summary
 
-Run with `--debug` for structured, verbose logging to stdout. Combine with `--dry-run` to skip the email step entirely — useful for testing new sources or prompt changes.
+`summary.prompt` in `config/sources.yaml` tells Claude what to focus on. The default targets model releases, research papers, and developer tooling. Edit freely — it's passed verbatim as the system prompt.
 
 ---
 
-## Contributing / Architecture
+## Project layout
 
-See `AGENTS.md` for coding conventions and agent instructions.
-See `docs/adr/` for Architecture Decision Records explaining key design choices.
-See `BACKLOG.md` for planned work.
+```
+config/sources.yaml         source list and summary settings
+state/processed.json        deduplication store (committed by CI)
+src/                        pipeline code
+docs/adr/                   architecture decisions
+.github/workflows/          scheduled job
+```
+
+Conventions and agent instructions: `AGENTS.md`
+Planned work: `BACKLOG.md`
+Design decisions: `docs/adr/README.md`

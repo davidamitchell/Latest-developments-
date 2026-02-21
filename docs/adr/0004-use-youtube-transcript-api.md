@@ -21,18 +21,16 @@ Fall back to **`yt-dlp` + `openai-whisper`** (tiny model, CPU) only when no tran
 ## Consequences
 
 ### Positive
-- `youtube-transcript-api` requires no API key, no OAuth, and no audio download — it fetches captions in seconds
+- `youtube-transcript-api` requires no API key and no audio download — captions are fetched directly in seconds
 - Auto-generated captions are available on the vast majority of YouTube videos, especially in the AI/tech space
-- No compute cost for transcription in the common case
-- No storage needed (no audio files to manage)
-- Library is lightweight and actively maintained
+- No compute cost for transcription; no audio files to store
 
 ### Negative / Trade-offs
-- Dependent on YouTube's internal (undocumented) caption endpoint — could break if YouTube changes its API
-- No captions available for some videos (live streams, very new uploads, private videos); these are silently skipped in MVP
-- Auto-generated captions have errors; quality is lower than Whisper transcription for highly technical content
-- Does not handle age-restricted or members-only content
+- Dependent on YouTube's internal (undocumented) caption endpoint; breaking changes are possible without notice
+- Live streams, very new uploads, and private videos have no captions and are skipped
+- Auto-generated caption quality is lower than Whisper for highly technical content; members-only videos are not accessible
 
 ### Neutral
+- Channel discovery uses YouTube's free RSS feed (`https://www.youtube.com/feeds/videos.xml?channel_id=CHANNEL_ID`) — no YouTube Data API key required
 - The fetcher interface is abstracted behind `src/fetchers/youtube.py`; switching to Whisper for all videos is a one-file change
-- A future ADR will address Whisper fallback if caption quality proves insufficient
+- Whisper fallback (for videos without captions) is deferred to a later slice

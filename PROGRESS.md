@@ -1,4 +1,4 @@
-# Progress Report
+# Progress
 
 Last updated: 2026-02-21
 
@@ -6,19 +6,17 @@ Last updated: 2026-02-21
 
 ## Current Status
 
-**Phase:** Foundation (Epic 0)
-**Active slice:** 0.2 — ADRs in progress
+**Phase:** Foundation (Epic 0 — complete)
+**Active slice:** Epic 1.1 — YouTube fetcher
 **Branch:** `claude/setup-summarizer-project-4UzIg`
 
 ---
 
-## Summary
-
 | Epic | Title | Status | Complete |
 |---|---|---|---|
-| 0 | Foundation | In Progress | 3 / 6 slices |
+| 0 | Foundation | Done | 9 / 9 slices |
 | 1 | Proof of Life (YouTube → Claude → Email) | Not started | 0 / 5 slices |
-| 2 | Deduplication | Not started | 0 / 4 slices |
+| 2 | Deduplication | Not started | 0 / 3 slices |
 | 3 | Scheduled Automation | Not started | 0 / 4 slices |
 | 4 | Blog / RSS Sources | Not started | 0 / 4 slices |
 | 5 | Hacker News | Not started | 0 / 4 slices |
@@ -29,37 +27,38 @@ Last updated: 2026-02-21
 
 ## Work Log
 
-### 2026-02-21
-
-**Session goal:** Set up project structure, documentation, and planning artifacts.
+### 2026-02-21 — Session 2
 
 **Completed:**
-- `README.md` — human-facing project overview, quick start, config reference
-- `AGENTS.md` — coding standards, repo layout, git workflow for AI agents
-- `BACKLOG.md` — full backlog with thinnest-slice epics 0–7
-- `PROGRESS.md` — this file
-- `docs/adr/` — ADR index + 7 initial ADRs covering all key decisions
+- `pyproject.toml` — project metadata, dependencies, ruff and pytest config
+- `requirements.txt` — pinned production deps for CI
+- `.devcontainer/devcontainer.json` — Codespaces setup with Python 3.11 and VS Code extensions
+- `Makefile` — `dev-install`, `test`, `lint`, `format`, `check`, `run`, `dry-run` targets
+- `.python-version` — pyenv compatibility
+- `.env.example` — credential template for local dev
+- `src/logger.py` — logging setup, structured JSON in debug mode
+- `src/config.py` — load and validate `sources.yaml`
+- `src/state.py` — read/write `state/processed.json`
+- `src/fetchers/__init__.py` — `Fetcher` protocol and `FetchedItem` dataclass
+- `src/main.py` — pipeline skeleton with arg parsing, config loading, state loading
+- `tests/conftest.py`, `tests/test_state.py`, `tests/test_config.py` — initial test suite
+- README, AGENTS, BACKLOG, ADRs — removed AI slop patterns, tightened prose
+
+### 2026-02-21 — Session 1
+
+**Completed:**
+- `README.md`, `AGENTS.md`, `BACKLOG.md`, `PROGRESS.md`
+- `docs/adr/` — ADR index + ADRs 0001–0007
 - `config/sources.yaml` — annotated configuration schema
-- `.gitignore` — updated with project-specific entries
-
-**Decisions made (see ADRs):**
-- Python 3.11 as runtime
-- Anthropic Claude API for summarisation
-- `youtube-transcript-api` for YouTube (no audio pipeline needed for transcripted videos)
-- JSON file for deduplication state (committed back by CI)
-- GitHub Actions for scheduling
-- Gmail SMTP as primary email provider (SendGrid as configurable alternative)
-- YAML for source configuration
-
-**Blocked / risks:**
-- None at this stage. Code implementation begins in Epic 1.
+- `.gitignore`, `.github/workflows/daily-digest.yml`
 
 ---
 
 ## Next Steps
 
-1. Complete Epic 0 remaining slices (0.4 GitHub Actions skeleton, 0.5 pyproject.toml, 0.6 logger)
-2. Begin Epic 1.1 — YouTube transcript fetcher
+1. Epic 1.1 — implement `src/fetchers/youtube.py` (YouTube RSS feed → transcript API)
+2. Epic 1.2 — implement `src/summariser.py`
+3. Epic 1.3 — implement `src/emailer.py`
 
 ---
 

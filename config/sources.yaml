@@ -94,11 +94,11 @@ hacker_news:
 # Summarisation settings
 # ---------------------------------------------------------------------------
 summary:
-  # Anthropic model to use. Cost/quality trade-off:
-  #   claude-haiku-3-5      — fastest, cheapest (recommended for daily digest)
-  #   claude-sonnet-4-5     — higher quality
-  #   claude-opus-4-5       — highest quality, highest cost
-  model: "claude-haiku-3-5"
+  # Anthropic model to use. Cost/quality options:
+  #   claude-haiku-4-5-20251001   — fastest, cheapest (recommended)
+  #   claude-sonnet-4-6           — higher quality
+  #   claude-opus-4-6             — highest quality, highest cost
+  model: "claude-haiku-4-5-20251001"
 
   # Maximum output tokens for the full digest
   max_tokens: 2000
