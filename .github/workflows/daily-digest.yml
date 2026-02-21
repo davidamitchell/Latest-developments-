@@ -1,0 +1,81 @@
+name: Daily Digest
+
+on:
+  # Run every day at 07:00 UTC
+  schedule:
+    - cron: "0 7 * * *"
+
+  # Allow manual runs from the Actions tab
+  workflow_dispatch:
+    inputs:
+      debug:
+        description: "Enable debug logging (--debug)"
+        required: false
+        default: "false"
+        type: boolean
+      dry_run:
+        description: "Dry run — skip sending email (--dry-run)"
+        required: false
+        default: "false"
+        type: boolean
+
+# Prevent concurrent runs (only one digest at a time)
+concurrency:
+  group: daily-digest
+  cancel-in-progress: false
+
+jobs:
+  digest:
+    name: Generate and Send Daily Digest
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write  # Required to commit state/processed.json back to the repo
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          # Fetch full history so state file commits work correctly
+          fetch-depth: 1
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run digest pipeline
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          EMAIL_SENDER: ${{ secrets.EMAIL_SENDER }}
+          EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+          EMAIL_RECIPIENT: ${{ secrets.EMAIL_RECIPIENT }}
+          EMAIL_PROVIDER: ${{ secrets.EMAIL_PROVIDER }}
+        run: |
+          ARGS=""
+          if [ "${{ inputs.debug }}" = "true" ]; then
+            ARGS="$ARGS --debug"
+          fi
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            ARGS="$ARGS --dry-run"
+          fi
+          python -m src.main $ARGS
+
+      - name: Commit updated state file
+        # Only commit if state file was modified (i.e., new items were processed)
+        # Skip on dry runs
+        if: inputs.dry_run != 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add state/processed.json
+          if git diff --cached --quiet; then
+            echo "No new items processed — state file unchanged"
+          else
+            git commit -m "chore: update processed state after digest run [skip ci]"
+            git push origin ${{ github.ref_name }}
+          fi
