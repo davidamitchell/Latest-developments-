@@ -19,6 +19,7 @@ Format: [MADR (Markdown Architectural Decision Records)](https://adr.github.io/m
 | [0005](0005-url-based-deduplication-with-json-state-file.md) | URL-based deduplication with JSON state file | Accepted | 2026-02-21 |
 | [0006](0006-email-delivery-via-smtp-with-sendgrid-option.md) | Email delivery via SMTP with SendGrid option | Accepted | 2026-02-21 |
 | [0007](0007-yaml-for-source-configuration.md) | YAML for source configuration | Accepted | 2026-02-21 |
+| [0008](0008-optional-ai-summarisation.md) | Optional AI summarisation with link-digest fallback | Accepted | 2026-02-21 |
 
 ---
 

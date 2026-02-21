@@ -83,3 +83,28 @@ class TestSendDigest:
 
         raw_message = mock_server.sendmail.call_args.args[2]
         assert "My Digest Subject" in raw_message
+
+    def test_resend_called(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.setenv("EMAIL_PROVIDER", "resend")
+        monkeypatch.setenv("EMAIL_SENDER", "sender@example.com")
+        monkeypatch.setenv("EMAIL_RECIPIENT", "recipient@example.com")
+        monkeypatch.setenv("RESEND_API_KEY", "re_test_key")
+
+        with patch("src.emailer.httpx.post") as mock_post:
+            mock_post.return_value.status_code = 200
+            send_digest("Subject", "Body")
+
+        mock_post.assert_called_once()
+        call_kwargs = mock_post.call_args
+        assert "resend.com" in call_kwargs.args[0]
+        payload = call_kwargs.kwargs["json"]
+        assert payload["to"] == ["recipient@example.com"]
+        assert payload["subject"] == "Subject"
+
+    def test_resend_raises_when_api_key_missing(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.setenv("EMAIL_PROVIDER", "resend")
+        monkeypatch.setenv("EMAIL_SENDER", "s@x.com")
+        monkeypatch.setenv("EMAIL_RECIPIENT", "r@x.com")
+        monkeypatch.delenv("RESEND_API_KEY", raising=False)
+        with pytest.raises(RuntimeError, match="RESEND_API_KEY"):
+            send_digest("Subject", "Body")

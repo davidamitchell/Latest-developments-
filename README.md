@@ -6,27 +6,50 @@ Runs on GitHub Actions. The workflow, config, and deduplication state all live i
 
 ---
 
+## What costs money
+
+| Component | Cost |
+|---|---|
+| GitHub Actions | Free (public repo or within free-tier minutes) |
+| YouTube RSS + transcripts | Free (no API key) |
+| Hacker News API | Free |
+| Resend email | Free up to 3 000 emails/month |
+| **Claude summarisation** | **Paid** — ~$0.01–0.05 per run with Haiku |
+
+Claude is optional. Set `summary.enabled: false` in `config/sources.yaml` and the pipeline sends a plain link list instead. Useful for testing delivery before signing up for an Anthropic account.
+
+---
+
 ## Setup
 
 ### 1. Configure sources
 
-Edit `config/sources.yaml` to choose which YouTube channels, RSS feeds, and HN filters to watch.
+Edit `config/sources.yaml` to choose which YouTube channels, RSS feeds, and HN filters to watch. Everything is commented.
 
-### 2. Add GitHub Secrets
+### 2. Choose an email provider
 
-Settings → Secrets and variables → Actions:
+**Resend** is the easiest starting point — free tier, no App Password or domain required for initial testing.
+
+1. Sign up at [resend.com](https://resend.com) and create an API key.
+2. For testing you can send from `onboarding@resend.dev` to your own address.
+3. Set `EMAIL_PROVIDER=resend` and `RESEND_API_KEY=re_...` in your secrets.
+
+Gmail also works but requires [App Password setup](https://support.google.com/accounts/answer/185833) (2FA must be enabled first).
+
+### 3. Add GitHub Secrets
+
+Settings → Secrets and variables → Actions. Minimum set for a Resend + link-digest run:
 
 | Secret | Value |
 |---|---|
-| `ANTHROPIC_API_KEY` | Anthropic console API key |
-| `EMAIL_SENDER` | Sending address |
-| `EMAIL_PASSWORD` | Gmail App Password or SendGrid key |
-| `EMAIL_RECIPIENT` | Destination address |
-| `EMAIL_PROVIDER` | `gmail` or `sendgrid` |
+| `EMAIL_PROVIDER` | `resend` |
+| `RESEND_API_KEY` | Resend API key |
+| `EMAIL_SENDER` | `onboarding@resend.dev` (testing) or your verified address |
+| `EMAIL_RECIPIENT` | Where to send the digest |
 
-Gmail requires an [App Password](https://support.google.com/accounts/answer/185833), not your account password. Enable 2FA first.
+Add `ANTHROPIC_API_KEY` when you want AI summaries instead of a link list.
 
-### 3. Enable the workflow
+### 4. Enable the workflow
 
 GitHub Actions → `Daily Digest` → Enable. Runs at 07:00 UTC by default; adjust the cron in `.github/workflows/daily-digest.yml`.
 
@@ -36,12 +59,11 @@ GitHub Actions → `Daily Digest` → Enable. Runs at 07:00 UTC by default; adju
 
 ```bash
 make dev-install   # install with dev dependencies
-make dry-run       # run pipeline without sending email
+cp .env.example .env && $EDITOR .env
+make dry-run       # run pipeline, print digest to stdout (no email sent)
 make test          # run test suite
 make lint          # ruff check
 ```
-
-Copy `.env.example` to `.env` and fill in credentials before running locally.
 
 ---
 
@@ -55,7 +77,7 @@ To reset: delete `state/processed.json`.
 
 ## Customising the summary
 
-`summary.prompt` in `config/sources.yaml` tells Claude what to focus on. The default targets model releases, research papers, and developer tooling. Edit freely — it's passed verbatim as the system prompt.
+`summary.prompt` in `config/sources.yaml` is passed verbatim as the Claude system prompt. The default targets model releases, research papers, and developer tooling.
 
 ---
 

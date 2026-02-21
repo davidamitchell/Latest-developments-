@@ -3,12 +3,23 @@
 # Edit this file to control which sources are monitored and how the digest is generated.
 # See README.md for full documentation.
 #
-# Environment variables required (set as GitHub Secrets):
-#   ANTHROPIC_API_KEY   — Anthropic Claude API key
-#   EMAIL_SENDER        — From address (e.g. yourname@gmail.com)
-#   EMAIL_PASSWORD      — Gmail App Password or SendGrid API key
-#   EMAIL_RECIPIENT     — Destination address for the digest
-#   EMAIL_PROVIDER      — "gmail" (default) or "sendgrid"
+# Environment variables (set as GitHub Secrets):
+#   Required for all providers:
+#     EMAIL_SENDER      — From address
+#     EMAIL_RECIPIENT   — Destination address
+#     EMAIL_PROVIDER    — "gmail" | "sendgrid" | "resend" (default: gmail)
+#
+#   Gmail (EMAIL_PROVIDER=gmail):
+#     EMAIL_PASSWORD    — Gmail App Password (requires 2FA)
+#
+#   SendGrid (EMAIL_PROVIDER=sendgrid):
+#     EMAIL_PASSWORD    — SendGrid API key
+#
+#   Resend (EMAIL_PROVIDER=resend) — free tier, no App Password required:
+#     RESEND_API_KEY    — Resend API key (resend.com, 3 000 emails/month free)
+#
+#   Required only when summary.enabled is true:
+#     ANTHROPIC_API_KEY — Anthropic console API key
 
 # ---------------------------------------------------------------------------
 # YouTube channels
@@ -94,6 +105,10 @@ hacker_news:
 # Summarisation settings
 # ---------------------------------------------------------------------------
 summary:
+  # Set to false to skip Claude and produce a plain link list instead.
+  # Useful for testing email delivery without an Anthropic API key.
+  enabled: true
+
   # Anthropic model to use. Cost/quality options:
   #   claude-haiku-4-5-20251001   — fastest, cheapest (recommended)
   #   claude-sonnet-4-6           — higher quality

@@ -7,7 +7,7 @@ from unittest.mock import MagicMock, patch
 
 from src.config import SummaryConfig
 from src.fetchers import FetchedItem
-from src.summariser import summarise
+from src.summariser import format_link_digest, summarise
 
 
 def _make_item(
@@ -106,3 +106,41 @@ class TestSummarise:
             assert "content 0" in user_content
             assert "content 1" in user_content
             assert "content 4" not in user_content
+
+    def test_enabled_false_skips_claude(self) -> None:
+        with patch("src.summariser.anthropic.Anthropic") as mock_cls:
+            result = summarise([_make_item()], _make_config(enabled=False))
+            mock_cls.assert_not_called()
+
+        assert "Test Article" in result
+        assert "https://example.com/id1" in result
+
+    def test_enabled_false_empty_returns_empty(self) -> None:
+        result = summarise([], _make_config(enabled=False))
+        assert result == ""
+
+
+class TestFormatLinkDigest:
+    def test_empty_returns_empty(self) -> None:
+        assert format_link_digest([], _make_config()) == ""
+
+    def test_contains_title_and_url(self) -> None:
+        result = format_link_digest([_make_item()], _make_config(), today=date(2026, 2, 21))
+        assert "Test Article" in result
+        assert "https://example.com/id1" in result
+        assert "21 Feb 2026" in result
+
+    def test_groups_by_source(self) -> None:
+        items = [
+            _make_item("a", source="YouTube"),
+            _make_item("b", source="Blogs"),
+        ]
+        result = format_link_digest(items, _make_config())
+        assert "## YouTube" in result
+        assert "## Blogs" in result
+
+    def test_respects_max_items_per_source(self) -> None:
+        items = [_make_item(str(i), source="S") for i in range(5)]
+        result = format_link_digest(items, _make_config(max_items_per_source=2))
+        # Only 2 items from source "S"; each item URL is example.com/{id}
+        assert result.count("example.com") == 2

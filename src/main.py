@@ -42,9 +42,12 @@ def main() -> int:
 
     logger.info("Starting digest pipeline (dry_run=%s)", args.dry_run)
 
-    if not os.environ.get("ANTHROPIC_API_KEY"):
-        logger.error("ANTHROPIC_API_KEY is not set — set it in .env or as an environment variable")
-        return 1
+    if cfg.summary.enabled and not os.environ.get("ANTHROPIC_API_KEY"):
+        logger.warning(
+            "ANTHROPIC_API_KEY is not set — falling back to plain link digest"
+            " (set summary.enabled: false in sources.yaml to silence this warning)"
+        )
+        cfg.summary.enabled = False
 
     processed = load_state()
     new_items: list[FetchedItem] = []
