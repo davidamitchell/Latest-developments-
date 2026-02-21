@@ -1,0 +1,159 @@
+# Latest Developments — Source Configuration
+#
+# Edit this file to control which sources are monitored and how the digest is generated.
+# See README.md for full documentation.
+#
+# Environment variables required (set as GitHub Secrets):
+#   ANTHROPIC_API_KEY   — Anthropic Claude API key
+#   EMAIL_SENDER        — From address (e.g. yourname@gmail.com)
+#   EMAIL_PASSWORD      — Gmail App Password or SendGrid API key
+#   EMAIL_RECIPIENT     — Destination address for the digest
+#   EMAIL_PROVIDER      — "gmail" (default) or "sendgrid"
+
+# ---------------------------------------------------------------------------
+# YouTube channels
+# ---------------------------------------------------------------------------
+youtube:
+  enabled: true
+
+  # How many recent videos to check per channel (most recent first)
+  max_videos_per_channel: 5
+
+  channels:
+    - name: "Andrej Karpathy"
+      channel_id: "UCbXgNpp0jedKWcQiULLbDTA"
+
+    - name: "Yannic Kilcher"
+      channel_id: "UCZHmQk67mSJgfCCTn7xBfew"
+
+    - name: "AI Explained"
+      channel_id: "UCNJ1Ymd5yFuUPtn21xtRbbw"
+
+    # Add more channels here:
+    # - name: "Channel Display Name"
+    #   channel_id: "UCxxxxxxxxxxxxxxxxxxxxxxx"
+    #   # Optional: override global max_videos_per_channel for this channel
+    #   max_videos: 3
+
+# ---------------------------------------------------------------------------
+# Blog / RSS feeds
+# ---------------------------------------------------------------------------
+blogs:
+  enabled: true
+
+  rss:
+    - name: "Simon Willison's Weblog"
+      url: "https://simonwillison.net/atom/everything/"
+
+    - name: "Lilian Weng (OpenAI)"
+      url: "https://lilianweng.github.io/index.xml"
+
+    - name: "Sebastian Raschka"
+      url: "https://magazine.sebastianraschka.com/feed"
+
+    - name: "The Gradient"
+      url: "https://thegradient.pub/rss/"
+
+    # Add more RSS feeds here:
+    # - name: "Feed Display Name"
+    #   url: "https://example.com/feed.xml"
+
+# ---------------------------------------------------------------------------
+# Hacker News
+# ---------------------------------------------------------------------------
+hacker_news:
+  enabled: true
+
+  # Only include stories with at least this many points
+  min_score: 100
+
+  # Only include stories matching at least one of these keywords (case-insensitive)
+  # Applied to title + URL
+  keywords:
+    - "LLM"
+    - "large language model"
+    - "Claude"
+    - "GPT"
+    - "Gemini"
+    - "Llama"
+    - "AI agent"
+    - "transformer"
+    - "RAG"
+    - "fine-tuning"
+    - "inference"
+    - "benchmark"
+    - "Anthropic"
+    - "OpenAI"
+    - "DeepMind"
+    - "Mistral"
+
+  # Maximum stories to include in the digest
+  max_stories: 10
+
+# ---------------------------------------------------------------------------
+# Summarisation settings
+# ---------------------------------------------------------------------------
+summary:
+  # Anthropic model to use. Cost/quality trade-off:
+  #   claude-haiku-3-5      — fastest, cheapest (recommended for daily digest)
+  #   claude-sonnet-4-5     — higher quality
+  #   claude-opus-4-5       — highest quality, highest cost
+  model: "claude-haiku-3-5"
+
+  # Maximum output tokens for the full digest
+  max_tokens: 2000
+
+  # Maximum items to include per source in the digest
+  max_items_per_source: 5
+
+  # System prompt passed to Claude.
+  # Describe what you consider "important" for your digest.
+  # The pipeline will append source content after this prompt.
+  prompt: |
+    You are summarising content from AI/ML sources for a senior software engineer
+    who follows the LLM space closely. Be concise and technical.
+
+    Focus on:
+    - New model releases and their key capabilities or benchmarks
+    - Novel research techniques with practical implications
+    - Important open-source releases (libraries, tools, datasets)
+    - Significant industry news (funding, partnerships, policy)
+    - Practical developer tutorials or insights worth knowing
+
+    Skip:
+    - Pure marketing announcements with no technical substance
+    - Repetitive coverage of the same story
+    - Beginner-level tutorials unless the technique is genuinely new
+
+    For each item, write 2-4 sentences: what it is, why it matters, and one
+    concrete takeaway if applicable.
+
+# ---------------------------------------------------------------------------
+# Email settings (credentials come from environment variables / GitHub Secrets)
+# ---------------------------------------------------------------------------
+email:
+  # Subject line for the daily digest email
+  subject: "Daily AI Digest — {date}"
+
+  # Send even if there are no new items (sends a "nothing new today" note)
+  send_if_empty: false
+
+# ---------------------------------------------------------------------------
+# Scheduling (informational — actual schedule is in .github/workflows/daily-digest.yml)
+# ---------------------------------------------------------------------------
+schedule:
+  # UTC time for the daily run. Update the cron in the workflow file to match.
+  time_utc: "07:00"
+  timezone_note: "Adjust .github/workflows/daily-digest.yml cron to match your preferred time"
+
+# ---------------------------------------------------------------------------
+# Debug / logging
+# ---------------------------------------------------------------------------
+logging:
+  # "INFO" for normal runs, "DEBUG" for verbose output
+  # Override with --debug flag at runtime
+  level: "INFO"
+
+  # Write logs to a file in addition to stdout (useful in Codespaces)
+  # Set to null to disable file logging
+  log_file: null  # e.g. "logs/digest.log"

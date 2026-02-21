@@ -1,3 +1,28 @@
+# ---------------------------------------------------------------------------
+# Latest Developments — project-specific ignores
+# ---------------------------------------------------------------------------
+
+# Environment / secrets — NEVER commit these
+.env
+.env.*
+!.env.example
+
+# Runtime state (processed.json is committed by CI; local copies ignored if needed)
+# state/processed.json  <- intentionally NOT ignored; CI commits this file
+
+# Logs (file logging is optional and local)
+logs/
+*.log
+
+# Audio downloads (Whisper fallback; large files)
+audio_cache/
+*.mp3
+*.mp4
+*.wav
+*.m4a
+*.webm
+
+# ---------------------------------------------------------------------------
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
