@@ -105,9 +105,12 @@ class YouTubeFetcher:
         return items
 
     def _get_transcript(self, video_id: str, title: str) -> str | None:
+        # Prefer human captions; fall back to auto-generated (a.en, a.de, …)
+        # youtube-transcript-api will translate auto-generated if needed.
+        language_prefs = ("en", "en-US", "en-GB", "a.en")
         try:
             result = with_backoff(
-                lambda: self._api.fetch(video_id),
+                lambda: self._api.fetch(video_id, languages=language_prefs),
                 label=f"transcript {video_id}",
                 no_retry=(CouldNotRetrieveTranscript,),
             )

@@ -8,6 +8,13 @@ import sys
 from datetime import UTC, datetime
 from pathlib import Path
 
+try:
+    from dotenv import load_dotenv  # type: ignore[import-untyped]
+
+    load_dotenv()
+except ImportError:
+    pass  # dotenv not installed; env vars must be set externally (CI injects them)
+
 from src.config import load_config
 from src.emailer import send_digest
 from src.fetchers import FetchedItem
