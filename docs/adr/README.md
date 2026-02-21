@@ -13,13 +13,14 @@ Format: [MADR (Markdown Architectural Decision Records)](https://adr.github.io/m
 | ADR | Title | Status | Date |
 |---|---|---|---|
 | [0001](0001-use-python-as-primary-language.md) | Use Python as primary language | Accepted | 2026-02-21 |
-| [0002](0002-use-anthropic-claude-for-summarisation.md) | Use Anthropic Claude for summarisation | Accepted | 2026-02-21 |
+| [0002](0002-use-anthropic-claude-for-summarisation.md) | Use Anthropic Claude for summarisation | Superseded by ADR-0009 | 2026-02-21 |
 | [0003](0003-use-github-actions-for-scheduling.md) | Use GitHub Actions for scheduling | Accepted | 2026-02-21 |
 | [0004](0004-use-youtube-transcript-api.md) | Use youtube-transcript-api for YouTube content | Accepted | 2026-02-21 |
 | [0005](0005-url-based-deduplication-with-json-state-file.md) | URL-based deduplication with JSON state file | Accepted | 2026-02-21 |
 | [0006](0006-email-delivery-via-smtp-with-sendgrid-option.md) | Email delivery via SMTP with SendGrid option | Accepted | 2026-02-21 |
 | [0007](0007-yaml-for-source-configuration.md) | YAML for source configuration | Accepted | 2026-02-21 |
 | [0008](0008-optional-ai-summarisation.md) | Optional AI summarisation with link-digest fallback | Accepted | 2026-02-21 |
+| [0009](0009-switch-to-gemini-api.md) | Switch AI summarisation to Google Gemini | Accepted | 2026-02-21 |
 
 ---
 

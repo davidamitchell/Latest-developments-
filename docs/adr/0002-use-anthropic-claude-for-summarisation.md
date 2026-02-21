@@ -1,7 +1,7 @@
 # ADR-0002: Use Anthropic Claude for Summarisation
 
 Date: 2026-02-21
-Status: Accepted
+Status: Superseded by [ADR-0009](0009-switch-to-gemini-api.md)
 
 ## Context
 

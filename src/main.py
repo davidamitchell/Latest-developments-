@@ -42,9 +42,9 @@ def main() -> int:
 
     logger.info("Starting digest pipeline (dry_run=%s)", args.dry_run)
 
-    if cfg.summary.enabled and not os.environ.get("ANTHROPIC_API_KEY"):
+    if cfg.summary.enabled and not os.environ.get("GEMINI_API_KEY"):
         logger.warning(
-            "ANTHROPIC_API_KEY is not set — falling back to plain link digest"
+            "GEMINI_API_KEY is not set — falling back to plain link digest"
             " (set summary.enabled: false in sources.yaml to silence this warning)"
         )
         cfg.summary.enabled = False

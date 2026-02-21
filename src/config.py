@@ -46,7 +46,7 @@ class HackerNewsConfig:
 @dataclass
 class SummaryConfig:
     enabled: bool = True  # False → skip AI; produce a plain link-list digest instead
-    model: str = "claude-haiku-4-5-20251001"
+    model: str = "gemini-2.0-flash"
     max_tokens: int = 2000
     max_items_per_source: int = 5
     prompt: str = ""
@@ -119,7 +119,7 @@ def load_config(path: Path = Path("config/sources.yaml")) -> Config:
 
     sm = raw.get("summary", {})
     summary = SummaryConfig(
-        model=sm.get("model", "claude-haiku-4-5-20251001"),
+        model=sm.get("model", "gemini-2.0-flash"),
         max_tokens=sm.get("max_tokens", 2000),
         max_items_per_source=sm.get("max_items_per_source", 5),
         prompt=sm.get("prompt", ""),

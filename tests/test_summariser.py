@@ -27,7 +27,7 @@ def _make_item(
 
 def _make_config(**kwargs: object) -> SummaryConfig:
     defaults: dict = {
-        "model": "claude-haiku-4-5-20251001",
+        "model": "gemini-2.0-flash",
         "max_tokens": 500,
         "max_items_per_source": 5,
         "prompt": "Summarise this.",
@@ -36,79 +36,72 @@ def _make_config(**kwargs: object) -> SummaryConfig:
     return SummaryConfig(**defaults)  # type: ignore[arg-type]
 
 
-def _mock_response(text: str) -> MagicMock:
-    content_block = MagicMock()
-    content_block.text = text
-    response = MagicMock()
-    response.content = [content_block]
-    return response
+def _mock_client(text: str = "summary") -> MagicMock:
+    """Return a mock genai.Client whose models.generate_content() returns text."""
+    mock = MagicMock()
+    mock.return_value.models.generate_content.return_value.text = text
+    return mock
 
 
 class TestSummarise:
     def test_empty_items_returns_empty_string(self) -> None:
         assert summarise([], _make_config()) == ""
 
-    def test_calls_claude_with_model_from_config(self) -> None:
-        with patch("src.summariser.anthropic.Anthropic") as mock_cls:
-            mock_client = mock_cls.return_value
-            mock_client.messages.create.return_value = _mock_response("summary")
+    def test_calls_gemini_with_correct_model(self) -> None:
+        mock_cls = _mock_client()
+        with patch("src.summariser.genai.Client", mock_cls):
+            summarise([_make_item()], _make_config(model="gemini-1.5-pro"))
 
-            summarise([_make_item()], _make_config(model="claude-sonnet-4-6"))
-
-            call_kwargs = mock_client.messages.create.call_args.kwargs
-            assert call_kwargs["model"] == "claude-sonnet-4-6"
+        call_kwargs = mock_cls.return_value.models.generate_content.call_args.kwargs
+        assert call_kwargs["model"] == "gemini-1.5-pro"
 
     def test_returns_digest_with_date_header(self) -> None:
-        with patch("src.summariser.anthropic.Anthropic") as mock_cls:
-            mock_cls.return_value.messages.create.return_value = _mock_response("Claude output")
-
+        with patch("src.summariser.genai.Client", _mock_client("Gemini output")):
             result = summarise([_make_item()], _make_config(), today=date(2026, 2, 21))
 
         assert "21 Feb 2026" in result
-        assert "Claude output" in result
+        assert "Gemini output" in result
 
     def test_uses_default_prompt_when_config_prompt_empty(self) -> None:
-        with patch("src.summariser.anthropic.Anthropic") as mock_cls:
-            mock_client = mock_cls.return_value
-            mock_client.messages.create.return_value = _mock_response("x")
-
+        mock_cls = _mock_client()
+        with patch("src.summariser.genai.Client", mock_cls):
             summarise([_make_item()], _make_config(prompt=""))
 
-            call_kwargs = mock_client.messages.create.call_args.kwargs
-            assert len(call_kwargs["system"]) > 0
+        call_kwargs = mock_cls.return_value.models.generate_content.call_args.kwargs
+        system = call_kwargs["config"].system_instruction
+        assert len(system) > 0
 
     def test_groups_items_by_source(self) -> None:
         items = [
             _make_item("a", source="YouTube", content="yt content"),
             _make_item("b", source="Blogs", content="blog content"),
         ]
-        with patch("src.summariser.anthropic.Anthropic") as mock_cls:
-            mock_client = mock_cls.return_value
-            mock_client.messages.create.return_value = _mock_response("ok")
-
+        mock_cls = _mock_client()
+        with patch("src.summariser.genai.Client", mock_cls):
             summarise(items, _make_config())
 
-            user_content = mock_client.messages.create.call_args.kwargs["messages"][0]["content"]
-            assert "YouTube" in user_content
-            assert "Blogs" in user_content
-            assert "yt content" in user_content
-            assert "blog content" in user_content
+        call_kwargs = mock_cls.return_value.models.generate_content.call_args.kwargs
+        contents = call_kwargs["contents"]
+        assert "YouTube" in contents
+        assert "Blogs" in contents
+        assert "yt content" in contents
+        assert "blog content" in contents
 
     def test_respects_max_items_per_source(self) -> None:
         items = [_make_item(str(i), source="S", content=f"content {i}") for i in range(5)]
-        with patch("src.summariser.anthropic.Anthropic") as mock_cls:
-            mock_client = mock_cls.return_value
-            mock_client.messages.create.return_value = _mock_response("ok")
-
+        mock_cls = _mock_client()
+        with patch("src.summariser.genai.Client", mock_cls):
             summarise(items, _make_config(max_items_per_source=2))
 
-            user_content = mock_client.messages.create.call_args.kwargs["messages"][0]["content"]
-            assert "content 0" in user_content
-            assert "content 1" in user_content
-            assert "content 4" not in user_content
+        call_kwargs = mock_cls.return_value.models.generate_content.call_args.kwargs
+        contents = call_kwargs["contents"]
+        assert "content 0" in contents
+        assert "content 1" in contents
+        assert "content 4" not in contents
 
-    def test_enabled_false_skips_claude(self) -> None:
-        with patch("src.summariser.anthropic.Anthropic") as mock_cls:
+    def test_enabled_false_skips_gemini(self) -> None:
+        mock_cls = _mock_client()
+        with patch("src.summariser.genai.Client", mock_cls):
             result = summarise([_make_item()], _make_config(enabled=False))
             mock_cls.assert_not_called()
 
@@ -142,5 +135,4 @@ class TestFormatLinkDigest:
     def test_respects_max_items_per_source(self) -> None:
         items = [_make_item(str(i), source="S") for i in range(5)]
         result = format_link_digest(items, _make_config(max_items_per_source=2))
-        # Only 2 items from source "S"; each item URL is example.com/{id}
         assert result.count("example.com") == 2

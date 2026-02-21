@@ -19,7 +19,7 @@
 #     RESEND_API_KEY    — Resend API key (resend.com, 3 000 emails/month free)
 #
 #   Required only when summary.enabled is true:
-#     ANTHROPIC_API_KEY — Anthropic console API key
+#     GEMINI_API_KEY    — Google AI Studio API key (free at aistudio.google.com)
 
 # ---------------------------------------------------------------------------
 # YouTube channels
@@ -109,11 +109,14 @@ summary:
   # Useful for testing email delivery without an Anthropic API key.
   enabled: true
 
-  # Anthropic model to use. Cost/quality options:
-  #   claude-haiku-4-5-20251001   — fastest, cheapest (recommended)
-  #   claude-sonnet-4-6           — higher quality
-  #   claude-opus-4-6             — highest quality, highest cost
-  model: "claude-haiku-4-5-20251001"
+  # Gemini model to use. Get a free API key at aistudio.google.com.
+  # Free tier (Google AI Studio): 1 500 req/day, 1M tokens/day — sufficient for daily runs.
+  #
+  # Options:
+  #   gemini-2.0-flash   — fast, free tier (recommended)
+  #   gemini-1.5-flash   — slightly older, also free tier
+  #   gemini-1.5-pro     — higher quality, lower free quota
+  model: "gemini-2.0-flash"
 
   # Maximum output tokens for the full digest
   max_tokens: 2000

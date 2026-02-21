@@ -1,11 +1,13 @@
-"""Anthropic Claude summarisation, with a plain link-digest fallback."""
+"""Google Gemini summarisation, with a plain link-digest fallback."""
 
 from __future__ import annotations
 
 import logging
+import os
 from datetime import UTC, date, datetime
 
-import anthropic
+from google import genai
+from google.genai import types
 
 from src.config import SummaryConfig
 from src.fetchers import FetchedItem
@@ -55,8 +57,8 @@ def summarise(items: list[FetchedItem], config: SummaryConfig, today: date | Non
     """
     Return a formatted plain-text digest.
 
-    If config.enabled is False, returns a plain link list without calling Claude.
-    Otherwise groups items by source, sends to Claude, and returns the AI summary.
+    If config.enabled is False, returns a plain link list without calling Gemini.
+    Otherwise groups items by source, sends to the Gemini API, and returns the summary.
     Items are truncated at 12,000 chars before reaching this function by the fetcher.
     """
     if not items:
@@ -87,13 +89,14 @@ def summarise(items: list[FetchedItem], config: SummaryConfig, today: date | Non
 
     logger.info("Summarising %d item(s) with %s", len(items), config.model)
 
-    client = anthropic.Anthropic()
-    response = client.messages.create(
+    client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY", ""))
+    response = client.models.generate_content(
         model=config.model,
-        max_tokens=config.max_tokens,
-        system=system_prompt,
-        messages=[{"role": "user", "content": user_content}],
+        contents=user_content,
+        config=types.GenerateContentConfig(
+            system_instruction=system_prompt,
+            max_output_tokens=config.max_tokens,
+        ),
     )
 
-    summary = response.content[0].text
-    return _digest_header(today) + summary
+    return _digest_header(today) + response.text

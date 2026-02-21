@@ -56,4 +56,4 @@ def test_missing_file_raises(tmp_path: Path) -> None:
 
 def test_default_model(config_path: Path) -> None:
     cfg = load_config(config_path)
-    assert "haiku" in cfg.summary.model
+    assert "gemini" in cfg.summary.model
