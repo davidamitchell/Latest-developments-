@@ -28,10 +28,10 @@ One end-to-end run, hardcoded source, proves the core pipeline works.
 
 | # | Slice | Status | Notes |
 |---|---|---|---|
-| 1.1 | `src/fetchers/youtube.py` — fetch transcript for a single hardcoded video | `[ ]` | Uses YouTube RSS feed + `youtube-transcript-api`; print to stdout |
-| 1.2 | `src/summariser.py` — send transcript to Claude, return summary string | `[ ]` | Model configurable via `sources.yaml` |
-| 1.3 | `src/emailer.py` — send plain-text email via SMTP (Gmail) | `[ ]` | Reads creds from env vars |
-| 1.4 | Wire 1.1 → 1.2 → 1.3 in `src/main.py`; `--dry-run` skips email | `[ ]` | |
+| 1.1 | `src/fetchers/youtube.py` — fetch transcript for a single hardcoded video | `[x]` | Uses YouTube RSS feed + `youtube-transcript-api`; no API key needed |
+| 1.2 | `src/summariser.py` — send transcript to Claude, return summary string | `[x]` | Model configurable via `sources.yaml` |
+| 1.3 | `src/emailer.py` — send plain-text email via SMTP (Gmail) | `[x]` | Reads creds from env vars; SendGrid also supported |
+| 1.4 | Wire 1.1 → 1.2 → 1.3 in `src/main.py`; `--dry-run` skips email | `[x]` | Also added `src/retry.py` — backoff for all network calls |
 | 1.5 | Manually run in Codespaces; confirm email received | `[ ]` | Acceptance: email arrives with coherent summary |
 
 **Acceptance criteria:** `python -m src.main --dry-run` prints a summary to stdout without errors.
@@ -44,7 +44,7 @@ Items processed once are never processed again, across days.
 
 | # | Slice | Status | Notes |
 |---|---|---|---|
-| 2.1 | YouTube fetcher uses state to skip already-processed videos | `[ ]` | `src/state.py` already implemented |
+| 2.1 | YouTube fetcher uses state to skip already-processed videos | `[x]` | `src/state.py` already implemented; fetcher checks `already_processed` |
 | 2.2 | State file committed back to repo by workflow after each run | `[ ]` | Enables persistence across Codespaces sessions |
 | 2.3 | Test: run pipeline twice; confirm second run processes 0 new items | `[ ]` | |
 

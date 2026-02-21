@@ -5,11 +5,16 @@ from __future__ import annotations
 import argparse
 import logging
 import sys
+from datetime import UTC, datetime
 from pathlib import Path
 
 from src.config import load_config
+from src.emailer import send_digest
+from src.fetchers import FetchedItem
+from src.fetchers.youtube import YouTubeFetcher
 from src.logger import setup_logging
 from src.state import load_state, save_state
+from src.summariser import summarise
 
 logger = logging.getLogger(__name__)
 
@@ -30,24 +35,36 @@ def main() -> int:
     logger.info("Starting digest pipeline (dry_run=%s)", args.dry_run)
 
     processed = load_state()
-    new_items: list = []
+    new_items: list[FetchedItem] = []
 
-    # Fetchers are registered here as each Epic 1–5 slice is completed.
-    # e.g.:
-    #   from src.fetchers.youtube import YouTubeFetcher
-    #   new_items += YouTubeFetcher(cfg.youtube).fetch(processed)
+    if cfg.youtube.enabled:
+        new_items += YouTubeFetcher(cfg.youtube).fetch(processed)
+
+    # Remaining fetchers added in Epics 4 and 5:
+    #   new_items += RSSFetcher(cfg.blogs).fetch(processed)
+    #   new_items += HackerNewsFetcher(cfg.hacker_news).fetch(processed)
 
     if not new_items:
         logger.info("No new items across all sources")
         if not cfg.email.send_if_empty:
             return 0
 
-    logger.info("Fetched %d new items", len(new_items))
-
+    logger.info("Fetched %d new item(s) total", len(new_items))
     for item in new_items:
-        logger.info("  [%s] %s — %s", item.source_name, item.title, item.url)
+        logger.info("  [%s] %s", item.source_name, item.title)
 
-    if not args.dry_run:
+    today = datetime.now(UTC).date()
+    digest = summarise(new_items, cfg.summary, today)
+
+    subject = cfg.email.subject.format(date=today.strftime("%d %b %Y"))
+
+    if args.dry_run:
+        print(f"\nSubject: {subject}\n\n{digest}")
+    else:
+        send_digest(subject, digest)
+        # Mark all fetched items as processed only after a successful send.
+        for item in new_items:
+            processed.add(item.id)
         save_state(processed)
 
     return 0
