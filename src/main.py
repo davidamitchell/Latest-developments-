@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import logging
+import os
 import sys
 from datetime import UTC, datetime
 from pathlib import Path
@@ -40,6 +41,10 @@ def main() -> int:
     setup_logging(debug=args.debug, log_file=cfg.logging.log_file)
 
     logger.info("Starting digest pipeline (dry_run=%s)", args.dry_run)
+
+    if not os.environ.get("ANTHROPIC_API_KEY"):
+        logger.error("ANTHROPIC_API_KEY is not set — set it in .env or as an environment variable")
+        return 1
 
     processed = load_state()
     new_items: list[FetchedItem] = []
