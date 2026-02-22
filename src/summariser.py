@@ -102,7 +102,11 @@ def summarise(items: list[FetchedItem], config: SummaryConfig, today: date | Non
         )
         return _digest_header(today) + response.text
     except genai_errors.APIError as e:
-        logger.warning(
-            "Gemini API error — falling back to link digest: %s", e
+        logger.warning("Gemini API error — falling back to link digest: %s", e)
+        header = _digest_header(today)
+        notice = (
+            f"[AI summarisation failed: {e.__class__.__name__} — "
+            f"no model processing was applied. Raw links only.]\n\n"
         )
-        return format_link_digest(items, config, today)
+        link_digest = format_link_digest(items, config, today)
+        return header + notice + link_digest[len(header):]

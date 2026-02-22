@@ -122,7 +122,11 @@ class TestSummarise:
         with patch("src.summariser.genai.Client", mock_cls):
             result = summarise([_make_item()], _make_config(), today=date(2026, 2, 22))
 
-        # Should fall back cleanly — no exception, contains the item
+        # Must surface the failure — reader must know AI did not process this
+        assert "AI summarisation failed" in result
+        assert "ClientError" in result
+        assert "no model processing" in result
+        # Must still contain the items
         assert "Test Article" in result
         assert "https://example.com/id1" in result
 

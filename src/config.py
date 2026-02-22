@@ -46,7 +46,7 @@ class HackerNewsConfig:
 @dataclass
 class SummaryConfig:
     enabled: bool = True  # False → skip AI; produce a plain link-list digest instead
-    model: str = "gemini-2.0-flash"
+    model: str = "gemini-2.5-flash"
     max_tokens: int = 2000
     max_items_per_source: int = 5
     prompt: str = ""
