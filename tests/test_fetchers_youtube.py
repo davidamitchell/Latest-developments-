@@ -17,21 +17,36 @@ def _make_config(channels: list[YouTubeChannel] | None = None) -> YouTubeConfig:
     )
 
 
-def _atom_feed(*video_ids: str) -> bytes:
-    """Build a minimal YouTube Atom feed for testing."""
+def _atom_feed(*video_ids: str, descriptions: dict[str, str] | None = None) -> bytes:
+    """Build a minimal YouTube Atom feed for testing.
+
+    Pass descriptions={video_id: text} to include media:description elements.
+    """
+    desc_map = descriptions or {}
     entries = ""
     for vid in video_ids:
+        desc = desc_map.get(vid, "")
+        media_block = (
+            f"""
+    <media:group>
+      <media:description>{desc}</media:description>
+    </media:group>"""
+            if desc
+            else ""
+        )
         entries += f"""
-  <entry xmlns:yt="http://www.youtube.com/xml/schemas/2015">
+  <entry xmlns:yt="http://www.youtube.com/xml/schemas/2015"
+         xmlns:media="http://search.yahoo.com/mrss/">
     <yt:videoId>{vid}</yt:videoId>
     <title>{vid} title</title>
     <link rel="alternate" href="https://www.youtube.com/watch?v={vid}"/>
-    <published>2026-02-21T07:00:00+00:00</published>
+    <published>2026-02-21T07:00:00+00:00</published>{media_block}
   </entry>"""
 
     return f"""<?xml version="1.0"?>
 <feed xmlns="http://www.w3.org/2005/Atom"
-      xmlns:yt="http://www.youtube.com/xml/schemas/2015">
+      xmlns:yt="http://www.youtube.com/xml/schemas/2015"
+      xmlns:media="http://search.yahoo.com/mrss/">
   <title>Test Channel</title>{entries}
 </feed>""".encode()
 
@@ -93,7 +108,8 @@ class TestYouTubeFetcher:
 
         assert len(items) == 2
 
-    def test_skips_video_without_transcript(self) -> None:
+    def test_includes_item_when_transcript_unavailable(self) -> None:
+        """Item is still emitted when transcript fails; content falls back to description."""
         from youtube_transcript_api import NoTranscriptFound
 
         cfg = _make_config()
@@ -109,8 +125,34 @@ class TestYouTubeFetcher:
             ]
             items = fetcher.fetch(set())
 
+        # Both items returned; v1 has no description in the test feed so content is ""
+        assert len(items) == 2
+        assert items[0].id == "v1"
+        assert items[0].content == ""
+        assert items[1].id == "v2"
+        assert items[1].content == "second"
+
+    def test_uses_description_when_transcript_blocked(self) -> None:
+        """Cloud IP blocks transcript → item appears with feed description as content."""
+        from youtube_transcript_api import NoTranscriptFound
+
+        cfg = _make_config()
+        fetcher = YouTubeFetcher(cfg)
+        feed = _atom_feed("vid1", descriptions={"vid1": "Deep dive into LLM fine-tuning"})
+
+        with (
+            patch("src.fetchers.youtube._fetch_url", return_value=feed),
+            patch.object(
+                fetcher._api,
+                "fetch",
+                side_effect=NoTranscriptFound("vid1", [], MagicMock()),
+            ),
+        ):
+            items = fetcher.fetch(set())
+
         assert len(items) == 1
-        assert items[0].id == "v2"
+        assert items[0].id == "vid1"
+        assert "LLM fine-tuning" in items[0].content
 
     def test_channel_error_does_not_abort_other_channels(self) -> None:
         channels = [
