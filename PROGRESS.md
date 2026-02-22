@@ -1,24 +1,24 @@
 # Progress
 
-Last updated: 2026-02-21
+Last updated: 2026-02-22
 
 ---
 
 ## Current Status
 
-**Phase:** Epic 1 — Proof of Life (4/5 slices done; awaiting manual acceptance test)
-**Active slice:** 1.5 — manual run in Codespaces
-**Branch:** `claude/setup-summarizer-project-4UzIg`
+**Phase:** Epic 4 — Blog / RSS Sources (in progress)
+**Active slice:** 4.1–4.4 — RSS fetcher implementation
+**Branch:** `claude/fix-workflow-transcript-fallback-4UzIg`
 
 ---
 
 | Epic | Title | Status | Complete |
 |---|---|---|---|
 | 0 | Foundation | Done | 9 / 9 slices |
-| 1 | Proof of Life (YouTube → Claude → Email) | In Progress | 4 / 5 slices |
-| 2 | Deduplication | In Progress | 1 / 3 slices |
-| 3 | Scheduled Automation | Not started | 0 / 4 slices |
-| 4 | Blog / RSS Sources | Not started | 0 / 4 slices |
+| 1 | Proof of Life (YouTube → Gemini → Email) | In Progress | 4 / 6 slices |
+| 2 | Deduplication | In Progress | 2 / 3 slices |
+| 3 | Scheduled Automation | Done | 4 / 4 slices |
+| 4 | Blog / RSS Sources | In Progress | 1 / 5 slices |
 | 5 | Hacker News | Not started | 0 / 4 slices |
 | 6 | Configurable Prompt & Polish | Not started | 0 / 5 slices |
 | 7 | Reliability & Observability | Not started | 0 / 5 slices |
@@ -26,6 +26,51 @@ Last updated: 2026-02-21
 ---
 
 ## Work Log
+
+### 2026-02-22 — Session 6
+
+**Completed:**
+- `.claude/CLAUDE.md` — generic continuous-improvement instructions (loads automatically each session)
+- `config/sources.yaml` — refocused on Nate Jones content: commented out Karpathy/Kilcher/AI Explained; added Nate Jones placeholder (channel ID still needed); added Nate's Newsletter as primary RSS source
+- `AGENTS.md` — corrected stale Anthropic references to Gemini; updated branch naming convention
+- `src/fetchers/rss.py` — RSS/Atom fetcher via `feedparser`; deduplicates by URL; reads from `config.blogs`
+- `src/main.py` — wired RSS fetcher into pipeline
+- `tests/test_fetchers_rss.py` — unit tests for RSS fetcher (mocked network)
+- `PROGRESS.md`, `BACKLOG.md` — updated to reflect current state
+
+**Notes:**
+- @natebjones channel ID still needs manual lookup (open youtube.com/@natebjones → view source → search `"channelId"`)
+- RSS fetcher uses `feedparser` (already in requirements.txt); `trafilatura` article extraction deferred to Epic 5
+
+### 2026-02-21 — Session 5
+
+**Completed:**
+- `src/fetchers/youtube.py` — transcript fallback: when cloud IPs block transcript API, use `media:description` from Atom feed instead of dropping the item entirely
+- `.github/workflows/daily-digest.yml` — three bug fixes from first live run:
+  1. `ANTHROPIC_API_KEY` → `GEMINI_API_KEY`
+  2. Added `RESEND_API_KEY` to env block
+  3. Guard before `git add state/processed.json` when file doesn't exist
+- `tests/test_fetchers_youtube.py` — updated: `_atom_feed()` now includes `media:description`; test renamed and added `test_uses_description_when_transcript_blocked`
+
+**Notes:**
+- First live dry-run confirmed the three bugs and their fixes
+- YouTube transcripts are consistently blocked on GitHub Actions cloud IPs; description fallback ensures items still appear in digest
+
+### 2026-02-21 — Session 4
+
+**Completed:**
+- `src/summariser.py` — switched from Anthropic to Google Gemini (`google-genai` SDK, not the deprecated `google-generativeai`)
+- `src/config.py` — default model changed to `gemini-2.0-flash`
+- `src/main.py` — API key check: `ANTHROPIC_API_KEY` → `GEMINI_API_KEY`
+- `pyproject.toml`, `requirements.txt` — `anthropic>=0.40.0` → `google-genai>=1.0.0`
+- `tests/test_summariser.py` — updated mocks for new `genai.Client` pattern
+- `docs/adr/0009-switch-to-gemini-api.md` — new ADR documenting the decision
+- `docs/adr/0002-use-anthropic-claude-for-summarisation.md` — status set to superseded
+
+**Notes:**
+- Used `google-genai` (current unified SDK) not `google-generativeai` (deprecated, end-of-life)
+- Free tier via Google AI Studio: 1,500 req/day, 1M tokens/day — adequate for daily digest
+- Model: `gemini-2.0-flash`
 
 ### 2026-02-21 — Session 3
 
@@ -36,27 +81,21 @@ Last updated: 2026-02-21
 - `src/emailer.py` — Gmail SMTP and SendGrid; credentials from env vars
 - `src/main.py` — wired: YouTube → summarise → email (or print on `--dry-run`)
 - Tests: `test_retry.py` (5), `test_fetchers_youtube.py` (12), `test_summariser.py` (6), `test_emailer.py` (5) — 37 total passing
-- Dropped feedparser dependency from YouTube fetcher (feedparser's `sgmllib` dep is broken on Python 3.11 without `sgmllib3k`); stdlib etree handles the well-structured Atom format cleanly
 
 **Notes:**
-- Blog/RSS fetcher (Epic 4) will still use feedparser — `sgmllib3k` installs fine in Codespaces/GitHub Actions, just not in this dev environment
+- Dropped feedparser from YouTube fetcher (feedparser's `sgmllib` dep is broken on Python 3.11); stdlib etree handles the well-structured Atom format cleanly
 
 ### 2026-02-21 — Session 2
 
 **Completed:**
 - `pyproject.toml` — project metadata, dependencies, ruff and pytest config
 - `requirements.txt` — pinned production deps for CI
-- `.devcontainer/devcontainer.json` — Codespaces setup with Python 3.11 and VS Code extensions
+- `.devcontainer/devcontainer.json` — Codespaces setup
 - `Makefile` — `dev-install`, `test`, `lint`, `format`, `check`, `run`, `dry-run` targets
-- `.python-version` — pyenv compatibility
-- `.env.example` — credential template for local dev
-- `src/logger.py` — logging setup, structured JSON in debug mode
-- `src/config.py` — load and validate `sources.yaml`
-- `src/state.py` — read/write `state/processed.json`
-- `src/fetchers/__init__.py` — `Fetcher` protocol and `FetchedItem` dataclass
-- `src/main.py` — pipeline skeleton with arg parsing, config loading, state loading
-- `tests/conftest.py`, `tests/test_state.py`, `tests/test_config.py` — initial test suite
-- README, AGENTS, BACKLOG, ADRs — removed AI slop patterns, tightened prose
+- `.python-version`, `.env.example`
+- `src/logger.py`, `src/config.py`, `src/state.py`, `src/fetchers/__init__.py`, `src/main.py` skeleton
+- `tests/conftest.py`, `tests/test_state.py`, `tests/test_config.py`
+- README, AGENTS, BACKLOG, ADRs — initial versions
 
 ### 2026-02-21 — Session 1
 
@@ -70,9 +109,10 @@ Last updated: 2026-02-21
 
 ## Next Steps
 
-1. Epic 1.5 — manual run in Codespaces to confirm end-to-end email delivery
-2. Epic 2.2 — commit state file back to repo in the workflow
-3. Epic 4.1 — RSS fetcher (`feedparser` in CI/Codespaces environment)
+1. Epic 1.6 — get @natebjones channel ID (manual: view source on youtube.com/@natebjones, search `"channelId"`)
+2. Epic 1.5 — run pipeline end-to-end (non-dry-run) to confirm email delivery once channel ID is set
+3. Epic 2.3 — run pipeline twice; confirm second run skips all items
+4. Epic 5.1 — Hacker News fetcher
 
 ---
 
@@ -80,8 +120,8 @@ Last updated: 2026-02-21
 
 | Metric | Value |
 |---|---|
-| Sources configured | — |
+| Sources configured | 1 YouTube (ID needed), 1 RSS |
 | Items processed (lifetime) | — |
-| Last successful run | — |
+| Last successful run | — (dry-run only so far) |
 | Last email sent | — |
 | Consecutive days without failure | — |

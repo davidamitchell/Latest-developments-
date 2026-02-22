@@ -31,20 +31,20 @@ youtube:
   max_videos_per_channel: 5
 
   channels:
-    - name: "Andrej Karpathy"
-      channel_id: "UCbXgNpp0jedKWcQiULLbDTA"
+    # Primary focus: Nate Jones — AI practitioner and strategist.
+    # Channel: https://youtube.com/@natebjones
+    # TO ACTIVATE: replace CHANNEL_ID_NEEDED with the UC… channel ID.
+    # Find it: open the channel page in a browser → view source → search "channelId"
+    - name: "Nate Jones"
+      channel_id: "UC0C-17n9iuUQPylguM1d-lQ"
 
-    - name: "Yannic Kilcher"
-      channel_id: "UCZHmQk67mSJgfCCTn7xBfew"
-
-    - name: "AI Explained"
-      channel_id: "UCNJ1Ymd5yFuUPtn21xtRbbw"
-
-    # Add more channels here:
-    # - name: "Channel Display Name"
-    #   channel_id: "UCxxxxxxxxxxxxxxxxxxxxxxx"
-    #   # Optional: override global max_videos_per_channel for this channel
-    #   max_videos: 3
+    # Paused while focusing on Nate Jones content (backlog 1.6):
+    # - name: "Andrej Karpathy"
+    #   channel_id: "UCbXgNpp0jedKWcQiULLbDTA"
+    # - name: "Yannic Kilcher"
+    #   channel_id: "UCZHmQk67mSJgfCCTn7xBfew"
+    # - name: "AI Explained"
+    #   channel_id: "UCNJ1Ymd5yFuUPtn21xtRbbw"
 
 # ---------------------------------------------------------------------------
 # Blog / RSS feeds
@@ -53,21 +53,20 @@ blogs:
   enabled: true
 
   rss:
-    - name: "Simon Willison's Weblog"
-      url: "https://simonwillison.net/atom/everything/"
+    # Primary focus: Nate's Newsletter — AI strategy and implementation analysis.
+    # Activated once the RSS fetcher (Epic 4.1–4.4) is implemented.
+    - name: "Nate's Newsletter"
+      url: "https://natesnewsletter.substack.com/feed"
 
-    - name: "Lilian Weng (OpenAI)"
-      url: "https://lilianweng.github.io/index.xml"
-
-    - name: "Sebastian Raschka"
-      url: "https://magazine.sebastianraschka.com/feed"
-
-    - name: "The Gradient"
-      url: "https://thegradient.pub/rss/"
-
-    # Add more RSS feeds here:
-    # - name: "Feed Display Name"
-    #   url: "https://example.com/feed.xml"
+    # Paused while focusing on Nate Jones content:
+    # - name: "Simon Willison's Weblog"
+    #   url: "https://simonwillison.net/atom/everything/"
+    # - name: "Lilian Weng (OpenAI)"
+    #   url: "https://lilianweng.github.io/index.xml"
+    # - name: "Sebastian Raschka"
+    #   url: "https://magazine.sebastianraschka.com/feed"
+    # - name: "The Gradient"
+    #   url: "https://thegradient.pub/rss/"
 
 # ---------------------------------------------------------------------------
 # Hacker News
@@ -124,7 +123,7 @@ summary:
   # Maximum items to include per source in the digest
   max_items_per_source: 5
 
-  # System prompt passed to Claude.
+  # System prompt passed to Gemini.
   # Describe what you consider "important" for your digest.
   # The pipeline will append source content after this prompt.
   prompt: |

@@ -85,9 +85,12 @@ class YouTubeFetcher:
             link_el = entry.find("atom:link[@rel='alternate']", _NS)
             url_str = link_el.get("href") if link_el is not None else f"https://youtu.be/{video_id}"
 
+            # Use description from the feed as fallback when transcript is unavailable
+            # (cloud runner IPs are frequently blocked by YouTube's transcript service).
+            description = _text(entry, "media:group/media:description", _NS)
+
             transcript = self._get_transcript(video_id, title)
-            if transcript is None:
-                continue
+            content = transcript if transcript is not None else description
 
             published = _parse_date(_text(entry, "atom:published", _NS))
             items.append(
@@ -95,7 +98,7 @@ class YouTubeFetcher:
                     id=video_id,
                     title=title,
                     url=url_str or f"https://youtu.be/{video_id}",
-                    content=transcript[:_MAX_CONTENT_CHARS],
+                    content=content[:_MAX_CONTENT_CHARS],
                     source_name=channel.name,
                     published=published,
                 )
