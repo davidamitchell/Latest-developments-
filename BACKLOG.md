@@ -33,6 +33,7 @@ One end-to-end run, hardcoded source, proves the core pipeline works.
 | 1.3 | `src/emailer.py` — send plain-text email via SMTP (Gmail) | `[x]` | Reads creds from env vars; SendGrid also supported |
 | 1.4 | Wire 1.1 → 1.2 → 1.3 in `src/main.py`; `--dry-run` skips email | `[x]` | Also added `src/retry.py` — backoff for all network calls |
 | 1.5 | Manually run in Codespaces; confirm email received | `[ ]` | Acceptance: email arrives with coherent summary |
+| 1.6 | Focus YouTube sources on Nate Jones: comment out Karpathy, Kilcher, AI Explained channels in `config/sources.yaml`; add `@natebjones` | `[ ]` | Handle: `@natebjones` at youtube.com/@natebjones. Channel ID (UC…) must be looked up manually — open the channel page, view source, search for `"channelId"` |
 
 **Acceptance criteria:** `python -m src.main --dry-run` prints a summary to stdout without errors.
 
@@ -77,6 +78,7 @@ RSS feeds ingested alongside YouTube.
 | 4.2 | Deduplication applied to RSS entries by URL | `[ ]` | |
 | 4.3 | RSS fetcher reads feeds from `config/sources.yaml` | `[ ]` | |
 | 4.4 | Summaries from multiple sources merged into single digest email | `[ ]` | |
+| 4.5 | Add Nate's Newsletter to `config/sources.yaml` as an RSS source | `[ ]` | Feed URL: `https://natesnewsletter.substack.com/feed` — complements the YouTube source with written analysis |
 
 **Acceptance criteria:** Digest email contains sections for both YouTube and blog sources.
 
@@ -129,6 +131,7 @@ Pipeline degrades gracefully; failures are surfaced.
 
 | Idea | Notes |
 |---|---|
+| **Research: transcript alternatives for cloud runners** | GitHub Actions IPs are blocked by YouTube's transcript service. Current fallback uses the feed description. Options to evaluate: (1) `youtube-transcript-api` proxy support (pass `proxies=` kwarg); (2) Supadata.ai — paid transcript-as-a-service API; (3) self-hosted runner on a residential IP; (4) download audio and run Whisper locally (high compute); (5) YouTube Data API v3 captions endpoint (requires OAuth, same IP may still be blocked). Goal: full transcript content in AI summaries, not just descriptions |
 | Twitter/X timeline ingestion | Requires API tier; deferred |
 | Podcast RSS (audio → Whisper) | High compute cost; revisit post-MVP |
 | Web UI for config editing | Out of scope for CLI-first approach |
