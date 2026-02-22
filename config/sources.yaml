@@ -109,13 +109,14 @@ summary:
   enabled: true
 
   # Gemini model to use. Get a free API key at aistudio.google.com.
-  # Free tier (Google AI Studio): 1 500 req/day, 1M tokens/day — sufficient for daily runs.
+  # Free tier requires no billing — create key at aistudio.google.com,
+  # do not link a billing account, and use a free-eligible model.
   #
-  # Options:
-  #   gemini-2.0-flash   — fast, free tier (recommended)
-  #   gemini-1.5-flash   — slightly older, also free tier
-  #   gemini-1.5-pro     — higher quality, lower free quota
-  model: "gemini-2.0-flash"
+  # Free-tier eligible models (as of Feb 2026):
+  #   gemini-2.5-flash   — latest, free tier (recommended)
+  #   gemini-2.0-flash   — previous generation, also free tier
+  #   gemini-2.0-flash-lite — lighter, higher rate limits
+  model: "gemini-2.5-flash"
 
   # Maximum output tokens for the full digest
   max_tokens: 2000
