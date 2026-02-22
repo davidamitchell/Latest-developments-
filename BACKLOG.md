@@ -33,7 +33,7 @@ One end-to-end run, hardcoded source, proves the core pipeline works.
 | 1.3 | `src/emailer.py` — send plain-text email via SMTP (Gmail) | `[x]` | Reads creds from env vars; SendGrid also supported |
 | 1.4 | Wire 1.1 → 1.2 → 1.3 in `src/main.py`; `--dry-run` skips email | `[x]` | Also added `src/retry.py` — backoff for all network calls |
 | 1.5 | Manually run in Codespaces; confirm email received | `[ ]` | Acceptance: email arrives with coherent summary |
-| 1.6 | Focus YouTube sources on Nate Jones: comment out Karpathy, Kilcher, AI Explained channels in `config/sources.yaml`; add `@natebjones` | `[ ]` | Handle: `@natebjones` at youtube.com/@natebjones. Channel ID (UC…) must be looked up manually — open the channel page, view source, search for `"channelId"` |
+| 1.6 | Focus YouTube sources on Nate Jones: comment out Karpathy, Kilcher, AI Explained channels in `config/sources.yaml`; add `@natebjones` | `[→]` | Config updated; `CHANNEL_ID_NEEDED` placeholder in sources.yaml — must be replaced manually: open youtube.com/@natebjones → view source → search `"channelId"` |
 
 **Acceptance criteria:** `python -m src.main --dry-run` prints a summary to stdout without errors.
 
@@ -46,7 +46,7 @@ Items processed once are never processed again, across days.
 | # | Slice | Status | Notes |
 |---|---|---|---|
 | 2.1 | YouTube fetcher uses state to skip already-processed videos | `[x]` | `src/state.py` already implemented; fetcher checks `already_processed` |
-| 2.2 | State file committed back to repo by workflow after each run | `[ ]` | Enables persistence across Codespaces sessions |
+| 2.2 | State file committed back to repo by workflow after each run | `[x]` | Enables persistence across Codespaces sessions |
 | 2.3 | Test: run pipeline twice; confirm second run processes 0 new items | `[ ]` | |
 
 **Acceptance criteria:** A second consecutive run produces "No new items" and sends no email.
@@ -59,9 +59,9 @@ Workflow runs daily without manual intervention.
 
 | # | Slice | Status | Notes |
 |---|---|---|---|
-| 3.1 | GitHub Actions workflow: `schedule: cron: '0 7 * * *'` | `[ ]` | Triggers at 07:00 UTC |
-| 3.2 | Workflow commits updated `state/processed.json` after run | `[ ]` | Bot commit with `[skip ci]` |
-| 3.3 | Workflow supports `workflow_dispatch` with `debug` input flag | `[ ]` | |
+| 3.1 | GitHub Actions workflow: `schedule: cron: '0 7 * * *'` | `[x]` | Triggers at 07:00 UTC |
+| 3.2 | Workflow commits updated `state/processed.json` after run | `[x]` | Bot commit with `[skip ci]` |
+| 3.3 | Workflow supports `workflow_dispatch` with `debug` input flag | `[x]` | |
 | 3.4 | Verify schedule fires and email arrives at expected time | `[ ]` | Acceptance test |
 
 **Acceptance criteria:** No manual action required for 3 consecutive days; email arrives each day.
@@ -74,11 +74,11 @@ RSS feeds ingested alongside YouTube.
 
 | # | Slice | Status | Notes |
 |---|---|---|---|
-| 4.1 | `src/fetchers/rss.py` — fetch and parse RSS/Atom feed via `feedparser` | `[ ]` | Returns list of `FetchedItem` |
-| 4.2 | Deduplication applied to RSS entries by URL | `[ ]` | |
-| 4.3 | RSS fetcher reads feeds from `config/sources.yaml` | `[ ]` | |
-| 4.4 | Summaries from multiple sources merged into single digest email | `[ ]` | |
-| 4.5 | Add Nate's Newsletter to `config/sources.yaml` as an RSS source | `[ ]` | Feed URL: `https://natesnewsletter.substack.com/feed` — complements the YouTube source with written analysis |
+| 4.1 | `src/fetchers/rss.py` — fetch and parse RSS/Atom feed | `[x]` | Uses httpx + stdlib ET (no feedparser — sgmllib3k build broken on this host); supports RSS 2.0 and Atom 1.0 |
+| 4.2 | Deduplication applied to RSS entries by URL | `[x]` | Normalises both feed URLs and processed-set URLs before comparison |
+| 4.3 | RSS fetcher reads feeds from `config/sources.yaml` | `[x]` | |
+| 4.4 | Summaries from multiple sources merged into single digest email | `[x]` | Items from all fetchers pooled before summarisation |
+| 4.5 | Add Nate's Newsletter to `config/sources.yaml` as an RSS source | `[x]` | Feed URL: `https://natesnewsletter.substack.com/feed` — complements the YouTube source with written analysis |
 
 **Acceptance criteria:** Digest email contains sections for both YouTube and blog sources.
 

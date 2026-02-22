@@ -44,7 +44,7 @@ Python 3.11+ daily digest pipeline. Fetches AI/ML content from YouTube, RSS feed
 
 ### Testing
 - Tests live in `tests/`; use `pytest`
-- Mock all network calls and the Anthropic API
+- Mock all network calls and the Gemini API (`patch("src.summariser.genai.Client", ...)`)
 - Unit tests on all business logic; integration tests are optional
 
 ---
@@ -59,7 +59,7 @@ src/
 │   ├── youtube.py      # YouTube fetcher (RSS feed + transcript API)
 │   ├── rss.py          # RSS/blog fetcher
 │   └── hackernews.py   # Hacker News Algolia API fetcher
-├── summariser.py       # Anthropic Claude summarisation
+├── summariser.py       # Gemini summarisation (google-genai SDK)
 ├── emailer.py          # Email delivery (Gmail / SendGrid)
 ├── state.py            # Deduplication: read/write processed.json
 ├── config.py           # Load and validate sources.yaml
@@ -106,10 +106,11 @@ Status values: `proposed` → `accepted` → `superseded` / `deprecated`
 
 ## Git Workflow
 
-- Branch: `claude/setup-summarizer-project-4UzIg` (current development branch)
+- Branch naming: `claude/<description>-<session-id>` — create a new branch per session/PR
 - Commits: imperative mood, present tense (`Add YouTube fetcher`, not `Added`)
 - Never force-push
 - Push after each logical unit of work; do not batch unrelated changes
+- Always open a PR rather than pushing directly to main
 
 ---
 

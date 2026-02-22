@@ -19,6 +19,7 @@ except ImportError:
 from src.config import load_config
 from src.emailer import send_digest
 from src.fetchers import FetchedItem
+from src.fetchers.rss import RSSFetcher
 from src.fetchers.youtube import YouTubeFetcher
 from src.logger import setup_logging
 from src.state import load_state, save_state
@@ -55,8 +56,10 @@ def main() -> int:
     if cfg.youtube.enabled:
         new_items += YouTubeFetcher(cfg.youtube).fetch(processed)
 
-    # Remaining fetchers added in Epics 4 and 5:
-    #   new_items += RSSFetcher(cfg.blogs).fetch(processed)
+    if cfg.blogs.enabled:
+        new_items += RSSFetcher(cfg.blogs).fetch(processed)
+
+    # Hacker News fetcher added in Epic 5:
     #   new_items += HackerNewsFetcher(cfg.hacker_news).fetch(processed)
 
     if not new_items:
