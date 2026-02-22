@@ -33,7 +33,7 @@ One end-to-end run, hardcoded source, proves the core pipeline works.
 | 1.3 | `src/emailer.py` — send plain-text email via SMTP (Gmail) | `[x]` | Reads creds from env vars; SendGrid also supported |
 | 1.4 | Wire 1.1 → 1.2 → 1.3 in `src/main.py`; `--dry-run` skips email | `[x]` | Also added `src/retry.py` — backoff for all network calls |
 | 1.5 | Manually run in Codespaces; confirm email received | `[ ]` | Acceptance: email arrives with coherent summary |
-| 1.6 | Focus YouTube sources on Nate Jones: comment out Karpathy, Kilcher, AI Explained channels in `config/sources.yaml`; add `@natebjones` | `[→]` | Config updated; `CHANNEL_ID_NEEDED` placeholder in sources.yaml — must be replaced manually: open youtube.com/@natebjones → view source → search `"channelId"` |
+| 1.6 | Focus YouTube sources on Nate Jones: comment out Karpathy, Kilcher, AI Explained channels in `config/sources.yaml`; add `@natebjones` | `[x]` | Channel ID: `UC0C-17n9iuUQPylguM1d-lQ` |
 
 **Acceptance criteria:** `python -m src.main --dry-run` prints a summary to stdout without errors.
 
