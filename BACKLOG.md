@@ -19,6 +19,7 @@ Status legend: `[ ]` Not started · `[→]` In progress · `[x]` Done · `[~]` D
 | 0.7 | Add `.devcontainer/`, `Makefile`, `.python-version`, `.env.example` | `[x]` | Codespaces-ready |
 | 0.8 | Add `src/config.py`, `src/state.py`, `src/fetchers/__init__.py`, `src/main.py` skeleton | `[x]` | |
 | 0.9 | Add `tests/` skeleton with `conftest.py`, `test_config.py`, `test_state.py` | `[x]` | |
+| 0.10 | Add `davidamitchell/Skills` as a git submodule so Claude Code picks up project-level custom skills | `[ ]` | Target path: `.claude/commands/` (Claude Code discovers skills there automatically). Run: `git submodule add https://github.com/davidamitchell/Skills .claude/commands` then `git submodule update --init`. Add `.gitmodules` to the workflow checkout step with `submodules: true`. |
 
 ---
 
@@ -110,6 +111,8 @@ User can tune what "important" means without touching code.
 | 6.3 | Digest email is HTML with sections per source | `[ ]` | |
 | 6.4 | `--debug` mode writes structured JSON logs to stdout | `[ ]` | |
 | 6.5 | `--dry-run` documented in README and AGENTS with examples | `[ ]` | |
+| 6.6 | Email includes a **TL;DR** section at the top: 3–5 bullets covering the most significant items, each with a direct link, plus a one-sentence trend note for the current period (e.g. "recurring theme this week: agentic coding workflows") | `[ ]` | Written by Gemini as part of the summarisation prompt; placed before the per-source sections |
+| 6.7 | Email includes a **Sources** section at the bottom: which sources were fetched, item counts per source, and 2–3 suggested related sources worth following | `[ ]` | Generated from fetch metadata, not Gemini; keeps the reader aware of coverage gaps |
 
 ---
 
@@ -124,6 +127,23 @@ Pipeline degrades gracefully; failures are surfaced.
 | 7.3 | Workflow failure sends alert email | `[ ]` | Uses GitHub Actions failure notification |
 | 7.4 | `pytest` suite with mocked network for all fetchers | `[ ]` | |
 | 7.5 | `ruff` linting enforced in CI | `[ ]` | |
+| 7.6 | Smoke tests in `tests/test_smoke.py`: exercise the full pipeline (`main()`) with mocked network; assert exit 0, no crash, digest contains expected structure even when fetchers or Gemini fail | `[ ]` | Catches integration-level regressions that unit tests miss |
+
+---
+
+## Epic 8 — History & Trend Analysis
+
+Each digest is archived; history feeds back into future summaries.
+
+| # | Slice | Status | Notes |
+|---|---|---|---|
+| 8.1 | Archive each digest to `history/YYYY-MM-DD.txt` after a successful send | `[ ]` | Plain-text file per day; committed to repo by workflow alongside `state/processed.json` |
+| 8.2 | Workflow commits `history/` alongside state on each successful run | `[ ]` | Single bot commit: `[skip ci] chore: update state and history YYYY-MM-DD` |
+| 8.3 | Summariser loads the last N digests from `history/` and passes them to Gemini as context | `[ ]` | Enables "compared to recent days, today's dominant theme is…" — N configurable in `sources.yaml` (default 7) |
+| 8.4 | Email **Trends** section: Gemini compares current digest to history and surfaces recurring topics, emerging threads, and notable absences | `[ ]` | Depends on 8.3; placed between TL;DR and per-source sections |
+| 8.5 | `history/` directory browsable as a digest archive (file-per-day, no UI needed) | `[ ]` | Acceptance: 7 consecutive days of files exist in `history/` |
+
+**Acceptance criteria:** After 7 days the Trends section names at least one theme that genuinely recurs across multiple digests.
 
 ---
 
