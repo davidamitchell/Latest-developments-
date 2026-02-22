@@ -112,6 +112,20 @@ class TestSummarise:
         result = summarise([], _make_config(enabled=False))
         assert result == ""
 
+    def test_falls_back_to_link_digest_on_api_error(self) -> None:
+        from google.genai import errors as genai_errors
+
+        mock_cls = MagicMock()
+        mock_cls.return_value.models.generate_content.side_effect = genai_errors.ClientError(
+            429, {"error": {"message": "quota exceeded"}}, MagicMock()
+        )
+        with patch("src.summariser.genai.Client", mock_cls):
+            result = summarise([_make_item()], _make_config(), today=date(2026, 2, 22))
+
+        # Should fall back cleanly — no exception, contains the item
+        assert "Test Article" in result
+        assert "https://example.com/id1" in result
+
 
 class TestFormatLinkDigest:
     def test_empty_returns_empty(self) -> None:

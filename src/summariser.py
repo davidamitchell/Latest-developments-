@@ -7,6 +7,7 @@ import os
 from datetime import UTC, date, datetime
 
 from google import genai
+from google.genai import errors as genai_errors
 from google.genai import types
 
 from src.config import SummaryConfig
@@ -90,13 +91,18 @@ def summarise(items: list[FetchedItem], config: SummaryConfig, today: date | Non
     logger.info("Summarising %d item(s) with %s", len(items), config.model)
 
     client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY", ""))
-    response = client.models.generate_content(
-        model=config.model,
-        contents=user_content,
-        config=types.GenerateContentConfig(
-            system_instruction=system_prompt,
-            max_output_tokens=config.max_tokens,
-        ),
-    )
-
-    return _digest_header(today) + response.text
+    try:
+        response = client.models.generate_content(
+            model=config.model,
+            contents=user_content,
+            config=types.GenerateContentConfig(
+                system_instruction=system_prompt,
+                max_output_tokens=config.max_tokens,
+            ),
+        )
+        return _digest_header(today) + response.text
+    except genai_errors.APIError as e:
+        logger.warning(
+            "Gemini API error — falling back to link digest: %s", e
+        )
+        return format_link_digest(items, config, today)

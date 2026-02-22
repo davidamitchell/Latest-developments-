@@ -4,11 +4,13 @@ from __future__ import annotations
 
 import xml.etree.ElementTree as ET
 from datetime import datetime
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 from src.config import BlogsConfig, RSSFeed
 from src.fetchers.rss import (
     RSSFetcher,
+    _PermanentHTTPError,
+    _fetch_url,
     _normalise_url,
     _parse_atom_date,
     _parse_entries,
@@ -260,3 +262,64 @@ class TestParseDates:
 
     def test_rfc2822_date_invalid_returns_none(self) -> None:
         assert _parse_rfc2822_date("garbage") is None
+
+
+# ---------------------------------------------------------------------------
+# _fetch_url — User-Agent and permanent-error behaviour
+# ---------------------------------------------------------------------------
+
+class TestFetchUrl:
+    def test_sends_browser_user_agent(self) -> None:
+        """Cloudflare blocks bare httpx UA; confirm a browser UA is sent."""
+        import httpx
+
+        captured_headers: dict = {}
+
+        def mock_get(url: str, **kwargs: object) -> MagicMock:
+            captured_headers.update(kwargs.get("headers", {}))
+            resp = MagicMock()
+            resp.status_code = 200
+            resp.content = b"<rss/>"
+            resp.raise_for_status.return_value = None
+            return resp
+
+        with patch("src.fetchers.rss.httpx.get", side_effect=mock_get):
+            _fetch_url("https://example.com/feed")
+
+        ua = captured_headers.get("User-Agent", "")
+        assert "Mozilla" in ua, f"Expected browser UA, got: {ua!r}"
+
+    def test_raises_permanent_error_on_403(self) -> None:
+        """403 responses must raise _PermanentHTTPError, not a retriable exception."""
+        import httpx
+
+        resp = MagicMock()
+        resp.status_code = 403
+        resp.raise_for_status.side_effect = httpx.HTTPStatusError(
+            "403", request=MagicMock(), response=resp
+        )
+
+        with patch("src.fetchers.rss.httpx.get", return_value=resp):
+            try:
+                _fetch_url("https://example.com/feed")
+                assert False, "Expected _PermanentHTTPError"
+            except _PermanentHTTPError:
+                pass  # correct
+
+    def test_does_not_raise_permanent_error_on_429(self) -> None:
+        """429 (rate limit) should be retriable — must NOT raise _PermanentHTTPError."""
+        import httpx
+
+        resp = MagicMock()
+        resp.status_code = 429
+        resp.raise_for_status.side_effect = httpx.HTTPStatusError(
+            "429", request=MagicMock(), response=resp
+        )
+
+        with patch("src.fetchers.rss.httpx.get", return_value=resp):
+            try:
+                _fetch_url("https://example.com/feed")
+            except _PermanentHTTPError:
+                assert False, "429 should NOT raise _PermanentHTTPError"
+            except httpx.HTTPStatusError:
+                pass  # correct — propagates for retry logic
