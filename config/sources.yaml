@@ -36,8 +36,8 @@ youtube:
     # TO ACTIVATE: replace CHANNEL_ID_NEEDED with the UC… channel ID.
     # Find it: open the channel page in a browser → view source → search "channelId"
     - name: "Nate Jones"
-      channel_id: "UC0C-17n9iuUQPylguM1d-lQ"
-
+      # channel_id: "UC0C-17n9iuUQPylguM1d-lQ"
+      channel_id: "UCu_fS_p9rAnS68M0P8jD0Aw"
     # Paused while focusing on Nate Jones content (backlog 1.6):
     # - name: "Andrej Karpathy"
     #   channel_id: "UCbXgNpp0jedKWcQiULLbDTA"
