@@ -1,1 +1,14 @@
-import requests\n\ndef _fetch_channel(channel_id):\n    url = f'https://www.googleapis.com/youtube/v3/search?key={YOUTUBE_API_KEY}&channelId={channel_id}&part=snippet,id&order=date&maxResults=5'\n    response = requests.get(url)\n    if response.status_code == 200:\n        videos = response.json().get('items', [])\n        video_metadata = []\n        for video in videos:\n            video_data = {\n                'title': video['snippet']['title'],\n                'description': video['snippet']['description'],\n                'videoId': video['id']['videoId'],\n                'publish_time': video['snippet']['publishedAt'],\n            }\n            video_metadata.append(video_data)\n        return video_metadata\n    else:\n        return []  # Handle API errors accordingly\n
+def fetch_youtube_data(api_key, video_id):
+    import requests
+    url = f'https://www.googleapis.com/youtube/v3/videos?id={video_id}&key={api_key}&part=snippet,contentDetails,statistics'
+    response = requests.get(url)
+    if response.status_code == 200:
+        return response.json()
+    else:
+        raise Exception('Error fetching data from YouTube API')
+
+if __name__ == '__main__':
+    API_KEY = 'YOUR_API_KEY'
+    VIDEO_ID = 'YOUR_VIDEO_ID'
+    data = fetch_youtube_data(API_KEY, VIDEO_ID)
+    print(data)
