@@ -4,7 +4,7 @@ on:
   # Run every day at 07:00 UTC
   schedule:
     - cron: "0 7 * * *"
-
+ 
   # Allow manual runs from the Actions tab
   workflow_dispatch:
     inputs:
@@ -18,35 +18,35 @@ on:
         required: false
         default: "false"
         type: boolean
-
+ 
 # Prevent concurrent runs (only one digest at a time)
 concurrency:
   group: daily-digest
   cancel-in-progress: false
-
+ 
 jobs:
   digest:
     name: Generate and Send Daily Digest
     runs-on: ubuntu-latest
-
+ 
     permissions:
       contents: write  # Required to commit state/processed.json back to the repo
-
+ 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 1
-
+ 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
           cache: "pip"
-
+ 
       - name: Install dependencies
         run: pip install -r requirements.txt
-
+ 
       - name: Run digest pipeline
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
@@ -55,6 +55,7 @@ jobs:
           EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
           EMAIL_RECIPIENT: ${{ secrets.EMAIL_RECIPIENT }}
           EMAIL_PROVIDER: ${{ secrets.EMAIL_PROVIDER }}
+          YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
         run: |
           ARGS=""
           if [ "${{ inputs.debug }}" = "true" ]; then
@@ -64,7 +65,7 @@ jobs:
             ARGS="$ARGS --dry-run"
           fi
           python -m src.main $ARGS
-
+ 
       - name: Commit updated state file
         # Only runs on non-dry-run executions; state file is only written after a
         # successful email send so it may not exist on first run or when all
@@ -83,4 +84,3 @@ jobs:
           else
             git commit -m "chore: update processed state after digest run [skip ci]"
             git push origin ${{ github.ref_name }}
-          fi
