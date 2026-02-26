@@ -87,7 +87,6 @@ def main() -> int:
     if cfg.blogs.enabled:
         new_items += _safe_fetch("Blogs/RSS", RSSFetcher(cfg.blogs).fetch)
 
-
     if cfg.substack.enabled:
         new_items += SubstackFetcher(cfg.substack).fetch(processed)
 

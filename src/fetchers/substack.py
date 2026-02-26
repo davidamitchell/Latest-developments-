@@ -2,8 +2,8 @@
 
 Reads Substack publications using the internal JSON API
 (https://<slug>.substack.com/api/v1/archive), which is less likely to be
-blocked by Cloudflare than the RSS feed.  Falls back to the RSS feed if the
-JSON API returns a non-retriable HTTP error.
+blocked by Cloudflare than the RSS feed.  Falls back to the RSS feed only
+when the JSON API returns a non-retriable 4xx (permanent HTTP) error.
 
 Deduplication key: the canonical post URL, normalised (trailing slash stripped).
 """
@@ -11,27 +11,24 @@ Deduplication key: the canonical post URL, normalised (trailing slash stripped).
 from __future__ import annotations
 
 import logging
+import xml.etree.ElementTree as ET
 from datetime import datetime
 
 import httpx
 
 from src.config import SubstackConfig, SubstackPublication
 from src.fetchers import FetchedItem
-from src.fetchers.rss import _HEADERS as _RSS_HEADERS, _normalise_url, _parse_entries
+from src.fetchers.rss import _HEADERS, _normalise_url, _parse_entries
 from src.retry import with_backoff
 
 logger = logging.getLogger(__name__)
 
+_MAX_CONTENT_CHARS = 12_000
+_API_LIMIT = 12
+
+
 class _PermanentHTTPError(Exception):
     """4xx HTTP error that will not improve on retry."""
-
-    _MAX_CONTENT_CHARS = 12_000
-    _API_LIMIT = 12
-
-    # Reuse the same browser-like headers from the RSS fetcher to avoid bot detection.
-    _HEADERS = _RSS_HEADERS
-
-
 
 
 class SubstackFetcher:
@@ -76,8 +73,6 @@ class SubstackFetcher:
                 label=f"Substack RSS {pub.name}",
                 no_retry=(_PermanentHTTPError,),
             )
-            import xml.etree.ElementTree as ET
-
             root = ET.fromstring(xml_bytes)
             entries = _parse_entries(root)
 
