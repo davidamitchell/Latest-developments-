@@ -296,13 +296,11 @@ class TestFetchJson:
             "429", request=MagicMock(), response=resp
         )
 
-        with patch("src.fetchers.substack.httpx.get", return_value=resp):
-            try:
-                _fetch_json("https://example.substack.com/api/v1/archive")
-            except _PermanentHTTPError:
-                raise AssertionError("429 should NOT raise _PermanentHTTPError") from None
-            except httpx.HTTPStatusError:
-                pass  # correct — propagates for retry logic
+        with (
+            patch("src.fetchers.substack.httpx.get", return_value=resp),
+            pytest.raises(httpx.HTTPStatusError),
+        ):
+            _fetch_json("https://example.substack.com/api/v1/archive")
 
     def test_raises_value_error_when_response_is_not_list(self) -> None:
         resp = MagicMock()
