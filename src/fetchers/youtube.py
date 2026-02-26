@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 import os
 from datetime import datetime
-from typing import Any
+from typing import Any, Protocol
 
 import httpx
 from youtube_transcript_api import YouTubeTranscriptApi
@@ -20,8 +20,12 @@ _MAX_CONTENT_CHARS = 12_000
 _SEARCH_ENDPOINT = "https://www.googleapis.com/youtube/v3/search"
 
 
+class _TranscriptSnippet(Protocol):
+    text: str
+
+
 class _TranscriptClient:
-    def fetch(self, video_id: str) -> list[object]:
+    def fetch(self, video_id: str) -> list[dict[str, Any] | _TranscriptSnippet]:
         return YouTubeTranscriptApi.get_transcript(video_id)
 
 
@@ -60,10 +64,7 @@ class YouTubeFetcher:
         }
 
         try:
-            payload = with_backoff(
-                lambda: _fetch_json(_SEARCH_ENDPOINT, params),
-                label=f"YouTube channel {channel.name}",
-            )
+            payload = _fetch_json(_SEARCH_ENDPOINT, params, label=f"YouTube channel {channel.name}")
         except Exception:
             logger.exception("Failed to fetch YouTube Data API for channel %r", channel.channel_id)
             return []
@@ -116,10 +117,25 @@ class YouTubeFetcher:
         return content or description
 
 
-def _fetch_json(url: str, params: dict[str, str]) -> dict[str, Any]:
-    response = httpx.get(url, params=params, timeout=15)
-    response.raise_for_status()
-    return response.json()
+def _fetch_json(url: str, params: dict[str, str], *, label: str) -> dict[str, Any]:
+    def _request() -> dict[str, Any]:
+        try:
+            response = httpx.get(url, params=params, timeout=15)
+            response.raise_for_status()
+        except httpx.HTTPStatusError as exc:
+            status = exc.response.status_code if exc.response else "unknown"
+            reason = exc.response.reason_phrase if exc.response else ""
+            message = f"{label} failed: HTTP {status} {reason}".strip()
+            raise RuntimeError(message) from exc
+        except httpx.HTTPError as exc:
+            raise RuntimeError(f"{label} failed: {exc}") from exc
+
+        try:
+            return response.json()
+        except ValueError as exc:
+            raise RuntimeError(f"{label} returned invalid JSON") from exc
+
+    return with_backoff(_request, label=label)
 
 
 def _parse_date(value: str | None) -> datetime | None:

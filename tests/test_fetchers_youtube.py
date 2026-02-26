@@ -4,8 +4,11 @@ from __future__ import annotations
 
 from unittest.mock import MagicMock, patch
 
+import httpx
+
 from src.config import YouTubeChannel, YouTubeConfig
 from src.fetchers.youtube import YouTubeFetcher, _parse_date
+from src.retry import with_backoff
 
 
 def _make_config(channels: list[YouTubeChannel] | None = None) -> YouTubeConfig:
@@ -85,6 +88,26 @@ class TestYouTubeFetcher:
         assert items[0].source_name == "Test Channel"
         assert items[0].url == "https://www.youtube.com/watch?v=vid1"
 
+    def test_fetch_uses_backoff(self) -> None:
+        cfg = _make_config()
+        fetcher = YouTubeFetcher(cfg)
+
+        with (
+            _with_api_key(),
+            patch("src.fetchers.youtube.httpx.get") as mock_get,
+            patch.object(fetcher._api, "fetch", return_value=_mock_transcript("transcript text")),
+            patch("src.fetchers.youtube.with_backoff", wraps=with_backoff) as mock_backoff,
+        ):
+            response = MagicMock()
+            response.raise_for_status.return_value = None
+            response.json.return_value = _search_response("vid1")
+            mock_get.return_value = response
+            items = fetcher.fetch(set())
+
+        assert len(items) == 1
+        mock_backoff.assert_called_once()
+        assert mock_backoff.call_args[1]["label"] == "YouTube channel Test Channel"
+
     def test_respects_max_videos(self) -> None:
         cfg = _make_config([YouTubeChannel(name="Ch", channel_id="UCtest", max_videos=2)])
         fetcher = YouTubeFetcher(cfg)
@@ -155,15 +178,18 @@ class TestYouTubeFetcher:
         cfg = _make_config(channels)
         fetcher = YouTubeFetcher(cfg)
 
-        def fetch_json_side(url: str, params: dict[str, str]) -> dict:
+        def get_side_effect(url: str, params: dict[str, str], timeout: int) -> MagicMock:
             if params["channelId"] == "UCgood":
-                return _search_response("vid1")
-            raise ConnectionError("DNS failure")
+                response = MagicMock()
+                response.raise_for_status.return_value = None
+                response.json.return_value = _search_response("vid1")
+                return response
+            raise httpx.HTTPError("DNS failure")
 
         with (
             _with_api_key(),
-            patch("src.fetchers.youtube._fetch_json", side_effect=fetch_json_side),
-            patch("src.fetchers.youtube.with_backoff", side_effect=lambda fn, **_: fn()),
+            patch("src.fetchers.youtube.httpx.get", side_effect=get_side_effect),
+            patch("src.retry.time.sleep", return_value=None),
             patch.object(fetcher._api, "fetch", return_value=_mock_transcript()),
         ):
             items = fetcher.fetch(set())
