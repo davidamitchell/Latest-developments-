@@ -21,6 +21,7 @@ Format: [MADR (Markdown Architectural Decision Records)](https://adr.github.io/m
 | [0007](0007-yaml-for-source-configuration.md) | YAML for source configuration | Accepted | 2026-02-21 |
 | [0008](0008-optional-ai-summarisation.md) | Optional AI summarisation with link-digest fallback | Accepted | 2026-02-21 |
 | [0009](0009-switch-to-gemini-api.md) | Switch AI summarisation to Google Gemini | Accepted | 2026-02-21 |
+| [0010](0010-resilient-rss-fetching.md) | Resilient RSS fetching — browser-like headers and fallback URL | Accepted | 2026-02-26 |
 
 ---
 

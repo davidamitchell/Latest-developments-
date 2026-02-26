@@ -19,11 +19,12 @@ except ImportError:
 from src.config import load_config
 from src.emailer import send_digest
 from src.fetchers import FetchedItem
+from src.fetchers.hackernews import HackerNewsFetcher
 from src.fetchers.rss import RSSFetcher
 from src.fetchers.youtube import YouTubeFetcher
 from src.logger import setup_logging
 from src.state import load_state, save_state
-from src.summariser import summarise
+from src.summariser import format_run_summary, summarise
 
 logger = logging.getLogger(__name__)
 
@@ -65,15 +66,28 @@ def main() -> int:
 
     processed = load_state()
     new_items: list[FetchedItem] = []
+    source_counts: dict[str, int] = {}
+    source_errors: list[str] = []
+
+    def _safe_fetch(name: str, fetcher_fn: object) -> list[FetchedItem]:
+        try:
+            result = fetcher_fn(processed)  # type: ignore[call-arg, operator]
+            source_counts[name] = len(result)
+            return result
+        except Exception as exc:
+            logger.error("Fetcher %r failed: %s", name, exc)
+            source_errors.append(f"{name}: {exc}")
+            source_counts[name] = 0
+            return []
 
     if cfg.youtube.enabled:
-        new_items += YouTubeFetcher(cfg.youtube).fetch(processed)
+        new_items += _safe_fetch("YouTube", YouTubeFetcher(cfg.youtube).fetch)
 
     if cfg.blogs.enabled:
-        new_items += RSSFetcher(cfg.blogs).fetch(processed)
+        new_items += _safe_fetch("Blogs/RSS", RSSFetcher(cfg.blogs).fetch)
 
-    # Hacker News fetcher added in Epic 5:
-    #   new_items += HackerNewsFetcher(cfg.hacker_news).fetch(processed)
+    if cfg.hacker_news.enabled:
+        new_items += _safe_fetch("Hacker News", HackerNewsFetcher(cfg.hacker_news).fetch)
 
     if not new_items:
         logger.info("No new items across all sources")
@@ -85,7 +99,9 @@ def main() -> int:
         logger.info("  [%s] %s", item.source_name, item.title)
 
     today = datetime.now(UTC).date()
+    run_ts = datetime.now(UTC)
     digest = summarise(new_items, cfg.summary, today)
+    digest += format_run_summary(source_counts, source_errors, run_ts)
 
     subject = cfg.email.subject.format(date=today.strftime("%d %b %Y"))
 
