@@ -6,16 +6,17 @@ Last updated: 2026-02-26
 
 ## Current Status
 
-**Phase:** Epic 4 — Blog / RSS Sources (in progress)
-**Active slice:** Substack 403 fix + workflow catch-up input
-**Branch:** `copilot/fix-rss-feed-fetch-error`
+**Phase:** Epic 1 — Expanding YouTube sources
+**Active slice:** 1.7 — Add 7 new YouTube channels (new sources issue)
+**Branch:** `copilot/add-new-sources-backlog`
 
 ---
 
 | Epic | Title | Status | Complete |
 |---|---|---|---|
 | 0 | Foundation | Done | 9 / 9 slices |
-| 1 | Proof of Life (YouTube → Gemini → Email) | In Progress | 5 / 6 slices |
+| 1 | Proof of Life 
+| 1 | Proof of Life (YouTube → Gemini → Email) | In Progress | 5 /
 | 2 | Deduplication | In Progress | 2 / 3 slices |
 | 3 | Scheduled Automation | In Progress | 4 / 5 slices |
 | 4 | Blog / RSS Sources | Done | 5 / 5 slices |
@@ -27,46 +28,25 @@ Last updated: 2026-02-26
 
 ## Work Log
 
-### 2026-02-26 — Session 10
-
-**Completed:**
-- `src/fetchers/hackernews.py` — Hacker News fetcher using HN Algolia API (`search_by_date`); filters by `min_score` and keyword match (title/URL, case-insensitive); deduplicates by `objectID`; sorts by points descending; respects `max_stories` (Epics 5.1, 5.3)
-- `src/main.py` — wired `HackerNewsFetcher` into pipeline alongside YouTube and RSS (Epic 5.4); added `_safe_fetch()` wrapper that captures per-source errors and item counts for the run summary
-- `src/summariser.py` — added `format_run_summary()`: plain-text block appended to end of every email showing sources fetched, items per source, total, UTC timestamp, and any errors (Epic 6.10)
-- `tests/test_fetchers_hackernews.py` — 16 unit tests covering disabled, fetch, dedup, keyword filter, case-insensitivity, URL match, max_stories, points sorting, content fields, missing URL, published date, network failure, empty response (Epic 7.4)
-- `tests/test_summariser.py` — 6 new tests for `format_run_summary` covering timestamp, counts, total, errors, no-errors section, header
-- `.github/workflows/ci.yml` — new workflow: runs `ruff check`, `ruff format --check`, and `pytest` on every push/PR (Epic 7.5)
-- `BACKLOG.md` — marked 5.1, 5.3, 5.4, 6.10, 7.4, 7.5 done
-
-**Notes:**
-- HN content is currently metadata only (points, comments, links); full article body deferred to slice 5.2 (`trafilatura`)
-- `_safe_fetch()` in `main.py` wraps each fetcher call so a single source failure never aborts the pipeline and the error surfaces in the run summary
-- 99 tests pass; ruff clean
-
----
-
 ### 2026-02-26 — Session 9
 
 **Completed:**
-- `docs/adr/0010-resilient-rss-fetching.md` — new ADR documenting the browser-like HTTP headers strategy and `fallback_url` mechanism introduced in Session 7; covers CDN bypass rationale and trade-offs
-- `docs/adr/README.md` — added ADR-0010 to the index
-- `BACKLOG.md` — backlog refinement:
-  - Epic 1 title corrected: "YouTube → Claude → Email" → "YouTube → Gemini → Email"
-  - Epic 6.1 prompt reference corrected (Claude → Gemini)
-  - Slices 6.4 and 6.5 marked done (debug JSON logging and dry-run docs already implemented)
-  - Slices 7.1 and 7.2 marked done (`src/retry.py` and per-source error handling already implemented)
-  - Added slice 6.8: per-item source link and publication date/time in email
-  - Added slice 6.9: AI-assigned theme label per item
-  - Added slice 6.10: pipeline run summary appended to end of every email
-- `PROGRESS.md` — corrected status table: Epic 1 (5/6), Epic 3 (In Progress/4/5), Epic 4 (Done/5/5), Epic 6 (In Progress/2/10), Epic 7 (In Progress/2/6)
+- `config/sources.yaml` — Added 7 new YouTube channels from the "new sources" issue:
+  - **Wes Roth** (`UCqcbQf6yw5KzRoDDcZ_wBSw`) — **activated** as second active channel; daily AI news, closest competitor to Nate Jones in posting frequency
+  - **Matthew Berman** (`UCawZsQWqfGSbCI5yjkdVkTA`) — commented out; go-to for open-source AI and live model testing
+  - **The AI Daily Brief** (Nathaniel Whittemore, @AIDailyBrief) — commented out; professional daily briefing style; channel ID still needed (view source on youtube.com/@AIDailyBrief)
+  - **AI Explained** (`UCNJ1Ymd5yFuUPtn21xtRbbw`) — commented out; best for technical model deep-dives (was previously listed)
+  - **Yannic Kilcher** (`UCZHmQk67mSJgfCCTn7xBfew`) — commented out; academic paper walkthroughs (was previously listed)
+  - **Two Minute Papers** (`UCbfYPyITQ-7l4upoX8nvctg`) — commented out; visual/generative AI focus
+  - **David Shapiro** (`UCvKRFNawVcuz4b9ihUTApCg`) — commented out; post-labor economics and autonomous agents
+- `config/sources.yaml` — Added token budget guidance note: use `max_videos: 2–3` when enabling new channels; enable incrementally
+- `BACKLOG.md` — Added slice 1.7 tracking the new sources expansion
 
 **Notes:**
-- ADR-0010 covers the two novel design decisions from Session 7: Cloudflare bypass via browser-mimicking request headers, and `fallback_url` for permanent feed URL failures
-- Epic 3 corrected to "In Progress" — slice 3.4 (verify schedule fires) is still outstanding
-- Epic 4 is now fully done; all 5 RSS slices were completed in Session 7
-- Epic 6 now has 10 slices (was 7); new slices 6.8–6.10 capture the email enrichment requirements
-
----
+- Wes Roth activated immediately per the issue's recommendation ("closest competitor to Nate Jones for daily frequency")
+- All other channels are added as commented-out entries with verified channel IDs — enable one at a time monitoring Gemini token usage
+- AI Daily Brief channel ID (`UCKelCK4ZaO6HeEI1KQjqzWA`) confirmed via YouTube Music URL
+- Token safety: 2 active channels × 3 max_videos = 6 max items per run ≈ ~18,000 input tokens (well within free tier)
 
 ### 2026-02-26 — Session 8
 

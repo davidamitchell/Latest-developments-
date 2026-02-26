@@ -30,21 +30,77 @@ youtube:
   # How many recent videos to check per channel (most recent first)
   max_videos_per_channel: 5
 
+  # Token budget note: each video contributes up to 12,000 chars of content.
+  # With multiple active channels, total input to Gemini can grow quickly.
+  # As a rough guide: (active channels) × max_videos_per_channel × ~3,000 chars ≈ input tokens.
+  # Use per-channel `max_videos: N` to cap a specific channel's contribution.
+  # Enable channels incrementally and monitor Gemini usage in AI Studio.
+
   channels:
     # Primary focus: Nate Jones — AI practitioner and strategist.
     # Channel: https://youtube.com/@natebjones
-    # TO ACTIVATE: replace CHANNEL_ID_NEEDED with the UC… channel ID.
-    # Find it: open the channel page in a browser → view source → search "channelId"
     - name: "Nate Jones"
       channel_id: "UC0C-17n9iuUQPylguM1d-lQ"
 
-    # Paused while focusing on Nate Jones content (backlog 1.6):
-    # - name: "Andrej Karpathy"
-    #   channel_id: "UCbXgNpp0jedKWcQiULLbDTA"
-    # - name: "Yannic Kilcher"
-    #   channel_id: "UCZHmQk67mSJgfCCTn7xBfew"
+    # --- News Junkies (daily coverage) ---
+
+    # Wes Roth — closest competitor to Nate Jones for daily frequency.
+    # Covers OpenAI, Anthropic, open-source breakthroughs; pro-AGI strategic focus.
+    # Channel: https://youtube.com/@WesRoth
+    # max_videos: 3 limits token usage during initial ramp-up; increase when comfortable.
+    - name: "Wes Roth"
+      channel_id: "UCqcbQf6yw5KzRoDDcZ_wBSw"
+      max_videos: 3
+
+    # Matthew Berman — go-to for open-source AI and live model testing.
+    # Shows how to run bleeding-edge models on local hardware.
+    # Channel: https://youtube.com/@matthew_berman
+    # - name: "Matthew Berman"
+    #   channel_id: "UCawZsQWqfGSbCI5yjkdVkTA"
+    #   max_videos: 3
+
+    # The AI Daily Brief (Nathaniel Whittemore) — professional "briefing" style.
+    # Daily podcast/video synthesising macro-trends, politics, and funding behind AI.
+    # Channel: https://youtube.com/@AIDailyBrief
+    # - name: "The AI Daily Brief"
+    #   channel_id: "UCKelCK4ZaO6HeEI1KQjqzWA"
+    #   max_videos: 3
+
+    # --- Deep-Dive Analysts ---
+
+    # AI Explained — best channel for understanding how newest models actually work.
+    # Stress-tests models with complex logic puzzles; thorough technical breakdowns.
+    # Channel: https://youtube.com/@aiexplained-official
     # - name: "AI Explained"
     #   channel_id: "UCNJ1Ymd5yFuUPtn21xtRbbw"
+    #   max_videos: 2
+
+    # Yannic Kilcher — reads actual academic papers; bleeding-edge research.
+    # Very technical (math and architecture of neural networks).
+    # Channel: https://youtube.com/@YannicKilcher
+    # - name: "Yannic Kilcher"
+    #   channel_id: "UCZHmQk67mSJgfCCTn7xBfew"
+    #   max_videos: 2
+
+    # Two Minute Papers (Károly Zsolnai-Fehér) — visual/generative AI focus.
+    # Robotics, physics simulations, graphics; previews consumer AI 12–24 months out.
+    # Channel: https://youtube.com/@TwoMinutePapers
+    # - name: "Two Minute Papers"
+    #   channel_id: "UCbfYPyITQ-7l4upoX8nvctg"
+    #   max_videos: 2
+
+    # --- Practical Builders ---
+
+    # David Shapiro — post-labor economics, AGI timelines, autonomous agents.
+    # Philosophical and speculative; focuses on job-category replacement and agentic AI.
+    # Channel: https://youtube.com/@DavidShapiroAutomator
+    # - name: "David Shapiro"
+    #   channel_id: "UCvKRFNawVcuz4b9ihUTApCg"
+    #   max_videos: 2
+
+    # Andrej Karpathy — deep technical content; paused (low posting frequency).
+    # - name: "Andrej Karpathy"
+    #   channel_id: "UCbXgNpp0jedKWcQiULLbDTA"
 
 # ---------------------------------------------------------------------------
 # Substack publications
