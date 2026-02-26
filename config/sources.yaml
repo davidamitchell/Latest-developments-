@@ -47,6 +47,20 @@ youtube:
     #   channel_id: "UCNJ1Ymd5yFuUPtn21xtRbbw"
 
 # ---------------------------------------------------------------------------
+# Substack publications
+# ---------------------------------------------------------------------------
+# Uses Substack's internal JSON API (https://<slug>.substack.com/api/v1/archive)
+# as the primary fetch method — less likely to be blocked by Cloudflare than RSS.
+# Automatically falls back to the RSS feed only when the JSON API returns a
+# non-retriable 4xx (permanent HTTP) error.
+substack:
+  enabled: true
+
+  publications:
+    - name: "Nate's Newsletter"
+      slug: "natesnewsletter"
+
+# ---------------------------------------------------------------------------
 # Blog / RSS feeds
 # ---------------------------------------------------------------------------
 blogs:
@@ -56,14 +70,10 @@ blogs:
     # Primary focus: Nate's Newsletter — AI strategy and implementation analysis.
     # Activated once the RSS fetcher (Epic 4.1–4.4) is implemented.
     #
-    # Substack feeds are often blocked by Cloudflare bot-detection (HTTP 403).
-    # Use fallback_url to specify an alternative URL tried when the primary fails.
-    # Substack's JSON API endpoint is less likely to be blocked:
-    #   https://<slug>.substack.com/api/v1/posts — returns JSON, not XML
-    # For pure RSS fallback, most Substack newsletters also publish at:
-    #   https://<slug>.substack.com/feed (primary — currently 403 on this newsletter)
-    - name: "Nate's Newsletter"
-      url: "https://natesnewsletter.substack.com/feed"
+    # Note: Substack newsletters are now fetched via the `substack` section above,
+    # which uses the JSON API and is less likely to be blocked by Cloudflare.
+    # - name: "Nate's Newsletter"
+    #   url: "https://natesnewsletter.substack.com/feed"
 
     # Paused while focusing on Nate Jones content:
     # - name: "Simon Willison's Weblog"
