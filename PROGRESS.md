@@ -6,16 +6,16 @@ Last updated: 2026-02-26
 
 ## Current Status
 
-**Phase:** Epic 4 — Blog / RSS Sources (in progress)
-**Active slice:** Substack 403 fix + workflow catch-up input
-**Branch:** `copilot/fix-rss-feed-fetch-error`
+**Phase:** Epic 1 — Expanding YouTube sources
+**Active slice:** 1.7 — Add 7 new YouTube channels (new sources issue)
+**Branch:** `copilot/add-new-sources-backlog`
 
 ---
 
 | Epic | Title | Status | Complete |
 |---|---|---|---|
 | 0 | Foundation | Done | 9 / 9 slices |
-| 1 | Proof of Life (YouTube → Gemini → Email) | In Progress | 4 / 6 slices |
+| 1 | Proof of Life (YouTube → Gemini → Email) | In Progress | 5 / 7 slices |
 | 2 | Deduplication | In Progress | 2 / 3 slices |
 | 3 | Scheduled Automation | Done | 5 / 5 slices |
 | 4 | Blog / RSS Sources | In Progress | 1 / 5 slices |
@@ -26,6 +26,26 @@ Last updated: 2026-02-26
 ---
 
 ## Work Log
+
+### 2026-02-26 — Session 9
+
+**Completed:**
+- `config/sources.yaml` — Added 7 new YouTube channels from the "new sources" issue:
+  - **Wes Roth** (`UCqcbQf6yw5KzRoDDcZ_wBSw`) — **activated** as second active channel; daily AI news, closest competitor to Nate Jones in posting frequency
+  - **Matthew Berman** (`UCawZsQWqfGSbCI5yjkdVkTA`) — commented out; go-to for open-source AI and live model testing
+  - **The AI Daily Brief** (Nathaniel Whittemore, @AIDailyBrief) — commented out; professional daily briefing style; channel ID still needed (view source on youtube.com/@AIDailyBrief)
+  - **AI Explained** (`UCNJ1Ymd5yFuUPtn21xtRbbw`) — commented out; best for technical model deep-dives (was previously listed)
+  - **Yannic Kilcher** (`UCZHmQk67mSJgfCCTn7xBfew`) — commented out; academic paper walkthroughs (was previously listed)
+  - **Two Minute Papers** (`UCbfYPyITQ-7l4upoX8nvctg`) — commented out; visual/generative AI focus
+  - **David Shapiro** (`UCvKRFNawVcuz4b9ihUTApCg`) — commented out; post-labor economics and autonomous agents
+- `config/sources.yaml` — Added token budget guidance note: use `max_videos: 2–3` when enabling new channels; enable incrementally
+- `BACKLOG.md` — Added slice 1.7 tracking the new sources expansion
+
+**Notes:**
+- Wes Roth activated immediately per the issue's recommendation ("closest competitor to Nate Jones for daily frequency")
+- All other channels are added as commented-out entries with verified channel IDs — enable one at a time monitoring Gemini token usage
+- AI Daily Brief channel ID (`UCKelCK4ZaO6HeEI1KQjqzWA`) confirmed via YouTube Music URL
+- Token safety: 2 active channels × 3 max_videos = 6 max items per run ≈ ~18,000 input tokens (well within free tier)
 
 ### 2026-02-26 — Session 8
 

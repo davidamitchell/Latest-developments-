@@ -36,6 +36,7 @@ One end-to-end run, hardcoded source, proves the core pipeline works.
 | 1.4 | Wire 1.1 → 1.2 → 1.3 in `src/main.py`; `--dry-run` skips email | `[x]` | Also added `src/retry.py` — backoff for all network calls |
 | 1.5 | Manually run in Codespaces; confirm email received | `[ ]` | Acceptance: email arrives with coherent summary |
 | 1.6 | Focus YouTube sources on Nate Jones: comment out Karpathy, Kilcher, AI Explained channels in `config/sources.yaml`; add `@natebjones` | `[x]` | Channel ID: `UC0C-17n9iuUQPylguM1d-lQ` |
+| 1.7 | Expand YouTube sources: add 7 new channels from issue — Wes Roth (active; `UCqcbQf6yw5KzRoDDcZ_wBSw`), Matthew Berman (`UCawZsQWqfGSbCI5yjkdVkTA`), The AI Daily Brief (`UCKelCK4ZaO6HeEI1KQjqzWA`), AI Explained (`UCNJ1Ymd5yFuUPtn21xtRbbw`), Yannic Kilcher (`UCZHmQk67mSJgfCCTn7xBfew`), Two Minute Papers (`UCbfYPyITQ-7l4upoX8nvctg`), David Shapiro (`UCvKRFNawVcuz4b9ihUTApCg`). Token budget: use per-channel `max_videos: 2–3` when enabling; enable channels incrementally. | `[→]` | Wes Roth activated; all others added as commented-out in `config/sources.yaml` with IDs |
 
 **Acceptance criteria:** `python -m src.main --dry-run` prints a summary to stdout without errors.
 
