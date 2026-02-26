@@ -17,38 +17,26 @@ def _make_config(channels: list[YouTubeChannel] | None = None) -> YouTubeConfig:
     )
 
 
-def _atom_feed(*video_ids: str, descriptions: dict[str, str] | None = None) -> bytes:
-    """Build a minimal YouTube Atom feed for testing.
-
-    Pass descriptions={video_id: text} to include media:description elements.
-    """
+def _search_response(*video_ids: str, descriptions: dict[str, str] | None = None) -> dict:
+    """Build a minimal YouTube Data API search.list response for testing."""
     desc_map = descriptions or {}
-    entries = ""
+    items = []
     for vid in video_ids:
-        desc = desc_map.get(vid, "")
-        media_block = (
-            f"""
-    <media:group>
-      <media:description>{desc}</media:description>
-    </media:group>"""
-            if desc
-            else ""
+        items.append(
+            {
+                "id": {"videoId": vid},
+                "snippet": {
+                    "title": f"{vid} title",
+                    "description": desc_map.get(vid, ""),
+                    "publishedAt": "2026-02-21T07:00:00+00:00",
+                },
+            }
         )
-        entries += f"""
-  <entry xmlns:yt="http://www.youtube.com/xml/schemas/2015"
-         xmlns:media="http://search.yahoo.com/mrss/">
-    <yt:videoId>{vid}</yt:videoId>
-    <title>{vid} title</title>
-    <link rel="alternate" href="https://www.youtube.com/watch?v={vid}"/>
-    <published>2026-02-21T07:00:00+00:00</published>{media_block}
-  </entry>"""
+    return {"items": items}
 
-    return f"""<?xml version="1.0"?>
-<feed xmlns="http://www.w3.org/2005/Atom"
-      xmlns:yt="http://www.youtube.com/xml/schemas/2015"
-      xmlns:media="http://search.yahoo.com/mrss/">
-  <title>Test Channel</title>{entries}
-</feed>""".encode()
+
+def _with_api_key() -> patch:
+    return patch.dict("os.environ", {"YOUTUBE_API_KEY": "test-key"})
 
 
 def _mock_transcript(text: str = "Hello world transcript") -> list[MagicMock]:
@@ -71,7 +59,8 @@ class TestYouTubeFetcher:
         fetcher = YouTubeFetcher(cfg)
 
         with (
-            patch("src.fetchers.youtube._fetch_url", return_value=_atom_feed("vid1")),
+            _with_api_key(),
+            patch("src.fetchers.youtube._fetch_json", return_value=_search_response("vid1")),
             patch.object(fetcher._api, "fetch") as mock_api,
         ):
             items = fetcher.fetch(already_processed={"vid1"})
@@ -84,7 +73,8 @@ class TestYouTubeFetcher:
         fetcher = YouTubeFetcher(cfg)
 
         with (
-            patch("src.fetchers.youtube._fetch_url", return_value=_atom_feed("vid1")),
+            _with_api_key(),
+            patch("src.fetchers.youtube._fetch_json", return_value=_search_response("vid1")),
             patch.object(fetcher._api, "fetch", return_value=_mock_transcript("transcript text")),
         ):
             items = fetcher.fetch(set())
@@ -98,10 +88,11 @@ class TestYouTubeFetcher:
     def test_respects_max_videos(self) -> None:
         cfg = _make_config([YouTubeChannel(name="Ch", channel_id="UCtest", max_videos=2)])
         fetcher = YouTubeFetcher(cfg)
-        feed = _atom_feed("v1", "v2", "v3", "v4", "v5")
+        response = _search_response("v1", "v2", "v3", "v4", "v5")
 
         with (
-            patch("src.fetchers.youtube._fetch_url", return_value=feed),
+            _with_api_key(),
+            patch("src.fetchers.youtube._fetch_json", return_value=response),
             patch.object(fetcher._api, "fetch", return_value=_mock_transcript()),
         ):
             items = fetcher.fetch(set())
@@ -116,7 +107,8 @@ class TestYouTubeFetcher:
         fetcher = YouTubeFetcher(cfg)
 
         with (
-            patch("src.fetchers.youtube._fetch_url", return_value=_atom_feed("v1", "v2")),
+            _with_api_key(),
+            patch("src.fetchers.youtube._fetch_json", return_value=_search_response("v1", "v2")),
             patch.object(fetcher._api, "fetch") as mock_api,
         ):
             mock_api.side_effect = [
@@ -138,10 +130,11 @@ class TestYouTubeFetcher:
 
         cfg = _make_config()
         fetcher = YouTubeFetcher(cfg)
-        feed = _atom_feed("vid1", descriptions={"vid1": "Deep dive into LLM fine-tuning"})
+        response = _search_response("vid1", descriptions={"vid1": "Deep dive into LLM fine-tuning"})
 
         with (
-            patch("src.fetchers.youtube._fetch_url", return_value=feed),
+            _with_api_key(),
+            patch("src.fetchers.youtube._fetch_json", return_value=response),
             patch.object(
                 fetcher._api,
                 "fetch",
@@ -162,13 +155,15 @@ class TestYouTubeFetcher:
         cfg = _make_config(channels)
         fetcher = YouTubeFetcher(cfg)
 
-        def fetch_url_side(url: str) -> bytes:
-            if "UCgood" in url:
-                return _atom_feed("vid1")
+        def fetch_json_side(url: str, params: dict[str, str]) -> dict:
+            if params["channelId"] == "UCgood":
+                return _search_response("vid1")
             raise ConnectionError("DNS failure")
 
         with (
-            patch("src.fetchers.youtube._fetch_url", side_effect=fetch_url_side),
+            _with_api_key(),
+            patch("src.fetchers.youtube._fetch_json", side_effect=fetch_json_side),
+            patch("src.fetchers.youtube.with_backoff", side_effect=lambda fn, **_: fn()),
             patch.object(fetcher._api, "fetch", return_value=_mock_transcript()),
         ):
             items = fetcher.fetch(set())
@@ -185,7 +180,8 @@ class TestYouTubeFetcher:
         snippet.text = "x " * 10_000
 
         with (
-            patch("src.fetchers.youtube._fetch_url", return_value=_atom_feed("vid1")),
+            _with_api_key(),
+            patch("src.fetchers.youtube._fetch_json", return_value=_search_response("vid1")),
             patch.object(fetcher._api, "fetch", return_value=[snippet]),
         ):
             items = fetcher.fetch(set())
@@ -193,15 +189,27 @@ class TestYouTubeFetcher:
         assert len(items[0].content) == _MAX_CONTENT_CHARS
 
     def test_empty_feed_returns_empty(self) -> None:
-        empty_feed = b"""<?xml version="1.0"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>Ch</title></feed>"""
+        empty_response = {"items": []}
         cfg = _make_config()
         fetcher = YouTubeFetcher(cfg)
 
-        with patch("src.fetchers.youtube._fetch_url", return_value=empty_feed):
+        with (
+            _with_api_key(),
+            patch("src.fetchers.youtube._fetch_json", return_value=empty_response),
+        ):
             items = fetcher.fetch(set())
 
         assert items == []
+
+    def test_missing_api_key_logs_error(self, caplog) -> None:
+        cfg = _make_config()
+        fetcher = YouTubeFetcher(cfg)
+
+        with caplog.at_level("ERROR"):
+            items = fetcher.fetch(set())
+
+        assert items == []
+        assert "YOUTUBE_API_KEY" in caplog.text
 
 
 class TestParseDate:
