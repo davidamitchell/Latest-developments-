@@ -27,6 +27,7 @@ class YouTubeConfig:
 class RSSFeed:
     name: str
     url: str
+    fallback_url: str | None = None
 
 
 @dataclass
@@ -106,7 +107,10 @@ def load_config(path: Path = Path("config/sources.yaml")) -> Config:
     bl = raw.get("blogs", {})
     blogs = BlogsConfig(
         enabled=bl.get("enabled", True),
-        rss=[RSSFeed(name=f["name"], url=f["url"]) for f in bl.get("rss", [])],
+        rss=[
+            RSSFeed(name=f["name"], url=f["url"], fallback_url=f.get("fallback_url"))
+            for f in bl.get("rss", [])
+        ],
     )
 
     hn = raw.get("hacker_news", {})

@@ -33,6 +33,13 @@ def _parse_args() -> argparse.Namespace:
     p.add_argument("--debug", action="store_true", help="Structured JSON logging to stdout")
     p.add_argument("--dry-run", action="store_true", help="Skip email; print digest to stdout")
     p.add_argument("--config", default="config/sources.yaml", help="Path to sources.yaml")
+    p.add_argument(
+        "--max-videos",
+        type=int,
+        default=None,
+        metavar="N",
+        help="Override max_videos_per_channel from config (useful for manual catch-up runs)",
+    )
     return p.parse_args()
 
 
@@ -42,6 +49,12 @@ def main() -> int:
     setup_logging(debug=args.debug, log_file=cfg.logging.log_file)
 
     logger.info("Starting digest pipeline (dry_run=%s)", args.dry_run)
+
+    if args.max_videos is not None:
+        logger.info("Overriding max_videos_per_channel: %d", args.max_videos)
+        cfg.youtube.max_videos_per_channel = args.max_videos
+        for ch in cfg.youtube.channels:
+            ch.max_videos = args.max_videos
 
     if cfg.summary.enabled and not os.environ.get("GEMINI_API_KEY"):
         logger.warning(
