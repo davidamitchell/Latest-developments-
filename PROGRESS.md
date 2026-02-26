@@ -15,13 +15,14 @@ Last updated: 2026-02-26
 | Epic | Title | Status | Complete |
 |---|---|---|---|
 | 0 | Foundation | Done | 9 / 9 slices |
-| 1 | Proof of Life (YouTube → Gemini → Email) | In Progress | 5 / 7 slices |
+| 1 | Proof of Life 
+| 1 | Proof of Life (YouTube → Gemini → Email) | In Progress | 5 /
 | 2 | Deduplication | In Progress | 2 / 3 slices |
-| 3 | Scheduled Automation | Done | 5 / 5 slices |
-| 4 | Blog / RSS Sources | In Progress | 1 / 5 slices |
-| 5 | Hacker News | Not started | 0 / 4 slices |
-| 6 | Configurable Prompt & Polish | Not started | 0 / 5 slices |
-| 7 | Reliability & Observability | Not started | 0 / 5 slices |
+| 3 | Scheduled Automation | In Progress | 4 / 5 slices |
+| 4 | Blog / RSS Sources | Done | 5 / 5 slices |
+| 5 | Hacker News | In Progress | 3 / 4 slices |
+| 6 | Configurable Prompt & Polish | In Progress | 3 / 10 slices |
+| 7 | Reliability & Observability | In Progress | 4 / 6 slices |
 
 ---
 
@@ -158,10 +159,14 @@ Last updated: 2026-02-26
 
 ## Next Steps
 
-1. Epic 1.6 — get @natebjones channel ID (manual: view source on youtube.com/@natebjones, search `"channelId"`)
-2. Epic 1.5 — run pipeline end-to-end (non-dry-run) to confirm email delivery once channel ID is set
-3. Epic 2.3 — run pipeline twice; confirm second run skips all items
-4. Epic 5.1 — Hacker News fetcher
+1. Epic 1.5 — run pipeline end-to-end (non-dry-run) to confirm email delivery
+2. Epic 2.3 — run pipeline twice; confirm second run skips all items
+3. Epic 3.4 — verify schedule fires at 07:00 UTC and email arrives
+4. Epic 5.2 — fetch linked article text with `trafilatura` (best-effort)
+5. Epic 6.1 — prompt field in sources.yaml passed to Gemini (already partially done in summariser; needs YAML/config plumbing verification)
+6. Epic 6.3 — HTML email with per-source sections
+7. Epic 6.6 — TL;DR section at top of email
+8. Epic 6.8 — per-item source link and publication date in email
 
 ---
 
