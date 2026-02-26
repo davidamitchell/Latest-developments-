@@ -13,7 +13,7 @@ Everything here has a free tier sufficient for a daily digest.
 | Component | Cost |
 |---|---|
 | GitHub Actions | Free (public repo or within free-tier minutes) |
-| YouTube Data API + transcripts | Free — API key required |
+| YouTube RSS + transcripts | Free — no API key |
 | Hacker News API | Free |
 | Resend email | Free up to 3 000 emails/month |
 | Gemini summarisation | Free — Google AI Studio gives 1 500 req/day |
@@ -28,13 +28,7 @@ To skip AI summarisation entirely, set `summary.enabled: false` in `config/sourc
 
 Edit `config/sources.yaml`. It is fully commented. At minimum, choose which YouTube channels and/or RSS feeds to watch.
 
-### 2. Get a YouTube Data API key (free)
-
-1. Visit the [Google Cloud Console](https://console.cloud.google.com/) and create a project.
-2. Enable **YouTube Data API v3** for the project.
-3. Create an API key and copy it.
-
-### 3. Get a Gemini API key (free)
+### 2. Get a Gemini API key (free)
 
 1. Go to [aistudio.google.com](https://aistudio.google.com) and sign in with your Google account.
 2. Click **Get API key** → **Create API key**.
@@ -42,7 +36,7 @@ Edit `config/sources.yaml`. It is fully commented. At minimum, choose which YouT
 
 No billing setup required. The free tier (1 500 requests/day, 1M tokens/day) covers daily digest runs comfortably.
 
-### 4. Set up email
+### 3. Set up email
 
 **Resend** is the simplest starting point — free tier, no domain or App Password required for initial testing.
 
@@ -51,7 +45,7 @@ No billing setup required. The free tier (1 500 requests/day, 1M tokens/day) cov
 
 Gmail also works but requires an [App Password](https://support.google.com/accounts/answer/185833) (Google account 2FA must be enabled first).
 
-### 5. Add GitHub Secrets
+### 4. Add GitHub Secrets
 
 Settings → Secrets and variables → Actions → New repository secret.
 
@@ -59,7 +53,6 @@ Settings → Secrets and variables → Actions → New repository secret.
 
 | Secret | Value |
 |---|---|
-| `YOUTUBE_API_KEY` | Your YouTube Data API key |
 | `GEMINI_API_KEY` | Your Google AI Studio key |
 | `EMAIL_PROVIDER` | `resend` |
 | `RESEND_API_KEY` | Your Resend API key |
@@ -79,7 +72,7 @@ Omit `GEMINI_API_KEY` and set `summary.enabled: false` in `sources.yaml`. The pi
 | `EMAIL_PASSWORD` | Your Gmail App Password |
 | `EMAIL_RECIPIENT` | Destination address |
 
-### 6. Enable the workflow
+### 5. Enable the workflow
 
 GitHub Actions tab → `Daily Digest` → Enable workflow.
 
@@ -92,7 +85,7 @@ Runs at 07:00 UTC by default. To change the time, edit the cron in `.github/work
 ```bash
 make dev-install        # install with dev dependencies
 cp .env.example .env
-$EDITOR .env            # fill in YOUTUBE_API_KEY, GEMINI_API_KEY, and email credentials
+$EDITOR .env            # fill in GEMINI_API_KEY and email credentials
 make dry-run            # run pipeline, print digest to stdout — no email sent
 make test               # run test suite
 make lint               # ruff check

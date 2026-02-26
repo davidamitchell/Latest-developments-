@@ -41,7 +41,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          # Fetch full history so state file commits work correctly
           fetch-depth: 1
 
       - name: Set up Python
@@ -56,11 +55,11 @@ jobs:
       - name: Run digest pipeline
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
           EMAIL_SENDER: ${{ secrets.EMAIL_SENDER }}
           EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
           EMAIL_RECIPIENT: ${{ secrets.EMAIL_RECIPIENT }}
           EMAIL_PROVIDER: ${{ secrets.EMAIL_PROVIDER }}
-          YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
         run: |
           ARGS=""
           if [ "${{ inputs.debug }}" = "true" ]; then
@@ -75,15 +74,20 @@ jobs:
           python -m src.main $ARGS
 
       - name: Commit updated state file
-        # Only commit if state file was modified (i.e., new items were processed)
-        # Skip on dry runs
+        # Only runs on non-dry-run executions; state file is only written after a
+        # successful email send so it may not exist on first run or when all
+        # items were skipped.
         if: inputs.dry_run != 'true'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+          if [ ! -f state/processed.json ]; then
+            echo "No state file to commit (nothing was processed)"
+            exit 0
+          fi
           git add state/processed.json
           if git diff --cached --quiet; then
-            echo "No new items processed — state file unchanged"
+            echo "State file unchanged — nothing to commit"
           else
             git commit -m "chore: update processed state after digest run [skip ci]"
             git push origin ${{ github.ref_name }}
