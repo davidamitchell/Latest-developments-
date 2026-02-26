@@ -20,6 +20,7 @@ Status legend: `[ ]` Not started · `[→]` In progress · `[x]` Done · `[~]` D
 | 0.8 | Add `src/config.py`, `src/state.py`, `src/fetchers/__init__.py`, `src/main.py` skeleton | `[x]` | |
 | 0.9 | Add `tests/` skeleton with `conftest.py`, `test_config.py`, `test_state.py` | `[x]` | |
 | 0.10 | Add `davidamitchell/Skills` as a git submodule so Claude Code picks up project-level custom skills | `[ ]` | Target path: `.claude/commands/` (Claude Code discovers skills there automatically). Run: `git submodule add https://github.com/davidamitchell/Skills .claude/commands` then `git submodule update --init`. Add `.gitmodules` to the workflow checkout step with `submodules: true`. |
+| 0.11 | Consolidate agent instructions: `AGENTS.md` as single source of truth; `.claude/CLAUDE.md` and `.github/copilot-instructions.md` as thin stubs | `[x]` | Resolves #6 — multi-agent DRY setup |
 
 ---
 
