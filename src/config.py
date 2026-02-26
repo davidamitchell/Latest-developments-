@@ -37,6 +37,18 @@ class BlogsConfig:
 
 
 @dataclass
+class SubstackPublication:
+    name: str
+    slug: str  # e.g. "natesnewsletter" for natesnewsletter.substack.com
+
+
+@dataclass
+class SubstackConfig:
+    enabled: bool = True
+    publications: list[SubstackPublication] = field(default_factory=list)
+
+
+@dataclass
 class HackerNewsConfig:
     enabled: bool = True
     min_score: int = 100
@@ -69,6 +81,7 @@ class LoggingConfig:
 class Config:
     youtube: YouTubeConfig = field(default_factory=YouTubeConfig)
     blogs: BlogsConfig = field(default_factory=BlogsConfig)
+    substack: SubstackConfig = field(default_factory=SubstackConfig)
     hacker_news: HackerNewsConfig = field(default_factory=HackerNewsConfig)
     summary: SummaryConfig = field(default_factory=SummaryConfig)
     email: EmailConfig = field(default_factory=EmailConfig)
@@ -113,6 +126,14 @@ def load_config(path: Path = Path("config/sources.yaml")) -> Config:
         ],
     )
 
+    ss = raw.get("substack", {})
+    substack = SubstackConfig(
+        enabled=ss.get("enabled", True),
+        publications=[
+            SubstackPublication(name=p["name"], slug=p["slug"]) for p in ss.get("publications", [])
+        ],
+    )
+
     hn = raw.get("hacker_news", {})
     hacker_news = HackerNewsConfig(
         enabled=hn.get("enabled", True),
@@ -144,6 +165,7 @@ def load_config(path: Path = Path("config/sources.yaml")) -> Config:
     return Config(
         youtube=youtube,
         blogs=blogs,
+        substack=substack,
         hacker_news=hacker_news,
         summary=summary,
         email=email,

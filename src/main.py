@@ -20,6 +20,7 @@ from src.config import load_config
 from src.emailer import send_digest
 from src.fetchers import FetchedItem
 from src.fetchers.rss import RSSFetcher
+from src.fetchers.substack import SubstackFetcher
 from src.fetchers.youtube import YouTubeFetcher
 from src.logger import setup_logging
 from src.state import load_state, save_state
@@ -71,6 +72,9 @@ def main() -> int:
 
     if cfg.blogs.enabled:
         new_items += RSSFetcher(cfg.blogs).fetch(processed)
+
+    if cfg.substack.enabled:
+        new_items += SubstackFetcher(cfg.substack).fetch(processed)
 
     # Hacker News fetcher added in Epic 5:
     #   new_items += HackerNewsFetcher(cfg.hacker_news).fetch(processed)
