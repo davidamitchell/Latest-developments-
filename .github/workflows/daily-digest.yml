@@ -50,7 +50,7 @@ jobs:
 
       - name: Run digest pipeline
         env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           EMAIL_SENDER: ${{ secrets.EMAIL_SENDER }}
           EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
           EMAIL_RECIPIENT: ${{ secrets.EMAIL_RECIPIENT }}
@@ -79,3 +79,4 @@ jobs:
           else
             git commit -m "chore: update processed state after digest run [skip ci]"
             git push origin ${{ github.ref_name }}
+          fi
