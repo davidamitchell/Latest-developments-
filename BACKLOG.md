@@ -24,7 +24,7 @@ Status legend: `[ ]` Not started · `[→]` In progress · `[x]` Done · `[~]` D
 
 ---
 
-## Epic 1 — Proof of Life (YouTube → Claude → Email)
+## Epic 1 — Proof of Life (YouTube → Gemini → Email)
 
 One end-to-end run, hardcoded source, proves the core pipeline works.
 
@@ -108,13 +108,16 @@ User can tune what "important" means without touching code.
 
 | # | Slice | Status | Notes |
 |---|---|---|---|
-| 6.1 | `summary.prompt` field in `config/sources.yaml` passed to Claude | `[ ]` | Default prompt if field absent |
+| 6.1 | `summary.prompt` field in `config/sources.yaml` passed to Gemini | `[ ]` | Default prompt if field absent |
 | 6.2 | `summary.max_items_per_source` and `summary.max_tokens` honoured | `[ ]` | |
 | 6.3 | Digest email is HTML with sections per source | `[ ]` | |
-| 6.4 | `--debug` mode writes structured JSON logs to stdout | `[ ]` | |
-| 6.5 | `--dry-run` documented in README and AGENTS with examples | `[ ]` | |
+| 6.4 | `--debug` mode writes structured JSON logs to stdout | `[x]` | Implemented in `src/logger.py` (`_JSONFormatter`); wired via `--debug` arg in `src/main.py` |
+| 6.5 | `--dry-run` documented in README and AGENTS with examples | `[x]` | Documented in README under "Local development"; `make dry-run` target in Makefile |
 | 6.6 | Email includes a **TL;DR** section at the top: 3–5 bullets covering the most significant items, each with a direct link, plus a one-sentence trend note for the current period (e.g. "recurring theme this week: agentic coding workflows") | `[ ]` | Written by Gemini as part of the summarisation prompt; placed before the per-source sections |
 | 6.7 | Email includes a **Sources** section at the bottom: which sources were fetched, item counts per source, and 2–3 suggested related sources worth following | `[ ]` | Generated from fetch metadata, not Gemini; keeps the reader aware of coverage gaps |
+| 6.8 | Each item rendered in the email includes its **source link** (clickable URL) and **publication date/time** | `[ ]` | Both fields already exist on `FetchedItem` (`url`, `published`); this slice wires them into the email template |
+| 6.9 | Each item carries a short **theme label** (1–3 words, e.g. "agentic RAG", "fine-tuning", "inference cost") assigned by Gemini during summarisation and displayed alongside the item in the digest | `[ ]` | Requires prompt change to ask Gemini for a `theme:` field per item; theme is surfaced in the email and can feed Epic 8 trend analysis |
+| 6.10 | **Run summary** appended to the end of every email: sources attempted, new items found per source, total items in digest, UTC run timestamp, and any per-source errors encountered | `[ ]` | Generated from pipeline metadata, not Gemini; gives the reader full transparency on what was and wasn't included |
 
 ---
 
@@ -124,8 +127,8 @@ Pipeline degrades gracefully; failures are surfaced.
 
 | # | Slice | Status | Notes |
 |---|---|---|---|
-| 7.1 | Per-source retry with exponential backoff (3 attempts) | `[ ]` | |
-| 7.2 | Source failure logs error and continues; digest still sent | `[ ]` | |
+| 7.1 | Per-source retry with exponential backoff (3 attempts) | `[x]` | `src/retry.py` — `with_backoff()` used by all fetchers and the summariser |
+| 7.2 | Source failure logs error and continues; digest still sent | `[x]` | Both `YouTubeFetcher` and `RSSFetcher` catch per-source exceptions and continue; pipeline proceeds with whatever items were successfully fetched |
 | 7.3 | Workflow failure sends alert email | `[ ]` | Uses GitHub Actions failure notification |
 | 7.4 | `pytest` suite with mocked network for all fetchers | `[ ]` | |
 | 7.5 | `ruff` linting enforced in CI | `[ ]` | |

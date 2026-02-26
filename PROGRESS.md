@@ -15,17 +15,40 @@ Last updated: 2026-02-26
 | Epic | Title | Status | Complete |
 |---|---|---|---|
 | 0 | Foundation | Done | 9 / 9 slices |
-| 1 | Proof of Life (YouTube → Gemini → Email) | In Progress | 4 / 6 slices |
+| 1 | Proof of Life (YouTube → Gemini → Email) | In Progress | 5 / 6 slices |
 | 2 | Deduplication | In Progress | 2 / 3 slices |
-| 3 | Scheduled Automation | Done | 5 / 5 slices |
-| 4 | Blog / RSS Sources | In Progress | 1 / 5 slices |
+| 3 | Scheduled Automation | In Progress | 4 / 5 slices |
+| 4 | Blog / RSS Sources | Done | 5 / 5 slices |
 | 5 | Hacker News | Not started | 0 / 4 slices |
-| 6 | Configurable Prompt & Polish | Not started | 0 / 5 slices |
-| 7 | Reliability & Observability | Not started | 0 / 5 slices |
+| 6 | Configurable Prompt & Polish | In Progress | 2 / 10 slices |
+| 7 | Reliability & Observability | In Progress | 2 / 6 slices |
 
 ---
 
 ## Work Log
+
+### 2026-02-26 — Session 9
+
+**Completed:**
+- `docs/adr/0010-resilient-rss-fetching.md` — new ADR documenting the browser-like HTTP headers strategy and `fallback_url` mechanism introduced in Session 7; covers CDN bypass rationale and trade-offs
+- `docs/adr/README.md` — added ADR-0010 to the index
+- `BACKLOG.md` — backlog refinement:
+  - Epic 1 title corrected: "YouTube → Claude → Email" → "YouTube → Gemini → Email"
+  - Epic 6.1 prompt reference corrected (Claude → Gemini)
+  - Slices 6.4 and 6.5 marked done (debug JSON logging and dry-run docs already implemented)
+  - Slices 7.1 and 7.2 marked done (`src/retry.py` and per-source error handling already implemented)
+  - Added slice 6.8: per-item source link and publication date/time in email
+  - Added slice 6.9: AI-assigned theme label per item
+  - Added slice 6.10: pipeline run summary appended to end of every email
+- `PROGRESS.md` — corrected status table: Epic 1 (5/6), Epic 3 (In Progress/4/5), Epic 4 (Done/5/5), Epic 6 (In Progress/2/10), Epic 7 (In Progress/2/6)
+
+**Notes:**
+- ADR-0010 covers the two novel design decisions from Session 7: Cloudflare bypass via browser-mimicking request headers, and `fallback_url` for permanent feed URL failures
+- Epic 3 corrected to "In Progress" — slice 3.4 (verify schedule fires) is still outstanding
+- Epic 4 is now fully done; all 5 RSS slices were completed in Session 7
+- Epic 6 now has 10 slices (was 7); new slices 6.8–6.10 capture the email enrichment requirements
+
+---
 
 ### 2026-02-26 — Session 8
 
@@ -138,10 +161,12 @@ Last updated: 2026-02-26
 
 ## Next Steps
 
-1. Epic 1.6 — get @natebjones channel ID (manual: view source on youtube.com/@natebjones, search `"channelId"`)
-2. Epic 1.5 — run pipeline end-to-end (non-dry-run) to confirm email delivery once channel ID is set
-3. Epic 2.3 — run pipeline twice; confirm second run skips all items
+1. Epic 1.5 — run pipeline end-to-end (non-dry-run) to confirm email delivery
+2. Epic 2.3 — run pipeline twice; confirm second run skips all items
+3. Epic 3.4 — verify schedule fires at 07:00 UTC and email arrives
 4. Epic 5.1 — Hacker News fetcher
+5. Epic 6.3 — HTML email with per-source sections
+6. Epic 6.8–6.10 — email enrichment: per-item metadata, theme labels, run summary
 
 ---
 
