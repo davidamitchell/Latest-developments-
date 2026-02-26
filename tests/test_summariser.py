@@ -7,7 +7,7 @@ from unittest.mock import MagicMock, patch
 
 from src.config import SummaryConfig
 from src.fetchers import FetchedItem
-from src.summariser import format_link_digest, summarise
+from src.summariser import format_link_digest, format_run_summary, summarise
 
 
 def _make_item(
@@ -154,3 +154,34 @@ class TestFormatLinkDigest:
         items = [_make_item(str(i), source="S") for i in range(5)]
         result = format_link_digest(items, _make_config(max_items_per_source=2))
         assert result.count("example.com") == 2
+
+
+class TestFormatRunSummary:
+    def test_contains_timestamp(self) -> None:
+        from datetime import datetime
+
+        ts = datetime(2026, 2, 21, 7, 0, 0)
+        result = format_run_summary({}, [], run_ts=ts)
+        assert "2026-02-21 07:00:00 UTC" in result
+
+    def test_contains_source_counts(self) -> None:
+        result = format_run_summary({"YouTube": 3, "Hacker News": 1}, [])
+        assert "YouTube: 3 new item(s)" in result
+        assert "Hacker News: 1 new item(s)" in result
+
+    def test_contains_total(self) -> None:
+        result = format_run_summary({"YouTube": 3, "Blogs/RSS": 2}, [])
+        assert "Total new items: 5" in result
+
+    def test_contains_errors_when_present(self) -> None:
+        result = format_run_summary({"YouTube": 0}, ["YouTube: connection timeout"])
+        assert "Errors" in result
+        assert "connection timeout" in result
+
+    def test_no_error_section_when_no_errors(self) -> None:
+        result = format_run_summary({"YouTube": 2}, [])
+        assert "Errors" not in result
+
+    def test_contains_run_summary_header(self) -> None:
+        result = format_run_summary({}, [])
+        assert "Run summary" in result

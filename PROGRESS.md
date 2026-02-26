@@ -19,13 +19,31 @@ Last updated: 2026-02-26
 | 2 | Deduplication | In Progress | 2 / 3 slices |
 | 3 | Scheduled Automation | In Progress | 4 / 5 slices |
 | 4 | Blog / RSS Sources | Done | 5 / 5 slices |
-| 5 | Hacker News | Not started | 0 / 4 slices |
-| 6 | Configurable Prompt & Polish | In Progress | 2 / 10 slices |
-| 7 | Reliability & Observability | In Progress | 2 / 6 slices |
+| 5 | Hacker News | In Progress | 3 / 4 slices |
+| 6 | Configurable Prompt & Polish | In Progress | 3 / 10 slices |
+| 7 | Reliability & Observability | In Progress | 4 / 6 slices |
 
 ---
 
 ## Work Log
+
+### 2026-02-26 — Session 10
+
+**Completed:**
+- `src/fetchers/hackernews.py` — Hacker News fetcher using HN Algolia API (`search_by_date`); filters by `min_score` and keyword match (title/URL, case-insensitive); deduplicates by `objectID`; sorts by points descending; respects `max_stories` (Epics 5.1, 5.3)
+- `src/main.py` — wired `HackerNewsFetcher` into pipeline alongside YouTube and RSS (Epic 5.4); added `_safe_fetch()` wrapper that captures per-source errors and item counts for the run summary
+- `src/summariser.py` — added `format_run_summary()`: plain-text block appended to end of every email showing sources fetched, items per source, total, UTC timestamp, and any errors (Epic 6.10)
+- `tests/test_fetchers_hackernews.py` — 16 unit tests covering disabled, fetch, dedup, keyword filter, case-insensitivity, URL match, max_stories, points sorting, content fields, missing URL, published date, network failure, empty response (Epic 7.4)
+- `tests/test_summariser.py` — 6 new tests for `format_run_summary` covering timestamp, counts, total, errors, no-errors section, header
+- `.github/workflows/ci.yml` — new workflow: runs `ruff check`, `ruff format --check`, and `pytest` on every push/PR (Epic 7.5)
+- `BACKLOG.md` — marked 5.1, 5.3, 5.4, 6.10, 7.4, 7.5 done
+
+**Notes:**
+- HN content is currently metadata only (points, comments, links); full article body deferred to slice 5.2 (`trafilatura`)
+- `_safe_fetch()` in `main.py` wraps each fetcher call so a single source failure never aborts the pipeline and the error surfaces in the run summary
+- 99 tests pass; ruff clean
+
+---
 
 ### 2026-02-26 — Session 9
 
@@ -164,9 +182,11 @@ Last updated: 2026-02-26
 1. Epic 1.5 — run pipeline end-to-end (non-dry-run) to confirm email delivery
 2. Epic 2.3 — run pipeline twice; confirm second run skips all items
 3. Epic 3.4 — verify schedule fires at 07:00 UTC and email arrives
-4. Epic 5.1 — Hacker News fetcher
-5. Epic 6.3 — HTML email with per-source sections
-6. Epic 6.8–6.10 — email enrichment: per-item metadata, theme labels, run summary
+4. Epic 5.2 — fetch linked article text with `trafilatura` (best-effort)
+5. Epic 6.1 — prompt field in sources.yaml passed to Gemini (already partially done in summariser; needs YAML/config plumbing verification)
+6. Epic 6.3 — HTML email with per-source sections
+7. Epic 6.6 — TL;DR section at top of email
+8. Epic 6.8 — per-item source link and publication date in email
 
 ---
 

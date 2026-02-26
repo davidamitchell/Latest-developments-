@@ -93,10 +93,10 @@ Top AI/LLM stories from HN included in digest.
 
 | # | Slice | Status | Notes |
 |---|---|---|---|
-| 5.1 | `src/fetchers/hackernews.py` — query HN Algolia API for top stories | `[ ]` | Filter by keyword list and min score from config |
+| 5.1 | `src/fetchers/hackernews.py` — query HN Algolia API for top stories | `[x]` | Filter by keyword list and min score from config; deduplicates by Algolia `objectID` |
 | 5.2 | Fetch linked article text (best-effort; skip paywalled) | `[ ]` | Use `trafilatura` for article extraction |
-| 5.3 | Deduplication by HN story ID | `[ ]` | |
-| 5.4 | Include HN section in digest email | `[ ]` | |
+| 5.3 | Deduplication by HN story ID | `[x]` | Uses `objectID` as stable dedup key |
+| 5.4 | Include HN section in digest email | `[x]` | Wired into `src/main.py` alongside YouTube and RSS fetchers |
 
 **Acceptance criteria:** Digest email contains a Hacker News section with ≥1 story on most days.
 
@@ -117,7 +117,7 @@ User can tune what "important" means without touching code.
 | 6.7 | Email includes a **Sources** section at the bottom: which sources were fetched, item counts per source, and 2–3 suggested related sources worth following | `[ ]` | Generated from fetch metadata, not Gemini; keeps the reader aware of coverage gaps |
 | 6.8 | Each item rendered in the email includes its **source link** (clickable URL) and **publication date/time** | `[ ]` | Both fields already exist on `FetchedItem` (`url`, `published`); this slice wires them into the email template |
 | 6.9 | Each item carries a short **theme label** (1–3 words, e.g. "agentic RAG", "fine-tuning", "inference cost") assigned by Gemini during summarisation and displayed alongside the item in the digest | `[ ]` | Requires prompt change to ask Gemini for a `theme:` field per item; theme is surfaced in the email and can feed Epic 8 trend analysis |
-| 6.10 | **Run summary** appended to the end of every email: sources attempted, new items found per source, total items in digest, UTC run timestamp, and any per-source errors encountered | `[ ]` | Generated from pipeline metadata, not Gemini; gives the reader full transparency on what was and wasn't included |
+| 6.10 | **Run summary** appended to the end of every email: sources attempted, new items found per source, total items in digest, UTC run timestamp, and any per-source errors encountered | `[x]` | `format_run_summary()` in `summariser.py`; appended by `main.py` after `summarise()` |
 
 ---
 
@@ -130,8 +130,8 @@ Pipeline degrades gracefully; failures are surfaced.
 | 7.1 | Per-source retry with exponential backoff (3 attempts) | `[x]` | `src/retry.py` — `with_backoff()` used by all fetchers and the summariser |
 | 7.2 | Source failure logs error and continues; digest still sent | `[x]` | Both `YouTubeFetcher` and `RSSFetcher` catch per-source exceptions and continue; pipeline proceeds with whatever items were successfully fetched |
 | 7.3 | Workflow failure sends alert email | `[ ]` | Uses GitHub Actions failure notification |
-| 7.4 | `pytest` suite with mocked network for all fetchers | `[ ]` | |
-| 7.5 | `ruff` linting enforced in CI | `[ ]` | |
+| 7.4 | `pytest` suite with mocked network for all fetchers | `[x]` | Tests in `tests/test_fetchers_*.py` cover YouTube, RSS, and HN fetchers with mocked network |
+| 7.5 | `ruff` linting enforced in CI | `[x]` | `.github/workflows/ci.yml` — runs `ruff check` + `ruff format --check` + `pytest` on every push/PR |
 | 7.6 | Smoke tests in `tests/test_smoke.py`: exercise the full pipeline (`main()`) with mocked network; assert exit 0, no crash, digest contains expected structure even when fetchers or Gemini fail | `[ ]` | Catches integration-level regressions that unit tests miss |
 
 ---
