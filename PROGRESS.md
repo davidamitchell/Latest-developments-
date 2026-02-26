@@ -27,6 +27,18 @@ Last updated: 2026-02-26
 
 ## Work Log
 
+### 2026-02-26 — Session 8
+
+**Completed:**
+- `AGENTS.md` — merged working methodology from `.claude/CLAUDE.md` into new "Working Methodology" section; `AGENTS.md` is now the single source of truth for all agents
+- `.claude/CLAUDE.md` — replaced with `@AGENTS.md` stub; Claude Code auto-includes the canonical file
+- `.github/copilot-instructions.md` — created; points GitHub Copilot to `AGENTS.md` as the canonical instructions file
+- `BACKLOG.md` — added slice 0.11 (multi-agent DRY setup) marked done
+
+**Notes:**
+- All three agents (Claude Code, OpenAI Codex, GitHub Copilot) now share a single instruction source: `AGENTS.md`
+- DRY enforced: working methodology lives only in `AGENTS.md`; agent-specific files are thin stubs
+
 ### 2026-02-26 — Session 7
 
 **Completed:**
