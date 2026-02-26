@@ -51,7 +51,8 @@ youtube:
 # ---------------------------------------------------------------------------
 # Uses Substack's internal JSON API (https://<slug>.substack.com/api/v1/archive)
 # as the primary fetch method — less likely to be blocked by Cloudflare than RSS.
-# Automatically falls back to the RSS feed if the JSON API fails.
+# Automatically falls back to the RSS feed only when the JSON API returns a
+# non-retriable 4xx (permanent HTTP) error.
 substack:
   enabled: true
 
