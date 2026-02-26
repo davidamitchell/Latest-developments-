@@ -1,6 +1,6 @@
 # Progress
 
-Last updated: 2026-02-22
+Last updated: 2026-02-26
 
 ---
 
@@ -26,6 +26,13 @@ Last updated: 2026-02-22
 ---
 
 ## Work Log
+
+### 2026-02-26 — Session 7
+
+**Completed:**
+- `src/fetchers/youtube.py` — switched channel discovery to YouTube Data API search.list with JSON helper; logs missing API key or request failures
+- `tests/test_fetchers_youtube.py` — updated to mock Data API responses and verify missing API key logging
+- `README.md`, `.env.example` — documented `YOUTUBE_API_KEY` requirement
 
 ### 2026-02-22 — Session 6
 
