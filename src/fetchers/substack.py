@@ -22,6 +22,9 @@ from src.retry import with_backoff
 
 logger = logging.getLogger(__name__)
 
+class _PermanentHTTPError(Exception):
+    """4xx HTTP error that will not improve on retry."""
+
     _MAX_CONTENT_CHARS = 12_000
     _API_LIMIT = 12
 
@@ -29,8 +32,6 @@ logger = logging.getLogger(__name__)
     _HEADERS = _RSS_HEADERS
 
 
-    class _PermanentHTTPError(Exception):
-    """4xx HTTP error that will not improve on retry."""
 
 
 class SubstackFetcher:
