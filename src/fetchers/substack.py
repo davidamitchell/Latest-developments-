@@ -17,32 +17,19 @@ import httpx
 
 from src.config import SubstackConfig, SubstackPublication
 from src.fetchers import FetchedItem
-from src.fetchers.rss import _normalise_url, _parse_entries
+from src.fetchers.rss import _HEADERS as _RSS_HEADERS, _normalise_url, _parse_entries
 from src.retry import with_backoff
 
 logger = logging.getLogger(__name__)
 
-_MAX_CONTENT_CHARS = 12_000
-_API_LIMIT = 12
+    _MAX_CONTENT_CHARS = 12_000
+    _API_LIMIT = 12
 
-# Reuse the same browser-like headers from the RSS fetcher to avoid bot detection.
-_HEADERS = {
-    "User-Agent": ("Mozilla/5.0 (X11; Linux x86_64; rv:125.0) Gecko/20100101 Firefox/125.0"),
-    "Accept": (
-        "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8"
-    ),
-    "Accept-Language": "en-US,en;q=0.5",
-    "Accept-Encoding": "gzip, deflate, br",
-    "Connection": "keep-alive",
-    "Upgrade-Insecure-Requests": "1",
-    "Sec-Fetch-Dest": "document",
-    "Sec-Fetch-Mode": "navigate",
-    "Sec-Fetch-Site": "none",
-    "Sec-Fetch-User": "?1",
-}
+    # Reuse the same browser-like headers from the RSS fetcher to avoid bot detection.
+    _HEADERS = _RSS_HEADERS
 
 
-class _PermanentHTTPError(Exception):
+    class _PermanentHTTPError(Exception):
     """4xx HTTP error that will not improve on retry."""
 
 
