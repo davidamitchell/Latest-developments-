@@ -18,6 +18,11 @@ on:
         required: false
         default: "false"
         type: boolean
+      max_videos:
+        description: "Max videos per channel to check (overrides config; use to catch up on missed content)"
+        required: false
+        default: ""
+        type: string
 
 # Prevent concurrent runs (only one digest at a time)
 concurrency:
@@ -62,6 +67,9 @@ jobs:
           fi
           if [ "${{ inputs.dry_run }}" = "true" ]; then
             ARGS="$ARGS --dry-run"
+          fi
+          if [ -n "${{ inputs.max_videos }}" ]; then
+            ARGS="$ARGS --max-videos ${{ inputs.max_videos }}"
           fi
           python -m src.main $ARGS
 

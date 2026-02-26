@@ -63,6 +63,7 @@ Workflow runs daily without manual intervention.
 | 3.1 | GitHub Actions workflow: `schedule: cron: '0 7 * * *'` | `[x]` | Triggers at 07:00 UTC |
 | 3.2 | Workflow commits updated `state/processed.json` after run | `[x]` | Bot commit with `[skip ci]` |
 | 3.3 | Workflow supports `workflow_dispatch` with `debug` input flag | `[x]` | |
+| 3.5 | Workflow `workflow_dispatch` supports `max_videos` input to override per-channel lookback (useful for catch-up runs when all recent videos are already processed) | `[x]` | `--max-videos N` CLI arg; overrides `max_videos_per_channel` and each channel's `max_videos` for that run |
 | 3.4 | Verify schedule fires and email arrives at expected time | `[ ]` | Acceptance test |
 
 **Acceptance criteria:** No manual action required for 3 consecutive days; email arrives each day.

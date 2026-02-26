@@ -1,14 +1,14 @@
 # Progress
 
-Last updated: 2026-02-22
+Last updated: 2026-02-26
 
 ---
 
 ## Current Status
 
 **Phase:** Epic 4 — Blog / RSS Sources (in progress)
-**Active slice:** 4.1–4.4 — RSS fetcher implementation
-**Branch:** `claude/fix-workflow-transcript-fallback-4UzIg`
+**Active slice:** Substack 403 fix + workflow catch-up input
+**Branch:** `copilot/fix-rss-feed-fetch-error`
 
 ---
 
@@ -17,7 +17,7 @@ Last updated: 2026-02-22
 | 0 | Foundation | Done | 9 / 9 slices |
 | 1 | Proof of Life (YouTube → Gemini → Email) | In Progress | 4 / 6 slices |
 | 2 | Deduplication | In Progress | 2 / 3 slices |
-| 3 | Scheduled Automation | Done | 4 / 4 slices |
+| 3 | Scheduled Automation | Done | 5 / 5 slices |
 | 4 | Blog / RSS Sources | In Progress | 1 / 5 slices |
 | 5 | Hacker News | Not started | 0 / 4 slices |
 | 6 | Configurable Prompt & Polish | Not started | 0 / 5 slices |
@@ -26,6 +26,21 @@ Last updated: 2026-02-22
 ---
 
 ## Work Log
+
+### 2026-02-26 — Session 7
+
+**Completed:**
+- `src/fetchers/rss.py` — Fix Substack HTTP 403: replaced RSS-specific `Accept` header with browser-like `text/html,...`; added `Accept-Language`, `Accept-Encoding`, `Connection`, `Upgrade-Insecure-Requests`, and `Sec-Fetch-*` headers. Cloudflare's bot-score checks these in addition to User-Agent.
+- `src/fetchers/rss.py` — Added `fallback_url` support: when the primary feed URL returns a permanent HTTP error (4xx), the fetcher tries `fallback_url` if configured.
+- `src/config.py` — Added optional `fallback_url` field to `RSSFeed` dataclass.
+- `config/sources.yaml` — Documented `fallback_url` option with Substack 403 context.
+- `src/main.py` — Added `--max-videos N` CLI argument that overrides `max_videos_per_channel` for a single run.
+- `.github/workflows/daily-digest.yml` — Added `max_videos` `workflow_dispatch` input; threaded through to `--max-videos` CLI arg.
+- `BACKLOG.md` — Added slice 3.5 for the max_videos workflow input.
+
+**Notes:**
+- 0 videos in the last run was **not a bug** — state tracking is correct. All 5 most recent Nate Jones videos had already been processed. Use the new `max_videos` input (e.g. 15) on a manual trigger to catch up.
+- The Substack 403 fix is live in this PR; the improved headers should bypass Cloudflare bot detection.
 
 ### 2026-02-22 — Session 6
 
