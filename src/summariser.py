@@ -110,3 +110,40 @@ def summarise(items: list[FetchedItem], config: SummaryConfig, today: date | Non
         )
         link_digest = format_link_digest(items, config, today)
         return header + notice + link_digest[len(header) :]
+
+
+def format_run_summary(
+    source_counts: dict[str, int],
+    source_errors: list[str],
+    run_ts: datetime | None = None,
+) -> str:
+    """Return a plain-text pipeline run summary to append at the end of the digest.
+
+    source_counts maps source name → number of new items fetched.
+    source_errors is a list of human-readable error strings.
+    run_ts is the UTC time the pipeline ran (defaults to now).
+    """
+    if run_ts is None:
+        run_ts = datetime.now(UTC)
+
+    lines: list[str] = [
+        "",
+        "",
+        "─" * 40,
+        "Run summary",
+        f"  UTC timestamp : {run_ts.strftime('%Y-%m-%d %H:%M:%S')} UTC",
+        f"  Total new items: {sum(source_counts.values())}",
+        "",
+        "  Sources fetched:",
+    ]
+    for name, count in source_counts.items():
+        lines.append(f"    {name}: {count} new item(s)")
+
+    if source_errors:
+        lines.append("")
+        lines.append("  Errors:")
+        for err in source_errors:
+            lines.append(f"    ✗ {err}")
+
+    lines.append("─" * 40)
+    return "\n".join(lines)
