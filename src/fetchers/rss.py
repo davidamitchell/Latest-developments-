@@ -28,14 +28,22 @@ _MAX_CONTENT_CHARS = 12_000
 _NS_ATOM = "http://www.w3.org/2005/Atom"
 _NS_CONTENT = "http://purl.org/rss/1.0/modules/content/"
 
-# Updated headers to specifically bypass Substack/Cloudflare blocks.
+# Cloudflare and many CDNs block requests that don't look like a real browser.
+# An RSS-specific Accept header is a giveaway; browsers send text/html first.
+# Sec-Fetch-* headers are checked by Cloudflare's bot-score heuristics.
 _HEADERS = {
-    "User-Agent": (
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-        "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+    "User-Agent": ("Mozilla/5.0 (X11; Linux x86_64; rv:125.0) Gecko/20100101 Firefox/125.0"),
+    "Accept": (
+        "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8"
     ),
-    "Accept": "application/rss+xml, application/atom+xml, application/xml, text/xml, */*",
-    "Accept-Language": "en-US,en;q=0.9",
+    "Accept-Language": "en-US,en;q=0.5",
+    "Accept-Encoding": "gzip, deflate, br",
+    "Connection": "keep-alive",
+    "Upgrade-Insecure-Requests": "1",
+    "Sec-Fetch-Dest": "document",
+    "Sec-Fetch-Mode": "navigate",
+    "Sec-Fetch-Site": "none",
+    "Sec-Fetch-User": "?1",
 }
 
 
@@ -60,11 +68,28 @@ class RSSFetcher:
         return items
 
     def _fetch_feed(self, feed_cfg: RSSFeed, already_processed: set[str]) -> list[FetchedItem]:
-        xml_bytes: bytes = with_backoff(
-            lambda: _fetch_url(feed_cfg.url),
-            label=f"RSS {feed_cfg.name}",
-            no_retry=(_PermanentHTTPError,),
-        )
+        try:
+            xml_bytes: bytes = with_backoff(
+                lambda: _fetch_url(feed_cfg.url),
+                label=f"RSS {feed_cfg.name}",
+                no_retry=(_PermanentHTTPError,),
+            )
+        except _PermanentHTTPError as exc:
+            if feed_cfg.fallback_url:
+                logger.warning(
+                    "Primary URL %r failed (%s); trying fallback_url %r",
+                    feed_cfg.url,
+                    exc,
+                    feed_cfg.fallback_url,
+                )
+                fallback_url = feed_cfg.fallback_url
+                xml_bytes = with_backoff(
+                    lambda: _fetch_url(fallback_url),
+                    label=f"RSS {feed_cfg.name} (fallback)",
+                    no_retry=(_PermanentHTTPError,),
+                )
+            else:
+                raise
         root = ET.fromstring(xml_bytes)
         entries = _parse_entries(root)
 
@@ -103,6 +128,7 @@ class RSSFetcher:
 # Feed parsing — returns a list of plain dicts for easy testing
 # ---------------------------------------------------------------------------
 
+
 def _parse_entries(root: ET.Element) -> list[dict]:
     tag = root.tag
     if tag == f"{{{_NS_ATOM}}}feed" or tag == "feed":
@@ -128,8 +154,10 @@ def _parse_atom(feed: ET.Element) -> list[dict]:
             or ""
         )
         published = _parse_atom_date(
-            _find_text(entry, "atom:published", ns) or _find_text(entry, "published")
-            or _find_text(entry, "atom:updated", ns) or _find_text(entry, "updated")
+            _find_text(entry, "atom:published", ns)
+            or _find_text(entry, "published")
+            or _find_text(entry, "atom:updated", ns)
+            or _find_text(entry, "updated")
         )
         entries.append({"url": url, "title": title, "content": content, "published": published})
     return entries
@@ -143,8 +171,10 @@ def _parse_rss(channel: ET.Element) -> list[dict]:
         # <content:encoded> is the full article body in many RSS feeds
         content_el = item.find(f"{{{_NS_CONTENT}}}encoded")
         content = (
-            (content_el.text or "").strip() if content_el is not None else None
-        ) or _find_text(item, "description") or ""
+            ((content_el.text or "").strip() if content_el is not None else None)
+            or _find_text(item, "description")
+            or ""
+        )
         published = _parse_rfc2822_date(_find_text(item, "pubDate"))
         entries.append({"url": url, "title": title, "content": content, "published": published})
     return entries
@@ -154,12 +184,11 @@ def _parse_rss(channel: ET.Element) -> list[dict]:
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 def _fetch_url(url: str) -> bytes:
     response = httpx.get(url, follow_redirects=True, timeout=15, headers=_HEADERS)
     if 400 <= response.status_code < 500 and response.status_code != 429:
-        raise _PermanentHTTPError(
-            f"HTTP {response.status_code} fetching {url!r} — not retrying"
-        )
+        raise _PermanentHTTPError(f"HTTP {response.status_code} fetching {url!r} — not retrying")
     response.raise_for_status()
     return response.content
 

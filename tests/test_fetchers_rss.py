@@ -9,12 +9,12 @@ from unittest.mock import MagicMock, patch
 from src.config import BlogsConfig, RSSFeed
 from src.fetchers.rss import (
     RSSFetcher,
-    _PermanentHTTPError,
     _fetch_url,
     _normalise_url,
     _parse_atom_date,
     _parse_entries,
     _parse_rfc2822_date,
+    _PermanentHTTPError,
 )
 
 # ---------------------------------------------------------------------------
@@ -87,9 +87,12 @@ def _make_config(feeds: list[dict] | None = None, enabled: bool = True) -> Blogs
 # RSSFetcher.fetch
 # ---------------------------------------------------------------------------
 
+
 class TestRSSFetcher:
     def test_returns_empty_when_disabled(self) -> None:
-        cfg = _make_config(feeds=[{"name": "Blog", "url": "https://example.com/feed"}], enabled=False)
+        cfg = _make_config(
+            feeds=[{"name": "Blog", "url": "https://example.com/feed"}], enabled=False
+        )
         assert RSSFetcher(cfg).fetch(set()) == []
 
     def test_returns_empty_when_no_feeds_configured(self) -> None:
@@ -139,10 +142,12 @@ class TestRSSFetcher:
         assert items == []
 
     def test_continues_after_feed_failure(self) -> None:
-        cfg = _make_config(feeds=[
-            {"name": "Bad", "url": "https://bad.example.com/feed"},
-            {"name": "Good", "url": "https://good.example.com/feed"},
-        ])
+        cfg = _make_config(
+            feeds=[
+                {"name": "Bad", "url": "https://bad.example.com/feed"},
+                {"name": "Good", "url": "https://good.example.com/feed"},
+            ]
+        )
         good_xml = _rss_xml({"title": "Good Post", "link": "https://good.example.com/1"})
 
         def fake_fetch(url: str) -> bytes:
@@ -166,10 +171,12 @@ class TestRSSFetcher:
         assert len(items[0].content) == 12_000
 
     def test_multiple_feeds_aggregated(self) -> None:
-        cfg = _make_config(feeds=[
-            {"name": "Feed A", "url": "https://a.example.com/feed"},
-            {"name": "Feed B", "url": "https://b.example.com/feed"},
-        ])
+        cfg = _make_config(
+            feeds=[
+                {"name": "Feed A", "url": "https://a.example.com/feed"},
+                {"name": "Feed B", "url": "https://b.example.com/feed"},
+            ]
+        )
         xml_a = _rss_xml({"title": "A1", "link": "https://a.example.com/1"})
         xml_b = _rss_xml({"title": "B1", "link": "https://b.example.com/1"})
 
@@ -196,6 +203,7 @@ class TestRSSFetcher:
 # ---------------------------------------------------------------------------
 # _parse_entries — unit tests for both feed formats
 # ---------------------------------------------------------------------------
+
 
 class TestParseEntries:
     def test_rss_items(self) -> None:
@@ -227,6 +235,7 @@ class TestParseEntries:
 # ---------------------------------------------------------------------------
 # Helper function unit tests
 # ---------------------------------------------------------------------------
+
 
 class TestNormaliseUrl:
     def test_strips_trailing_slash(self) -> None:
@@ -268,12 +277,12 @@ class TestParseDates:
 # _fetch_url — User-Agent and permanent-error behaviour
 # ---------------------------------------------------------------------------
 
+
 class TestFetchUrl:
     def test_sends_browser_user_agent(self) -> None:
         """Cloudflare blocks bare httpx UA; confirm a browser UA is sent."""
-        import httpx
 
-        captured_headers: dict = {}
+        captured_headers: dict[str, str] = {}
 
         def mock_get(url: str, **kwargs: object) -> MagicMock:
             captured_headers.update(kwargs.get("headers", {}))
@@ -289,6 +298,44 @@ class TestFetchUrl:
         ua = captured_headers.get("User-Agent", "")
         assert "Mozilla" in ua, f"Expected browser UA, got: {ua!r}"
 
+    def test_sends_browser_like_accept_header(self) -> None:
+        """Accept header must not reveal RSS-client identity; Cloudflare uses it for bot scoring."""
+        captured_headers: dict[str, str] = {}
+
+        def mock_get(url: str, **kwargs: object) -> MagicMock:
+            captured_headers.update(kwargs.get("headers", {}))
+            resp = MagicMock()
+            resp.status_code = 200
+            resp.content = b"<rss/>"
+            resp.raise_for_status.return_value = None
+            return resp
+
+        with patch("src.fetchers.rss.httpx.get", side_effect=mock_get):
+            _fetch_url("https://example.com/feed")
+
+        accept = captured_headers.get("Accept", "")
+        assert "text/html" in accept, f"Expected browser Accept, got: {accept!r}"
+        assert "application/rss+xml" not in accept, "RSS-specific Accept reveals bot identity"
+
+    def test_sends_sec_fetch_headers(self) -> None:
+        """Sec-Fetch-* headers are required to pass Cloudflare's bot-score heuristics."""
+        captured_headers: dict[str, str] = {}
+
+        def mock_get(url: str, **kwargs: object) -> MagicMock:
+            captured_headers.update(kwargs.get("headers", {}))
+            resp = MagicMock()
+            resp.status_code = 200
+            resp.content = b"<rss/>"
+            resp.raise_for_status.return_value = None
+            return resp
+
+        with patch("src.fetchers.rss.httpx.get", side_effect=mock_get):
+            _fetch_url("https://example.com/feed")
+
+        assert "Sec-Fetch-Mode" in captured_headers, "Sec-Fetch-Mode header missing"
+        assert "Sec-Fetch-Dest" in captured_headers, "Sec-Fetch-Dest header missing"
+        assert "Sec-Fetch-Site" in captured_headers, "Sec-Fetch-Site header missing"
+
     def test_raises_permanent_error_on_403(self) -> None:
         """403 responses must raise _PermanentHTTPError, not a retriable exception."""
         import httpx
@@ -302,7 +349,7 @@ class TestFetchUrl:
         with patch("src.fetchers.rss.httpx.get", return_value=resp):
             try:
                 _fetch_url("https://example.com/feed")
-                assert False, "Expected _PermanentHTTPError"
+                raise AssertionError("Expected _PermanentHTTPError")
             except _PermanentHTTPError:
                 pass  # correct
 
@@ -320,6 +367,65 @@ class TestFetchUrl:
             try:
                 _fetch_url("https://example.com/feed")
             except _PermanentHTTPError:
-                assert False, "429 should NOT raise _PermanentHTTPError"
+                raise AssertionError("429 should NOT raise _PermanentHTTPError") from None
             except httpx.HTTPStatusError:
                 pass  # correct — propagates for retry logic
+
+
+class TestFallbackUrl:
+    def test_fallback_url_used_when_primary_returns_403(self) -> None:
+        """When the primary URL returns 403, the fallback_url should be tried."""
+
+        good_xml = _rss_xml({"title": "Fallback Post", "link": "https://example.com/1"})
+
+        cfg = _make_config(feeds=[{"name": "Blog", "url": "https://primary.example.com/feed"}])
+        cfg.rss[0] = RSSFeed(
+            name="Blog",
+            url="https://primary.example.com/feed",
+            fallback_url="https://fallback.example.com/feed",
+        )
+
+        def fake_fetch(url: str) -> bytes:
+            if "primary" in url:
+                resp = MagicMock()
+                resp.status_code = 403
+                raise _PermanentHTTPError("HTTP 403 fetching primary — not retrying")
+            return good_xml
+
+        with patch("src.fetchers.rss._fetch_url", side_effect=fake_fetch):
+            items = RSSFetcher(cfg).fetch(set())
+
+        assert len(items) == 1
+        assert items[0].title == "Fallback Post"
+
+    def test_no_fallback_reraises_permanent_error(self) -> None:
+        """Without fallback_url, a 403 propagates and is caught by RSSFetcher.fetch."""
+        cfg = _make_config(feeds=[{"name": "Blog", "url": "https://primary.example.com/feed"}])
+
+        def fake_fetch(url: str) -> bytes:
+            raise _PermanentHTTPError("HTTP 403 fetching primary — not retrying")
+
+        with patch("src.fetchers.rss._fetch_url", side_effect=fake_fetch):
+            # Should NOT raise — outer fetch() catches all exceptions and returns []
+            items = RSSFetcher(cfg).fetch(set())
+
+        assert items == []
+
+    def test_fallback_failure_is_logged_as_error(self) -> None:
+        """When both primary and fallback fail, the outer handler logs an error."""
+
+        cfg = _make_config(feeds=[{"name": "Blog", "url": "https://primary.example.com/feed"}])
+        cfg.rss[0] = RSSFeed(
+            name="Blog",
+            url="https://primary.example.com/feed",
+            fallback_url="https://fallback.example.com/feed",
+        )
+
+        def fake_fetch(url: str) -> bytes:
+            raise _PermanentHTTPError(f"HTTP 403 fetching {url} — not retrying")
+
+        with patch("src.fetchers.rss._fetch_url", side_effect=fake_fetch):
+            items = RSSFetcher(cfg).fetch(set())
+
+        # Both failed — should return empty, not crash
+        assert items == []

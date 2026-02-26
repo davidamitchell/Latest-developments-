@@ -109,4 +109,4 @@ def summarise(items: list[FetchedItem], config: SummaryConfig, today: date | Non
             f"no model processing was applied. Raw links only.]\n\n"
         )
         link_digest = format_link_digest(items, config, today)
-        return header + notice + link_digest[len(header):]
+        return header + notice + link_digest[len(header) :]
