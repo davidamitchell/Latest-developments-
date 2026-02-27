@@ -103,6 +103,21 @@ ADRs follow the [MADR format](https://adr.github.io/madr/). File naming: `docs/a
 
 Status values: `proposed` → `accepted` → `superseded` / `deprecated`
 
+### When an ADR is required
+
+An ADR **must** be written any time a change involves one or more of the following:
+
+- Introducing a new external dependency, service, or third-party API
+- Choosing between two or more viable technical approaches (document what was rejected and why)
+- Changing how agent configuration is delivered (MCP, skills, instructions files)
+- Changing how the project is built, tested, or deployed
+- Introducing a new persistent file format or state schema
+- Any change that a future agent would need context on to understand *why* it was done this way
+
+If you find yourself thinking "this is just config" or "this is just wiring" — stop and ask whether a future agent reading only the diff could reconstruct the reasoning. If not, write the ADR.
+
+**The slice completion checklist item "Any new ADRs written and indexed" is a hard gate, not a suggestion.** Do not mark a slice done if an ADR was warranted and not written.
+
 ---
 
 ## Git Workflow
