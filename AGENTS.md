@@ -133,7 +133,7 @@ Skills live in `.github/skills/<name>/SKILL.md`. GitHub Copilot discovers them a
 | `strategic-persuasion` | Building audience-targeted persuasive content |
 | `strategy-author` | Producing or reviewing strategy documents |
 
-Skills are synced weekly from [`davidamitchell/Skills`](https://github.com/davidamitchell/Skills) via `.github/workflows/sync-skills.yml`. Run the workflow manually to pull the latest versions. To add a new skill, add it to the Skills repo first; it will be picked up on the next sync.
+`.github/skills` is a git submodule tracking [`davidamitchell/Skills`](https://github.com/davidamitchell/Skills). A weekly workflow (`.github/workflows/sync-skills.yml`) advances the submodule pointer to the latest commit. Run the workflow manually to pull immediately. To add a new skill, add it to the Skills repo first; it will be picked up on the next sync.
 
 ### Claude Code
 

@@ -1,4 +1,4 @@
-name: Sync Skills
+name: Update Skills Submodule
 
 on:
   # Run weekly to pick up updates from the Skills repo
@@ -9,47 +9,31 @@ on:
   workflow_dispatch:
 
 jobs:
-  sync:
-    name: Sync skills from davidamitchell/Skills
+  update:
+    name: Update .github/skills submodule to latest
     runs-on: ubuntu-latest
 
     permissions:
       contents: write
 
     steps:
-      - name: Checkout this repository
+      - name: Checkout this repository (with submodules)
         uses: actions/checkout@v4
         with:
+          submodules: true
           fetch-depth: 1
 
-      - name: Checkout Skills repository
-        uses: actions/checkout@v4
-        with:
-          repository: davidamitchell/Skills
-          path: _skills_source
-          fetch-depth: 1
+      - name: Update submodule to latest upstream commit
+        run: git submodule update --remote .github/skills
 
-      - name: Sync skill directories
-        run: |
-          set -e
-          mkdir -p .github/skills
-          for skill_dir in _skills_source/skills/*/; do
-            skill_name=$(basename "$skill_dir")
-            dest=".github/skills/$skill_name"
-            mkdir -p "$dest"
-            cp "$skill_dir/SKILL.md" "$dest/SKILL.md"
-            echo "Synced: $skill_name"
-          done
-          rm -rf _skills_source
-
-      - name: Commit updated skills
+      - name: Commit updated submodule pointer
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add .github/skills/
+          git add .github/skills
           if git diff --cached --quiet; then
-            echo "No skill changes to commit — already up to date"
+            echo "Skills submodule already up to date"
           else
-            git commit -m "chore: sync skills from davidamitchell/Skills [skip ci]"
+            git commit -m "chore: update skills submodule to latest [skip ci]"
             git push origin ${{ github.ref_name }}
           fi
