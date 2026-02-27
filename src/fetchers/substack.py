@@ -99,6 +99,7 @@ class SubstackFetcher:
                     content=entry.get("content", "")[:_MAX_CONTENT_CHARS],
                     source_name=pub.name,
                     published=entry.get("published"),
+                    source_type="Substack",
                 )
             )
 

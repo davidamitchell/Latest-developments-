@@ -101,6 +101,7 @@ class YouTubeFetcher:
                     content=content[:_MAX_CONTENT_CHARS],
                     source_name=channel.name,
                     published=published,
+                    source_type="YouTube",
                 )
             )
 

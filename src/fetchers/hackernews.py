@@ -74,6 +74,7 @@ class HackerNewsFetcher:
                     content=content[:_MAX_CONTENT_CHARS],
                     source_name="Hacker News",
                     published=published,
+                    source_type="Hacker News",
                 )
             )
 

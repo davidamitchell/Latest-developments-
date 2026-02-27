@@ -25,7 +25,7 @@ from src.fetchers.substack import SubstackFetcher
 from src.fetchers.youtube import YouTubeFetcher
 from src.logger import setup_logging
 from src.state import load_state, save_state
-from src.summariser import format_run_summary, summarise
+from src.summariser import format_run_summary, render_html_digest, summarise
 
 logger = logging.getLogger(__name__)
 
@@ -108,13 +108,14 @@ def main() -> int:
     run_ts = datetime.now(UTC)
     digest = summarise(new_items, cfg.summary, today)
     digest += format_run_summary(source_counts, source_errors, run_ts)
+    html_digest = render_html_digest(new_items, digest, today)
 
     subject = cfg.email.subject.format(date=today.strftime("%d %b %Y"))
 
     if args.dry_run:
         print(f"\nSubject: {subject}\n\n{digest}")
     else:
-        send_digest(subject, digest)
+        send_digest(subject, digest, html_body=html_digest)
         # Mark all fetched items as processed only after a successful send.
         for item in new_items:
             processed.add(item.id)

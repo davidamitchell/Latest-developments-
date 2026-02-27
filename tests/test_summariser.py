@@ -2,12 +2,12 @@
 
 from __future__ import annotations
 
-from datetime import date
+from datetime import date, datetime
 from unittest.mock import MagicMock, patch
 
 from src.config import SummaryConfig
 from src.fetchers import FetchedItem
-from src.summariser import format_link_digest, format_run_summary, summarise
+from src.summariser import format_link_digest, format_run_summary, render_html_digest, summarise
 
 
 def _make_item(
@@ -15,6 +15,7 @@ def _make_item(
     title: str = "Test Article",
     source: str = "Test Source",
     content: str = "Some content here",
+    source_type: str = "",
 ) -> FetchedItem:
     return FetchedItem(
         id=id,
@@ -22,6 +23,7 @@ def _make_item(
         url=f"https://example.com/{id}",
         content=content,
         source_name=source,
+        source_type=source_type,
     )
 
 
@@ -185,3 +187,88 @@ class TestFormatRunSummary:
     def test_contains_run_summary_header(self) -> None:
         result = format_run_summary({}, [])
         assert "Run summary" in result
+
+
+class TestRenderHtmlDigest:
+    def test_returns_html_document(self) -> None:
+        item = _make_item(source_type="YouTube")
+        result = render_html_digest([item], "Summary text", today=date(2026, 2, 27))
+        assert "<!DOCTYPE html>" in result
+        assert "<html" in result
+
+    def test_contains_date_header(self) -> None:
+        item = _make_item()
+        result = render_html_digest([item], "Summary", today=date(2026, 2, 27))
+        assert "27 Feb 2026" in result
+
+    def test_contains_item_title_and_link(self) -> None:
+        item = _make_item(id="abc", title="My Article")
+        result = render_html_digest([item], "Summary", today=date(2026, 2, 27))
+        assert "My Article" in result
+        assert "https://example.com/abc" in result
+
+    def test_contains_source_type_badge(self) -> None:
+        item = _make_item(source_type="YouTube")
+        result = render_html_digest([item], "Summary", today=date(2026, 2, 27))
+        assert "📺" in result
+        assert "YouTube" in result
+
+    def test_contains_hacker_news_badge(self) -> None:
+        item = _make_item(source="Hacker News", source_type="Hacker News")
+        result = render_html_digest([item], "Summary", today=date(2026, 2, 27))
+        assert "🔶" in result
+
+    def test_contains_find_out_more_link(self) -> None:
+        item = _make_item(id="xyz")
+        result = render_html_digest([item], "Summary", today=date(2026, 2, 27))
+        assert "Find out more" in result
+        assert "https://example.com/xyz" in result
+
+    def test_contains_ai_analysis_section(self) -> None:
+        item = _make_item()
+        result = render_html_digest([item], "Gemini analysis text", today=date(2026, 2, 27))
+        assert "AI Analysis" in result
+        assert "Gemini analysis text" in result
+
+    def test_source_name_displayed(self) -> None:
+        item = _make_item(source="Nate Jones")
+        result = render_html_digest([item], "Summary", today=date(2026, 2, 27))
+        assert "Nate Jones" in result
+
+    def test_html_escaping(self) -> None:
+        item = _make_item(title="A <script>bad</script> Title")
+        result = render_html_digest([item], "Summary", today=date(2026, 2, 27))
+        assert "<script>" not in result
+        assert "&lt;script&gt;" in result
+
+    def test_empty_items_renders_header(self) -> None:
+        result = render_html_digest([], "No items today", today=date(2026, 2, 27))
+        assert "27 Feb 2026" in result
+        assert "No items today" in result
+
+    def test_published_date_shown_in_card(self) -> None:
+        item = FetchedItem(
+            id="x",
+            title="Dated Article",
+            url="https://example.com/x",
+            content="content",
+            source_name="RSS",
+            published=datetime(2026, 2, 15),
+            source_type="RSS",
+        )
+        result = render_html_digest([item], "Summary", today=date(2026, 2, 27))
+        assert "15 Feb 2026" in result
+
+    def test_dyslexia_friendly_font_in_css(self) -> None:
+        item = _make_item()
+        result = render_html_digest([item], "Summary", today=date(2026, 2, 27))
+        assert "Arial" in result
+
+    def test_multiple_sources_grouped(self) -> None:
+        items = [
+            _make_item("a", source="YouTube", source_type="YouTube"),
+            _make_item("b", source="Hacker News", source_type="Hacker News"),
+        ]
+        result = render_html_digest(items, "Summary", today=date(2026, 2, 27))
+        assert "YouTube" in result
+        assert "Hacker News" in result
