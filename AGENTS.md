@@ -46,6 +46,7 @@ Python 3.11+ daily digest pipeline. Fetches AI/ML content from YouTube, RSS feed
 - Tests live in `tests/`; use `pytest`
 - Mock all network calls and the Gemini API (`patch("src.summariser.genai.Client", ...)`)
 - Unit tests on all business logic; integration tests are optional
+- **Bug fixes must start with a failing test.** Write a test that reproduces the bug first, confirm it fails, then apply the fix and confirm the test passes. Never commit a bug fix without a companion regression test.
 
 ---
 
@@ -198,3 +199,16 @@ Questions that surface patterns:
 - Prefer reversible actions over irreversible ones, especially when uncertain.
 - When choosing between writing more code and gaining more understanding: gain understanding first.
 - Leave the codebase in a state where the next session can start immediately.
+
+---
+
+## Mini-Retro — After Each Piece of Work
+
+After completing any task or PR, take two minutes to ask:
+
+1. **Did the process work?** Was there a test-first cycle, or was the fix applied before a test existed?
+2. **What broke the process?** If the process didn't work, identify the exact moment — the assumption, the missing context, the skipped step.
+3. **How can the instructions be improved?** If a convention or constraint would have prevented the problem, add it to this file *now*, not later.
+4. **Is this a pattern?** Has this class of issue appeared before? If so, it is a process problem, not a one-off.
+
+The goal is that the next agent working in this repository should not be able to make the same class of mistake. If that is not true after your session, update AGENTS.md before closing.

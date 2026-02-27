@@ -88,6 +88,17 @@ class Config:
     logging: LoggingConfig = field(default_factory=LoggingConfig)
 
 
+def _yaml_list(value: list | None) -> list:
+    """Return *value* unchanged if it is a list, or ``[]`` when YAML parsed the key as null.
+
+    A YAML key whose items are all commented out is parsed as ``null`` (``None``),
+    not as an empty list.  ``dict.get(key, [])`` only substitutes the default for
+    *absent* keys, so the ``None`` passes through and causes ``TypeError`` on
+    iteration.  This helper normalises both cases to an empty list.
+    """
+    return value if isinstance(value, list) else []
+
+
 def require_env(key: str) -> str:
     value = os.environ.get(key)
     if not value:
@@ -113,7 +124,7 @@ def load_config(path: Path = Path("config/sources.yaml")) -> Config:
                 channel_id=ch["channel_id"],
                 max_videos=ch.get("max_videos", default_max),
             )
-            for ch in yt.get("channels", [])
+            for ch in _yaml_list(yt.get("channels"))
         ],
     )
 
@@ -122,7 +133,7 @@ def load_config(path: Path = Path("config/sources.yaml")) -> Config:
         enabled=bl.get("enabled", True),
         rss=[
             RSSFeed(name=f["name"], url=f["url"], fallback_url=f.get("fallback_url"))
-            for f in bl.get("rss", [])
+            for f in _yaml_list(bl.get("rss"))
         ],
     )
 
@@ -130,7 +141,8 @@ def load_config(path: Path = Path("config/sources.yaml")) -> Config:
     substack = SubstackConfig(
         enabled=ss.get("enabled", True),
         publications=[
-            SubstackPublication(name=p["name"], slug=p["slug"]) for p in ss.get("publications", [])
+            SubstackPublication(name=p["name"], slug=p["slug"])
+            for p in _yaml_list(ss.get("publications"))
         ],
     )
 
@@ -138,7 +150,7 @@ def load_config(path: Path = Path("config/sources.yaml")) -> Config:
     hacker_news = HackerNewsConfig(
         enabled=hn.get("enabled", True),
         min_score=hn.get("min_score", 100),
-        keywords=hn.get("keywords", []),
+        keywords=_yaml_list(hn.get("keywords")),
         max_stories=hn.get("max_stories", 10),
     )
 
