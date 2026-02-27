@@ -113,7 +113,7 @@ def load_config(path: Path = Path("config/sources.yaml")) -> Config:
                 channel_id=ch["channel_id"],
                 max_videos=ch.get("max_videos", default_max),
             )
-            for ch in yt.get("channels", [])
+            for ch in (yt.get("channels") or [])
         ],
     )
 
@@ -122,7 +122,7 @@ def load_config(path: Path = Path("config/sources.yaml")) -> Config:
         enabled=bl.get("enabled", True),
         rss=[
             RSSFeed(name=f["name"], url=f["url"], fallback_url=f.get("fallback_url"))
-            for f in bl.get("rss", [])
+            for f in (bl.get("rss") or [])
         ],
     )
 
@@ -130,7 +130,7 @@ def load_config(path: Path = Path("config/sources.yaml")) -> Config:
     substack = SubstackConfig(
         enabled=ss.get("enabled", True),
         publications=[
-            SubstackPublication(name=p["name"], slug=p["slug"]) for p in ss.get("publications", [])
+            SubstackPublication(name=p["name"], slug=p["slug"]) for p in (ss.get("publications") or [])
         ],
     )
 
@@ -138,7 +138,7 @@ def load_config(path: Path = Path("config/sources.yaml")) -> Config:
     hacker_news = HackerNewsConfig(
         enabled=hn.get("enabled", True),
         min_score=hn.get("min_score", 100),
-        keywords=hn.get("keywords", []),
+        keywords=hn.get("keywords") or [],
         max_stories=hn.get("max_stories", 10),
     )
 
