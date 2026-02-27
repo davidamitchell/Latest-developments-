@@ -27,7 +27,15 @@ _DEFAULT_PROMPT = (
     " (e.g. 'Recurring theme: agentic coding workflows').\n\n"
     "Then for each item, write:\n"
     "Theme: [1–3 word label, e.g. 'inference cost', 'agentic RAG', 'fine-tuning']\n"
-    "Summary: [2–4 sentences: what it is, why it matters, one concrete takeaway]"
+    "Summary: [2–4 sentences: what it is, why it matters, one concrete takeaway]\n\n"
+    "After all items, add a ## Suggested Sources section with 2–3 YouTube channels,"
+    " newsletters, or blogs that would complement today's content themes and that the"
+    " reader is unlikely to already follow. For each, write the name in bold and one"
+    " sentence explaining why it is worth following.\n\n"
+    "Finally, add a ## Item Themes section at the very end listing each item's URL"
+    " and its theme label, one per line, in exactly this format:\n"
+    "- <url> | <theme label>\n"
+    "Use the exact URL from the 'URL:' field provided for each item."
 )
 
 _ITEM_HEADER = "### {title}\nSource: {source} [{source_type}]\nURL: {url}\n\n"
@@ -73,6 +81,8 @@ font-size:17px;line-height:1.9}
 margin-top:28px;padding-top:12px;line-height:1.7}
 .analysis ul{margin:6px 0 12px 20px;padding:0}
 .analysis ul li{margin-bottom:6px}
+.theme-badge{display:inline-block;background:#f0e8ff;color:#5a2a8a;\
+border-radius:3px;padding:2px 8px;font-size:13px;font-weight:700;margin-left:8px}
 """
 
 
@@ -83,21 +93,62 @@ def _source_badge(item: FetchedItem) -> str:
     return f"{emoji} {_html.escape(stype)}"
 
 
-def _render_item_card(item: FetchedItem) -> str:
+def _render_item_card(item: FetchedItem, theme: str | None = None) -> str:
     """Render a single FetchedItem as an HTML card."""
     title_esc = _html.escape(item.title)
     url_esc = _html.escape(item.url)
     source_esc = _html.escape(item.source_name)
     badge = _source_badge(item)
     pub = f" &nbsp;·&nbsp; {item.published.strftime('%d %b %Y')}" if item.published else ""
+    theme_html = f' &nbsp;<span class="theme-badge">{_html.escape(theme)}</span>' if theme else ""
     return (
         '<div class="card">'
         f'<p class="card-title"><a href="{url_esc}">{title_esc}</a></p>'
         f'<div class="meta"><span class="badge">{badge}</span>'
-        f"<strong>{source_esc}</strong>{pub}</div>"
+        f"<strong>{source_esc}</strong>{pub}{theme_html}</div>"
         f'<div class="more"><a href="{url_esc}">Find out more →</a></div>'
         "</div>"
     )
+
+
+def _extract_item_themes(text: str) -> tuple[dict[str, str], str]:
+    """Extract and remove the ``## Item Themes`` section from AI output.
+
+    Returns ``(url_to_theme, clean_text)`` where *url_to_theme* maps each item
+    URL to its 1–3 word theme label and *clean_text* has the section stripped so
+    it does not appear in the rendered analysis.
+
+    The expected format inside the section is one entry per line::
+
+        - https://example.com/video | inference cost
+
+    Lines that do not match the ``<url> | <theme>`` pattern are silently skipped.
+    """
+    themes: dict[str, str] = {}
+    # Match the section header plus everything up to the next ## header,
+    # a run-summary separator line (────…), or end-of-string.
+    pattern = re.compile(
+        r"(?:^|\n)\s*## Item Themes\s*\n(.*?)(?=\n## |\n[─═]{4,}|\Z)",
+        re.DOTALL | re.IGNORECASE,
+    )
+    match = pattern.search(text)
+    if not match:
+        return themes, text
+
+    for line in match.group(1).splitlines():
+        stripped = line.strip().lstrip("- ").strip()
+        if " | " in stripped:
+            url_part, theme_part = stripped.split(" | ", 1)
+            url_part = url_part.strip()
+            theme_part = theme_part.strip()
+            if url_part and theme_part:
+                themes[url_part] = theme_part
+
+    # Remove the matched section (keep the leading newline so surrounding text
+    # still flows correctly).
+    start = match.start()
+    clean_text = text[:start].rstrip() + text[match.end() :]
+    return themes, clean_text
 
 
 def _plain_to_html(text: str) -> str:
@@ -175,6 +226,9 @@ def render_html_digest(
 
     date_str = _html.escape(today.strftime("%d %b %Y"))
 
+    # Extract per-item themes and remove the structured section from display.
+    item_themes, display_digest = _extract_item_themes(plain_digest)
+
     # --- Items section ---
     by_source: dict[str, list[FetchedItem]] = {}
     for item in items:
@@ -184,10 +238,11 @@ def render_html_digest(
     for source, source_items in by_source.items():
         items_html += f'<div class="sec" style="font-size:17px">{_html.escape(source)}</div>\n'
         for item in source_items:
-            items_html += _render_item_card(item) + "\n"
+            theme = item_themes.get(item.url)
+            items_html += _render_item_card(item, theme=theme) + "\n"
 
     # --- AI analysis section ---
-    analysis_html = _plain_to_html(plain_digest)
+    analysis_html = _plain_to_html(display_digest)
 
     content = f"""\
 <div class="hdr"><h1>🤖 Daily AI Digest &mdash; {date_str}</h1></div>

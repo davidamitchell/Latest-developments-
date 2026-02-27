@@ -6,7 +6,7 @@ Last updated: 2026-02-27
 
 ## Current Status
 
-**Phase:** Epic 6 — Configurable Prompt & Polish (rationalised + 6.6 implemented)
+**Phase:** Epic 6 — Configurable Prompt & Polish (all 10 slices done)
 **Active slice:** —
 **Branch:** `copilot/update-epic-6-docs`
 
@@ -20,13 +20,31 @@ Last updated: 2026-02-27
 | 3 | Scheduled Automation | In Progress | 4 / 5 slices |
 | 4 | Blog / RSS Sources | Done | 5 / 5 slices |
 | 5 | Hacker News | In Progress | 3 / 4 slices |
-| 6 | Configurable Prompt & Polish | In Progress | 8 / 10 slices |
+| 6 | Configurable Prompt & Polish | **Done** | 10 / 10 slices |
 | 7 | Reliability & Observability | In Progress | 4 / 6 slices |
 | 9 | MCP Tool Configuration | Done | 7 / 7 slices |
 
 ---
 
 ## Work Log
+
+### 2026-02-27 — Session 12
+
+**Completed:**
+- `src/summariser.py` — `_DEFAULT_PROMPT` updated to request a `## Suggested Sources` section (2–3 AI-generated recommendations based on today's content themes) and a `## Item Themes` section at the end with structured `url | theme` format (slice 6.7 + 6.9)
+- `src/summariser.py` — `_extract_item_themes()` added: parses the `## Item Themes` section, returns a `{url: theme}` dict, and strips the section from the displayed analysis text
+- `src/summariser.py` — `_render_item_card()` updated to accept an optional `theme` argument; displays theme as a `.theme-badge` span in the card meta row
+- `src/summariser.py` — `render_html_digest()` updated to extract themes before rendering, passing matched theme to each card
+- `src/summariser.py` — CSS updated: added `.theme-badge` class (purple badge matching the palette)
+- `config/sources.yaml` — `summary.prompt` updated to request `## Suggested Sources` and `## Item Themes` sections (matches updated `_DEFAULT_PROMPT`)
+- `tests/test_summariser.py` — 10 new regression tests: 6 for `_extract_item_themes()` parsing + 4 for theme badge rendering in `render_html_digest()`
+- `BACKLOG.md` — 6.7 and 6.9 marked `[x]`; Epic 6 is now fully complete (10/10 slices)
+- `state/processed.json` — reset to empty (0 processed IDs) so next run fetches fresh content
+
+**Notes:**
+- `## Suggested Sources` renders automatically through the existing `_plain_to_html()` heading + bullet handling — no rendering code change required
+- `## Item Themes` is stripped from the AI Analysis display (it is structural data for card labelling, not human-readable prose)
+- Slice 0.10: the `git submodule add https://github.com/davidamitchell/Skills .claude/commands` command must be run manually from a machine with internet access, then pushed
 
 ### 2026-02-27 — Session 11
 

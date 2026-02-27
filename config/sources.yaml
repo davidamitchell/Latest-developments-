@@ -226,6 +226,16 @@ summary:
     Theme: [1–3 word label, e.g. "agentic RAG", "fine-tuning", "inference cost"]
     Summary: [2–4 sentences: what it is, why it matters, one concrete takeaway]
 
+    After all items, add a ## Suggested Sources section with 2–3 YouTube channels,
+    newsletters, or blogs that complement today's content themes and that the reader
+    is unlikely to already follow. Write each source name in bold and add one sentence
+    explaining why it is worth following.
+
+    Finally, add a ## Item Themes section at the very end listing each item's URL and
+    its theme label, one per line, in exactly this format:
+    - <url> | <theme label>
+    Use the exact URL from the 'URL:' field provided for each item.
+
 # ---------------------------------------------------------------------------
 # Email settings (credentials come from environment variables / GitHub Secrets)
 # ---------------------------------------------------------------------------
