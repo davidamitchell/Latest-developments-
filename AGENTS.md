@@ -103,6 +103,21 @@ ADRs follow the [MADR format](https://adr.github.io/madr/). File naming: `docs/a
 
 Status values: `proposed` → `accepted` → `superseded` / `deprecated`
 
+### When an ADR is required
+
+An ADR **must** be written any time a change involves one or more of the following:
+
+- Introducing a new external dependency, service, or third-party API
+- Choosing between two or more viable technical approaches (document what was rejected and why)
+- Changing how agent configuration is delivered (MCP, skills, instructions files)
+- Changing how the project is built, tested, or deployed
+- Introducing a new persistent file format or state schema
+- Any change that a future agent would need context on to understand *why* it was done this way
+
+If you find yourself thinking "this is just config" or "this is just wiring" — stop and ask whether a future agent reading only the diff could reconstruct the reasoning. If not, write the ADR.
+
+**The slice completion checklist item "Any new ADRs written and indexed" is a hard gate, not a suggestion.** Do not mark a slice done if an ADR was warranted and not written.
+
 ---
 
 ## Git Workflow
@@ -112,6 +127,32 @@ Status values: `proposed` → `accepted` → `superseded` / `deprecated`
 - Never force-push
 - Push after each logical unit of work; do not batch unrelated changes
 - Always open a PR rather than pushing directly to main
+
+---
+
+## Agent Skills
+
+Skills are modular instruction files that agents load automatically when a task matches the skill's `description`. They extend agent behaviour without bloating the main instructions.
+
+### GitHub Copilot (Coding Agent, VS Code Agent Mode)
+
+Skills live in `.github/skills/<name>/SKILL.md`. GitHub Copilot discovers them automatically.
+
+| Skill | When Copilot loads it |
+|---|---|
+| `backlog-manager` | Managing `BACKLOG.md`, adding or refining work items |
+| `citation-discipline` | Writing research or reports where every claim must be sourced |
+| `remove-ai-slop` | Post-processing AI-generated text to reduce detection signals |
+| `research` | Investigating a topic with recursive decomposition and verification |
+| `speculation-control` | Producing factual writing that requires clear epistemic discipline |
+| `strategic-persuasion` | Building audience-targeted persuasive content |
+| `strategy-author` | Producing or reviewing strategy documents |
+
+`.github/skills` is a git submodule tracking [`davidamitchell/Skills`](https://github.com/davidamitchell/Skills). A weekly workflow (`.github/workflows/sync-skills.yml`) advances the submodule pointer to the latest commit. Run the workflow manually to pull immediately. To add a new skill, add it to the Skills repo first; it will be picked up on the next sync.
+
+### Claude Code
+
+`.claude/skills` is a git submodule tracking the same [`davidamitchell/Skills`](https://github.com/davidamitchell/Skills) repo. Claude Code discovers skills from `.claude/skills/<name>/SKILL.md`. The weekly sync workflow advances both submodule pointers together — a single source of truth serves both agents automatically.
 
 ---
 

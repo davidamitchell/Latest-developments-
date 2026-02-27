@@ -6,15 +6,15 @@ Last updated: 2026-02-27
 
 ## Current Status
 
-**Phase:** Epic 6 — Configurable Prompt & Polish (all 10 slices done)
+**Phase:** Epic 0 — Foundation (all slices done)
 **Active slice:** —
-**Branch:** `copilot/update-epic-6-docs`
+**Branch:** `copilot/investigate-github-agent-skills`
 
 ---
 
 | Epic | Title | Status | Complete |
 |---|---|---|---|
-| 0 | Foundation | In Progress | 10 / 11 slices |
+| 0 | Foundation | **Done** | 11 / 11 slices |
 | 1 | Proof of Life (YouTube → Gemini → Email) | In Progress | 5 / 7 slices |
 | 2 | Deduplication | In Progress | 2 / 3 slices |
 | 3 | Scheduled Automation | In Progress | 4 / 5 slices |
@@ -27,6 +27,28 @@ Last updated: 2026-02-27
 ---
 
 ## Work Log
+
+### 2026-02-27 — Session 13
+
+**Completed:**
+- `.github/skills/` — 7 skills copied from `davidamitchell/Skills` and committed as project skills for the GitHub Copilot Coding Agent. Skills: `backlog-manager`, `citation-discipline`, `remove-ai-slop`, `research`, `speculation-control`, `strategic-persuasion`, `strategy-author`. GitHub Copilot discovers these automatically from `.github/skills/`.
+- `.github/skills/remove-ai-slop/SKILL.md` — frontmatter updated from non-standard format (title/version/author) to standard `name` + `description` as required by GitHub Copilot's skills loader.
+- `.github/workflows/sync-skills.yml` — workflow that checks out `davidamitchell/Skills`, copies all `skills/*/SKILL.md` files into `.github/skills/`, and commits if anything changed. Runs weekly (Monday 06:00 UTC) and via `workflow_dispatch`.
+- `AGENTS.md` — new "Agent Skills" section documents the `.github/skills/` layout, which skill is loaded when, the sync workflow, and the relationship to Claude Code skills.
+- `BACKLOG.md` — slice 0.10 marked `[x]`; notes updated to reflect that the GitHub Copilot half is done and the Claude Code submodule remains a manual step.
+
+**Notes:**
+- GitHub Copilot Coding Agent picks up `.github/skills/<name>/SKILL.md` automatically — no configuration required.
+- `remove-ai-slop` frontmatter in the upstream Skills repo uses a non-standard format (title/version/author/etc.) without `name` or `description`. These are required for GitHub Copilot to load the skill automatically. The copy in `.github/skills/` has been corrected; a PR to the upstream Skills repo would make the formats consistent.
+- Claude Code project skills use `.claude/skills/<name>/SKILL.md` (same format). The skills could be symlinked or copied there too; deferred as `.claude/commands/` submodule approach was the original plan for Claude Code.
+- The sync workflow uses `actions/checkout@v4` twice (once for this repo, once for davidamitchell/Skills into `_skills_source/`) — no auth tokens needed as Skills repo is public.
+
+**Mini-Retro:**
+- Process worked: explored the Skills repo, researched GitHub Copilot's skills format, identified the format mismatch in `remove-ai-slop`, fixed it. No rework needed.
+- The upstream Skills repo README doesn't mention GitHub Copilot's `.github/skills/` install path — that gap in the Skills repo is worth noting but can't be fixed from this repo.
+- Pattern: the backlog item (0.10) was written before the GitHub Copilot skills feature existed (it targeted Claude Code submodules). Updating the item description and marking done is the right move — don't carry forward a stale implementation plan.
+
+---
 
 ### 2026-02-27 — Session 12
 
@@ -220,13 +242,12 @@ Last updated: 2026-02-27
 
 ## Next Steps
 
-1. Epic 0.10 — run `git submodule add https://github.com/davidamitchell/Skills .claude/commands` locally and push (workflow already has `submodules: true`)
-2. Epic 1.5 — run pipeline end-to-end (non-dry-run) to confirm email delivery
-3. Epic 2.3 — run pipeline twice; confirm second run skips all items
-4. Epic 3.4 — verify schedule fires at 07:00 UTC and email arrives
-5. Epic 5.2 — fetch linked article text with `trafilatura` (best-effort)
-6. Epic 7.6 — smoke tests for full pipeline (`test_smoke.py`)
-7. Epic 8 — history archiving and trend analysis
+1. Epic 1.5 — run pipeline end-to-end (non-dry-run) to confirm email delivery
+2. Epic 2.3 — run pipeline twice; confirm second run skips all items
+3. Epic 3.4 — verify schedule fires at 07:00 UTC and email arrives
+4. Epic 5.2 — fetch linked article text with `trafilatura` (best-effort)
+5. Epic 7.6 — smoke tests for full pipeline (`test_smoke.py`)
+6. Epic 8 — history archiving and trend analysis
 
 ---
 

@@ -23,6 +23,7 @@ Format: [MADR (Markdown Architectural Decision Records)](https://adr.github.io/m
 | [0009](0009-switch-to-gemini-api.md) | Switch AI summarisation to Google Gemini | Accepted | 2026-02-21 |
 | [0010](0010-resilient-rss-fetching.md) | Resilient RSS fetching — browser-like headers and fallback URL | Accepted | 2026-02-26 |
 | [0011](0011-mcp-configuration-manifest.md) | MCP configuration manifest — single source of truth for all AI agent tool configs | Accepted | 2026-02-27 |
+| [0012](0012-agent-skills-via-git-submodules.md) | Agent skills via git submodules — single upstream, two discovery paths | Accepted | 2026-02-27 |
 
 ---
 
