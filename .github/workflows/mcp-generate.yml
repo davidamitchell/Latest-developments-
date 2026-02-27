@@ -1,0 +1,52 @@
+name: MCP Generate
+
+on:
+  # Run automatically when the manifest changes
+  push:
+    paths:
+      - "mcp/manifest.yaml"
+      - "mcp/generate.py"
+
+  # Allow manual runs from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  generate:
+    name: Regenerate MCP configs and run tests
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write  # Required to commit regenerated configs
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: pip install -r mcp/requirements.txt pytest
+
+      - name: Run tests
+        run: pytest mcp/tests/ -v
+
+      - name: Regenerate configs
+        run: python mcp/generate.py --deploy --repo-root .
+
+      - name: Commit regenerated configs
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add mcp/generated/ .github/mcp.json .vscode/mcp.json .mcp.json
+          if git diff --cached --quiet; then
+            echo "No changes to commit — configs are already up to date"
+          else
+            git commit -m "chore: regenerate MCP configs from manifest [skip ci]"
+            git push origin ${{ github.ref_name }}
+          fi

@@ -17,6 +17,7 @@ class FetchedItem:
     content: str  # Full text content
     source_name: str  # Display name shown in the digest
     published: datetime | None = None
+    source_type: str = ""  # e.g. "YouTube", "Hacker News", "RSS", "Substack"
 
 
 @runtime_checkable

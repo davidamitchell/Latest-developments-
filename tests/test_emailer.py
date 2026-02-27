@@ -108,3 +108,34 @@ class TestSendDigest:
         monkeypatch.delenv("RESEND_API_KEY", raising=False)
         with pytest.raises(RuntimeError, match="RESEND_API_KEY"):
             send_digest("Subject", "Body")
+
+    def test_html_body_included_in_gmail_message(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        for k, v in _env("gmail").items():
+            monkeypatch.setenv(k, v)
+
+        mock_server = MagicMock()
+        mock_server.__enter__ = lambda s: s
+        mock_server.__exit__ = MagicMock(return_value=False)
+
+        with patch("src.emailer.smtplib.SMTP_SSL", return_value=mock_server):
+            send_digest("Subject", "Plain body", html_body="<html><body>HTML</body></html>")
+
+        raw_message = mock_server.sendmail.call_args.args[2]
+        # multipart/alternative wraps parts as base64; check MIME structure instead
+        assert "multipart/alternative" in raw_message
+        assert "text/plain" in raw_message
+        assert "text/html" in raw_message
+
+    def test_html_body_included_in_resend_payload(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.setenv("EMAIL_PROVIDER", "resend")
+        monkeypatch.setenv("EMAIL_SENDER", "sender@example.com")
+        monkeypatch.setenv("EMAIL_RECIPIENT", "recipient@example.com")
+        monkeypatch.setenv("RESEND_API_KEY", "re_test_key")
+
+        with patch("src.emailer.httpx.post") as mock_post:
+            mock_post.return_value.status_code = 200
+            send_digest("Subject", "Plain", html_body="<b>HTML content</b>")
+
+        payload = mock_post.call_args.kwargs["json"]
+        assert payload["text"] == "Plain"
+        assert payload["html"] == "<b>HTML content</b>"

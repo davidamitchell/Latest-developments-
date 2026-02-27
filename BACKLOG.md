@@ -153,6 +153,24 @@ Each digest is archived; history feeds back into future summaries.
 
 ---
 
+## Epic 9 — MCP Tool Configuration
+
+Manage MCP server configs for all AI agent environments from a single manifest.
+
+| # | Slice | Status | Notes |
+|---|---|---|---|
+| 9.1 | `mcp/manifest.yaml` — source of truth for all MCP servers | `[x]` | Servers: fetch, sequential_thinking, time, memory, git, filesystem, github |
+| 9.2 | `mcp/generate.py` — converts manifest to GitHub, VS Code, Claude Desktop, Claude Code, opencode formats | `[x]` | PyYAML only; no external deps beyond what's already installed |
+| 9.3 | Generated configs committed: `.github/mcp.json`, `.vscode/mcp.json`, `.mcp.json`, `mcp/generated/*.json` | `[x]` | GitHub Copilot Agent picks up `.github/mcp.json` automatically |
+| 9.4 | `.github/workflows/mcp-generate.yml` — regenerates + tests + commits on manifest change | `[x]` | Runs on push to `mcp/manifest.yaml` or `workflow_dispatch` |
+| 9.5 | `mcp/tests/test_generate.py` — 20 pytest tests covering all builders and smoke tests on real manifest | `[x]` | Run via: `pytest mcp/tests/ -v` |
+| 9.6 | `mcp/README.md` — copy-paste instructions, server table, manifest editing guide | `[x]` | Self-contained; links to ADR-0011 |
+| 9.7 | ADR-0011 — document the manifest approach and trade-offs | `[x]` | |
+
+**Acceptance criteria:** `python mcp/generate.py --deploy` runs without error; `pytest mcp/tests/` passes; GitHub Copilot Agent has access to `fetch`, `time`, and `sequential_thinking` servers via `.github/mcp.json`.
+
+---
+
 ## Deferred / Ideas
 
 | Idea | Notes |

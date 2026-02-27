@@ -1,0 +1,361 @@
+# MCP Server Manifest
+# Source of truth for all MCP server configurations in this repo.
+#
+# Run `python mcp/generate.py` to regenerate all target configs in mcp/generated/.
+# Or trigger the `mcp-generate` GitHub Actions workflow — it regenerates and commits.
+#
+# Adding a server:
+#   1. Add an entry under `servers:` below.
+#   2. Set `targets` to the environments that make sense (see list below).
+#   3. Run `python mcp/generate.py` and commit the generated files.
+#
+# Supported targets:
+#   github          — GitHub Copilot Coding Agent (.github/mcp.json)
+#   vscode          — VS Code GitHub Copilot extension (.vscode/mcp.json)
+#   claude_desktop  — Claude Desktop app (claude_desktop_config.json fragment)
+#   claude_code     — Claude Code CLI (.mcp.json at project root)
+#   opencode        — opencode CLI (~/.config/opencode/opencode.json fragment)
+
+version: "1"
+
+servers:
+
+  # ── Web / Research ─────────────────────────────────────────────────────────
+
+  fetch:
+    description: >
+      Fetch any URL and extract readable text. Directly enables backlog slice 5.2
+      (article extraction from Hacker News story links).
+    package: "@modelcontextprotocol/server-fetch"
+    type: stdio
+    command: npx
+    args:
+      - "-y"
+      - "@modelcontextprotocol/server-fetch"
+    targets:
+      - github
+      - vscode
+      - claude_desktop
+      - claude_code
+      - opencode
+
+  # ── Productivity / Reasoning ────────────────────────────────────────────────
+
+  sequential_thinking:
+    description: >
+      Structured step-by-step reasoning for complex multi-part problems.
+      Helps the AI plan pipeline changes, debug scheduling issues, and think
+      through multi-source summarisation strategies.
+    package: "@modelcontextprotocol/server-sequential-thinking"
+    type: stdio
+    command: npx
+    args:
+      - "-y"
+      - "@modelcontextprotocol/server-sequential-thinking"
+    targets:
+      - github
+      - vscode
+      - claude_desktop
+      - claude_code
+      - opencode
+
+  time:
+    description: >
+      Current time and timezone conversion. Useful when debugging scheduling
+      and cron expressions relative to UTC.
+    package: "@modelcontextprotocol/server-time"
+    type: stdio
+    command: npx
+    args:
+      - "-y"
+      - "@modelcontextprotocol/server-time"
+    targets:
+      - github
+      - vscode
+      - claude_desktop
+      - claude_code
+      - opencode
+
+  memory:
+    description: >
+      Persistent knowledge graph across AI sessions. Enables multi-day context
+      — e.g. remembering which sources were flaky, which prompts worked best,
+      or tracking theme trends across digests (Epic 8).
+    package: "@modelcontextprotocol/server-memory"
+    type: stdio
+    command: npx
+    args:
+      - "-y"
+      - "@modelcontextprotocol/server-memory"
+    targets:
+      - vscode
+      - claude_desktop
+      - claude_code
+      - opencode
+    notes: >
+      Not included in github target — the Copilot Agent runs ephemerally
+      and has no persistent store.
+
+  # ── Code / Repository ───────────────────────────────────────────────────────
+
+  git:
+    description: >
+      Local git operations — log, diff, blame, show. Complements the
+      built-in GitHub tools with access to uncommitted local state.
+    package: "@modelcontextprotocol/server-git"
+    type: stdio
+    command: npx
+    args:
+      - "-y"
+      - "@modelcontextprotocol/server-git"
+    targets:
+      - vscode
+      - claude_desktop
+      - claude_code
+      - opencode
+    notes: >
+      Not needed in the GitHub target — the Copilot Agent already has
+      full repo access via the GitHub API.
+
+  filesystem:
+    description: >
+      Read and write local files within allowed directories. Path argument
+      should be adjusted per-machine; the default /workspace suits Codespaces
+      and Docker.
+    package: "@modelcontextprotocol/server-filesystem"
+    type: stdio
+    command: npx
+    args:
+      - "-y"
+      - "@modelcontextprotocol/server-filesystem"
+      - "/workspace"
+    targets:
+      - vscode
+      - claude_desktop
+      - claude_code
+      - opencode
+    notes: >
+      Not included in github target — filesystem access is not meaningful
+      inside the ephemeral Copilot Agent sandbox.
+
+  # ── Research & Content Sourcing ─────────────────────────────────────────────
+
+  puppeteer:
+    description: >
+      Headless Chromium browser. Handles JS-rendered pages and soft paywalls
+      that defeat the `fetch` server. Directly supports backlog 5.2
+      (article extraction from Hacker News links). No API key required.
+    package: "@modelcontextprotocol/server-puppeteer"
+    type: stdio
+    command: npx
+    args:
+      - "-y"
+      - "@modelcontextprotocol/server-puppeteer"
+    targets:
+      - github
+      - vscode
+      - claude_desktop
+      - claude_code
+      - opencode
+
+  brave_search:
+    description: >
+      Web search via Brave's API. Useful for discovering new AI/ML sources
+      (backlog 6.7), verifying story context during summarisation, and
+      cross-referencing claims. Free tier: 2,000 queries/month.
+    package: "@modelcontextprotocol/server-brave-search"
+    type: stdio
+    command: npx
+    args:
+      - "-y"
+      - "@modelcontextprotocol/server-brave-search"
+    env:
+      BRAVE_API_KEY: "${BRAVE_API_KEY}"
+    targets:
+      - github
+      - vscode
+      - claude_desktop
+      - claude_code
+      - opencode
+    notes: >
+      Requires a free Brave Search API key set as BRAVE_API_KEY.
+      Get one at https://brave.com/search/api/
+
+  arxiv:
+    description: >
+      Semantic search over arXiv preprints. Enables the AI to pull
+      ML/AI paper abstracts as a high-signal content source with zero
+      scraping risk. Directly adds a new source type for the digest.
+    package: "@blazickjp/arxiv-mcp-server"
+    type: stdio
+    command: npx
+    args:
+      - "-y"
+      - "@blazickjp/arxiv-mcp-server"
+    targets:
+      - github
+      - vscode
+      - claude_desktop
+      - claude_code
+      - opencode
+    notes: >
+      Community package. No API key required — arXiv is open access.
+
+  huggingface:
+    description: >
+      Browse HuggingFace model cards, datasets, and papers-with-code.
+      Useful for enriching digests with model release details and
+      benchmarks, and for discovering trending open-source models.
+    package: "mcp-hfspace"
+    type: stdio
+    command: npx
+    args:
+      - "-y"
+      - "mcp-hfspace"
+    targets:
+      - vscode
+      - claude_desktop
+      - claude_code
+      - opencode
+    notes: >
+      Community package. No API key required for public model cards.
+      Not included in github target — best suited for interactive sessions.
+
+  # ── UI Design & Visualisation ───────────────────────────────────────────────
+
+  playwright:
+    description: >
+      Drive a real browser via the official Playwright MCP. Take screenshots,
+      test that the rendered HTML email looks correct across mail client
+      previews, and interact with web UIs. Directly useful for validating
+      the dyslexia-friendly email template (backlog UI work).
+    package: "@playwright/mcp"
+    type: stdio
+    command: npx
+    args:
+      - "-y"
+      - "@playwright/mcp"
+    targets:
+      - vscode
+      - claude_desktop
+      - claude_code
+      - opencode
+    notes: >
+      Official Playwright MCP. Not included in github target — requires a
+      display/browser environment not available in the ephemeral sandbox.
+
+  charting:
+    description: >
+      Generate charts and data visualisations as SVG/PNG. Useful for
+      embedding topic-frequency trend charts in the digest (Epic 8),
+      and for visualising source distribution or theme counts over time.
+    package: "@antv/mcp-server-chart"
+    type: stdio
+    command: npx
+    args:
+      - "-y"
+      - "@antv/mcp-server-chart"
+    targets:
+      - vscode
+      - claude_desktop
+      - claude_code
+      - opencode
+    notes: >
+      Community package from AntV. Not included in github target.
+
+  # ── Content Quality / AI Slop Removal ───────────────────────────────────────
+
+  sqlite:
+    description: >
+      Query SQLite databases. Enables structured queries over digest history
+      for trend analysis (Epic 8). Point at history/digest.db once that
+      Epic is implemented. Also useful for building a content-quality
+      scoring database.
+    package: "@modelcontextprotocol/server-sqlite"
+    type: stdio
+    command: npx
+    args:
+      - "-y"
+      - "@modelcontextprotocol/server-sqlite"
+      - "--db-path"
+      - "history/digest.db"
+    targets:
+      - vscode
+      - claude_desktop
+      - claude_code
+      - opencode
+    notes: >
+      Not included in github target — database file is local.
+      Create history/digest.db once Epic 8 is implemented.
+
+  gptzero:
+    description: >
+      Detect AI-generated content using the GPTZero API. Score fetched
+      articles for AI-generation probability before including them in the
+      digest — filter out spam blogs and AI-slop rewrites of real stories.
+      Directly addresses the AI slop removal use case.
+    package: "gptzero-mcp"
+    type: stdio
+    command: npx
+    args:
+      - "-y"
+      - "gptzero-mcp"
+    env:
+      GPTZERO_API_KEY: "${GPTZERO_API_KEY}"
+    targets:
+      - vscode
+      - claude_desktop
+      - claude_code
+      - opencode
+    notes: >
+      Requires a GPTZero API key set as GPTZERO_API_KEY.
+      Get one at https://gptzero.me — free tier available.
+      Community package; verify package name before use.
+      Not included in github target — best used interactively.
+
+  readability:
+    description: >
+      Compute readability and text quality metrics (Flesch-Kincaid grade,
+      sentence complexity, keyword density). Flag items that are
+      keyword-stuffed SEO filler rather than genuine analysis.
+      Implements the slop-removal readability filter.
+    package: "mcp-readability"
+    type: stdio
+    command: npx
+    args:
+      - "-y"
+      - "mcp-readability"
+    targets:
+      - vscode
+      - claude_desktop
+      - claude_code
+      - opencode
+    notes: >
+      Community package. Wraps standard readability metrics.
+      Alternative: use the Python REPL server with py-readability installed.
+      Verify package availability before deploying.
+
+  # ── GitHub ──────────────────────────────────────────────────────────────────
+
+  github:
+    description: >
+      Browse GitHub issues, PRs, repos, code, and CI runs. Not needed for
+      the GitHub Copilot Agent (built-in access), but very useful in
+      Claude Desktop / VS Code / opencode sessions.
+    package: "@modelcontextprotocol/server-github"
+    type: stdio
+    command: npx
+    args:
+      - "-y"
+      - "@modelcontextprotocol/server-github"
+    env:
+      GITHUB_PERSONAL_ACCESS_TOKEN: "${GITHUB_PERSONAL_ACCESS_TOKEN}"
+    targets:
+      - vscode
+      - claude_desktop
+      - claude_code
+      - opencode
+    notes: >
+      Requires a GitHub Personal Access Token with `repo` scope set as the
+      GITHUB_PERSONAL_ACCESS_TOKEN environment variable. Create one at
+      https://github.com/settings/tokens

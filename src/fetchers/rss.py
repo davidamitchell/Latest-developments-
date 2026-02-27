@@ -117,6 +117,7 @@ class RSSFetcher:
                     content=entry.get("content", "")[:_MAX_CONTENT_CHARS],
                     source_name=feed_cfg.name,
                     published=entry.get("published"),
+                    source_type="RSS",
                 )
             )
 
