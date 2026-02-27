@@ -6,28 +6,62 @@ Last updated: 2026-02-27
 
 ## Current Status
 
-**Phase:** Epic 9 — MCP Tool Configuration (complete)
+**Phase:** Epic 6 — Configurable Prompt & Polish (all 10 slices done)
 **Active slice:** —
-**Branch:** `copilot/add-meta-data-to-summary`
+**Branch:** `copilot/update-epic-6-docs`
 
 ---
 
 | Epic | Title | Status | Complete |
 |---|---|---|---|
-| 0 | Foundation | Done | 9 / 9 slices |
-| 1 | Proof of Life 
-| 1 | Proof of Life (YouTube → Gemini → Email) | In Progress | 5 /
+| 0 | Foundation | In Progress | 10 / 11 slices |
+| 1 | Proof of Life (YouTube → Gemini → Email) | In Progress | 5 / 7 slices |
 | 2 | Deduplication | In Progress | 2 / 3 slices |
 | 3 | Scheduled Automation | In Progress | 4 / 5 slices |
 | 4 | Blog / RSS Sources | Done | 5 / 5 slices |
 | 5 | Hacker News | In Progress | 3 / 4 slices |
-| 6 | Configurable Prompt & Polish | In Progress | 3 / 10 slices |
+| 6 | Configurable Prompt & Polish | **Done** | 10 / 10 slices |
 | 7 | Reliability & Observability | In Progress | 4 / 6 slices |
 | 9 | MCP Tool Configuration | Done | 7 / 7 slices |
 
 ---
 
 ## Work Log
+
+### 2026-02-27 — Session 12
+
+**Completed:**
+- `src/summariser.py` — `_DEFAULT_PROMPT` updated to request a `## Suggested Sources` section (2–3 AI-generated recommendations based on today's content themes) and a `## Item Themes` section at the end with structured `url | theme` format (slice 6.7 + 6.9)
+- `src/summariser.py` — `_extract_item_themes()` added: parses the `## Item Themes` section, returns a `{url: theme}` dict, and strips the section from the displayed analysis text
+- `src/summariser.py` — `_render_item_card()` updated to accept an optional `theme` argument; displays theme as a `.theme-badge` span in the card meta row
+- `src/summariser.py` — `render_html_digest()` updated to extract themes before rendering, passing matched theme to each card
+- `src/summariser.py` — CSS updated: added `.theme-badge` class (purple badge matching the palette)
+- `config/sources.yaml` — `summary.prompt` updated to request `## Suggested Sources` and `## Item Themes` sections (matches updated `_DEFAULT_PROMPT`)
+- `tests/test_summariser.py` — 10 new regression tests: 6 for `_extract_item_themes()` parsing + 4 for theme badge rendering in `render_html_digest()`
+- `BACKLOG.md` — 6.7 and 6.9 marked `[x]`; Epic 6 is now fully complete (10/10 slices)
+- `state/processed.json` — reset to empty (0 processed IDs) so next run fetches fresh content
+
+**Notes:**
+- `## Suggested Sources` renders automatically through the existing `_plain_to_html()` heading + bullet handling — no rendering code change required
+- `## Item Themes` is stripped from the AI Analysis display (it is structural data for card labelling, not human-readable prose)
+- Slice 0.10: the `git submodule add https://github.com/davidamitchell/Skills .claude/commands` command must be run manually from a machine with internet access, then pushed
+
+### 2026-02-27 — Session 11
+
+**Completed:**
+- `BACKLOG.md` — Epic 6 rationalised: marked 6.1, 6.2, 6.3, 6.8 as `[x]` (all were already fully implemented in code); marked 6.7 and 6.9 as `[~]` (deferred) with rationale
+- `src/summariser.py` — `_DEFAULT_PROMPT` updated to request a `## TL;DR` section as the first part of every response (3–5 bullets + one-sentence trend note)
+- `src/summariser.py` — `_plain_to_html()` extended to render `- ` and `* ` bullet lines as `<ul><li>` lists, so TL;DR bullets (and any other bullets in Gemini output) render correctly in the HTML email
+- `src/summariser.py` — CSS updated: added `ul li` styling inside `.analysis` block for consistent spacing
+- `config/sources.yaml` — `summary.prompt` updated to request `## TL;DR` section and per-item `Theme:` labels (matches `_DEFAULT_PROMPT` structure)
+- `tests/test_summariser.py` — 3 new regression tests for bullet-list HTML rendering (`test_bullet_list_rendered_as_ul`, `test_star_bullet_rendered_as_ul`, `test_bullets_closed_by_blank_line`)
+- `.github/workflows/daily-digest.yml` — checkout step updated with `submodules: true` (prep for slice 0.10)
+- `BACKLOG.md` — slice 0.10 updated: workflow prep done; manual `git submodule add` step flagged for user
+
+**Notes:**
+- 6.7 (Sources section): run summary already shows sources/counts; "suggested related sources" deferred — commented-out channels in `config/sources.yaml` serve as discovery list
+- 6.9 (Theme labels): prompt requests `Theme:` per item and Gemini outputs them in the analysis section; per-item card display deferred (requires structured AI output)
+- Slice 0.10: the actual `git submodule add https://github.com/davidamitchell/Skills .claude/commands` command must be run manually from a machine with internet access, then pushed
 
 ### 2026-02-27 — Session 10
 
@@ -186,14 +220,13 @@ Last updated: 2026-02-27
 
 ## Next Steps
 
-1. Epic 1.5 — run pipeline end-to-end (non-dry-run) to confirm email delivery
-2. Epic 2.3 — run pipeline twice; confirm second run skips all items
-3. Epic 3.4 — verify schedule fires at 07:00 UTC and email arrives
-4. Epic 5.2 — fetch linked article text with `trafilatura` (best-effort)
-5. Epic 6.1 — prompt field in sources.yaml passed to Gemini (already partially done in summariser; needs YAML/config plumbing verification)
-6. Epic 6.3 — HTML email with per-source sections
-7. Epic 6.6 — TL;DR section at top of email
-8. Epic 6.8 — per-item source link and publication date in email
+1. Epic 0.10 — run `git submodule add https://github.com/davidamitchell/Skills .claude/commands` locally and push (workflow already has `submodules: true`)
+2. Epic 1.5 — run pipeline end-to-end (non-dry-run) to confirm email delivery
+3. Epic 2.3 — run pipeline twice; confirm second run skips all items
+4. Epic 3.4 — verify schedule fires at 07:00 UTC and email arrives
+5. Epic 5.2 — fetch linked article text with `trafilatura` (best-effort)
+6. Epic 7.6 — smoke tests for full pipeline (`test_smoke.py`)
+7. Epic 8 — history archiving and trend analysis
 
 ---
 
@@ -201,7 +234,7 @@ Last updated: 2026-02-27
 
 | Metric | Value |
 |---|---|
-| Sources configured | 1 YouTube (ID needed), 1 RSS |
+| Sources configured | 2 YouTube (Nate Jones + Wes Roth), 1 Substack, 1 HN |
 | Items processed (lifetime) | — |
 | Last successful run | — (dry-run only so far) |
 | Last email sent | — |

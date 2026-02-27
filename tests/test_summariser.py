@@ -7,7 +7,13 @@ from unittest.mock import MagicMock, patch
 
 from src.config import SummaryConfig
 from src.fetchers import FetchedItem
-from src.summariser import format_link_digest, format_run_summary, render_html_digest, summarise
+from src.summariser import (
+    _extract_item_themes,
+    format_link_digest,
+    format_run_summary,
+    render_html_digest,
+    summarise,
+)
 
 
 def _make_item(
@@ -272,3 +278,107 @@ class TestRenderHtmlDigest:
         result = render_html_digest(items, "Summary", today=date(2026, 2, 27))
         assert "YouTube" in result
         assert "Hacker News" in result
+
+    def test_bullet_list_rendered_as_ul(self) -> None:
+        """_plain_to_html should convert '- item' lines into <ul><li> elements."""
+        digest = "## TL;DR\n\n- First key point\n- Second key point\n\nSome paragraph."
+        result = render_html_digest([_make_item()], digest, today=date(2026, 2, 27))
+        assert "<ul>" in result
+        assert "<li>First key point</li>" in result
+        assert "<li>Second key point</li>" in result
+        # <ul> must be closed before any subsequent paragraph content
+        ul_pos = result.index("<ul>")
+        ul_close_pos = result.index("</ul>")
+        assert ul_pos < ul_close_pos
+        assert result.index("Second key point") < ul_close_pos
+
+    def test_star_bullet_rendered_as_ul(self) -> None:
+        """_plain_to_html should also convert '* item' lines into <ul><li> elements."""
+        digest = "## TL;DR\n\n* Star bullet item\n"
+        result = render_html_digest([_make_item()], digest, today=date(2026, 2, 27))
+        assert "<ul>" in result
+        assert "<li>Star bullet item</li>" in result
+
+    def test_bullets_closed_by_blank_line(self) -> None:
+        """A blank line after bullets should close the <ul> before the next paragraph."""
+        digest = "- Bullet one\n\nNormal paragraph."
+        result = render_html_digest([_make_item()], digest, today=date(2026, 2, 27))
+        ul_pos = result.index("<ul>")
+        ul_close_pos = result.index("</ul>")
+        p_pos = result.index("<p>", ul_close_pos)
+        assert ul_pos < ul_close_pos < p_pos
+
+
+class TestExtractItemThemes:
+    def test_parses_url_theme_pairs(self) -> None:
+        text = "Some analysis.\n\n## Item Themes\n- https://example.com/v1 | inference cost\n- https://example.com/v2 | agentic RAG\n"
+        themes, clean = _extract_item_themes(text)
+        assert themes == {
+            "https://example.com/v1": "inference cost",
+            "https://example.com/v2": "agentic RAG",
+        }
+
+    def test_section_removed_from_clean_text(self) -> None:
+        text = "Analysis text.\n\n## Item Themes\n- https://example.com/v1 | fine-tuning\n"
+        _, clean = _extract_item_themes(text)
+        assert "## Item Themes" not in clean
+        assert "fine-tuning" not in clean
+        assert "Analysis text." in clean
+
+    def test_no_section_returns_original_text(self) -> None:
+        text = "Just some analysis with no themes section."
+        themes, clean = _extract_item_themes(text)
+        assert themes == {}
+        assert clean == text
+
+    def test_stops_before_run_summary_separator(self) -> None:
+        text = (
+            "Analysis.\n\n## Item Themes\n- https://example.com/v1 | inference cost\n"
+            "\n────────────────────────────────────────\nRun summary\n"
+        )
+        themes, clean = _extract_item_themes(text)
+        assert "https://example.com/v1" in themes
+        assert "Run summary" in clean
+
+    def test_skips_malformed_lines(self) -> None:
+        text = "## Item Themes\n- not a valid line\n- https://example.com/v1 | valid theme\n"
+        themes, _ = _extract_item_themes(text)
+        assert len(themes) == 1
+        assert themes["https://example.com/v1"] == "valid theme"
+
+    def test_case_insensitive_header(self) -> None:
+        text = "## item themes\n- https://example.com/v1 | open source\n"
+        themes, _ = _extract_item_themes(text)
+        assert themes["https://example.com/v1"] == "open source"
+
+
+class TestRenderHtmlDigestThemes:
+    def test_theme_badge_shown_on_card(self) -> None:
+        """When AI output includes an Item Themes section, the theme badge appears on the card."""
+        item = _make_item(id="v1")
+        digest = "Analysis text.\n\n## Item Themes\n- https://example.com/v1 | inference cost\n"
+        result = render_html_digest([item], digest, today=date(2026, 2, 27))
+        assert '<span class="theme-badge">inference cost</span>' in result
+
+    def test_item_themes_section_not_in_analysis(self) -> None:
+        """The ## Item Themes section must be stripped from the rendered AI Analysis."""
+        item = _make_item(id="v1")
+        digest = "Analysis.\n\n## Item Themes\n- https://example.com/v1 | agentic RAG\n"
+        result = render_html_digest([item], digest, today=date(2026, 2, 27))
+        assert "## Item Themes" not in result
+
+    def test_no_theme_badge_when_url_not_matched(self) -> None:
+        """Item cards without a matching URL in themes section have no theme badge."""
+        item = _make_item(id="v1")
+        digest = "Analysis.\n\n## Item Themes\n- https://example.com/other | some theme\n"
+        result = render_html_digest([item], digest, today=date(2026, 2, 27))
+        # The CSS contains the class name; check no span element with that class is present.
+        assert '<span class="theme-badge">' not in result
+
+    def test_theme_html_escaped(self) -> None:
+        """Theme labels are HTML-escaped before insertion into the card."""
+        item = _make_item(id="v1")
+        digest = "## Item Themes\n- https://example.com/v1 | <script>xss</script>\n"
+        result = render_html_digest([item], digest, today=date(2026, 2, 27))
+        assert "<script>" not in result
+        assert "&lt;script&gt;" in result
