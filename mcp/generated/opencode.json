@@ -49,6 +49,86 @@
         "/workspace"
       ]
     },
+    "puppeteer": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "@modelcontextprotocol/server-puppeteer"
+      ]
+    },
+    "brave_search": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "@modelcontextprotocol/server-brave-search"
+      ],
+      "environment": {
+        "BRAVE_API_KEY": "${BRAVE_API_KEY}"
+      }
+    },
+    "arxiv": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "@blazickjp/arxiv-mcp-server"
+      ]
+    },
+    "huggingface": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "mcp-hfspace"
+      ]
+    },
+    "playwright": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "@playwright/mcp"
+      ]
+    },
+    "charting": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "@antv/mcp-server-chart"
+      ]
+    },
+    "sqlite": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "@modelcontextprotocol/server-sqlite",
+        "--db-path",
+        "history/digest.db"
+      ]
+    },
+    "gptzero": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "gptzero-mcp"
+      ],
+      "environment": {
+        "GPTZERO_API_KEY": "${GPTZERO_API_KEY}"
+      }
+    },
+    "readability": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "mcp-readability"
+      ]
+    },
     "github": {
       "type": "local",
       "command": [
