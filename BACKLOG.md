@@ -19,7 +19,7 @@ Status legend: `[ ]` Not started · `[→]` In progress · `[x]` Done · `[~]` D
 | 0.7 | Add `.devcontainer/`, `Makefile`, `.python-version`, `.env.example` | `[x]` | Codespaces-ready |
 | 0.8 | Add `src/config.py`, `src/state.py`, `src/fetchers/__init__.py`, `src/main.py` skeleton | `[x]` | |
 | 0.9 | Add `tests/` skeleton with `conftest.py`, `test_config.py`, `test_state.py` | `[x]` | |
-| 0.10 | Add `davidamitchell/Skills` as a git submodule so Claude Code picks up project-level custom skills | `[ ]` | Target path: `.claude/commands/` (Claude Code discovers skills there automatically). Run: `git submodule add https://github.com/davidamitchell/Skills .claude/commands` then `git submodule update --init`. Add `.gitmodules` to the workflow checkout step with `submodules: true`. |
+| 0.10 | Add `davidamitchell/Skills` as a git submodule so Claude Code picks up project-level custom skills | `[→]` | Target path: `.claude/commands/` (Claude Code discovers skills there automatically). Run: `git submodule add https://github.com/davidamitchell/Skills .claude/commands` then `git submodule update --init`. Workflow checkout updated with `submodules: true` (prep done). Manual step needed: run the `git submodule add` command locally and push. |
 | 0.11 | Consolidate agent instructions: `AGENTS.md` as single source of truth; `.claude/CLAUDE.md` and `.github/copilot-instructions.md` as thin stubs | `[x]` | Resolves #6 — multi-agent DRY setup |
 
 ---
@@ -109,15 +109,15 @@ User can tune what "important" means without touching code.
 
 | # | Slice | Status | Notes |
 |---|---|---|---|
-| 6.1 | `summary.prompt` field in `config/sources.yaml` passed to Gemini | `[ ]` | Default prompt if field absent |
-| 6.2 | `summary.max_items_per_source` and `summary.max_tokens` honoured | `[ ]` | |
-| 6.3 | Digest email is HTML with sections per source | `[ ]` | |
+| 6.1 | `summary.prompt` field in `config/sources.yaml` passed to Gemini | `[x]` | `SummaryConfig.prompt` read from YAML; passed as `system_instruction` to Gemini; empty string uses `_DEFAULT_PROMPT` |
+| 6.2 | `summary.max_items_per_source` and `summary.max_tokens` honoured | `[x]` | Both fields in `SummaryConfig`; used in `summarise()` and `format_link_digest()` |
+| 6.3 | Digest email is HTML with sections per source | `[x]` | `render_html_digest()` in `summariser.py`; items grouped by source with dyslexia-friendly cards; wired in `main.py` via `html_body=` kwarg |
 | 6.4 | `--debug` mode writes structured JSON logs to stdout | `[x]` | Implemented in `src/logger.py` (`_JSONFormatter`); wired via `--debug` arg in `src/main.py` |
 | 6.5 | `--dry-run` documented in README and AGENTS with examples | `[x]` | Documented in README under "Local development"; `make dry-run` target in Makefile |
-| 6.6 | Email includes a **TL;DR** section at the top: 3–5 bullets covering the most significant items, each with a direct link, plus a one-sentence trend note for the current period (e.g. "recurring theme this week: agentic coding workflows") | `[ ]` | Written by Gemini as part of the summarisation prompt; placed before the per-source sections |
-| 6.7 | Email includes a **Sources** section at the bottom: which sources were fetched, item counts per source, and 2–3 suggested related sources worth following | `[ ]` | Generated from fetch metadata, not Gemini; keeps the reader aware of coverage gaps |
-| 6.8 | Each item rendered in the email includes its **source link** (clickable URL) and **publication date/time** | `[ ]` | Both fields already exist on `FetchedItem` (`url`, `published`); this slice wires them into the email template |
-| 6.9 | Each item carries a short **theme label** (1–3 words, e.g. "agentic RAG", "fine-tuning", "inference cost") assigned by Gemini during summarisation and displayed alongside the item in the digest | `[ ]` | Requires prompt change to ask Gemini for a `theme:` field per item; theme is surfaced in the email and can feed Epic 8 trend analysis |
+| 6.6 | Email includes a **TL;DR** section at the top: 3–5 bullets covering the most significant items, each with a direct link, plus a one-sentence trend note for the current period | `[x]` | `_DEFAULT_PROMPT` and `config/sources.yaml` prompt both request a `## TL;DR` section as the first section; `_plain_to_html()` now renders `- ` and `* ` bullet lines as `<ul><li>` lists so TL;DR bullets display correctly in HTML email |
+| 6.7 | Email includes a **Sources** section at the bottom: which sources were fetched, item counts per source, and 2–3 suggested related sources worth following | `[~]` | Sources fetched + item counts: covered by 6.10 run summary (visible in HTML analysis section). Suggested related sources: deferred — commented-out channels in `config/sources.yaml` serve as a manual discovery list |
+| 6.8 | Each item rendered in the email includes its **source link** (clickable URL) and **publication date/time** | `[x]` | `_render_item_card()` renders title as `<a href=url>`, source badge, source name, and formatted `published` date; already in place since 6.3 |
+| 6.9 | Each item carries a short **theme label** (1–3 words) assigned by Gemini during summarisation and displayed alongside the item in the digest | `[~]` | Prompt (both default and `sources.yaml`) requests `Theme:` per item; labels appear in the AI Analysis section. Per-item card display deferred (requires parsing AI output and correlating to items — fragile without structured output from Gemini) |
 | 6.10 | **Run summary** appended to the end of every email: sources attempted, new items found per source, total items in digest, UTC run timestamp, and any per-source errors encountered | `[x]` | `format_run_summary()` in `summariser.py`; appended by `main.py` after `summarise()` |
 
 ---

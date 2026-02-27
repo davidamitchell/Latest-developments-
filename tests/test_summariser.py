@@ -272,3 +272,32 @@ class TestRenderHtmlDigest:
         result = render_html_digest(items, "Summary", today=date(2026, 2, 27))
         assert "YouTube" in result
         assert "Hacker News" in result
+
+    def test_bullet_list_rendered_as_ul(self) -> None:
+        """_plain_to_html should convert '- item' lines into <ul><li> elements."""
+        digest = "## TL;DR\n\n- First key point\n- Second key point\n\nSome paragraph."
+        result = render_html_digest([_make_item()], digest, today=date(2026, 2, 27))
+        assert "<ul>" in result
+        assert "<li>First key point</li>" in result
+        assert "<li>Second key point</li>" in result
+        # <ul> must be closed before any subsequent paragraph content
+        ul_pos = result.index("<ul>")
+        ul_close_pos = result.index("</ul>")
+        assert ul_pos < ul_close_pos
+        assert result.index("Second key point") < ul_close_pos
+
+    def test_star_bullet_rendered_as_ul(self) -> None:
+        """_plain_to_html should also convert '* item' lines into <ul><li> elements."""
+        digest = "## TL;DR\n\n* Star bullet item\n"
+        result = render_html_digest([_make_item()], digest, today=date(2026, 2, 27))
+        assert "<ul>" in result
+        assert "<li>Star bullet item</li>" in result
+
+    def test_bullets_closed_by_blank_line(self) -> None:
+        """A blank line after bullets should close the <ul> before the next paragraph."""
+        digest = "- Bullet one\n\nNormal paragraph."
+        result = render_html_digest([_make_item()], digest, today=date(2026, 2, 27))
+        ul_pos = result.index("<ul>")
+        ul_close_pos = result.index("</ul>")
+        p_pos = result.index("<p>", ul_close_pos)
+        assert ul_pos < ul_close_pos < p_pos

@@ -19,7 +19,13 @@ logger = logging.getLogger(__name__)
 
 _DEFAULT_PROMPT = (
     "Summarise the following AI/ML content for a senior software engineer who follows"
-    " the space closely. Be concise and technical. For each item, write:\n"
+    " the space closely. Be concise and technical.\n\n"
+    "Begin your response with a ## TL;DR section: 3–5 bullet points covering the most"
+    " significant items, each with the item title (as a direct link using its URL),"
+    " and a one-sentence 'why it matters' note. After the bullets, add one sentence"
+    " describing any recurring theme across today's content"
+    " (e.g. 'Recurring theme: agentic coding workflows').\n\n"
+    "Then for each item, write:\n"
     "Theme: [1–3 word label, e.g. 'inference cost', 'agentic RAG', 'fine-tuning']\n"
     "Summary: [2–4 sentences: what it is, why it matters, one concrete takeaway]"
 )
@@ -65,6 +71,8 @@ font-size:17px;line-height:1.9}
 .analysis p{margin:0 0 12px;text-align:left}
 .runsummary{font-size:14px;color:#666;border-top:1px solid #ccc;\
 margin-top:28px;padding-top:12px;line-height:1.7}
+.analysis ul{margin:6px 0 12px 20px;padding:0}
+.analysis ul li{margin-bottom:6px}
 """
 
 
@@ -93,9 +101,10 @@ def _render_item_card(item: FetchedItem) -> str:
 
 
 def _plain_to_html(text: str) -> str:
-    """Convert lightly-formatted plain text (markdown headers + bold) to HTML."""
+    """Convert lightly-formatted plain text (markdown headers + bold + bullets) to HTML."""
     out: list[str] = []
     in_p = False
+    in_ul = False
 
     def _close_p() -> None:
         nonlocal in_p
@@ -103,10 +112,17 @@ def _plain_to_html(text: str) -> str:
             out.append("</p>")
             in_p = False
 
+    def _close_ul() -> None:
+        nonlocal in_ul
+        if in_ul:
+            out.append("</ul>")
+            in_ul = False
+
     for line in text.splitlines():
         stripped = line.strip()
         if not stripped:
             _close_p()
+            _close_ul()
             continue
         # Escape HTML first so user content cannot inject tags.
         # The bold replacement below inserts only literal <strong>…</strong> with
@@ -115,20 +131,31 @@ def _plain_to_html(text: str) -> str:
         esc = re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", esc)
         if esc.startswith("### "):
             _close_p()
+            _close_ul()
             out.append(f"<h3>{esc[4:]}</h3>")
         elif esc.startswith("## "):
             _close_p()
+            _close_ul()
             out.append(f"<h2>{esc[3:]}</h2>")
         elif re.match(r"^[=─\-]{4,}$", stripped):
             _close_p()
+            _close_ul()
             out.append("<hr>")
+        elif stripped.startswith("- ") or stripped.startswith("* "):
+            _close_p()
+            if not in_ul:
+                out.append("<ul>")
+                in_ul = True
+            out.append(f"<li>{esc[2:]}</li>")
         else:
+            _close_ul()
             if not in_p:
                 out.append("<p>")
                 in_p = True
             out.append(esc + "<br>")
 
     _close_p()
+    _close_ul()
     return "\n".join(out)
 
 
