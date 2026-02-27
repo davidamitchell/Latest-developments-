@@ -5,7 +5,7 @@ from __future__ import annotations
 from unittest.mock import MagicMock, patch
 
 from src.config import YouTubeChannel, YouTubeConfig
-from src.fetchers.youtube import YouTubeFetcher, _parse_date
+from src.fetchers.youtube import YouTubeFetcher, _is_short, _parse_date
 
 
 def _make_config(channels: list[YouTubeChannel] | None = None) -> YouTubeConfig:
@@ -17,15 +17,22 @@ def _make_config(channels: list[YouTubeChannel] | None = None) -> YouTubeConfig:
     )
 
 
-def _atom_feed(*video_ids: str, descriptions: dict[str, str] | None = None) -> bytes:
+def _atom_feed(
+    *video_ids: str,
+    descriptions: dict[str, str] | None = None,
+    titles: dict[str, str] | None = None,
+) -> bytes:
     """Build a minimal YouTube Atom feed for testing.
 
     Pass descriptions={video_id: text} to include media:description elements.
+    Pass titles={video_id: title} to override the default title for specific videos.
     """
     desc_map = descriptions or {}
+    title_map = titles or {}
     entries = ""
     for vid in video_ids:
         desc = desc_map.get(vid, "")
+        title = title_map.get(vid, f"{vid} title")
         media_block = (
             f"""
     <media:group>
@@ -38,7 +45,7 @@ def _atom_feed(*video_ids: str, descriptions: dict[str, str] | None = None) -> b
   <entry xmlns:yt="http://www.youtube.com/xml/schemas/2015"
          xmlns:media="http://search.yahoo.com/mrss/">
     <yt:videoId>{vid}</yt:videoId>
-    <title>{vid} title</title>
+    <title>{title}</title>
     <link rel="alternate" href="https://www.youtube.com/watch?v={vid}"/>
     <published>2026-02-21T07:00:00+00:00</published>{media_block}
   </entry>"""
@@ -192,6 +199,43 @@ class TestYouTubeFetcher:
 
         assert len(items[0].content) == _MAX_CONTENT_CHARS
 
+    def test_skips_youtube_shorts(self) -> None:
+        """Videos with #Shorts in the title should be filtered out."""
+        cfg = _make_config()
+        fetcher = YouTubeFetcher(cfg)
+        feed = _atom_feed(
+            "short1",
+            "regular1",
+            titles={"short1": "Cool clip #Shorts", "regular1": "Deep dive into LLMs"},
+        )
+
+        with (
+            patch("src.fetchers.youtube._fetch_url", return_value=feed),
+            patch.object(fetcher._api, "fetch", return_value=_mock_transcript()),
+        ):
+            items = fetcher.fetch(set())
+
+        assert len(items) == 1
+        assert items[0].id == "regular1"
+
+    def test_skips_shorts_case_insensitive(self) -> None:
+        """#short and #SHORTS should both be filtered."""
+        cfg = _make_config()
+        fetcher = YouTubeFetcher(cfg)
+        feed = _atom_feed(
+            "s1",
+            "s2",
+            titles={"s1": "My #short video", "s2": "Analysis #SHORTS test"},
+        )
+
+        with (
+            patch("src.fetchers.youtube._fetch_url", return_value=feed),
+            patch.object(fetcher._api, "fetch", return_value=_mock_transcript()),
+        ):
+            items = fetcher.fetch(set())
+
+        assert items == []
+
     def test_empty_feed_returns_empty(self) -> None:
         empty_feed = b"""<?xml version="1.0"?>
 <feed xmlns="http://www.w3.org/2005/Atom"><title>Ch</title></feed>"""
@@ -202,6 +246,24 @@ class TestYouTubeFetcher:
             items = fetcher.fetch(set())
 
         assert items == []
+
+
+class TestIsShort:
+    def test_shorts_hashtag_detected(self) -> None:
+        assert _is_short("My video #Shorts") is True
+
+    def test_short_hashtag_detected(self) -> None:
+        assert _is_short("Quick tip #short") is True
+
+    def test_uppercase_shorts_detected(self) -> None:
+        assert _is_short("Cool #SHORTS clip") is True
+
+    def test_regular_title_not_detected(self) -> None:
+        assert _is_short("Deep dive into LLM fine-tuning") is False
+
+    def test_word_shorts_without_hash_not_detected(self) -> None:
+        """'shorts' without the # is not a YouTube Shorts hashtag."""
+        assert _is_short("Best shorts for summer") is False
 
 
 class TestParseDate:

@@ -52,7 +52,6 @@ class HackerNewsFetcher:
 
             title = story.get("title") or "Untitled"
             hn_url = f"https://news.ycombinator.com/item?id={story_id}"
-            article_url = story.get("url") or hn_url
             points = story.get("points") or 0
             num_comments = story.get("num_comments") or 0
 
@@ -70,7 +69,7 @@ class HackerNewsFetcher:
                 FetchedItem(
                     id=story_id,
                     title=title,
-                    url=article_url,
+                    url=hn_url,
                     content=content[:_MAX_CONTENT_CHARS],
                     source_name="Hacker News",
                     published=published,

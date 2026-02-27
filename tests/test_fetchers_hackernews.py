@@ -61,7 +61,8 @@ class TestHackerNewsFetcher:
         assert items[0].id == "42"
         assert items[0].title == "GPT-5 with LLM features"
         assert items[0].source_name == "Hacker News"
-        assert items[0].url == "https://example.com/article"
+        # URL must point to the HN discussion page, not the external article
+        assert items[0].url == "https://news.ycombinator.com/item?id=42"
 
     def test_skips_already_processed_story(self) -> None:
         cfg = _make_config()

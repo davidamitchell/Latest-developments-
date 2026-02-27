@@ -11,6 +11,7 @@ It returns up to 15 recent videos as Atom XML, parsed here with stdlib etree.
 from __future__ import annotations
 
 import logging
+import re
 import xml.etree.ElementTree as ET
 from datetime import datetime
 
@@ -82,6 +83,12 @@ class YouTubeFetcher:
                 continue
 
             title = _text(entry, "atom:title", _NS) or "Untitled"
+
+            # Skip YouTube Shorts — these are short-form videos tagged #Shorts
+            if _is_short(title):
+                logger.debug("Skip %s — appears to be a YouTube Short", video_id)
+                continue
+
             link_el = entry.find("atom:link[@rel='alternate']", _NS)
             url_str = link_el.get("href") if link_el is not None else f"https://youtu.be/{video_id}"
 
@@ -127,6 +134,11 @@ class YouTubeFetcher:
         except RuntimeError:
             logger.error("Transcript fetch failed after retries for %r", title)
             return None
+
+
+def _is_short(title: str) -> bool:
+    """Return True if the video appears to be a YouTube Short based on its title hashtag."""
+    return bool(re.search(r"#shorts?\b", title, re.IGNORECASE))
 
 
 def _fetch_url(url: str) -> bytes:

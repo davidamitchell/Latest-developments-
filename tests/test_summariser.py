@@ -8,7 +8,10 @@ from unittest.mock import MagicMock, patch
 from src.config import SummaryConfig
 from src.fetchers import FetchedItem
 from src.summariser import (
+    _extract_item_summaries,
     _extract_item_themes,
+    _extract_tldr,
+    _filter_ai_slop,
     format_link_digest,
     format_run_summary,
     render_html_digest,
@@ -225,10 +228,14 @@ class TestRenderHtmlDigest:
         assert "🔶" in result
 
     def test_contains_find_out_more_link(self) -> None:
-        item = _make_item(id="xyz")
+        item = _make_item(id="xyz", title="GPT-5 Released")
         result = render_html_digest([item], "Summary", today=date(2026, 2, 27))
         assert "Find out more" in result
+        # Title still links to the item URL
         assert "https://example.com/xyz" in result
+        # "Find out more" now points to a Google search for the title
+        assert "google.com/search" in result
+        assert "GPT-5+Released" in result or "GPT-5%20Released" in result
 
     def test_contains_ai_analysis_section(self) -> None:
         item = _make_item()
@@ -379,6 +386,163 @@ class TestRenderHtmlDigestThemes:
         """Theme labels are HTML-escaped before insertion into the card."""
         item = _make_item(id="v1")
         digest = "## Item Themes\n- https://example.com/v1 | <script>xss</script>\n"
+        result = render_html_digest([item], digest, today=date(2026, 2, 27))
+        assert "<script>" not in result
+        assert "&lt;script&gt;" in result
+
+
+class TestExtractItemSummaries:
+    def test_parses_url_summary_pairs(self) -> None:
+        text = (
+            "Analysis.\n\n## Item Summaries\n"
+            "- https://example.com/v1 | First summary sentence. Second sentence.\n"
+            "- https://example.com/v2 | Another summary here.\n"
+        )
+        summaries, clean = _extract_item_summaries(text)
+        assert summaries == {
+            "https://example.com/v1": "First summary sentence. Second sentence.",
+            "https://example.com/v2": "Another summary here.",
+        }
+
+    def test_section_removed_from_clean_text(self) -> None:
+        text = "Analysis.\n\n## Item Summaries\n- https://example.com/v1 | Summary text.\n"
+        _, clean = _extract_item_summaries(text)
+        assert "## Item Summaries" not in clean
+        assert "Summary text." not in clean
+        assert "Analysis." in clean
+
+    def test_no_section_returns_original(self) -> None:
+        text = "Just analysis text with no summaries section."
+        summaries, clean = _extract_item_summaries(text)
+        assert summaries == {}
+        assert clean == text
+
+    def test_skips_malformed_lines(self) -> None:
+        text = "## Item Summaries\n- not valid\n- https://example.com/v1 | Valid summary.\n"
+        summaries, _ = _extract_item_summaries(text)
+        assert len(summaries) == 1
+        assert summaries["https://example.com/v1"] == "Valid summary."
+
+    def test_case_insensitive_header(self) -> None:
+        text = "## item summaries\n- https://example.com/v1 | A summary.\n"
+        summaries, _ = _extract_item_summaries(text)
+        assert summaries["https://example.com/v1"] == "A summary."
+
+
+class TestExtractTldr:
+    def test_extracts_tldr_content(self) -> None:
+        text = "## TL;DR\n\n- Bullet one.\n- Bullet two.\n\nRecurring theme: agents.\n\n## Next Section\nMore text."
+        tldr, clean = _extract_tldr(text)
+        assert "Bullet one." in tldr
+        assert "Recurring theme: agents." in tldr
+        assert "## TL;DR" not in clean
+        assert "## Next Section" in clean
+
+    def test_no_tldr_returns_empty_and_original(self) -> None:
+        text = "Just analysis with no TL;DR."
+        tldr, clean = _extract_tldr(text)
+        assert tldr == ""
+        assert clean == text
+
+    def test_case_insensitive(self) -> None:
+        text = "## tl;dr\n\n- A bullet.\n\n## Other\nContent."
+        tldr, _ = _extract_tldr(text)
+        assert "A bullet." in tldr
+
+    def test_stops_before_run_summary_separator(self) -> None:
+        text = "## TL;DR\n- Key point.\n\n────────────────────────────────────────\nRun summary\n"
+        tldr, clean = _extract_tldr(text)
+        assert "Key point." in tldr
+        assert "Run summary" in clean
+
+
+class TestFilterAiSlop:
+    def test_removes_ai_self_reference(self) -> None:
+        text = "As an AI language model, I can summarise this."
+        result = _filter_ai_slop(text)
+        assert "As an AI" not in result
+        assert "I can summarise this." in result
+
+    def test_removes_certainly_opener(self) -> None:
+        text = "Certainly! Here is the summary."
+        result = _filter_ai_slop(text)
+        assert "Certainly" not in result
+
+    def test_removes_it_is_worth_noting(self) -> None:
+        text = "It's worth noting that the model improved significantly."
+        result = _filter_ai_slop(text)
+        assert "worth noting" not in result
+        assert "the model improved significantly." in result
+
+    def test_removes_in_conclusion(self) -> None:
+        text = "In conclusion, the results are promising."
+        result = _filter_ai_slop(text)
+        assert "In conclusion" not in result
+        assert "the results are promising." in result
+
+    def test_leaves_technical_content_intact(self) -> None:
+        text = "GPT-4 achieves 87% on MMLU. The transformer uses 175B parameters."
+        result = _filter_ai_slop(text)
+        assert "GPT-4 achieves 87% on MMLU" in result
+        assert "175B parameters" in result
+
+    def test_collapses_excess_blank_lines(self) -> None:
+        text = "Line one.\n\n\n\nLine two."
+        result = _filter_ai_slop(text)
+        assert "\n\n\n" not in result
+
+
+class TestRenderHtmlDigestTldr:
+    def test_tldr_rendered_at_top_before_items(self) -> None:
+        item = _make_item(id="v1")
+        digest = "## TL;DR\n\n- Key insight.\n\nRecurring theme: agents.\n\n## Analysis\nContent."
+        result = render_html_digest([item], digest, today=date(2026, 2, 27))
+        # TL;DR div class appears before the card class in the rendered HTML
+        assert 'class="tldr"' in result
+        assert 'class="card"' in result
+        assert result.index('class="tldr"') < result.index('class="card"')
+
+    def test_tldr_section_removed_from_analysis(self) -> None:
+        item = _make_item(id="v1")
+        digest = "## TL;DR\n\n- Only bullet.\n\n## Analysis\nReal content."
+        result = render_html_digest([item], digest, today=date(2026, 2, 27))
+        # TL;DR content should appear in the tldr div, not duplicated in analysis
+        assert result.count("Only bullet.") == 1
+
+    def test_no_tldr_section_renders_without_error(self) -> None:
+        item = _make_item(id="v1")
+        digest = "Just analysis text with no TL;DR section."
+        result = render_html_digest([item], digest, today=date(2026, 2, 27))
+        assert "<!DOCTYPE html>" in result
+        assert "Just analysis text" in result
+
+
+class TestRenderHtmlDigestItemSummaries:
+    def test_item_summary_shown_in_card(self) -> None:
+        item = _make_item(id="v1")
+        digest = (
+            "Analysis.\n\n## Item Summaries\n"
+            "- https://example.com/v1 | This model achieves state-of-the-art results.\n"
+        )
+        result = render_html_digest([item], digest, today=date(2026, 2, 27))
+        assert "This model achieves state-of-the-art results." in result
+        assert 'class="card-summary"' in result
+
+    def test_item_summaries_section_not_in_analysis(self) -> None:
+        item = _make_item(id="v1")
+        digest = "Analysis.\n\n## Item Summaries\n- https://example.com/v1 | A summary.\n"
+        result = render_html_digest([item], digest, today=date(2026, 2, 27))
+        assert "## Item Summaries" not in result
+
+    def test_no_summary_card_when_url_not_matched(self) -> None:
+        item = _make_item(id="v1")
+        digest = "Analysis.\n\n## Item Summaries\n- https://example.com/other | Different item.\n"
+        result = render_html_digest([item], digest, today=date(2026, 2, 27))
+        assert 'class="card-summary"' not in result
+
+    def test_summary_html_escaped(self) -> None:
+        item = _make_item(id="v1")
+        digest = "## Item Summaries\n- https://example.com/v1 | <script>xss</script>\n"
         result = render_html_digest([item], digest, today=date(2026, 2, 27))
         assert "<script>" not in result
         assert "&lt;script&gt;" in result
