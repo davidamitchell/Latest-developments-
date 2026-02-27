@@ -1,14 +1,14 @@
 # Progress
 
-Last updated: 2026-02-26
+Last updated: 2026-02-27
 
 ---
 
 ## Current Status
 
-**Phase:** Epic 1 — Expanding YouTube sources
-**Active slice:** 1.7 — Add 7 new YouTube channels (new sources issue)
-**Branch:** `copilot/add-new-sources-backlog`
+**Phase:** Epic 9 — MCP Tool Configuration (complete)
+**Active slice:** —
+**Branch:** `copilot/add-meta-data-to-summary`
 
 ---
 
@@ -23,6 +23,33 @@ Last updated: 2026-02-26
 | 5 | Hacker News | In Progress | 3 / 4 slices |
 | 6 | Configurable Prompt & Polish | In Progress | 3 / 10 slices |
 | 7 | Reliability & Observability | In Progress | 4 / 6 slices |
+| 9 | MCP Tool Configuration | Done | 7 / 7 slices |
+
+---
+
+## Work Log
+
+### 2026-02-27 — Session 10
+
+**Completed:**
+- `mcp/manifest.yaml` — source of truth for all MCP servers (fetch, sequential_thinking, time, memory, git, filesystem, github). Each server declares which environments it targets.
+- `mcp/generate.py` — converts manifest to five target formats (GitHub Copilot Agent, VS Code, Claude Desktop, Claude Code, opencode). Supports `--deploy` to also write canonical repo locations. Pure Python; only dependency is PyYAML (already installed).
+- `mcp/tests/test_generate.py` — 20 pytest tests covering all builders, format differences, deploy mode, and a smoke test on the real manifest. All passing.
+- `mcp/requirements.txt` — minimal self-contained dep list (PyYAML).
+- `mcp/README.md` — comprehensive guide: quick start, server table, manifest editing instructions, how to regenerate, how to run tests, environment variable notes.
+- `.github/mcp.json` — deployed GitHub Copilot Agent config (fetch + sequential_thinking + time). Picked up automatically by the GitHub Copilot Coding Agent.
+- `.vscode/mcp.json` — deployed VS Code config.
+- `.mcp.json` — deployed Claude Code CLI config.
+- `mcp/generated/*.json` — all five generated configs committed.
+- `.github/workflows/mcp-generate.yml` — workflow that regenerates configs, runs tests, and commits on any change to the manifest.
+- `docs/adr/0011-mcp-configuration-manifest.md` — ADR documenting the manifest approach.
+- `docs/adr/README.md` — updated with ADR-0011.
+- `BACKLOG.md` — added Epic 9 (MCP Tool Configuration) with all slices marked done.
+
+**Notes:**
+- `.github/mcp.json` is the copy-paste answer to the user's question about GitHub agent config.
+- GitHub target intentionally excludes `filesystem`, `git`, `memory`, and `github` (redundant or not meaningful in the ephemeral Copilot Agent sandbox).
+- All 20 tests pass: `pytest mcp/tests/ -v`
 
 ---
 

@@ -1,0 +1,164 @@
+# MCP Server Manifest
+# Source of truth for all MCP server configurations in this repo.
+#
+# Run `python mcp/generate.py` to regenerate all target configs in mcp/generated/.
+# Or trigger the `mcp-generate` GitHub Actions workflow — it regenerates and commits.
+#
+# Adding a server:
+#   1. Add an entry under `servers:` below.
+#   2. Set `targets` to the environments that make sense (see list below).
+#   3. Run `python mcp/generate.py` and commit the generated files.
+#
+# Supported targets:
+#   github          — GitHub Copilot Coding Agent (.github/mcp.json)
+#   vscode          — VS Code GitHub Copilot extension (.vscode/mcp.json)
+#   claude_desktop  — Claude Desktop app (claude_desktop_config.json fragment)
+#   claude_code     — Claude Code CLI (.mcp.json at project root)
+#   opencode        — opencode CLI (~/.config/opencode/opencode.json fragment)
+
+version: "1"
+
+servers:
+
+  # ── Web / Research ─────────────────────────────────────────────────────────
+
+  fetch:
+    description: >
+      Fetch any URL and extract readable text. Directly enables backlog slice 5.2
+      (article extraction from Hacker News story links).
+    package: "@modelcontextprotocol/server-fetch"
+    type: stdio
+    command: npx
+    args:
+      - "-y"
+      - "@modelcontextprotocol/server-fetch"
+    targets:
+      - github
+      - vscode
+      - claude_desktop
+      - claude_code
+      - opencode
+
+  # ── Productivity / Reasoning ────────────────────────────────────────────────
+
+  sequential_thinking:
+    description: >
+      Structured step-by-step reasoning for complex multi-part problems.
+      Helps the AI plan pipeline changes, debug scheduling issues, and think
+      through multi-source summarisation strategies.
+    package: "@modelcontextprotocol/server-sequential-thinking"
+    type: stdio
+    command: npx
+    args:
+      - "-y"
+      - "@modelcontextprotocol/server-sequential-thinking"
+    targets:
+      - github
+      - vscode
+      - claude_desktop
+      - claude_code
+      - opencode
+
+  time:
+    description: >
+      Current time and timezone conversion. Useful when debugging scheduling
+      and cron expressions relative to UTC.
+    package: "@modelcontextprotocol/server-time"
+    type: stdio
+    command: npx
+    args:
+      - "-y"
+      - "@modelcontextprotocol/server-time"
+    targets:
+      - github
+      - vscode
+      - claude_desktop
+      - claude_code
+      - opencode
+
+  memory:
+    description: >
+      Persistent knowledge graph across AI sessions. Enables multi-day context
+      — e.g. remembering which sources were flaky, which prompts worked best,
+      or tracking theme trends across digests (Epic 8).
+    package: "@modelcontextprotocol/server-memory"
+    type: stdio
+    command: npx
+    args:
+      - "-y"
+      - "@modelcontextprotocol/server-memory"
+    targets:
+      - vscode
+      - claude_desktop
+      - claude_code
+      - opencode
+    notes: >
+      Not included in github target — the Copilot Agent runs ephemerally
+      and has no persistent store.
+
+  # ── Code / Repository ───────────────────────────────────────────────────────
+
+  git:
+    description: >
+      Local git operations — log, diff, blame, show. Complements the
+      built-in GitHub tools with access to uncommitted local state.
+    package: "@modelcontextprotocol/server-git"
+    type: stdio
+    command: npx
+    args:
+      - "-y"
+      - "@modelcontextprotocol/server-git"
+    targets:
+      - vscode
+      - claude_desktop
+      - claude_code
+      - opencode
+    notes: >
+      Not needed in the GitHub target — the Copilot Agent already has
+      full repo access via the GitHub API.
+
+  filesystem:
+    description: >
+      Read and write local files within allowed directories. Path argument
+      should be adjusted per-machine; the default /workspace suits Codespaces
+      and Docker.
+    package: "@modelcontextprotocol/server-filesystem"
+    type: stdio
+    command: npx
+    args:
+      - "-y"
+      - "@modelcontextprotocol/server-filesystem"
+      - "/workspace"
+    targets:
+      - vscode
+      - claude_desktop
+      - claude_code
+      - opencode
+    notes: >
+      Not included in github target — filesystem access is not meaningful
+      inside the ephemeral Copilot Agent sandbox.
+
+  # ── GitHub ──────────────────────────────────────────────────────────────────
+
+  github:
+    description: >
+      Browse GitHub issues, PRs, repos, code, and CI runs. Not needed for
+      the GitHub Copilot Agent (built-in access), but very useful in
+      Claude Desktop / VS Code / opencode sessions.
+    package: "@modelcontextprotocol/server-github"
+    type: stdio
+    command: npx
+    args:
+      - "-y"
+      - "@modelcontextprotocol/server-github"
+    env:
+      GITHUB_PERSONAL_ACCESS_TOKEN: "${GITHUB_PERSONAL_ACCESS_TOKEN}"
+    targets:
+      - vscode
+      - claude_desktop
+      - claude_code
+      - opencode
+    notes: >
+      Requires a GitHub Personal Access Token with `repo` scope set as the
+      GITHUB_PERSONAL_ACCESS_TOKEN environment variable. Create one at
+      https://github.com/settings/tokens
