@@ -1,0 +1,55 @@
+name: Sync Skills
+
+on:
+  # Run weekly to pick up updates from the Skills repo
+  schedule:
+    - cron: "0 6 * * 1"  # Every Monday at 06:00 UTC
+
+  # Allow manual runs from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  sync:
+    name: Sync skills from davidamitchell/Skills
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout this repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Checkout Skills repository
+        uses: actions/checkout@v4
+        with:
+          repository: davidamitchell/Skills
+          path: _skills_source
+          fetch-depth: 1
+
+      - name: Sync skill directories
+        run: |
+          set -e
+          mkdir -p .github/skills
+          for skill_dir in _skills_source/skills/*/; do
+            skill_name=$(basename "$skill_dir")
+            dest=".github/skills/$skill_name"
+            mkdir -p "$dest"
+            cp "$skill_dir/SKILL.md" "$dest/SKILL.md"
+            echo "Synced: $skill_name"
+          done
+          rm -rf _skills_source
+
+      - name: Commit updated skills
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .github/skills/
+          if git diff --cached --quiet; then
+            echo "No skill changes to commit — already up to date"
+          else
+            git commit -m "chore: sync skills from davidamitchell/Skills [skip ci]"
+            git push origin ${{ github.ref_name }}
+          fi

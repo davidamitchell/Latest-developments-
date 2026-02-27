@@ -115,6 +115,32 @@ Status values: `proposed` → `accepted` → `superseded` / `deprecated`
 
 ---
 
+## Agent Skills
+
+Skills are modular instruction files that agents load automatically when a task matches the skill's `description`. They extend agent behaviour without bloating the main instructions.
+
+### GitHub Copilot (Coding Agent, VS Code Agent Mode)
+
+Skills live in `.github/skills/<name>/SKILL.md`. GitHub Copilot discovers them automatically.
+
+| Skill | When Copilot loads it |
+|---|---|
+| `backlog-manager` | Managing `BACKLOG.md`, adding or refining work items |
+| `citation-discipline` | Writing research or reports where every claim must be sourced |
+| `remove-ai-slop` | Post-processing AI-generated text to reduce detection signals |
+| `research` | Investigating a topic with recursive decomposition and verification |
+| `speculation-control` | Producing factual writing that requires clear epistemic discipline |
+| `strategic-persuasion` | Building audience-targeted persuasive content |
+| `strategy-author` | Producing or reviewing strategy documents |
+
+Skills are synced weekly from [`davidamitchell/Skills`](https://github.com/davidamitchell/Skills) via `.github/workflows/sync-skills.yml`. Run the workflow manually to pull the latest versions. To add a new skill, add it to the Skills repo first; it will be picked up on the next sync.
+
+### Claude Code
+
+Claude Code discovers skills from `.claude/skills/<name>/SKILL.md`. The skills in `.github/skills/` use the same SKILL.md format and can be copied to `.claude/skills/` if project-level Claude Code skills are needed.
+
+---
+
 ## GitHub Actions / Codespaces
 
 - Workflow: `.github/workflows/daily-digest.yml`
