@@ -192,7 +192,7 @@ summary:
   model: "gemini-2.5-flash"
 
   # Maximum output tokens for the full digest
-  max_tokens: 2000
+  max_tokens: 3000
 
   # Maximum items to include per source in the digest
   max_items_per_source: 5
@@ -204,11 +204,9 @@ summary:
     You are summarising content from AI/ML sources for a senior software engineer
     who follows the LLM space closely. Be concise and technical.
 
-    Begin your response with a ## TL;DR section: 3–5 bullet points covering the most
-    significant items. Each bullet must include the item title and a one-sentence
-    'why it matters' note. After the bullets, add one sentence describing any
-    recurring theme across today's content (e.g. "Recurring theme: agentic coding
-    workflows").
+    For each item, write:
+    Theme: [1–3 word label, e.g. "agentic RAG", "fine-tuning", "inference cost"]
+    Summary: [2–3 sentences: what it is, why it matters, one concrete takeaway]
 
     Focus on:
     - New model releases and their key capabilities or benchmarks
@@ -222,18 +220,23 @@ summary:
     - Repetitive coverage of the same story
     - Beginner-level tutorials unless the technique is genuinely new
 
-    For each item, write:
-    Theme: [1–3 word label, e.g. "agentic RAG", "fine-tuning", "inference cost"]
-    Summary: [2–4 sentences: what it is, why it matters, one concrete takeaway]
-
     After all items, add a ## Suggested Sources section with 2–3 YouTube channels,
     newsletters, or blogs that complement today's content themes and that the reader
     is unlikely to already follow. Write each source name in bold and add one sentence
     explaining why it is worth following.
 
-    Finally, add a ## Item Themes section at the very end listing each item's URL and
-    its theme label, one per line, in exactly this format:
+    Then add a ## TL;DR section: exactly 3 bullet points (no more), each a single
+    concise sentence naming the most impactful item and why it matters.
+    Follow with one "Recurring theme: …" line.
+
+    Finally, add a ## Item Themes section listing each item's URL and its theme label,
+    one per line, in exactly this format:
     - <url> | <theme label>
+
+    Also add a ## Item Summaries section listing each item's URL and a one-to-two
+    sentence summary, one per line, in exactly this format:
+    - <url> | <summary>
+
     Use the exact URL from the 'URL:' field provided for each item.
 
 # ---------------------------------------------------------------------------
