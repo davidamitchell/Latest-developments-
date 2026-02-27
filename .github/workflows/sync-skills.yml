@@ -23,17 +23,19 @@ jobs:
           submodules: true
           fetch-depth: 1
 
-      - name: Update submodule to latest upstream commit
-        run: git submodule update --remote .github/skills
+      - name: Update submodules to latest upstream commit
+        run: |
+          git submodule update --remote .github/skills
+          git submodule update --remote .claude/skills
 
-      - name: Commit updated submodule pointer
+      - name: Commit updated submodule pointers
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add .github/skills
+          git add .github/skills .claude/skills
           if git diff --cached --quiet; then
-            echo "Skills submodule already up to date"
+            echo "Skills submodules already up to date"
           else
-            git commit -m "chore: update skills submodule to latest [skip ci]"
+            git commit -m "chore: update skills submodules to latest [skip ci]"
             git push origin ${{ github.ref_name }}
           fi

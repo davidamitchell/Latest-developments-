@@ -137,7 +137,7 @@ Skills live in `.github/skills/<name>/SKILL.md`. GitHub Copilot discovers them a
 
 ### Claude Code
 
-Claude Code discovers skills from `.claude/skills/<name>/SKILL.md`. The skills in `.github/skills/` use the same SKILL.md format and can be copied to `.claude/skills/` if project-level Claude Code skills are needed.
+`.claude/skills` is a git submodule tracking the same [`davidamitchell/Skills`](https://github.com/davidamitchell/Skills) repo. Claude Code discovers skills from `.claude/skills/<name>/SKILL.md`. The weekly sync workflow advances both submodule pointers together — a single source of truth serves both agents automatically.
 
 ---
 
