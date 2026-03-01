@@ -43,6 +43,17 @@
         "BRAVE_API_KEY": "${BRAVE_API_KEY}"
       }
     },
+    "tavily": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "tavily-mcp@latest"
+      ],
+      "env": {
+        "TAVILY_API_KEY": "${TAVILY_API_KEY}"
+      }
+    },
     "arxiv": {
       "type": "stdio",
       "command": "npx",
