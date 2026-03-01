@@ -18,15 +18,18 @@ pytestmark = pytest.mark.skipif(
 
 
 def test_youtube_api_returns_results() -> None:
-    """YouTube Data API v3 search.list returns at least 1 video for a known active channel."""
+    """YouTube Data API v3 search.list returns at least 1 result for a broad query.
+
+    Uses a keyword search (no channelId) so the result is not dependent on any
+    specific channel's publish activity or search-index state.
+    """
     key = os.environ["YOUTUBE_API_KEY"]
     resp = httpx.get(
         "https://www.googleapis.com/youtube/v3/search",
         params={
             "part": "snippet",
-            "channelId": "UC295-Dw4tzbMmcArTTnNMcQ",  # Google Developers — regularly publishes
+            "q": "python programming",
             "type": "video",
-            "order": "date",
             "maxResults": 1,
             "key": key,
         },
@@ -35,7 +38,7 @@ def test_youtube_api_returns_results() -> None:
     assert resp.status_code == 200, f"HTTP {resp.status_code}: {resp.text[:300]}"
     items = resp.json().get("items", [])
     assert len(items) >= 1, (
-        "API returned 0 results for the Google Developers channel — "
+        "API returned 0 results for a broad search query — "
         "check that the key is valid and YouTube Data API v3 is enabled in Google Cloud Console"
     )
     assert items[0]["id"].get("videoId"), "First result is missing videoId"
