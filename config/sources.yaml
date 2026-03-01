@@ -18,6 +18,11 @@
 #   Resend (EMAIL_PROVIDER=resend) — free tier, no App Password required:
 #     RESEND_API_KEY    — Resend API key (resend.com, 3 000 emails/month free)
 #
+#   Required for YouTube fetcher:
+#     YOUTUBE_API_KEY   — YouTube Data API v3 key (Google Console, free tier — 10 000 units/day)
+#                         Get a key at https://console.developers.google.com/
+#                         Enable the "YouTube Data API v3" for the project.
+#
 #   Required only when summary.enabled is true:
 #     GEMINI_API_KEY    — Google AI Studio API key (free at aistudio.google.com)
 

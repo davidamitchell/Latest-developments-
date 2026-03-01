@@ -55,6 +55,7 @@ jobs:
 
       - name: Run digest pipeline
         env:
+          YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
           EMAIL_SENDER: ${{ secrets.EMAIL_SENDER }}

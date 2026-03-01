@@ -1,0 +1,32 @@
+# Copilot Agent pre-firewall setup steps.
+#
+# These steps run before the Copilot coding agent's network firewall is enabled,
+# allowing packages to be installed from PyPI and other public registries.
+# The agent can then run tests, linting, and dry-runs without network access.
+#
+# See: https://docs.github.com/en/copilot/using-github-copilot/coding-agent/customizing-the-development-environment-for-copilot-coding-agent
+
+name: "Copilot Setup Steps"
+
+on:
+  workflow_dispatch:
+
+jobs:
+  copilot-setup-steps:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install project and dev dependencies
+        run: pip install -e ".[dev]"
