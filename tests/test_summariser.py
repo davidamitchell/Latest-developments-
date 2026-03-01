@@ -82,6 +82,18 @@ class TestSummarise:
         system = call_kwargs["config"].system_instruction
         assert len(system) > 0
 
+    def test_today_date_injected_into_system_prompt(self) -> None:
+        """The current date must appear in the system prompt so the LLM can anchor partial
+        dates in content (e.g. '27 Feb' → 27 February 2026, not February 2027) and treat
+        all fetched content as real, current events rather than fictional future scenarios."""
+        mock_cls = _mock_client()
+        with patch("src.summariser.genai.Client", mock_cls):
+            summarise([_make_item()], _make_config(), today=date(2026, 2, 27))
+
+        call_kwargs = mock_cls.return_value.models.generate_content.call_args.kwargs
+        system = call_kwargs["config"].system_instruction
+        assert "27 February 2026" in system
+
     def test_groups_items_by_source(self) -> None:
         items = [
             _make_item("a", source="YouTube", content="yt content"),

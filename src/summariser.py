@@ -8,6 +8,7 @@ import os
 import re
 import urllib.parse
 from datetime import UTC, date, datetime
+from pathlib import Path
 
 from google import genai
 from google.genai import errors as genai_errors
@@ -18,27 +19,16 @@ from src.fetchers import FetchedItem
 
 logger = logging.getLogger(__name__)
 
-_DEFAULT_PROMPT = (
-    "Summarise the following AI/ML content for a senior software engineer who follows"
-    " the space closely. Be concise and technical.\n\n"
-    "For each item, write:\n"
-    "Theme: [1–3 word label, e.g. 'inference cost', 'agentic RAG', 'fine-tuning']\n"
-    "Summary: [2–3 sentences: what it is, why it matters, one concrete takeaway]\n\n"
-    "After all items, add a ## Suggested Sources section with 2–3 YouTube channels,"
-    " newsletters, or blogs that would complement today's content themes and that the"
-    " reader is unlikely to already follow. For each, write the name in bold and one"
-    " sentence explaining why it is worth following.\n\n"
-    "Then add a ## TL;DR section: exactly 3 bullet points (no more), each a single"
-    " concise sentence naming the most impactful item and why it matters."
-    " Follow with one 'Recurring theme: …' line.\n\n"
-    "Finally, add a ## Item Themes section listing each item's URL"
-    " and its theme label, one per line, in exactly this format:\n"
-    "- <url> | <theme label>\n\n"
-    "Also add a ## Item Summaries section listing each item's URL and a one-to-two"
-    " sentence summary, one per line, in exactly this format:\n"
-    "- <url> | <summary>\n"
-    "Use the exact URL from the 'URL:' field provided for each item."
-)
+_CONFIG_DIR = Path(__file__).parent.parent / "config"
+_TEMPLATES_DIR = Path(__file__).parent / "templates"
+
+# Load the default prompt from config/prompt.md so it is editable without touching Python.
+try:
+    _DEFAULT_PROMPT = (_CONFIG_DIR / "prompt.md").read_text().strip()
+except OSError as _e:
+    raise RuntimeError(
+        f"Could not load default prompt from {_CONFIG_DIR / 'prompt.md'}: {_e}"
+    ) from _e
 
 _ITEM_HEADER = "### {title}\nSource: {source} [{source_type}]\nURL: {url}\n\n"
 
@@ -113,52 +103,13 @@ def _filter_ai_slop(text: str) -> str:
 # HTML email rendering
 # ---------------------------------------------------------------------------
 
-_HTML_CSS = """\
-body{font-family:Arial,Helvetica,sans-serif;font-size:17px;line-height:1.7;\
-letter-spacing:.03em;word-spacing:.08em;background:#f5f0e8;color:#2a2a2a;\
-margin:0;padding:0;text-align:left}
-.wrap{max-width:640px;margin:0 auto;padding:16px 12px}
-.hdr{border-bottom:3px solid #4a7c59;padding-bottom:10px;margin-bottom:18px}
-.hdr h1{font-size:20px;color:#2a2a2a;margin:0;letter-spacing:.04em}
-.tldr{background:#eaf4ea;border-left:4px solid #4a7c59;\
-padding:12px 14px;margin-bottom:16px;border-radius:0 4px 4px 0;font-size:16px}
-.tldr ul{margin:6px 0 4px 18px;padding:0}
-.tldr ul li{margin-bottom:4px}
-.sec{font-size:18px;font-weight:700;color:#4a7c59;\
-border-bottom:2px solid #c8d8c0;padding-bottom:5px;\
-margin:22px 0 12px;letter-spacing:.03em}
-.card{background:#fff;border-left:4px solid #4a7c59;\
-padding:12px 14px;margin-bottom:10px;border-radius:0 4px 4px 0}
-.card-title{font-size:17px;font-weight:700;margin:0 0 5px}
-.card-title a{color:#1a5c96;text-decoration:none}
-.badge{display:inline-block;background:#e8f0e8;color:#2a6040;\
-border-radius:3px;padding:2px 6px;font-size:13px;font-weight:700;margin-right:6px}
-.meta{font-size:14px;color:#555;margin-bottom:6px;line-height:1.4}
-.card-summary{font-size:15px;color:#333;line-height:1.6;margin:6px 0 8px}
-.more{font-size:14px;margin-top:4px}
-.more a{color:#1a5c96;font-weight:700;text-decoration:none}
-.analysis{background:#fffef5;border:1px solid #d8d0b8;\
-padding:14px 16px;margin-top:20px;border-radius:4px;\
-font-size:16px;line-height:1.8}
-.analysis h2{color:#4a7c59;font-size:17px;margin:14px 0 4px}
-.analysis h3{color:#2a6040;font-size:15px;margin:12px 0 4px}
-.analysis p{margin:0 0 10px;text-align:left}
-.runsummary{font-size:13px;color:#666;border-top:1px solid #ccc;\
-margin-top:24px;padding-top:10px;line-height:1.6}
-.analysis ul{margin:4px 0 10px 18px;padding:0}
-.analysis ul li{margin-bottom:4px}
-.theme-badge{display:inline-block;background:#f0e8ff;color:#5a2a8a;\
-border-radius:3px;padding:2px 6px;font-size:12px;font-weight:700;margin-left:6px}
-@media(max-width:480px){
-.wrap{padding:10px 8px}
-.hdr h1{font-size:18px}
-.sec{font-size:16px}
-.card{padding:10px 10px}
-.card-title{font-size:16px}
-.card-summary{font-size:14px}
-.analysis{padding:10px 12px;font-size:15px}
-}
-"""
+# CSS and outer HTML frame are loaded from src/templates/ so they can be
+# edited without touching Python source.
+try:
+    _EMAIL_CSS = (_TEMPLATES_DIR / "email.css").read_text().strip()
+    _EMAIL_HTML_TEMPLATE = (_TEMPLATES_DIR / "email.html").read_text()
+except OSError as _e:
+    raise RuntimeError(f"Could not load email template from {_TEMPLATES_DIR}: {_e}") from _e
 
 
 def _source_badge(item: FetchedItem) -> str:
@@ -405,11 +356,8 @@ def render_html_digest(
 <div class="analysis">{analysis_html}</div>
 """
 
-    return (
-        '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">'
-        '<meta name="viewport" content="width=device-width,initial-scale=1">'
-        f"<style>{_HTML_CSS}</style></head>"
-        f'<body><div class="wrap">{content}</div></body></html>'
+    return _EMAIL_HTML_TEMPLATE.replace("<!--%%CSS%%-->", _EMAIL_CSS).replace(
+        "<!--%%CONTENT%%-->", content
     )
 
 
@@ -481,6 +429,14 @@ def summarise(items: list[FetchedItem], config: SummaryConfig, today: date | Non
 
     user_content = "\n\n---\n\n".join(sections)
     system_prompt = config.prompt.strip() or _DEFAULT_PROMPT
+    date_context = (
+        f"Today's date is {today.strftime('%d %B %Y')}."
+        " Each item below is attributed to its source (shown in the 'Source:' field):"
+        " a YouTube channel, RSS feed, Hacker News post, or newsletter."
+        " Ground all summaries in what that source material states;"
+        " attribute claims to their source rather than asserting them as universal facts.\n\n"
+    )
+    system_prompt = date_context + system_prompt
 
     logger.info("Summarising %d item(s) with %s", len(items), config.model)
 
