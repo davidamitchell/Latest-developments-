@@ -481,6 +481,12 @@ def summarise(items: list[FetchedItem], config: SummaryConfig, today: date | Non
 
     user_content = "\n\n---\n\n".join(sections)
     system_prompt = config.prompt.strip() or _DEFAULT_PROMPT
+    date_context = (
+        f"Today's date is {today.strftime('%d %B %Y')}."
+        " All content below is real and current — do not treat any references,"
+        " organisations, or events as fictional or hypothetical.\n\n"
+    )
+    system_prompt = date_context + system_prompt
 
     logger.info("Summarising %d item(s) with %s", len(items), config.model)
 
