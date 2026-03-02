@@ -245,6 +245,22 @@ summary:
     Use the exact URL from the 'URL:' field provided for each item.
 
 # ---------------------------------------------------------------------------
+# History & Trend Analysis (Epic 8)
+# ---------------------------------------------------------------------------
+history:
+  # Set to false to disable digest archiving and trend context entirely.
+  enabled: true
+
+  # Number of past daily digests to pass to Gemini as trend context.
+  # Increasing this gives richer comparisons but uses more tokens.
+  history_days: 7
+
+  # Directory (relative to project root) where archived digests are stored.
+  # Each successful send writes history/<YYYY-MM-DD>.txt.
+  # This directory is committed to the repo by the workflow after each run.
+  history_dir: "history"
+
+# ---------------------------------------------------------------------------
 # Email settings (credentials come from environment variables / GitHub Secrets)
 # ---------------------------------------------------------------------------
 email:

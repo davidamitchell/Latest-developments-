@@ -75,7 +75,7 @@ jobs:
           fi
           python -m src.main $ARGS
 
-      - name: Commit updated state file
+      - name: Commit updated state and history
         # Only runs on non-dry-run executions; state file is only written after a
         # successful email send so it may not exist on first run or when all
         # items were skipped.
@@ -83,14 +83,22 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          if [ ! -f state/processed.json ]; then
-            echo "No state file to commit (nothing was processed)"
+          if [ ! -f state/processed.json ] && [ ! -d history ]; then
+            echo "No state or history to commit (nothing was processed)"
             exit 0
           fi
-          git add state/processed.json
+          # Stage state file if it exists
+          if [ -f state/processed.json ]; then
+            git add state/processed.json
+          fi
+          # Stage history directory if it has any txt files
+          if [ -d history ] && find history -maxdepth 1 -name "*.txt" -type f | grep -q .; then
+            git add history/
+          fi
+          TODAY=$(date -u +%Y-%m-%d)
           if git diff --cached --quiet; then
-            echo "State file unchanged — nothing to commit"
+            echo "State and history unchanged — nothing to commit"
           else
-            git commit -m "chore: update processed state after digest run [skip ci]"
+            git commit -m "chore: update state and history ${TODAY} [skip ci]"
             git push origin ${{ github.ref_name }}
           fi

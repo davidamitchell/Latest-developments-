@@ -1,14 +1,14 @@
 # Progress
 
-Last updated: 2026-02-27
+Last updated: 2026-03-02
 
 ---
 
 ## Current Status
 
-**Phase:** Epic 0 — Foundation (all slices done)
+**Phase:** Epic 8 — History & Trend Analysis (all slices done)
 **Active slice:** —
-**Branch:** `copilot/investigate-github-agent-skills`
+**Branch:** `copilot/complete-epic-8`
 
 ---
 
@@ -21,12 +21,47 @@ Last updated: 2026-02-27
 | 4 | Blog / RSS Sources | Done | 5 / 5 slices |
 | 5 | Hacker News | In Progress | 3 / 4 slices |
 | 6 | Configurable Prompt & Polish | **Done** | 10 / 10 slices |
-| 7 | Reliability & Observability | In Progress | 4 / 6 slices |
+| 7 | Reliability & Observability | In Progress | 5 / 6 slices |
+| 8 | History & Trend Analysis | **Done** | 5 / 5 slices |
 | 9 | MCP Tool Configuration | Done | 7 / 7 slices |
 
 ---
 
 ## Work Log
+
+### 2026-03-02 — Session 14
+
+**Completed:**
+- `src/history.py` — new module: `archive_digest(today, text, history_dir)` writes `history/YYYY-MM-DD.txt`; `load_recent_digests(n, history_dir)` returns most-recent-first list of N archived digests. Handles missing directory gracefully.
+- `src/config.py` — `HistoryConfig` dataclass added (`enabled`, `history_days`, `history_dir`); wired into `Config` and `load_config()`.
+- `config/sources.yaml` — `history:` section added (defaults: enabled, 7 days, `history/` directory).
+- `src/summariser.py` — `summarise()` gains `history: list[str] | None` parameter; `_build_history_context()` formats history into system prompt with per-digest 3,000-char truncation and `## Trends` instruction; `_extract_trends()` extracts the Trends section from AI output; `render_html_digest()` renders Trends section between TL;DR and items grid.
+- `src/main.py` — loads historical digests before calling `summarise()`; calls `archive_digest()` after successful email send; skips archiving on `--dry-run`.
+- `.github/workflows/daily-digest.yml` — commit step updated to also stage `history/*.txt` files; commit message updated to include date.
+- `history/.gitkeep` — ensures directory exists in fresh checkouts.
+- `tests/test_history.py` — 16 unit tests covering `archive_digest`, `load_recent_digests`, `history_date_from_path`.
+- `tests/test_summariser.py` — 14 new tests: `TestExtractTrends` (5 tests), `TestRenderHtmlDigestTrends` (4 tests), `TestSummariseWithHistory` (4 tests); `_extract_trends` added to imports.
+- `tests/test_smoke.py` — new smoke test file (slice 7.6); 9 integration-level tests exercising `main()` end-to-end with mocked network. Covers: no-items exit, dry-run behaviour, fetcher failure recovery, archive integration.
+- `tests/test_config.py` — 2 new tests for `HistoryConfig` loading (defaults and custom values).
+- `docs/adr/0014-history-archiving-and-trend-analysis.md` — ADR documenting the file format, config schema extension, summariser API change, and trade-offs.
+- `docs/adr/README.md` — updated with ADR-0014.
+- `AGENTS.md` — Testing section updated to mandate full testing pyramid (unit + smoke/integration); Slice Completion Checklist updated to include pyramid check; new "Continuous Improvement — Always On" section added (active struggle tracking, error logging, mandatory mini-retro in PROGRESS.md).
+- `.github/skills` + `.claude/skills` — submodules advanced to latest commit (`e54136b`) in `davidamitchell/Skills` repo.
+- `BACKLOG.md` — all Epic 8 slices marked `[x]`; slice 7.6 marked `[x]`.
+
+**Key design decisions:**
+- Plain-text archive format: zero new dependencies, human-readable, `git log`-browsable.
+- Per-digest 3,000-char truncation: limits token spend (7 × 3,000 = 21,000 extra tokens per run, within free tier).
+- Trends section is conditional: only rendered in HTML when Gemini outputs `## Trends` (only present when history was provided and substantial enough to compare).
+- `archive_digest()` called only after successful send — ensures history files always represent real emails sent.
+
+**Mini-Retro:**
+- Process worked: explore → plan → tests + implementation → lint → full suite. No rework on core functionality.
+- Two test failures on first run: (1) `test_analysis_text_preserved` had incorrect assumptions about regex boundary behaviour (text without a following `##` header meant "Post-analysis." was captured inside the trends section, not after it) — fixed by adding a `## Analysis` header in the test; (2) `test_pipeline_calls_save_state_after_send` used `send_if_empty=True` but then asserted `save_state` not called — mismatch between test intent and config. Root cause: tests written without thinking through all config interactions. Fix: add a comment explaining the expected behaviour explicitly.
+- Pattern identified: test assertions about "what won't be called" require careful attention to config interactions. Adding comments to test setup that explain *why* a given config value leads to the expected outcome prevents this class of mistake.
+- Skills submodule required manual `git submodule init` before `--remote` update would work — shallow clone from CI had no submodule HEAD. Note for next session: `git submodule init && git submodule update --remote` is the correct sequence.
+
+
 
 ### 2026-02-27 — Session 13
 
