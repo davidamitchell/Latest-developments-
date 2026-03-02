@@ -68,6 +68,17 @@
         "BRAVE_API_KEY": "${BRAVE_API_KEY}"
       }
     },
+    "tavily": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "tavily-mcp@latest"
+      ],
+      "environment": {
+        "TAVILY_API_KEY": "${TAVILY_API_KEY}"
+      }
+    },
     "arxiv": {
       "type": "local",
       "command": [

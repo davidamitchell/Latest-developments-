@@ -1,18 +1,18 @@
-"""YouTube channel fetcher.
+"""YouTube channel fetcher using the YouTube Data API v3.
 
-Discovers recent videos via each channel's public RSS/Atom feed
-(no API key required), then fetches transcripts via youtube-transcript-api.
+Discovers recent videos via the YouTube Data API search endpoint, then fetches
+transcripts via youtube-transcript-api.
 
-The YouTube channel feed format is:
-  https://www.youtube.com/feeds/videos.xml?channel_id=CHANNEL_ID
-It returns up to 15 recent videos as Atom XML, parsed here with stdlib etree.
+Requires YOUTUBE_API_KEY environment variable — set as a GitHub Secret or in
+.env for local runs.  Get a free key at https://console.developers.google.com/
+with the "YouTube Data API v3" enabled (free tier: 10,000 units/day).
 """
 
 from __future__ import annotations
 
 import logging
+import os
 import re
-import xml.etree.ElementTree as ET
 from datetime import datetime
 
 import httpx
@@ -24,87 +24,77 @@ from src.retry import with_backoff
 
 logger = logging.getLogger(__name__)
 
-_FEED_URL = "https://www.youtube.com/feeds/videos.xml?channel_id={channel_id}"
+_SEARCH_API = "https://www.googleapis.com/youtube/v3/search"
 _MAX_CONTENT_CHARS = 12_000
-
-# Atom and YouTube XML namespaces used in the channel feed
-_NS = {
-    "atom": "http://www.w3.org/2005/Atom",
-    "yt": "http://www.youtube.com/xml/schemas/2015",
-    "media": "http://search.yahoo.com/mrss/",
-}
 
 
 class YouTubeFetcher:
     def __init__(self, config: YouTubeConfig) -> None:
         self._config = config
-        self._api = YouTubeTranscriptApi()
+        self._api_key = os.environ.get("YOUTUBE_API_KEY", "")
+        self._transcript_api = YouTubeTranscriptApi()
 
     def fetch(self, already_processed: set[str]) -> list[FetchedItem]:
         if not self._config.enabled or not self._config.channels:
             return []
 
+        if not self._api_key:
+            raise RuntimeError("YOUTUBE_API_KEY is not set — add it as a GitHub Secret or in .env")
+
         items: list[FetchedItem] = []
         for channel in self._config.channels:
-            try:
-                items.extend(self._fetch_channel(channel, already_processed))
-            except Exception:
-                logger.exception("Failed to process channel %r", channel.name)
+            # Errors propagate here so they are captured in the run summary by
+            # _safe_fetch in main.py — no silent swallowing of channel failures.
+            items.extend(self._fetch_channel(channel, already_processed))
         return items
 
     def _fetch_channel(
         self, channel: YouTubeChannel, already_processed: set[str]
     ) -> list[FetchedItem]:
-        url = _FEED_URL.format(channel_id=channel.channel_id)
-        xml_bytes: bytes = with_backoff(
-            lambda: _fetch_url(url),
-            label=f"RSS {channel.name}",
+        search_results = with_backoff(
+            lambda: self._search_channel(channel.channel_id, channel.max_videos),
+            label=f"YouTube API {channel.name}",
         )
 
-        root = ET.fromstring(xml_bytes)
-        entries = root.findall("atom:entry", _NS)
-
-        if not entries:
-            logger.warning("No entries in feed for %r", channel.name)
+        if not search_results:
+            logger.warning(
+                "No videos returned for channel %r (channel_id=%r)"
+                " — verify the channel_id is correct in config/sources.yaml",
+                channel.name,
+                channel.channel_id,
+            )
             return []
 
         items: list[FetchedItem] = []
-        checked = 0
-        for entry in entries:
-            if checked >= channel.max_videos:
-                break
-            checked += 1
-
-            video_id = _text(entry, "yt:videoId", _NS)
+        for result in search_results:
+            video_id = result.get("id", {}).get("videoId", "")
             if not video_id:
                 continue
             if video_id in already_processed:
                 logger.debug("Skip %s — already processed", video_id)
                 continue
 
-            title = _text(entry, "atom:title", _NS) or "Untitled"
+            snippet = result.get("snippet", {})
+            title = snippet.get("title") or "Untitled"
 
             # Skip YouTube Shorts — these are short-form videos tagged #Shorts
             if _is_short(title):
                 logger.debug("Skip %s — appears to be a YouTube Short", video_id)
                 continue
 
-            link_el = entry.find("atom:link[@rel='alternate']", _NS)
-            url_str = link_el.get("href") if link_el is not None else f"https://youtu.be/{video_id}"
-
-            # Use description from the feed as fallback when transcript is unavailable
+            # Use description from the API as fallback when transcript is unavailable
             # (cloud runner IPs are frequently blocked by YouTube's transcript service).
-            description = _text(entry, "media:group/media:description", _NS)
+            description = snippet.get("description", "")
+            published = _parse_date(snippet.get("publishedAt", ""))
 
             transcript = self._get_transcript(video_id, title)
             content = transcript if transcript is not None else description
 
-            published = _parse_date(_text(entry, "atom:published", _NS))
             items.append(
                 FetchedItem(
                     id=video_id,
                     title=title,
-                    url=url_str or f"https://youtu.be/{video_id}",
+                    url=f"https://www.youtube.com/watch?v={video_id}",
                     content=content[:_MAX_CONTENT_CHARS],
                     source_name=channel.name,
                     published=published,
@@ -115,13 +105,29 @@ class YouTubeFetcher:
         logger.info("Channel %r: %d new item(s)", channel.name, len(items))
         return items
 
+    def _search_channel(self, channel_id: str, max_results: int) -> list[dict]:
+        """Call the YouTube Data API search.list to get recent videos for a channel."""
+        params = {
+            "part": "snippet",
+            "channelId": channel_id,
+            "type": "video",
+            "order": "date",
+            "maxResults": min(
+                max_results, 50
+            ),  # YouTube API hard limit is 50; channels with max_videos > 50 are silently capped
+            "key": self._api_key,
+        }
+        response = httpx.get(_SEARCH_API, params=params, timeout=15)
+        response.raise_for_status()
+        return response.json().get("items") or []
+
     def _get_transcript(self, video_id: str, title: str) -> str | None:
         # Prefer human captions; fall back to auto-generated (a.en, a.de, …)
         # youtube-transcript-api will translate auto-generated if needed.
         language_prefs = ("en", "en-US", "en-GB", "a.en")
         try:
             result = with_backoff(
-                lambda: self._api.fetch(video_id, languages=language_prefs),
+                lambda: self._transcript_api.fetch(video_id, languages=language_prefs),
                 label=f"transcript {video_id}",
                 no_retry=(CouldNotRetrieveTranscript,),
             )
@@ -139,17 +145,6 @@ class YouTubeFetcher:
 def _is_short(title: str) -> bool:
     """Return True if the video appears to be a YouTube Short based on its title hashtag."""
     return bool(re.search(r"#shorts?\b", title, re.IGNORECASE))
-
-
-def _fetch_url(url: str) -> bytes:
-    response = httpx.get(url, follow_redirects=True, timeout=15)
-    response.raise_for_status()
-    return response.content
-
-
-def _text(element: ET.Element, path: str, ns: dict[str, str]) -> str:
-    el = element.find(path, ns)
-    return (el.text or "").strip() if el is not None else ""
 
 
 def _parse_date(value: str) -> datetime | None:

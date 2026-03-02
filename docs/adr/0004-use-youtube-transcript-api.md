@@ -1,7 +1,7 @@
 # ADR-0004: Use youtube-transcript-api for YouTube Content
 
 Date: 2026-02-21
-Status: Accepted
+Status: Partially superseded by ADR-0013 (channel discovery now uses YouTube Data API v3; transcript fetching via this library is unchanged)
 
 ## Context
 
@@ -31,6 +31,6 @@ Fall back to **`yt-dlp` + `openai-whisper`** (tiny model, CPU) only when no tran
 - Auto-generated caption quality is lower than Whisper for highly technical content; members-only videos are not accessible
 
 ### Neutral
-- Channel discovery uses YouTube's free RSS feed (`https://www.youtube.com/feeds/videos.xml?channel_id=CHANNEL_ID`) — no YouTube Data API key required
+- Channel discovery previously used YouTube's free RSS feed; as of ADR-0013 it uses the YouTube Data API v3 (`search.list`).
 - The fetcher interface is abstracted behind `src/fetchers/youtube.py`; switching to Whisper for all videos is a one-file change
 - Whisper fallback (for videos without captions) is deferred to a later slice
