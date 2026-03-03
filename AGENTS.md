@@ -45,7 +45,7 @@ Python 3.11+ daily digest pipeline. Fetches AI/ML content from YouTube, RSS feed
 ### Testing
 - Tests live in `tests/`; use `pytest`
 - Mock all network calls and the Gemini API (`patch("src.summariser.genai.Client", ...)`)
-- **Apply the full testing pyramid:** unit tests on all business logic; integration/smoke tests in `tests/test_smoke.py` to exercise the full pipeline end-to-end; unit tests alone are necessary but not sufficient.
+- **Apply the full testing pyramid:** unit tests on all business logic; integration/smoke tests in `tests/test_smoke.py` to exercise the full pipeline end-to-end; unit tests are necessary but not sufficient.
 - **Bug fixes must start with a failing test.** Write a test that reproduces the bug first, confirm it fails, then apply the fix and confirm the test passes. Never commit a bug fix without a companion regression test.
 
 ---
