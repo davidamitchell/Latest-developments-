@@ -25,6 +25,7 @@ Format: [MADR (Markdown Architectural Decision Records)](https://adr.github.io/m
 | [0011](0011-mcp-configuration-manifest.md) | MCP configuration manifest — single source of truth for all AI agent tool configs | Accepted | 2026-02-27 |
 | [0012](0012-agent-skills-via-git-submodules.md) | Agent skills via git submodules — single upstream, two discovery paths | Accepted | 2026-02-27 |
 | [0013](0013-switch-to-youtube-data-api.md) | Switch YouTube channel discovery to YouTube Data API v3 | Accepted | 2026-03-01 |
+| [0014](0014-history-archiving-and-trend-analysis.md) | Digest history archiving and trend analysis | Accepted | 2026-03-02 |
 
 ---
 

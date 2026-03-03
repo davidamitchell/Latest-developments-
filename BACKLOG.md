@@ -133,7 +133,7 @@ Pipeline degrades gracefully; failures are surfaced.
 | 7.3 | Workflow failure sends alert email | `[ ]` | Uses GitHub Actions failure notification |
 | 7.4 | `pytest` suite with mocked network for all fetchers | `[x]` | Tests in `tests/test_fetchers_*.py` cover YouTube, RSS, and HN fetchers with mocked network |
 | 7.5 | `ruff` linting enforced in CI | `[x]` | `.github/workflows/ci.yml` — runs `ruff check` + `ruff format --check` + `pytest` on every push/PR |
-| 7.6 | Smoke tests in `tests/test_smoke.py`: exercise the full pipeline (`main()`) with mocked network; assert exit 0, no crash, digest contains expected structure even when fetchers or Gemini fail | `[ ]` | Catches integration-level regressions that unit tests miss |
+| 7.6 | Smoke tests in `tests/test_smoke.py`: exercise the full pipeline (`main()`) with mocked network; assert exit 0, no crash, digest contains expected structure even when fetchers or Gemini fail | `[x]` | Catches integration-level regressions that unit tests miss |
 
 ---
 
@@ -143,11 +143,11 @@ Each digest is archived; history feeds back into future summaries.
 
 | # | Slice | Status | Notes |
 |---|---|---|---|
-| 8.1 | Archive each digest to `history/YYYY-MM-DD.txt` after a successful send | `[ ]` | Plain-text file per day; committed to repo by workflow alongside `state/processed.json` |
-| 8.2 | Workflow commits `history/` alongside state on each successful run | `[ ]` | Single bot commit: `[skip ci] chore: update state and history YYYY-MM-DD` |
-| 8.3 | Summariser loads the last N digests from `history/` and passes them to Gemini as context | `[ ]` | Enables "compared to recent days, today's dominant theme is…" — N configurable in `sources.yaml` (default 7) |
-| 8.4 | Email **Trends** section: Gemini compares current digest to history and surfaces recurring topics, emerging threads, and notable absences | `[ ]` | Depends on 8.3; placed between TL;DR and per-source sections |
-| 8.5 | `history/` directory browsable as a digest archive (file-per-day, no UI needed) | `[ ]` | Acceptance: 7 consecutive days of files exist in `history/` |
+| 8.1 | Archive each digest to `history/YYYY-MM-DD.txt` after a successful send | `[x]` | `src/history.py` — `archive_digest()` called in `main.py` after successful send; file-per-day committed to repo |
+| 8.2 | Workflow commits `history/` alongside state on each successful run | `[x]` | Single bot commit: `[skip ci] chore: update state and history YYYY-MM-DD` |
+| 8.3 | Summariser loads the last N digests from `history/` and passes them to Gemini as context | `[x]` | `load_recent_digests()` in `src/history.py`; `summarise()` gains `history=` param; N configurable via `history.history_days` (default 7) |
+| 8.4 | Email **Trends** section: Gemini compares current digest to history and surfaces recurring topics, emerging threads, and notable absences | `[x]` | `_extract_trends()` in `summariser.py`; rendered in HTML email between TL;DR and items when `## Trends` section present in AI output |
+| 8.5 | `history/` directory browsable as a digest archive (file-per-day, no UI needed) | `[x]` | `history/.gitkeep` ensures directory exists; committed by workflow after each run |
 
 **Acceptance criteria:** After 7 days the Trends section names at least one theme that genuinely recurs across multiple digests.
 

@@ -66,6 +66,13 @@ class SummaryConfig:
 
 
 @dataclass
+class HistoryConfig:
+    enabled: bool = True
+    history_days: int = 7  # number of past digests to pass as context to Gemini
+    history_dir: str = "history"  # directory relative to project root
+
+
+@dataclass
 class EmailConfig:
     subject: str = "Daily AI Digest — {date}"
     send_if_empty: bool = False
@@ -84,6 +91,7 @@ class Config:
     substack: SubstackConfig = field(default_factory=SubstackConfig)
     hacker_news: HackerNewsConfig = field(default_factory=HackerNewsConfig)
     summary: SummaryConfig = field(default_factory=SummaryConfig)
+    history: HistoryConfig = field(default_factory=HistoryConfig)
     email: EmailConfig = field(default_factory=EmailConfig)
     logging: LoggingConfig = field(default_factory=LoggingConfig)
 
@@ -162,6 +170,13 @@ def load_config(path: Path = Path("config/sources.yaml")) -> Config:
         prompt=sm.get("prompt", ""),
     )
 
+    hi = raw.get("history", {})
+    history = HistoryConfig(
+        enabled=hi.get("enabled", True),
+        history_days=hi.get("history_days", 7),
+        history_dir=hi.get("history_dir", "history"),
+    )
+
     em = raw.get("email", {})
     email = EmailConfig(
         subject=em.get("subject", "Daily AI Digest — {date}"),
@@ -180,6 +195,7 @@ def load_config(path: Path = Path("config/sources.yaml")) -> Config:
         substack=substack,
         hacker_news=hacker_news,
         summary=summary,
+        history=history,
         email=email,
         logging=logging_cfg,
     )

@@ -23,6 +23,7 @@ from src.fetchers.hackernews import HackerNewsFetcher
 from src.fetchers.rss import RSSFetcher
 from src.fetchers.substack import SubstackFetcher
 from src.fetchers.youtube import YouTubeFetcher
+from src.history import archive_digest, load_recent_digests
 from src.logger import setup_logging
 from src.state import load_state, save_state
 from src.summariser import format_run_summary, render_html_digest, summarise
@@ -104,9 +105,17 @@ def main() -> int:
     for item in new_items:
         logger.info("  [%s] %s", item.source_name, item.title)
 
+    # Load historical digests for trend context (Epic 8.3).
+    history: list[str] = []
+    if cfg.history.enabled and cfg.summary.enabled:
+        history_dir = Path(cfg.history.history_dir)
+        history = load_recent_digests(cfg.history.history_days, history_dir)
+        if history:
+            logger.info("Loaded %d historical digest(s) for trend context", len(history))
+
     today = datetime.now(UTC).date()
     run_ts = datetime.now(UTC)
-    digest = summarise(new_items, cfg.summary, today)
+    digest = summarise(new_items, cfg.summary, today, history=history or None)
     digest += format_run_summary(source_counts, source_errors, run_ts)
     html_digest = render_html_digest(new_items, digest, today)
 
@@ -120,6 +129,9 @@ def main() -> int:
         for item in new_items:
             processed.add(item.id)
         save_state(processed)
+        # Archive the digest for future trend context (Epic 8.1).
+        if cfg.history.enabled:
+            archive_digest(today, digest, Path(cfg.history.history_dir))
 
     return 0
 

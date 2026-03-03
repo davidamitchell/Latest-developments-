@@ -93,3 +93,26 @@ def test_null_hacker_news_keywords_does_not_raise(tmp_path: Path) -> None:
     p.write_text("hacker_news:\n  enabled: true\n  keywords:\n")
     cfg = load_config(p)
     assert cfg.hacker_news.keywords == []
+
+
+def test_history_config_defaults(config_path: Path) -> None:
+    cfg = load_config(config_path)
+    assert cfg.history.enabled is True
+    assert cfg.history.history_days == 7
+    assert cfg.history.history_dir == "history"
+
+
+def test_history_config_custom_values(tmp_path: Path) -> None:
+    p = tmp_path / "sources.yaml"
+    p.write_text(
+        """
+history:
+  enabled: false
+  history_days: 14
+  history_dir: "digests"
+"""
+    )
+    cfg = load_config(p)
+    assert cfg.history.enabled is False
+    assert cfg.history.history_days == 14
+    assert cfg.history.history_dir == "digests"

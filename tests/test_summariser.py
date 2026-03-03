@@ -11,6 +11,7 @@ from src.summariser import (
     _extract_item_summaries,
     _extract_item_themes,
     _extract_tldr,
+    _extract_trends,
     _filter_ai_slop,
     format_link_digest,
     format_run_summary,
@@ -558,3 +559,129 @@ class TestRenderHtmlDigestItemSummaries:
         result = render_html_digest([item], digest, today=date(2026, 2, 27))
         assert "<script>" not in result
         assert "&lt;script&gt;" in result
+
+
+class TestExtractTrends:
+    def test_extracts_trends_content(self) -> None:
+        text = "Analysis.\n\n## Trends\n\n- LLMs dominating again.\n- Agents are recurring.\n\n## Next\nMore."
+        trends, clean = _extract_trends(text)
+        assert "LLMs dominating again." in trends
+        assert "Agents are recurring." in trends
+        assert "## Trends" not in clean
+        assert "## Next" in clean
+
+    def test_no_trends_returns_empty_and_original(self) -> None:
+        text = "Just analysis with no trends section."
+        trends, clean = _extract_trends(text)
+        assert trends == ""
+        assert clean == text
+
+    def test_case_insensitive_header(self) -> None:
+        text = "## trends\n\n- A bullet.\n\n## Other\nContent."
+        trends, _ = _extract_trends(text)
+        assert "A bullet." in trends
+
+    def test_stops_before_run_summary_separator(self) -> None:
+        text = "## Trends\n- Key trend.\n\n────────────────────────────────────────\nRun summary\n"
+        trends, clean = _extract_trends(text)
+        assert "Key trend." in trends
+        assert "Run summary" in clean
+
+    def test_analysis_text_preserved(self) -> None:
+        text = "Pre-analysis.\n\n## Trends\n- Trend one.\n\n## Analysis\nPost-analysis."
+        _, clean = _extract_trends(text)
+        assert "Pre-analysis." in clean
+        assert "Post-analysis." in clean
+
+
+class TestRenderHtmlDigestTrends:
+    def test_trends_section_rendered_when_present(self) -> None:
+        item = _make_item(id="v1")
+        digest = "## Trends\n\n- LLMs are everywhere again.\n\nAnalysis text."
+        result = render_html_digest([item], digest, today=date(2026, 3, 1))
+        assert 'class="trends"' in result
+        assert "📈 Trends" in result
+        assert "LLMs are everywhere again." in result
+
+    def test_trends_section_not_in_analysis_area(self) -> None:
+        item = _make_item(id="v1")
+        digest = "## Trends\n\n- Recurring theme.\n\nAnalysis text."
+        result = render_html_digest([item], digest, today=date(2026, 3, 1))
+        assert "## Trends" not in result
+
+    def test_no_trends_div_when_absent(self) -> None:
+        item = _make_item(id="v1")
+        digest = "Just analysis with no trends section."
+        result = render_html_digest([item], digest, today=date(2026, 3, 1))
+        assert 'class="trends"' not in result
+
+    def test_trends_appears_before_items(self) -> None:
+        item = _make_item(id="v1")
+        digest = "## Trends\n\n- Trend here.\n\nAnalysis."
+        result = render_html_digest([item], digest, today=date(2026, 3, 1))
+        trends_pos = result.index('class="trends"')
+        items_pos = result.index('class="card"')
+        assert trends_pos < items_pos
+
+
+class TestSummariseWithHistory:
+    def test_history_included_in_system_prompt(self) -> None:
+        mock_cls = _mock_client()
+        with patch("src.summariser.genai.Client", mock_cls):
+            summarise(
+                [_make_item()],
+                _make_config(),
+                today=date(2026, 3, 1),
+                history=["old digest one", "old digest two"],
+            )
+
+        call_kwargs = mock_cls.return_value.models.generate_content.call_args.kwargs
+        system = call_kwargs["config"].system_instruction
+        assert "HISTORICAL CONTEXT" in system
+        assert "old digest one" in system
+        assert "old digest two" in system
+
+    def test_no_history_uses_normal_prompt(self) -> None:
+        mock_cls = _mock_client()
+        with patch("src.summariser.genai.Client", mock_cls):
+            summarise(
+                [_make_item()],
+                _make_config(),
+                today=date(2026, 3, 1),
+                history=None,
+            )
+
+        call_kwargs = mock_cls.return_value.models.generate_content.call_args.kwargs
+        system = call_kwargs["config"].system_instruction
+        assert "HISTORICAL CONTEXT" not in system
+
+    def test_empty_history_list_uses_normal_prompt(self) -> None:
+        mock_cls = _mock_client()
+        with patch("src.summariser.genai.Client", mock_cls):
+            summarise(
+                [_make_item()],
+                _make_config(),
+                today=date(2026, 3, 1),
+                history=[],
+            )
+
+        call_kwargs = mock_cls.return_value.models.generate_content.call_args.kwargs
+        system = call_kwargs["config"].system_instruction
+        assert "HISTORICAL CONTEXT" not in system
+
+    def test_history_truncated_to_3000_chars(self) -> None:
+        long_digest = "x" * 5000
+        mock_cls = _mock_client()
+        with patch("src.summariser.genai.Client", mock_cls):
+            summarise(
+                [_make_item()],
+                _make_config(),
+                today=date(2026, 3, 1),
+                history=[long_digest],
+            )
+
+        call_kwargs = mock_cls.return_value.models.generate_content.call_args.kwargs
+        system = call_kwargs["config"].system_instruction
+        assert "…[truncated]" in system
+        # The full 5000-char digest must not appear verbatim
+        assert "x" * 5000 not in system

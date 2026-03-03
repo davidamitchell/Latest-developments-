@@ -45,7 +45,7 @@ Python 3.11+ daily digest pipeline. Fetches AI/ML content from YouTube, RSS feed
 ### Testing
 - Tests live in `tests/`; use `pytest`
 - Mock all network calls and the Gemini API (`patch("src.summariser.genai.Client", ...)`)
-- Unit tests on all business logic; integration tests are optional
+- **Apply the full testing pyramid:** unit tests on all business logic; integration/smoke tests in `tests/test_smoke.py` to exercise the full pipeline end-to-end; unit tests alone are necessary but not sufficient.
 - **Bug fixes must start with a failing test.** Write a test that reproduces the bug first, confirm it fails, then apply the fix and confirm the test passes. Never commit a bug fix without a companion regression test.
 
 ---
@@ -172,6 +172,7 @@ Before marking a backlog slice as done:
 - [ ] Code merged to the development branch
 - [ ] `make check` passes (ruff lint + format)
 - [ ] `make test` passes (with mocked network)
+- [ ] Full testing pyramid applied: unit tests for business logic + smoke/integration tests where applicable
 - [ ] `make dry-run` works end-to-end
 - [ ] `PROGRESS.md` updated
 - [ ] Any new ADRs written and indexed
@@ -253,3 +254,46 @@ After completing any task or PR, take two minutes to ask:
 4. **Is this a pattern?** Has this class of issue appeared before? If so, it is a process problem, not a one-off.
 
 The goal is that the next agent working in this repository should not be able to make the same class of mistake. If that is not true after your session, update AGENTS.md before closing.
+
+---
+
+## Continuous Improvement — Always On
+
+Every agent session in this repository is an opportunity to improve the system.
+This is not optional — it is part of every session.
+
+### Active tracking
+
+- **Watch for struggles.** If something took longer than expected, required more
+  than one attempt, or produced an incorrect result on the first try, note it.
+- **Track errors.** If a test failed, a linter caught a bug, or a plan had to
+  change mid-execution, record what happened and why.
+- **Log patterns.** A recurring struggle is a signal that something in the
+  process, instructions, or tooling needs to change.  A one-off is noise;
+  the third occurrence is a mandate to fix the root cause.
+
+### What to do with what you find
+
+- If a coding convention would have prevented a mistake, add it to the
+  "Coding Standards" section above.
+- If a workflow step was missing or unclear, add it to the "Slice Completion
+  Checklist".
+- If an assumption was wrong and could mislead a future agent, add a clarifying
+  note to the relevant section — or write an ADR if the context is significant.
+- If `PROGRESS.md` would have helped (it contained the answer but was stale),
+  update it.
+
+### At the end of every session
+
+Append a **Mini-Retro** block to `PROGRESS.md` under the session's work log
+entry.  It must answer:
+
+1. Did the process work? (test-first cycle, incremental commits, no big-bang
+   changes)
+2. What slowed you down or went wrong?  Root-cause, not symptoms.
+3. What change to process/instructions would prevent the same issue next time?
+4. Is this a pattern (seen before)?
+
+If the session was clean (no mistakes, no rework, no surprises), write that
+explicitly — it confirms the process is working.
+

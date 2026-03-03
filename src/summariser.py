@@ -22,6 +22,10 @@ logger = logging.getLogger(__name__)
 _CONFIG_DIR = Path(__file__).parent.parent / "config"
 _TEMPLATES_DIR = Path(__file__).parent / "templates"
 
+# Maximum characters to include from each historical digest when building the
+# history context block.  Keeps total token spend bounded even with many days of history.
+_MAX_HISTORY_DIGEST_CHARS = 3000
+
 # Load the default prompt from config/prompt.md so it is editable without touching Python.
 try:
     _DEFAULT_PROMPT = (_CONFIG_DIR / "prompt.md").read_text().strip()
@@ -242,6 +246,26 @@ def _extract_tldr(text: str) -> tuple[str, str]:
     return tldr_content, clean_text
 
 
+def _extract_trends(text: str) -> tuple[str, str]:
+    """Extract and remove the ``## Trends`` section from AI output.
+
+    Returns ``(trends_content, clean_text)`` where *trends_content* is the raw text
+    inside the section and *clean_text* has the section stripped.
+    """
+    pattern = re.compile(
+        r"(?:^|\n)\s*## Trends\s*\n(.*?)(?=\n## |\n[─═]{4,}|\Z)",
+        re.DOTALL | re.IGNORECASE,
+    )
+    match = pattern.search(text)
+    if not match:
+        return "", text
+
+    trends_content = match.group(1).strip()
+    start = match.start()
+    clean_text = text[:start].rstrip() + text[match.end() :]
+    return trends_content, clean_text
+
+
 def _plain_to_html(text: str) -> str:
     """Convert lightly-formatted plain text (markdown headers + bold + bullets) to HTML."""
     out: list[str] = []
@@ -321,6 +345,7 @@ def render_html_digest(
     item_themes, display_digest = _extract_item_themes(plain_digest)
     item_summaries, display_digest = _extract_item_summaries(display_digest)
     tldr_content, display_digest = _extract_tldr(display_digest)
+    trends_content, display_digest = _extract_trends(display_digest)
 
     # Apply AI slop filter to the remaining analysis text.
     display_digest = _filter_ai_slop(display_digest)
@@ -330,6 +355,14 @@ def render_html_digest(
     if tldr_content:
         tldr_html = (
             f'<div class="sec">TL;DR</div><div class="tldr">{_plain_to_html(tldr_content)}</div>\n'
+        )
+
+    # --- Trends section (only present when history was used) ---
+    trends_html = ""
+    if trends_content:
+        trends_html = (
+            f'<div class="sec">📈 Trends</div>'
+            f'<div class="trends">{_plain_to_html(trends_content)}</div>\n'
         )
 
     # --- Items section ---
@@ -351,6 +384,7 @@ def render_html_digest(
     content = f"""\
 <div class="hdr"><h1>🤖 Daily AI Digest &mdash; {date_str}</h1></div>
 {tldr_html}
+{trends_html}
 {items_html}
 <div class="sec">AI Analysis</div>
 <div class="analysis">{analysis_html}</div>
@@ -363,6 +397,35 @@ def render_html_digest(
 
 def _digest_header(today: date) -> str:
     return f"Daily AI Digest — {today.strftime('%d %b %Y')}\n{'=' * 40}\n\n"
+
+
+def _build_history_context(history: list[str]) -> str:
+    """Build a history context block to append to the system prompt.
+
+    *history* is a list of plain-text digests, newest first.  The block
+    instructs Gemini to compare today's content to recent days and add a
+    ``## Trends`` section naming recurring topics, emerging threads, and
+    notable absences.
+    """
+    snippets: list[str] = []
+    for i, digest in enumerate(history):
+        # Truncate each historical digest to avoid blowing the context window.
+        truncated = digest[:_MAX_HISTORY_DIGEST_CHARS] + (
+            "…[truncated]" if len(digest) > _MAX_HISTORY_DIGEST_CHARS else ""
+        )
+        snippets.append(f"### Historical digest {i + 1} (most recent first)\n{truncated}")
+
+    history_block = "\n\n".join(snippets)
+    return (
+        "HISTORICAL CONTEXT (last "
+        + str(len(history))
+        + " digest(s) for trend comparison — do NOT re-summarise these):\n\n"
+        + history_block
+        + "\n\nAfter your normal analysis, add a ## Trends section (3–5 bullets) that compares"
+        " today's content to the historical context above."
+        " Name any recurring topics, emerging threads, and notable absences."
+        " If no history is available or the content is too sparse, omit this section."
+    )
 
 
 def format_link_digest(
@@ -391,13 +454,21 @@ def format_link_digest(
     return _digest_header(today) + "\n\n".join(sections)
 
 
-def summarise(items: list[FetchedItem], config: SummaryConfig, today: date | None = None) -> str:
+def summarise(
+    items: list[FetchedItem],
+    config: SummaryConfig,
+    today: date | None = None,
+    history: list[str] | None = None,
+) -> str:
     """
     Return a formatted plain-text digest.
 
     If config.enabled is False, returns a plain link list without calling Gemini.
     Otherwise groups items by source, sends to the Gemini API, and returns the summary.
     Items are truncated at 12,000 chars before reaching this function by the fetcher.
+
+    When *history* is provided (a list of recent plain-text digests, newest first),
+    it is appended to the system prompt so Gemini can surface trend comparisons.
     """
     if not items:
         return ""
@@ -437,6 +508,11 @@ def summarise(items: list[FetchedItem], config: SummaryConfig, today: date | Non
         " attribute claims to their source rather than asserting them as universal facts.\n\n"
     )
     system_prompt = date_context + system_prompt
+
+    if history:
+        history_block = _build_history_context(history)
+        system_prompt = system_prompt + "\n\n" + history_block
+        logger.info("Including %d historical digest(s) as trend context", len(history))
 
     logger.info("Summarising %d item(s) with %s", len(items), config.model)
 
