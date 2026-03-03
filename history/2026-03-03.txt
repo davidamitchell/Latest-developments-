@@ -1,0 +1,39 @@
+Daily AI Digest — 03 Mar 2026
+========================================
+
+Here's a summary of recent AI/ML news for a senior software engineer:
+
+### You Don&#39;t Need SaaS. The $0.10 System That Replaced My AI Workflow (45 Min No-Code Build)
+Source: Nate Jones [YouTube]
+URL: https://www.youtube.com/watch?v=2JiMmye2ezg
+Theme: Local AI Workflow
+Summary: This video explores creating a low-cost, no-code AI workflow to manage conversational context and memory across disparate LLMs like Claude and ChatGPT. It addresses the common challenge of context loss when switching between AI services, offering a practical approach to build a custom, integrated AI assistant without SaaS dependencies. The concrete takeaway is the feasibility of establishing enhanced context management in custom AI applications for significant cost reduction.
+
+### Claude kill count going up
+Source: Wes Roth [YouTube]
+URL: https://www.youtube.com/watch?v=Hzm3D7i3NFk
+Theme: LLM Misuse
+Summary: This video discusses claims that Claude has been used in malicious attacks by Iran, highlighting critical ethical and security concerns for LLM providers. Such incidents underscore the necessity for robust safeguards and policies to prevent powerful AI models from being leveraged for harmful activities. The practical implication is the ongoing challenge for model developers to implement effective misuse detection and prevention mechanisms.
+
+### Anthropic Cowork feature creates 10GB VM bundle on macOS without warning
+Source: Hacker News [Hacker News]
+URL: https://news.ycombinator.com/item?id=47218288
+Theme: LLM Tooling Issues
+Summary: Anthropic's Cowork feature on macOS reportedly installs a 10GB virtual machine bundle without explicit user warning or consent. This incident raises concerns about resource consumption, transparency, and user control within local LLM development environments. It highlights the importance of clear communication and granular configuration options for developers integrating AI tools into their workflows.
+
+### Right-sizes LLM models to your system's RAM, CPU, and GPU
+Source: Hacker News [Hacker News]
+URL: https://news.ycombinator.com/item?id=47211830
+Theme: LLM Resource Optimization
+Summary: The `llmfit` tool aims to dynamically size LLM models to optimally fit a system's available RAM
+
+────────────────────────────────────────
+Run summary
+  UTC timestamp : 2026-03-03 07:34:02 UTC
+  Total new items: 11
+
+  Sources fetched:
+    YouTube: 4 new item(s)
+    Blogs/RSS: 0 new item(s)
+    Hacker News: 7 new item(s)
+────────────────────────────────────────
