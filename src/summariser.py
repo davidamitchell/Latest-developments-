@@ -162,7 +162,24 @@ def _render_item_card(
     elif teaser:
         summary_html = f'<div class="card-summary">{_html.escape(teaser)}</div>'
     elif summary:
-        summary_html = f'<div class="card-summary">{_html.escape(summary)}</div>'
+        # No dedicated teaser from AI — split on the first sentence boundary and
+        # render the expandable pattern so multi-sentence summaries are always
+        # expandable rather than shown as a wall of inline text.
+        first, _, rest = summary.partition(". ")
+        if rest:
+            first_esc = _html.escape(first + ".")
+            summary_esc = _html.escape(summary)
+            summary_html = (
+                f'<div class="card-summary">'
+                f"{first_esc}"
+                f'<details class="card-expand">'
+                f"<summary>\u2026</summary>"
+                f'<span class="card-summary-full">{summary_esc}</span>'
+                f"</details>"
+                f"</div>"
+            )
+        else:
+            summary_html = f'<div class="card-summary">{_html.escape(summary)}</div>'
     else:
         summary_html = ""
 

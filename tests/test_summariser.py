@@ -791,13 +791,27 @@ class TestRenderHtmlDigestExpandableSummary:
         assert "\u2026" in result  # … character inside <summary>
 
     def test_summary_only_renders_plain_card_summary(self) -> None:
-        """When no teaser is present the medium summary shows directly (backward compat)."""
+        """Single-sentence summary with no teaser shows inline (no expand control)."""
         item = _make_item(id="v1")
         digest = "Analysis.\n\n## Item Summaries\n- https://example.com/v1 | Plain summary.\n"
         result = render_html_digest([item], digest, today=date(2026, 2, 27))
         assert "Plain summary." in result
         assert 'class="card-summary"' in result
         assert "<details" not in result
+
+    def test_multi_sentence_summary_only_renders_expandable(self) -> None:
+        """Multi-sentence summary with no teaser is split: first sentence visible, rest on expand."""
+        item = _make_item(id="v1")
+        digest = (
+            "Analysis.\n\n## Item Summaries\n"
+            "- https://example.com/v1 | First sentence. Second sentence here.\n"
+        )
+        result = render_html_digest([item], digest, today=date(2026, 2, 27))
+        assert "First sentence." in result
+        assert "Second sentence here." in result
+        assert "<details" in result
+        assert 'class="card-expand"' in result
+        assert "\u2026" in result
 
     def test_teaser_escaping(self) -> None:
         item = _make_item(id="v1")
