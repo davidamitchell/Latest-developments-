@@ -124,9 +124,17 @@ def _source_badge(item: FetchedItem) -> str:
 
 
 def _render_item_card(
-    item: FetchedItem, theme: str | None = None, summary: str | None = None
+    item: FetchedItem,
+    theme: str | None = None,
+    summary: str | None = None,
+    teaser: str | None = None,
 ) -> str:
-    """Render a single FetchedItem as an HTML card."""
+    """Render a single FetchedItem as an HTML card.
+
+    When both *teaser* and *summary* are provided the card shows the teaser with
+    a ``(…)`` expand control that reveals the medium summary inline.  When only
+    *summary* is provided it is shown directly (legacy / fallback behaviour).
+    """
     title_esc = _html.escape(item.title)
     url_esc = _html.escape(item.url)
     source_esc = _html.escape(item.source_name)
@@ -138,7 +146,25 @@ def _render_item_card(
     search_url = "https://www.google.com/search?" + urllib.parse.urlencode({"q": item.title})
     search_url_esc = _html.escape(search_url)
 
-    summary_html = f'<div class="card-summary">{_html.escape(summary)}</div>' if summary else ""
+    if teaser and summary:
+        # Expandable: teaser visible; medium summary revealed on click.
+        teaser_esc = _html.escape(teaser)
+        summary_esc = _html.escape(summary)
+        summary_html = (
+            f'<div class="card-summary">'
+            f"{teaser_esc}"
+            f'<details class="card-expand">'
+            f"<summary>\u2026</summary>"
+            f'<span class="card-summary-full">{summary_esc}</span>'
+            f"</details>"
+            f"</div>"
+        )
+    elif teaser:
+        summary_html = f'<div class="card-summary">{_html.escape(teaser)}</div>'
+    elif summary:
+        summary_html = f'<div class="card-summary">{_html.escape(summary)}</div>'
+    else:
+        summary_html = ""
 
     return (
         '<div class="card">'
@@ -195,11 +221,11 @@ def _extract_item_summaries(text: str) -> tuple[dict[str, str], str]:
     """Extract and remove the ``## Item Summaries`` section from AI output.
 
     Returns ``(url_to_summary, clean_text)`` where *url_to_summary* maps each
-    item URL to a short summary string and *clean_text* has the section stripped.
+    item URL to a medium-length summary string and *clean_text* has the section stripped.
 
     Expected format (one entry per line)::
 
-        - https://example.com/video | One to two sentence summary.
+        - https://example.com/video | Two to three sentence medium summary.
 
     Lines that do not match the ``<url> | <summary>`` pattern are silently skipped.
     """
@@ -224,6 +250,41 @@ def _extract_item_summaries(text: str) -> tuple[dict[str, str], str]:
     start = match.start()
     clean_text = text[:start].rstrip() + text[match.end() :]
     return summaries, clean_text
+
+
+def _extract_item_teasers(text: str) -> tuple[dict[str, str], str]:
+    """Extract and remove the ``## Item Teasers`` section from AI output.
+
+    Returns ``(url_to_teaser, clean_text)`` where *url_to_teaser* maps each
+    item URL to a single-sentence teaser and *clean_text* has the section stripped.
+
+    Expected format (one entry per line)::
+
+        - https://example.com/video | One punchy teaser sentence.
+
+    Lines that do not match the ``<url> | <teaser>`` pattern are silently skipped.
+    """
+    teasers: dict[str, str] = {}
+    pattern = re.compile(
+        r"(?:^|\n)\s*## Item Teasers\s*\n(.*?)(?=\n## |\n[─═]{4,}|\Z)",
+        re.DOTALL | re.IGNORECASE,
+    )
+    match = pattern.search(text)
+    if not match:
+        return teasers, text
+
+    for line in match.group(1).splitlines():
+        stripped = line.strip().lstrip("- ").strip()
+        if " | " in stripped:
+            url_part, teaser_part = stripped.split(" | ", 1)
+            url_part = url_part.strip()
+            teaser_part = teaser_part.strip()
+            if url_part and teaser_part:
+                teasers[url_part] = teaser_part
+
+    start = match.start()
+    clean_text = text[:start].rstrip() + text[match.end() :]
+    return teasers, clean_text
 
 
 def _extract_tldr(text: str) -> tuple[str, str]:
@@ -264,6 +325,26 @@ def _extract_trends(text: str) -> tuple[str, str]:
     start = match.start()
     clean_text = text[:start].rstrip() + text[match.end() :]
     return trends_content, clean_text
+
+
+def _extract_synthesis(text: str) -> tuple[str, str]:
+    """Extract and remove the ``## Synthesis`` section from AI output.
+
+    Returns ``(synthesis_content, clean_text)`` where *synthesis_content* is the raw text
+    inside the section and *clean_text* has the section stripped.
+    """
+    pattern = re.compile(
+        r"(?:^|\n)\s*## Synthesis\s*\n(.*?)(?=\n## |\n[─═]{4,}|\Z)",
+        re.DOTALL | re.IGNORECASE,
+    )
+    match = pattern.search(text)
+    if not match:
+        return "", text
+
+    synthesis_content = match.group(1).strip()
+    start = match.start()
+    clean_text = text[:start].rstrip() + text[match.end() :]
+    return synthesis_content, clean_text
 
 
 def _plain_to_html(text: str) -> str:
@@ -344,8 +425,10 @@ def render_html_digest(
     # Extract structured sections and remove them from the display digest.
     item_themes, display_digest = _extract_item_themes(plain_digest)
     item_summaries, display_digest = _extract_item_summaries(display_digest)
+    item_teasers, display_digest = _extract_item_teasers(display_digest)
     tldr_content, display_digest = _extract_tldr(display_digest)
     trends_content, display_digest = _extract_trends(display_digest)
+    synthesis_content, display_digest = _extract_synthesis(display_digest)
 
     # Apply AI slop filter to the remaining analysis text.
     display_digest = _filter_ai_slop(display_digest)
@@ -376,10 +459,21 @@ def render_html_digest(
         for item in source_items:
             theme = item_themes.get(item.url)
             summary = item_summaries.get(item.url)
-            items_html += _render_item_card(item, theme=theme, summary=summary) + "\n"
+            teaser = item_teasers.get(item.url)
+            items_html += (
+                _render_item_card(item, theme=theme, summary=summary, teaser=teaser) + "\n"
+            )
 
     # --- AI analysis section ---
     analysis_html = _plain_to_html(display_digest)
+
+    # --- Synthesis section at the bottom ---
+    synthesis_html = ""
+    if synthesis_content:
+        synthesis_html = (
+            f'<div class="sec">🔗 Synthesis</div>'
+            f'<div class="synthesis">{_plain_to_html(synthesis_content)}</div>\n'
+        )
 
     content = f"""\
 <div class="hdr"><h1>🤖 Daily AI Digest &mdash; {date_str}</h1></div>
@@ -388,7 +482,7 @@ def render_html_digest(
 {items_html}
 <div class="sec">AI Analysis</div>
 <div class="analysis">{analysis_html}</div>
-"""
+{synthesis_html}"""
 
     return _EMAIL_HTML_TEMPLATE.replace("<!--%%CSS%%-->", _EMAIL_CSS).replace(
         "<!--%%CONTENT%%-->", content

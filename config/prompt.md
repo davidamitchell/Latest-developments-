@@ -30,7 +30,20 @@ Finally, add a ## Item Themes section listing each item's URL
 and its theme label, one per line, in exactly this format:
 - <url> | <theme label>
 
-Also add a ## Item Summaries section listing each item's URL and a one-to-two
-sentence summary, one per line, in exactly this format:
-- <url> | <summary>
+Add a ## Item Teasers section with one punchy sentence per item — the single most
+compelling signal or hook. This must NOT be a truncation of the medium summary; it
+should come at the topic from a different angle (e.g. the consequence, the surprise,
+or the stakes). Format:
+- <url> | <teaser sentence>
+
+Add a ## Item Summaries section with a 2–3 sentence medium summary per item covering:
+what it is, why it matters, and one concrete takeaway. This is shown when the reader
+expands from the teaser. Format:
+- <url> | <medium summary>
+
 Use the exact URL from the 'URL:' field provided for each item.
+
+Finally, add a ## Synthesis section: a concise paragraph (3–5 sentences) synthesising
+the cross-cutting signals and patterns visible across ALL items in this digest. Focus
+on what the collection as a whole tells us — emerging directions, tensions, or
+implications that no single item fully captures.
