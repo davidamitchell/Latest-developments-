@@ -1,0 +1,35 @@
+Daily AI Digest — 04 Mar 2026
+========================================
+
+Here's a summary of recent AI/ML news for a senior software engineer:
+
+## Nate Jones
+
+### Dario Amodei Made One Mistake. Sam Altman Got $110 Billion. Here&#39;s the Full Story.
+Source: Nate Jones [YouTube]
+URL: https://www.youtube.com/watch?v=pTtueIqrg0Q
+Theme: AI Business Strategy
+Summary: This video discusses the strategic decisions of key figures like Dario Amodei and Sam Altman, examining how specific choices impacted the competitive landscape and funding of major AI companies. It highlights the high-stakes business strategies and their financial implications, such as OpenAI's $110 billion valuation, offering insights into the market dynamics shaping the LLM industry.
+
+## Hacker News
+
+### Claude's Cycles [pdf]
+Source: Hacker News [Hacker News]
+URL: https://news.ycombinator.com/item?id=47230710
+Theme: Theoretical CS
+Summary: This PDF by Donald Knuth titled "Claude's Cycles" explores permutations related to linear feedback shift registers, a topic in theoretical computer science. While not directly about Anthropic's LLM, the Hacker News discussion links this fundamental algorithmic analysis to the recent prominence of "Claude," potentially sparking discussions on foundational concepts underlying modern AI.
+
+### GPT‑5.3 Instant
+Source: Hacker News [Hacker News]
+URL: https://news.ycombinator.com/item?id=472
+
+────────────────────────────────────────
+Run summary
+  UTC timestamp : 2026-03-04 06:20:25 UTC
+  Total new items: 6
+
+  Sources fetched:
+    YouTube: 1 new item(s)
+    Blogs/RSS: 0 new item(s)
+    Hacker News: 5 new item(s)
+────────────────────────────────────────
