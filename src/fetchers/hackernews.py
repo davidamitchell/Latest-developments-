@@ -56,12 +56,15 @@ class HackerNewsFetcher:
             num_comments = story.get("num_comments") or 0
 
             # Content is metadata + links; full article body is deferred to slice 5.2.
+            # Note: Discussion URL is already in the URL: header sent to the AI — do not
+            # repeat it here to avoid the model mistaking the article URL for the item URL.
             content_lines = [
                 f"Points: {points}  |  Comments: {num_comments}",
-                f"Discussion: {hn_url}",
             ]
             if story.get("url"):
-                content_lines.append(f"Article: {story['url']}")
+                content_lines.append(
+                    f"Linked article (context only — not the item URL): {story['url']}"
+                )
             content = "\n".join(content_lines)
 
             published = _parse_hn_date(story.get("created_at"))

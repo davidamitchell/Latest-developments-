@@ -142,7 +142,7 @@ class TestHackerNewsFetcher:
 
         assert [i.id for i in items] == ["1", "3", "2"]
 
-    def test_content_contains_points_and_discussion_link(self) -> None:
+    def test_content_contains_points_and_comments(self) -> None:
         cfg = _make_config()
         hit = _make_hit("42", points=250, num_comments=88)
 
@@ -154,7 +154,24 @@ class TestHackerNewsFetcher:
 
         assert "Points: 250" in items[0].content
         assert "Comments: 88" in items[0].content
-        assert "https://news.ycombinator.com/item?id=42" in items[0].content
+        # Discussion URL is in the URL: header sent to AI — not duplicated in content
+        assert "Discussion:" not in items[0].content
+
+    def test_content_labels_article_url_as_context_only(self) -> None:
+        """Article URL must be labelled so the AI doesn't use it as the item's canonical URL."""
+        cfg = _make_config()
+        hit = _make_hit("42", url="https://external.example.com/article")
+
+        with patch(
+            "src.fetchers.hackernews._fetch_algolia",
+            return_value=_algolia_response([hit]),
+        ):
+            items = HackerNewsFetcher(cfg).fetch(set())
+
+        assert "https://external.example.com/article" in items[0].content
+        # Must NOT appear as a bare 'Article:' label that could be mistaken for item URL
+        assert "Article:" not in items[0].content
+        assert "context only" in items[0].content.lower()
 
     def test_uses_hn_url_when_no_article_url(self) -> None:
         cfg = _make_config()

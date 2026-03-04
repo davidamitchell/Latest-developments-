@@ -38,10 +38,14 @@ or the stakes). Format:
 
 Add a ## Item Summaries section with a 2–3 sentence medium summary per item covering:
 what it is, why it matters, and one concrete takeaway. This is shown when the reader
-expands from the teaser. Format:
+expands from the teaser. For items where content is sparse (e.g. only a score and
+headline), write the teaser and summary from the title alone. Format:
 - <url> | <medium summary>
 
-Use the exact URL from the 'URL:' field provided for each item.
+CRITICAL: In the Item Teasers, Item Summaries, and Item Themes sections the URL for
+each entry MUST be copied exactly from that item's 'URL:' field in the input — never
+substitute any other URL found in the item content (e.g. an article link or discussion
+link). Each item has exactly one canonical URL; use only that.
 
 Finally, add a ## Synthesis section: a concise paragraph (3–5 sentences) synthesising
 the cross-cutting signals and patterns visible across ALL items in this digest. Focus
