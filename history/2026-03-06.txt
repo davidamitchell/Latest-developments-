@@ -1,0 +1,23 @@
+Daily AI Digest — 06 Mar 2026
+========================================
+
+Here's a summary of recent AI/ML news for a senior software engineer:
+
+## Nate Jones
+
+### 3.7 - THE MIDDLEWARE TRAP
+Source: Nate Jones [YouTube]
+URL: https://www.youtube.com/watch?v=gC-BGKD8efA
+Theme: AI Middleware Cost
+Summary: This video discusses the "middleware trap" in AI software stacks, where excessive abstraction layers lead to hidden costs and performance inefficiencies. It highlights that over-engineered middleware can inflate pricing and create bottlenecks, hindering direct interaction with foundational
+
+────────────────────────────────────────
+Run summary
+  UTC timestamp : 2026-03-06 07:31:00 UTC
+  Total new items: 11
+
+  Sources fetched:
+    YouTube: 5 new item(s)
+    Blogs/RSS: 0 new item(s)
+    Hacker News: 6 new item(s)
+────────────────────────────────────────
