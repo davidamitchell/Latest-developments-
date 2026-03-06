@@ -40,4 +40,23 @@ Run summary
     YouTube: 1 new item(s)
     Blogs/RSS: 0 new item(s)
     Hacker News: 0 new item(s)
+Here's a summary of recent AI/ML news for a senior software engineer:
+
+## Nate Jones
+
+### Dario Amodei Made One Mistake. Sam Altman Got $110 Billion. Here&#39;s the Full Story.
+Source: Nate Jones [YouTube]
+URL: https://www.youtube.com/watch?v=pTtueIqrg0Q
+Theme: AI Industry Dynamics
+Summary: This video discusses the competitive landscape between Anthropic and OpenAI, specifically focusing on a strategic "mistake" by Dario Amodei that allegedly led
+
+────────────────────────────────────────
+Run summary
+  UTC timestamp : 2026-03-04 07:30:06 UTC
+  Total new items: 24
+
+  Sources fetched:
+    YouTube: 19 new item(s)
+    Blogs/RSS: 0 new item(s)
+    Hacker News: 5 new item(s)
 ────────────────────────────────────────
