@@ -9,7 +9,9 @@ from src.config import SummaryConfig
 from src.fetchers import FetchedItem
 from src.summariser import (
     _extract_item_summaries,
+    _extract_item_teasers,
     _extract_item_themes,
+    _extract_synthesis,
     _extract_tldr,
     _extract_trends,
     _filter_ai_slop,
@@ -685,3 +687,171 @@ class TestSummariseWithHistory:
         assert "…[truncated]" in system
         # The full 5000-char digest must not appear verbatim
         assert "x" * 5000 not in system
+
+
+class TestExtractItemTeasers:
+    def test_parses_url_teaser_pairs(self) -> None:
+        text = (
+            "Analysis.\n\n## Item Teasers\n"
+            "- https://example.com/v1 | The ban signals escalating API enforcement.\n"
+            "- https://example.com/v2 | Inference costs just halved again.\n"
+        )
+        teasers, clean = _extract_item_teasers(text)
+        assert teasers == {
+            "https://example.com/v1": "The ban signals escalating API enforcement.",
+            "https://example.com/v2": "Inference costs just halved again.",
+        }
+
+    def test_section_removed_from_clean_text(self) -> None:
+        text = "Analysis.\n\n## Item Teasers\n- https://example.com/v1 | A hook.\n"
+        _, clean = _extract_item_teasers(text)
+        assert "## Item Teasers" not in clean
+        assert "A hook." not in clean
+        assert "Analysis." in clean
+
+    def test_no_section_returns_original(self) -> None:
+        text = "Just analysis text with no teasers section."
+        teasers, clean = _extract_item_teasers(text)
+        assert teasers == {}
+        assert clean == text
+
+    def test_skips_malformed_lines(self) -> None:
+        text = "## Item Teasers\n- not valid\n- https://example.com/v1 | Valid teaser.\n"
+        teasers, _ = _extract_item_teasers(text)
+        assert len(teasers) == 1
+        assert teasers["https://example.com/v1"] == "Valid teaser."
+
+    def test_case_insensitive_header(self) -> None:
+        text = "## item teasers\n- https://example.com/v1 | A teaser.\n"
+        teasers, _ = _extract_item_teasers(text)
+        assert teasers["https://example.com/v1"] == "A teaser."
+
+    def test_stops_before_run_summary_separator(self) -> None:
+        text = (
+            "## Item Teasers\n- https://example.com/v1 | Teaser here.\n"
+            "\n────────────────────────────────────────\nRun summary\n"
+        )
+        teasers, clean = _extract_item_teasers(text)
+        assert "https://example.com/v1" in teasers
+        assert "Run summary" in clean
+
+
+class TestExtractSynthesis:
+    def test_extracts_synthesis_content(self) -> None:
+        text = (
+            "Analysis.\n\n## Synthesis\n\nThe items collectively point to rising GPU costs.\n"
+            "\n## Next\nMore."
+        )
+        synthesis, clean = _extract_synthesis(text)
+        assert "rising GPU costs" in synthesis
+        assert "## Synthesis" not in clean
+        assert "## Next" in clean
+
+    def test_no_synthesis_returns_empty_and_original(self) -> None:
+        text = "Just analysis with no synthesis section."
+        synthesis, clean = _extract_synthesis(text)
+        assert synthesis == ""
+        assert clean == text
+
+    def test_case_insensitive_header(self) -> None:
+        text = "## synthesis\n\nPatterns emerging.\n\n## Other\nContent."
+        synthesis, _ = _extract_synthesis(text)
+        assert "Patterns emerging." in synthesis
+
+    def test_stops_before_run_summary_separator(self) -> None:
+        text = (
+            "## Synthesis\nKey signal.\n\n────────────────────────────────────────\nRun summary\n"
+        )
+        synthesis, clean = _extract_synthesis(text)
+        assert "Key signal." in synthesis
+        assert "Run summary" in clean
+
+
+class TestRenderHtmlDigestExpandableSummary:
+    def test_teaser_and_summary_renders_details_element(self) -> None:
+        item = _make_item(id="v1")
+        digest = (
+            "Analysis.\n\n"
+            "## Item Teasers\n- https://example.com/v1 | Short hook sentence.\n\n"
+            "## Item Summaries\n- https://example.com/v1 | Longer medium summary here.\n"
+        )
+        result = render_html_digest([item], digest, today=date(2026, 2, 27))
+        assert "<details" in result
+        assert "Short hook sentence." in result
+        assert "Longer medium summary here." in result
+        assert 'class="card-expand"' in result
+
+    def test_expand_toggle_shows_ellipsis(self) -> None:
+        item = _make_item(id="v1")
+        digest = (
+            "## Item Teasers\n- https://example.com/v1 | Hook.\n\n"
+            "## Item Summaries\n- https://example.com/v1 | Medium.\n"
+        )
+        result = render_html_digest([item], digest, today=date(2026, 2, 27))
+        assert "\u2026" in result  # … character inside <summary>
+
+    def test_summary_only_renders_plain_card_summary(self) -> None:
+        """Single-sentence summary with no teaser shows inline (no expand control)."""
+        item = _make_item(id="v1")
+        digest = "Analysis.\n\n## Item Summaries\n- https://example.com/v1 | Plain summary.\n"
+        result = render_html_digest([item], digest, today=date(2026, 2, 27))
+        assert "Plain summary." in result
+        assert 'class="card-summary"' in result
+        assert "<details" not in result
+
+    def test_multi_sentence_summary_only_renders_expandable(self) -> None:
+        """Multi-sentence summary with no teaser is split: first sentence visible, rest on expand."""
+        item = _make_item(id="v1")
+        digest = (
+            "Analysis.\n\n## Item Summaries\n"
+            "- https://example.com/v1 | First sentence. Second sentence here.\n"
+        )
+        result = render_html_digest([item], digest, today=date(2026, 2, 27))
+        assert "First sentence." in result
+        assert "Second sentence here." in result
+        assert "<details" in result
+        assert 'class="card-expand"' in result
+        assert "\u2026" in result
+
+    def test_teaser_escaping(self) -> None:
+        item = _make_item(id="v1")
+        digest = "## Item Teasers\n- https://example.com/v1 | <script>xss</script>\n"
+        result = render_html_digest([item], digest, today=date(2026, 2, 27))
+        assert "<script>" not in result
+        assert "&lt;script&gt;" in result
+
+    def test_item_teasers_section_not_in_analysis(self) -> None:
+        item = _make_item(id="v1")
+        digest = "Analysis.\n\n## Item Teasers\n- https://example.com/v1 | Hook.\n"
+        result = render_html_digest([item], digest, today=date(2026, 2, 27))
+        assert "## Item Teasers" not in result
+
+
+class TestRenderHtmlDigestSynthesis:
+    def test_synthesis_section_rendered_when_present(self) -> None:
+        item = _make_item(id="v1")
+        digest = "Analysis text.\n\n## Synthesis\n\nKey cross-cutting signal here.\n"
+        result = render_html_digest([item], digest, today=date(2026, 2, 27))
+        assert 'class="synthesis"' in result
+        assert "🔗 Synthesis" in result
+        assert "Key cross-cutting signal here." in result
+
+    def test_synthesis_section_not_in_analysis_area(self) -> None:
+        item = _make_item(id="v1")
+        digest = "## Synthesis\n\nSome synthesis.\n\nAnalysis text."
+        result = render_html_digest([item], digest, today=date(2026, 2, 27))
+        assert "## Synthesis" not in result
+
+    def test_no_synthesis_div_when_absent(self) -> None:
+        item = _make_item(id="v1")
+        digest = "Just analysis with no synthesis section."
+        result = render_html_digest([item], digest, today=date(2026, 2, 27))
+        assert 'class="synthesis"' not in result
+
+    def test_synthesis_appears_after_analysis(self) -> None:
+        item = _make_item(id="v1")
+        digest = "Analysis text.\n\n## Synthesis\n\nSynthesis paragraph."
+        result = render_html_digest([item], digest, today=date(2026, 2, 27))
+        analysis_pos = result.index('class="analysis"')
+        synthesis_pos = result.index('class="synthesis"')
+        assert analysis_pos < synthesis_pos
