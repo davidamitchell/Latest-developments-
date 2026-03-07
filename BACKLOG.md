@@ -6,6 +6,29 @@ Status legend: `[ ]` Not started · `[→]` In progress · `[x]` Done · `[~]` D
 
 ---
 
+## W-0001
+
+status: done
+created: 2026-03-07
+updated: 2026-03-07
+
+### Outcome
+
+Repository structure is standardised: single `.github/copilot-instructions.md` source of truth, `.github/skills` submodule, `sync-skills.yml` workflow, `BACKLOG.md`, `PROGRESS.md`, `CHANGELOG.md`, and `docs/adr/` all present and consistent.
+
+### Context
+
+Standardisation pass to remove `AGENTS.md`/`.claude/` and align with all other repos in the davidamitchell organisation.
+
+### Notes
+
+- `AGENTS.md` content merged into `.github/copilot-instructions.md`
+- `.claude/` directory and `.claude/skills` submodule removed
+- `.gitmodules` and `sync-skills.yml` updated to remove `.claude/skills`
+- ADR-0015 written to record the decision
+
+---
+
 ## Epic 0 — Foundation
 
 | # | Slice | Status | Notes |

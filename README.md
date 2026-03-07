@@ -117,8 +117,10 @@ state/processed.json        deduplication store (committed by CI)
 src/                        pipeline code
 docs/adr/                   architecture decisions
 .github/workflows/          scheduled job
+.github/copilot-instructions.md  agent instructions
+BACKLOG.md                  planned and completed work items
+PROGRESS.md                 append-only session history
+CHANGELOG.md                user-facing change log
 ```
 
-Conventions and agent instructions: `AGENTS.md`
-Planned work: `BACKLOG.md`
-Design decisions: `docs/adr/README.md`
+AI agents should read `.github/copilot-instructions.md` for full project conventions, coding standards, and working methodology.

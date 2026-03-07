@@ -295,3 +295,16 @@ Last updated: 2026-03-02
 | Last successful run | — (dry-run only so far) |
 | Last email sent | — |
 | Consecutive days without failure | — |
+
+---
+
+## 2026-03-07
+
+Standardisation pass: expanded `.github/copilot-instructions.md` from stub to full content (merged from `AGENTS.md`). Deleted `AGENTS.md` and `.claude/` directory (including `.claude/CLAUDE.md` and `.claude/skills` submodule). Updated `.gitmodules` to remove `.claude/skills` entry. Updated `.github/workflows/sync-skills.yml` to only advance `.github/skills` (removed `.claude/skills` steps). Updated `README.md` to remove `AGENTS.md` references and direct AI agents to `.github/copilot-instructions.md`. Added W-0001 to `BACKLOG.md`. Created `CHANGELOG.md`. Added ADR-0015 documenting the decision. Updated `docs/adr/README.md` index.
+
+### Mini-Retro
+
+1. **Did the process work?** Yes — documentation-only changes; no code paths affected. No test failures expected.
+2. **What slowed down or went wrong?** The existing `docs/adr/0001-*.md` was already taken (Python language ADR), so the new ADR was numbered 0015.
+3. **What change would prevent this next time?** Nothing to change — checking existing ADR numbers before assigning is standard practice.
+4. **Is this a pattern?** No — one-off structural alignment.
