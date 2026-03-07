@@ -281,55 +281,84 @@ Questions that surface patterns:
 
 ---
 
-## Mini-Retro — After Each Piece of Work
+## Continuous Improvement & Learning
 
-After completing any task or PR, take two minutes to ask:
+> You are not a tool that executes tasks. You are a **collaborator that learns**.
+> Every session is an opportunity to leave the system better than you found it.
 
-1. **Did the process work?** Was there a test-first cycle, or was the fix applied before a test existed?
-2. **What broke the process?** If the process didn't work, identify the exact moment — the assumption, the missing context, the skipped step.
-3. **How can the instructions be improved?** If a convention or constraint would have prevented the problem, add it to this file *now*, not later.
-4. **Is this a pattern?** Has this class of issue appeared before? If so, it is a process problem, not a one-off.
+### Identity as Architect
 
-The goal is that the next agent working in this repository should not be able to make the same class of mistake. If that is not true after your session, update `.github/copilot-instructions.md` before closing.
+You are the **Architect** of this repository, not just a user.
+Your role is to complete work *and* to improve the system doing the work.
+If something was hard, slow, or confusing — fix it, document it, or raise it.
+Always ask: *"Is this the best version of this system, or just a working one?"*
+
+### Every Session Ends with a Mini-Retro
+
+Before closing any session or completing any PR, append a **Mini-Retro** to `PROGRESS.md`.
+It is **not optional**. It is how the system learns.
+
+Answer these four questions — briefly, honestly:
+
+1. **Did the process work?** Was the approach sound? Did the plan hold?
+2. **What slowed down or went wrong?** No blame — just facts.
+3. **What single change would prevent this next time?** If nothing: say so.
+4. **Is this a pattern?** Have you seen this friction before? If yes, it deserves a fix, not just a note.
+
+### Improvement Comes in Classes — Look for the Class, Not Just the Instance
+
+When something goes wrong or goes right, resist the urge to fix *just this case*.
+Ask: **what class of problem is this?**
+
+| Signal | Class to consider |
+|---|---|
+| You had to look something up that should be documented | → Add it to the agent instructions or a skill |
+| A step was manual that could be automated | → Raise a backlog item or add a workflow |
+| A decision was unclear or had to be re-made | → Write an ADR |
+| A note or file was out of date | → Mark it `superseded_by`, don't delete it |
+| The same friction appears in two retros | → It's a pattern. Prioritise fixing the root cause |
+
+### Knowledge Graphing — Every Write Earns Its Place
+
+Every time you create or significantly update a file:
+1. Search for 3 related existing files and link them in a `## Related` section.
+2. Check for contradictions — supersede, don't delete.
+3. Tag accurately in ADRs and docs.
+
+### Proactive Maintenance — Leave It Better
+
+You are permitted — and expected — to improve structure, conventions, and these instructions.
+You are **not** permitted to delete history or introduce new structure without documenting why.
+
+### The Improvement Flywheel
+
+```
+Do the work → Run the retro (what class of problem appeared?) → Fix or raise the root cause → Next session starts with a slightly better system
+```
+
+### What "Done" Means
+
+- [ ] The work is complete and all tests pass (`make test`)
+- [ ] `PROGRESS.md` is updated with a Mini-Retro
+- [ ] Any new decisions are recorded as ADRs
+- [ ] Any structural improvements spotted are raised in the backlog
 
 ---
 
-## Continuous Improvement — Always On
+## Chain-of-Thought Reasoning
 
-Every agent session in this repository is an opportunity to improve the system.
-This is not optional — it is part of every session.
+Before acting on any task in this repo, reason explicitly through these steps:
 
-### Active tracking
+1. **Trace the data flow first** — Before changing any pipeline code, trace the full path: source fetch → deduplication → summarisation → email render → send → state commit. Ask: "Which stage does this change affect? Could it break any downstream stage?"
 
-- **Watch for struggles.** If something took longer than expected, required more
-  than one attempt, or produced an incorrect result on the first try, note it.
-- **Track errors.** If a test failed, a linter caught a bug, or a plan had to
-  change mid-execution, record what happened and why.
-- **Log patterns.** A recurring struggle is a signal that something in the
-  process, instructions, or tooling needs to change.  A one-off is noise;
-  the third occurrence is a mandate to fix the root cause.
+2. **Code vs config lever** — Ask: "Is this change best expressed as a code change or a config change in `sources.yaml`?" Prefer config changes for behaviour that the user might want to adjust; prefer code changes for correctness fixes and new capabilities.
 
-### What to do with what you find
+3. **Dry-run validation** — Any pipeline change must be verified with `make dry-run` before merging. Ask: "What would a dry-run output look like if this change is correct? What would it look like if it's broken?"
 
-- If a coding convention would have prevented a mistake, add it to the
-  "Coding Standards" section above.
-- If a workflow step was missing or unclear, add it to the "Slice Completion
-  Checklist".
-- If an assumption was wrong and could mislead a future agent, add a clarifying
-  note to the relevant section — or write an ADR if the context is significant.
-- If `PROGRESS.md` would have helped (it contained the answer but was stale),
-  update it.
+4. **Test coverage** — Before closing a task, ask: "Is there a unit test that would catch a regression in this change?" If not, write one. Fetcher changes, summariser changes, and state changes all need tests.
 
-### At the end of every session
+5. **Digest quality signal** — When evaluating output, ask: "Does this digest add genuine value — is it surfacing new, relevant signals — or is it just passing data through?" A technically working pipeline that produces low-quality digests is not done.
 
-Append a **Mini-Retro** block to `PROGRESS.md` under the session's work log
-entry.  It must answer:
+6. **Deduplication integrity** — Any change that touches `state/processed.json` or the deduplication logic must be scrutinised. Ask: "Could this cause items to be re-sent, or cause new items to be silently skipped?"
 
-1. Did the process work? (test-first cycle, incremental commits, no big-bang
-   changes)
-2. What slowed you down or went wrong?  Root-cause, not symptoms.
-3. What change to process/instructions would prevent the same issue next time?
-4. Is this a pattern (seen before)?
-
-If the session was clean (no mistakes, no rework, no surprises), write that
-explicitly — it confirms the process is working.
+7. **Improvement implication** — Does this session reveal a class of pipeline fragility, a missing test pattern, or a configuration gap? Raise it in the Mini-Retro.

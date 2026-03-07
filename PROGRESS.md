@@ -1,6 +1,6 @@
 # Progress
 
-Last updated: 2026-03-02
+Last updated: 2026-03-07
 
 ---
 
@@ -308,3 +308,17 @@ Standardisation pass: expanded `.github/copilot-instructions.md` from stub to fu
 2. **What slowed down or went wrong?** The existing `docs/adr/0001-*.md` was already taken (Python language ADR), so the new ADR was numbered 0015.
 3. **What change would prevent this next time?** Nothing to change — checking existing ADR numbers before assigning is standard practice.
 4. **Is this a pattern?** No — one-off structural alignment.
+
+## 2026-03-07 — Continuous Improvement & Learning framework
+
+**Completed:**
+- `.github/copilot-instructions.md` — replaced old "Mini-Retro — After Each Piece of Work" and "Continuous Improvement — Always On" sections with the unified **Continuous Improvement & Learning** framework (Identity as Architect, Every Session Ends with a Mini-Retro, Improvement Classes table, Knowledge Graphing, Proactive Maintenance, Improvement Flywheel, What "Done" Means).
+- `.github/copilot-instructions.md` — added new **Chain-of-Thought Reasoning** section with 7 pipeline-specific reasoning steps (data-flow trace, code vs config lever, dry-run validation, test coverage, digest quality signal, deduplication integrity, improvement implication).
+- `CHANGELOG.md` — added entries under `## [Unreleased]` for this change.
+
+### Mini-Retro
+
+1. **Did the process work?** Yes — documentation-only change; replaced two superseded sections with the canonical unified framework.
+2. **What slowed down or went wrong?** Nothing. The old sections were clearly identified and the replacement was a clean cut.
+3. **What change would prevent this next time?** Nothing to change — structural updates to agent instructions should continue to follow the same pattern: find, remove superseded content, insert new canonical content.
+4. **Is this a pattern?** No — first time standardising to this specific framework.
