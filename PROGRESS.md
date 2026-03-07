@@ -322,3 +322,20 @@ Standardisation pass: expanded `.github/copilot-instructions.md` from stub to fu
 2. **What slowed down or went wrong?** Nothing. The old sections were clearly identified and the replacement was a clean cut.
 3. **What change would prevent this next time?** Nothing to change — structural updates to agent instructions should continue to follow the same pattern: find, remove superseded content, insert new canonical content.
 4. **Is this a pattern?** No — first time standardising to this specific framework.
+
+## 2026-03-07 — Align copilot-instructions.md with personal Copilot instructions
+
+**Completed:**
+- `.github/copilot-instructions.md` — fixed `remove-ai-slop` skill description ("Post-processing AI-generated text to reduce detection signals" → "Removing hollow language from prose before committing").
+- `.github/copilot-instructions.md` — added missing `Missing skill` row to the signal table ("Add to backlog; do not synthesise a substitute").
+- `.github/copilot-instructions.md` — added two missing items to the "What Done Means" checklist: `CHANGELOG.md updated if behaviour changed` and `remove-ai-slop run on committed prose`.
+- `.github/copilot-instructions.md` — added action mandate after the four mini-retro questions ("Do not just answer — make the change...").
+- `.github/copilot-instructions.md` — replaced hollow opening quote in "Identity as Architect" with direct instruction.
+- `.github/copilot-instructions.md` — added skills fallback line after the Agent Skills table.
+
+### Mini-Retro
+
+1. **Did the process work?** Yes — documentation-only changes; six targeted edits aligned cross-repo standard sections without touching repo-specific content.
+2. **What slowed down or went wrong?** Nothing. All six changes were straightforward textual edits.
+3. **What change would prevent this next time?** Nothing to change — the problem statement was precise and the target locations were unambiguous.
+4. **Is this a pattern?** No — first alignment pass against personal Copilot instructions.

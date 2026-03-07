@@ -182,12 +182,14 @@ Skills live in `.github/skills/<name>/SKILL.md`. GitHub Copilot discovers them a
 | `citation-discipline` | Writing research or reports where every claim must be sourced |
 | `code-review` | Reviewing code changes for correctness, style, and security |
 | `decisions` | Writing ADRs using the MADR format |
-| `remove-ai-slop` | Post-processing AI-generated text to reduce detection signals |
+| `remove-ai-slop` | Removing hollow language from prose before committing |
 | `research` | Investigating a topic with recursive decomposition and verification |
 | `speculation-control` | Producing factual writing that requires clear epistemic discipline |
 | `strategic-persuasion` | Building audience-targeted persuasive content |
 | `strategy-author` | Producing or reviewing strategy documents |
 | `technical-writer` | Writing or improving technical documentation |
+
+If no skill fits, note the gap in `BACKLOG.md` and proceed without synthesising a substitute.
 
 `.github/skills` is a git submodule tracking [`davidamitchell/Skills`](https://github.com/davidamitchell/Skills). A weekly workflow (`.github/workflows/sync-skills.yml`) advances the submodule pointer to the latest commit. Run the workflow manually to pull immediately. To add a new skill, add it to the Skills repo first; it will be picked up on the next sync.
 
@@ -283,8 +285,7 @@ Questions that surface patterns:
 
 ## Continuous Improvement & Learning
 
-> You are not a tool that executes tasks. You are a **collaborator that learns**.
-> Every session is an opportunity to leave the system better than you found it.
+> Complete the work. Improve the system. If something was hard, slow, or confusing — fix it, document it, or raise it.
 
 ### Identity as Architect
 
@@ -305,6 +306,8 @@ Answer these four questions — briefly, honestly:
 3. **What single change would prevent this next time?** If nothing: say so.
 4. **Is this a pattern?** Have you seen this friction before? If yes, it deserves a fix, not just a note.
 
+> Do not just answer — make the change. If the answer is "document it", document it now. If it is "add a backlog item", add it now.
+
 ### Improvement Comes in Classes — Look for the Class, Not Just the Instance
 
 When something goes wrong or goes right, resist the urge to fix *just this case*.
@@ -317,6 +320,7 @@ Ask: **what class of problem is this?**
 | A decision was unclear or had to be re-made | → Write an ADR |
 | A note or file was out of date | → Mark it `superseded_by`, don't delete it |
 | The same friction appears in two retros | → It's a pattern. Prioritise fixing the root cause |
+| Missing skill | Add to backlog; do not synthesise a substitute |
 
 ### Knowledge Graphing — Every Write Earns Its Place
 
@@ -342,6 +346,8 @@ Do the work → Run the retro (what class of problem appeared?) → Fix or raise
 - [ ] `PROGRESS.md` is updated with a Mini-Retro
 - [ ] Any new decisions are recorded as ADRs
 - [ ] Any structural improvements spotted are raised in the backlog
+- [ ] `CHANGELOG.md` updated if behaviour changed
+- [ ] `remove-ai-slop` run on committed prose
 
 ---
 
