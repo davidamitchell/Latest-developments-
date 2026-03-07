@@ -7,17 +7,13 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Added
-- `.github/copilot-instructions.md` (full content, replaces AGENTS.md stub)
-- `BACKLOG.md` work item W-0001 for the standardisation pass
+- `.github/copilot-instructions.md`: unified **Continuous Improvement & Learning** framework (supersedes old Mini-Retro and Continuous Improvement — Always On sections)
+- `.github/copilot-instructions.md`: **Chain-of-Thought Reasoning** section with 7 pipeline-specific reasoning steps
 - `PROGRESS.md` entry for 2026-03-07 session
-- `CHANGELOG.md` (this file)
-- `docs/adr/0015-standardise-agent-instructions.md`
-
-### Removed
-- `AGENTS.md` (content moved to `.github/copilot-instructions.md`)
-- `.claude/` directory and `.claude/skills` submodule
 
 ### Changed
-- `.gitmodules`: removed `.claude/skills` entry
-- `.github/workflows/sync-skills.yml`: removed `.claude/skills` sync step; simplified to single submodule
-- `README.md`: updated to reflect current structure; AI agents directed to `.github/copilot-instructions.md`
+- `.github/copilot-instructions.md`: replaced "Mini-Retro — After Each Piece of Work" and "Continuous Improvement — Always On" sections with unified **Continuous Improvement & Learning** framework
+
+### Removed
+- `.github/copilot-instructions.md`: old "Mini-Retro — After Each Piece of Work" section (superseded by unified framework)
+- `.github/copilot-instructions.md`: old "Continuous Improvement — Always On" section (superseded by unified framework)
