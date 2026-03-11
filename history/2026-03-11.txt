@@ -1,0 +1,35 @@
+Daily AI Digest — 11 Mar 2026
+========================================
+
+## Nate Jones
+
+### Stop accepting AI output that &quot;looks right.&quot; The other 17% is everything and nobody is ready for it.
+Source: Nate Jones [YouTube]
+URL: https://www.youtube.com/watch?v=-FhtPUkXKO4
+Theme: AI output validation
+Summary: This video argues against superficial acceptance of AI outputs, emphasizing the critical importance of scrutinizing the "other 17%" of flawed or incorrect results. It suggests that over-reliance on seemingly correct AI output leads to significant downstream issues for which many organizations are unprepared. Robust validation and human oversight are crucial for mitigating hidden errors and ensuring reliability, especially in high-stakes applications.
+
+### Your AI Buddy Doesn&#39;t Work Here Anymore #futureofwork #ai #personalai
+Source: Nate Jones [YouTube]
+URL: https://www.youtube.com/watch?v=AZ-ACn6dOIY
+Theme: AI in Workforce
+Summary: This video discusses a shift in how AI is integrated into the workplace, moving beyond individual "AI buddies" towards more systemic or embedded AI solutions. It suggests that focusing solely on personal AI tools misses the broader organizational transformation where AI redefines team structures and workflows. Businesses need to consider AI's company-wide impact on processes and roles, beyond individual productivity gains.
+
+---
+
+## Wes Roth
+
+### this EX-OPENAI RESEARCHER just released it...
+Source: Wes Roth [YouTube]
+URL: https://www.youtube.com/watch?v=tUk
+
+────────────────────────────────────────
+Run summary
+  UTC timestamp : 2026-03-11 07:35:02 UTC
+  Total new items: 9
+
+  Sources fetched:
+    YouTube: 3 new item(s)
+    Blogs/RSS: 0 new item(s)
+    Hacker News: 6 new item(s)
+────────────────────────────────────────
