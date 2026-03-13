@@ -1,0 +1,36 @@
+Daily AI Digest — 13 Mar 2026
+========================================
+
+Here's a summary of recent AI/ML news for a senior software engineer:
+
+## Nate Jones
+
+### Why AI agents need every guardrail made explicit! #ai #aiagents #futureofwork
+Source: Nate Jones [YouTube]
+Theme: AI Agent Safety
+Summary: This video argues that AI agents require explicitly defined guardrails to prevent unintended actions and ensure safe operation. It highlights that implicit assumptions or poorly defined boundaries can lead to agents exceeding their intended scope or causing harm. Developers must prioritize clear, explicit policy definition over emergent behavior for reliable agent deployment.
+
+### 4,000 People Lost Their Jobs At Block. Dorsey Blamed AI. Here&#39;s What Actually Happened.
+Source: Nate Jones [YouTube]
+Theme: AI Workforce Impact
+Summary: This video analyzes the reported job losses at Block, investigating whether AI was the direct cause as suggested by Dorsey or if other factors were at play. It dissects the nuances of how technological shifts, including AI adoption, contribute to workforce adjustments beyond simple automation. The takeaway is to critically examine claims about AI-driven job displacement, considering broader economic and strategic decisions.
+
+---
+
+## Wes Roth
+
+### this EX-OPENAI RESEARCHER just released it | Brain Cells Play Doom | Fly in the Matrix
+Source: Wes Roth [YouTube]
+Theme: Biological Computing
+Summary: This video discusses novel research, potentially from an ex-Open
+
+────────────────────────────────────────
+Run summary
+  UTC timestamp : 2026-03-13 07:36:22 UTC
+  Total new items: 11
+
+  Sources fetched:
+    YouTube: 3 new item(s)
+    Blogs/RSS: 0 new item(s)
+    Hacker News: 8 new item(s)
+────────────────────────────────────────
