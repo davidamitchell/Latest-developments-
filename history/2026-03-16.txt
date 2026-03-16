@@ -1,0 +1,27 @@
+Daily AI Digest — 16 Mar 2026
+========================================
+
+Here's a summary of recent AI/ML news for a senior software engineer:
+
+## Nate Jones
+
+### She quit, picked up AI, and shipped in 30 days what her team planned for Q3.
+Source: Nate Jones [YouTube]
+Theme: AI Productivity
+Summary: This video likely illustrates a case where an individual, leveraging AI tools, achieved in 30 days what a traditional team planned for an entire quarter. It highlights AI's potential for dramatic individual productivity gains and expedited project delivery. The takeaway is that AI empowers small teams or individuals to achieve disproportionate output, challenging conventional project timelines and resource allocation.
+
+### Why messy teams outperform perfectly planned ones #ai #futureofwork #chatgpt
+Source: Nate Jones [YouTube]
+Theme: AI Team Dynamics
+Summary: This video likely argues that teams embracing
+
+────────────────────────────────────────
+Run summary
+  UTC timestamp : 2026-03-16 08:00:03 UTC
+  Total new items: 6
+
+  Sources fetched:
+    YouTube: 2 new item(s)
+    Blogs/RSS: 0 new item(s)
+    Hacker News: 4 new item(s)
+────────────────────────────────────────
