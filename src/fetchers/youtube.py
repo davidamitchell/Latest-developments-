@@ -17,6 +17,7 @@ from datetime import datetime
 
 import httpx
 from youtube_transcript_api import CouldNotRetrieveTranscript, YouTubeTranscriptApi
+from youtube_transcript_api.proxies import GenericProxyConfig, WebshareProxyConfig
 
 from src.config import YouTubeChannel, YouTubeConfig
 from src.fetchers import FetchedItem
@@ -28,11 +29,41 @@ _SEARCH_API = "https://www.googleapis.com/youtube/v3/search"
 _MAX_CONTENT_CHARS = 12_000
 
 
+def _build_proxy_config() -> WebshareProxyConfig | GenericProxyConfig | None:
+    """Build a proxy config from environment variables, or return None.
+
+    Priority:
+    1. WEBSHARE_PROXY_USERNAME + WEBSHARE_PROXY_PASSWORD → WebshareProxyConfig
+       (residential rotating proxies; recommended for bypassing YouTube IP blocks)
+    2. YOUTUBE_PROXY_URL → GenericProxyConfig
+       (arbitrary HTTP/HTTPS proxy, e.g. a self-hosted Squid or similar)
+    3. Neither set → no proxy (default, will be blocked on cloud runners)
+
+    Set these as GitHub Secrets to enable transcript fetching from GitHub Actions.
+    """
+    webshare_user = os.environ.get("WEBSHARE_PROXY_USERNAME", "")
+    webshare_pass = os.environ.get("WEBSHARE_PROXY_PASSWORD", "")
+    if webshare_user and webshare_pass:
+        logger.debug("Transcript API: using Webshare proxy (username=%r)", webshare_user)
+        return WebshareProxyConfig(
+            proxy_username=webshare_user,
+            proxy_password=webshare_pass,
+        )
+
+    proxy_url = os.environ.get("YOUTUBE_PROXY_URL", "")
+    if proxy_url:
+        logger.debug("Transcript API: using generic proxy %r", proxy_url)
+        return GenericProxyConfig(http_url=proxy_url, https_url=proxy_url)
+
+    logger.debug("Transcript API: no proxy configured — cloud runner IPs may be blocked")
+    return None
+
+
 class YouTubeFetcher:
     def __init__(self, config: YouTubeConfig) -> None:
         self._config = config
         self._api_key = os.environ.get("YOUTUBE_API_KEY", "")
-        self._transcript_api = YouTubeTranscriptApi()
+        self._transcript_api = YouTubeTranscriptApi(proxy_config=_build_proxy_config())
 
     def fetch(self, already_processed: set[str]) -> list[FetchedItem]:
         if not self._config.enabled or not self._config.channels:

@@ -339,3 +339,21 @@ Standardisation pass: expanded `.github/copilot-instructions.md` from stub to fu
 2. **What slowed down or went wrong?** Nothing. All six changes were straightforward textual edits.
 3. **What change would prevent this next time?** Nothing to change — the problem statement was precise and the target locations were unambiguous.
 4. **Is this a pattern?** No — first alignment pass against personal Copilot instructions.
+
+## 2026-03-17 — YouTube transcript proxy support
+
+**Completed:**
+- Diagnosed root cause: CI logs confirmed `IpBlocked` exceptions on every video — GitHub Actions AWS IPs are blocked by YouTube's transcript endpoint. Fallback was using brief `snippet.description` (100–200 chars) rather than full transcripts.
+- Verified research finding: `youtube-transcript-api >= 1.x` ships first-class `WebshareProxyConfig` and `GenericProxyConfig` on `YouTubeTranscriptApi.__init__(proxy_config=...)`. No new dependency needed.
+- Added `_build_proxy_config()` helper to `src/fetchers/youtube.py`; reads `WEBSHARE_PROXY_USERNAME` + `WEBSHARE_PROXY_PASSWORD` (Webshare wins) or `YOUTUBE_PROXY_URL` (generic fallback), or `None` (no proxy — existing behaviour).
+- Added 4 new tests in `TestYouTubeFetcherProxyConfig` (wrote failing tests first, then implemented fix — per issue mandate).
+- All 255 tests pass; linter clean.
+- `docs/adr/0016-youtube-transcript-proxy-support.md` written and indexed.
+- `CHANGELOG.md` updated.
+
+### Mini-Retro
+
+1. **Did the process work?** Yes — followed issue mandate strictly: checked logs first, checked commit history, wrote failing tests before writing code. Fix was 3 lines of production code plus a 30-line helper function.
+2. **What slowed down or went wrong?** The internal attribute for verifying proxy config is `_fetcher._proxy_config` (with underscore prefix), not `.proxy_config`. First test draft used the wrong attribute; caught immediately by running the tests before coding.
+3. **What change would prevent this next time?** Inspect library internals before writing tests against them.
+4. **Is this a pattern?** No — first time wiring proxy config into this fetcher.

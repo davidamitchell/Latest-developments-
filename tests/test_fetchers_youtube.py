@@ -268,6 +268,78 @@ class TestYouTubeFetcher:
         assert items == []
 
 
+class TestYouTubeFetcherProxyConfig:
+    """Tests for proxy configuration support in YouTubeFetcher.
+
+    YouTube blocks transcript requests from cloud/datacenter IPs (GitHub Actions).
+    The youtube-transcript-api library supports proxy configuration via
+    WebshareProxyConfig (residential proxy service) or GenericProxyConfig
+    (arbitrary HTTP/HTTPS proxy URL).  These tests verify that YouTubeFetcher
+    reads the relevant env vars and wires them into the transcript API.
+    """
+
+    def test_no_proxy_when_no_env_vars_set(self) -> None:
+        """Default: no proxy config when proxy env vars are absent."""
+        cfg = _make_config()
+        with patch.dict("os.environ", {}, clear=False):
+            # Ensure proxy vars are absent
+            import os
+
+            os.environ.pop("WEBSHARE_PROXY_USERNAME", None)
+            os.environ.pop("WEBSHARE_PROXY_PASSWORD", None)
+            os.environ.pop("YOUTUBE_PROXY_URL", None)
+            fetcher = YouTubeFetcher(cfg)
+        assert fetcher._transcript_api._fetcher._proxy_config is None
+
+    def test_webshare_proxy_used_when_env_vars_set(self) -> None:
+        """When WEBSHARE_PROXY_USERNAME and WEBSHARE_PROXY_PASSWORD are set,
+        YouTubeTranscriptApi is initialised with a WebshareProxyConfig."""
+        from youtube_transcript_api.proxies import WebshareProxyConfig
+
+        cfg = _make_config()
+        with patch.dict(
+            "os.environ",
+            {"WEBSHARE_PROXY_USERNAME": "user123", "WEBSHARE_PROXY_PASSWORD": "pass456"},
+        ):
+            fetcher = YouTubeFetcher(cfg)
+
+        proxy = fetcher._transcript_api._fetcher._proxy_config
+        assert isinstance(proxy, WebshareProxyConfig)
+
+    def test_generic_proxy_used_when_youtube_proxy_url_set(self) -> None:
+        """When YOUTUBE_PROXY_URL is set, YouTubeTranscriptApi is initialised
+        with a GenericProxyConfig using that URL for both http and https."""
+        from youtube_transcript_api.proxies import GenericProxyConfig
+
+        cfg = _make_config()
+        with patch.dict(
+            "os.environ",
+            {"YOUTUBE_PROXY_URL": "http://myproxy.example.com:8080"},
+        ):
+            fetcher = YouTubeFetcher(cfg)
+
+        proxy = fetcher._transcript_api._fetcher._proxy_config
+        assert isinstance(proxy, GenericProxyConfig)
+
+    def test_webshare_takes_precedence_over_generic_proxy(self) -> None:
+        """When both WEBSHARE_* and YOUTUBE_PROXY_URL are set, Webshare wins."""
+        from youtube_transcript_api.proxies import WebshareProxyConfig
+
+        cfg = _make_config()
+        with patch.dict(
+            "os.environ",
+            {
+                "WEBSHARE_PROXY_USERNAME": "user",
+                "WEBSHARE_PROXY_PASSWORD": "pass",
+                "YOUTUBE_PROXY_URL": "http://other.example.com:8080",
+            },
+        ):
+            fetcher = YouTubeFetcher(cfg)
+
+        proxy = fetcher._transcript_api._fetcher._proxy_config
+        assert isinstance(proxy, WebshareProxyConfig)
+
+
 class TestIsShort:
     def test_shorts_hashtag_detected(self) -> None:
         assert _is_short("My video #Shorts") is True

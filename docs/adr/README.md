@@ -27,6 +27,7 @@ Format: [MADR (Markdown Architectural Decision Records)](https://adr.github.io/m
 | [0013](0013-switch-to-youtube-data-api.md) | Switch YouTube channel discovery to YouTube Data API v3 | Accepted | 2026-03-01 |
 | [0014](0014-history-archiving-and-trend-analysis.md) | Digest history archiving and trend analysis | Accepted | 2026-03-02 |
 | [0015](0015-standardise-agent-instructions.md) | Standardise agent instruction files | Accepted | 2026-03-07 |
+| [0016](0016-youtube-transcript-proxy-support.md) | YouTube transcript proxy support | Accepted | 2026-03-17 |
 
 ---
 

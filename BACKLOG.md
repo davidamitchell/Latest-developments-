@@ -198,7 +198,7 @@ Manage MCP server configs for all AI agent environments from a single manifest.
 
 | Idea | Notes |
 |---|---|
-| **Research: transcript alternatives for cloud runners** | GitHub Actions IPs are blocked by YouTube's transcript service. Current fallback uses the feed description. Options to evaluate: (1) `youtube-transcript-api` proxy support (pass `proxies=` kwarg); (2) Supadata.ai — paid transcript-as-a-service API; (3) self-hosted runner on a residential IP; (4) download audio and run Whisper locally (high compute); (5) YouTube Data API v3 captions endpoint (requires OAuth, same IP may still be blocked). Goal: full transcript content in AI summaries, not just descriptions |
+| **~~Research: transcript alternatives for cloud runners~~** | Resolved (2026-03-17): `youtube-transcript-api` `WebshareProxyConfig` / `GenericProxyConfig` via `WEBSHARE_PROXY_USERNAME` + `WEBSHARE_PROXY_PASSWORD` or `YOUTUBE_PROXY_URL` env vars. See ADR-0016. yt-dlp+Whisper blocked by same CDN; cookies risk account ban. |
 | Twitter/X timeline ingestion | Requires API tier; deferred |
 | Podcast RSS (audio → Whisper) | High compute cost; revisit post-MVP |
 | Web UI for config editing | Out of scope for CLI-first approach |
