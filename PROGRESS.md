@@ -357,3 +357,21 @@ Standardisation pass: expanded `.github/copilot-instructions.md` from stub to fu
 2. **What slowed down or went wrong?** The internal attribute for verifying proxy config is `_fetcher._proxy_config` (with underscore prefix), not `.proxy_config`. First test draft used the wrong attribute; caught immediately by running the tests before coding.
 3. **What change would prevent this next time?** Inspect library internals before writing tests against them.
 4. **Is this a pattern?** No — first time wiring proxy config into this fetcher.
+
+## 2026-03-17 — YouTube transcript proxy: missing tests, workflow wiring, README, copilot instructions
+
+**Completed (PR feedback):**
+- Found and fixed the critical functional gap: `daily-digest.yml` did not pass `WEBSHARE_PROXY_USERNAME`, `WEBSHARE_PROXY_PASSWORD`, or `YOUTUBE_PROXY_URL` to the pipeline step. Feature was silently non-functional in CI even when secrets were configured.
+- Added 3 workflow-validation tests (`TestDailyDigestWorkflowProxyEnvVars`) that parse the YAML and assert each env var is present — these failed before the fix, confirming the bug.
+- Added 3 edge-case tests for partial Webshare credentials (only username, only password, one credential + URL falls through to generic).
+- Updated `.github/workflows/daily-digest.yml` to inject all three proxy secrets.
+- Updated `README.md` with a new "YouTube transcript proxy (optional but recommended)" section: Webshare signup/dashboard instructions, generic proxy option, no-proxy fallback note. Updated Cost table.
+- Updated `.env.example` with proxy vars and inline "where to get it" comments.
+- Updated `.github/copilot-instructions.md` with a hard constraint: every new env var must be wired in `.env.example`, README, and the workflow — with a workflow-validation test that fails before the workflow is updated.
+
+### Mini-Retro
+
+1. **Did the process work?** No — the initial PR shipped the proxy feature but silently omitted the workflow wiring and user documentation. Three mandatory surfaces were skipped: `.env.example`, README, and the workflow `env:` block.
+2. **What slowed down or went wrong?** The "env var in three places" checklist wasn't explicit anywhere. The Slice Completion Checklist had "README updated if user-facing behaviour changed" but nothing about `.env.example` or workflow wiring.
+3. **What change would prevent this next time?** Added a Non-Negotiable Constraint to `.github/copilot-instructions.md` that explicitly lists all three surfaces and mandates a workflow-validation test. This is now a hard gate, not just a checklist item.
+4. **Is this a pattern?** Yes — this is the same class of mistake as the transcript cloud IP block: a feature that appears to work locally but silently fails in CI due to missing env injection. The pattern is "missing env var wiring". The fix is: make the failure visible in test output before it reaches CI.

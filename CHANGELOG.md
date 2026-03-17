@@ -13,7 +13,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   transcript API requests through the configured proxy. This bypasses YouTube's cloud IP
   block on GitHub Actions, enabling full transcript-based summaries instead of falling back
   to the short API description. No proxy → existing fallback behaviour is unchanged.
-  See `docs/adr/0016-youtube-transcript-proxy-support.md`.
+  See `docs/adr/0016-youtube-transcript-proxy-support.md` and `README.md` for setup instructions.
 - `.github/copilot-instructions.md`: unified **Continuous Improvement & Learning** framework (supersedes old Mini-Retro and Continuous Improvement — Always On sections)
 - `.github/copilot-instructions.md`: **Chain-of-Thought Reasoning** section with 7 pipeline-specific reasoning steps
 - `PROGRESS.md` entry for 2026-03-07 session

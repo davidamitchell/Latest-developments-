@@ -49,6 +49,12 @@ Python 3.11+ daily digest pipeline. Fetches AI/ML content from YouTube, RSS feed
 - **No breaking changes to the config schema** without updating `config/sources.yaml`, the relevant ADR, and the README.
 - **Every slice must be end-to-end runnable** before being marked complete in `BACKLOG.md`.
 - **Keep PROGRESS.md updated** after every meaningful commit.
+- **Every new environment variable or GitHub Secret must be wired in all three places:**
+  1. `.env.example` — with an inline comment explaining where to get the value and what it does
+  2. `README.md` → the relevant Secrets table (or a new subsection if it needs setup instructions)
+  3. `.github/workflows/daily-digest.yml` → the `env:` block of the "Run digest pipeline" step
+  
+  Failing to wire an env var into the workflow means the feature is silently non-functional in CI even when the secret is configured. Write a workflow-validation test in `TestDailyDigestWorkflowProxyEnvVars` (or a parallel class) that parses the YAML and asserts the env var is present — this test should fail before you add it to the workflow.
 
 ---
 

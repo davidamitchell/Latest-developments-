@@ -339,6 +339,113 @@ class TestYouTubeFetcherProxyConfig:
         proxy = fetcher._transcript_api._fetcher._proxy_config
         assert isinstance(proxy, WebshareProxyConfig)
 
+    def test_only_webshare_username_no_password_no_proxy(self) -> None:
+        """Partial Webshare credentials (username only) do not create a proxy."""
+        import os
+
+        cfg = _make_config()
+        os.environ.pop("WEBSHARE_PROXY_PASSWORD", None)
+        os.environ.pop("YOUTUBE_PROXY_URL", None)
+        with patch.dict("os.environ", {"WEBSHARE_PROXY_USERNAME": "user"}, clear=False):
+            fetcher = YouTubeFetcher(cfg)
+
+        assert fetcher._transcript_api._fetcher._proxy_config is None
+
+    def test_only_webshare_password_no_username_no_proxy(self) -> None:
+        """Partial Webshare credentials (password only) do not create a proxy."""
+        import os
+
+        cfg = _make_config()
+        os.environ.pop("WEBSHARE_PROXY_USERNAME", None)
+        os.environ.pop("YOUTUBE_PROXY_URL", None)
+        with patch.dict("os.environ", {"WEBSHARE_PROXY_PASSWORD": "pass"}, clear=False):
+            fetcher = YouTubeFetcher(cfg)
+
+        assert fetcher._transcript_api._fetcher._proxy_config is None
+
+    def test_partial_webshare_with_proxy_url_uses_generic(self) -> None:
+        """Partial Webshare credentials (username only) + YOUTUBE_PROXY_URL → falls through to
+        GenericProxyConfig, not Webshare."""
+        import os
+
+        from youtube_transcript_api.proxies import GenericProxyConfig
+
+        cfg = _make_config()
+        os.environ.pop("WEBSHARE_PROXY_PASSWORD", None)
+        with patch.dict(
+            "os.environ",
+            {
+                "WEBSHARE_PROXY_USERNAME": "user",
+                "YOUTUBE_PROXY_URL": "http://myproxy.example.com:8080",
+            },
+            clear=False,
+        ):
+            fetcher = YouTubeFetcher(cfg)
+
+        proxy = fetcher._transcript_api._fetcher._proxy_config
+        assert isinstance(proxy, GenericProxyConfig)
+
+
+class TestDailyDigestWorkflowProxyEnvVars:
+    """Verify the daily-digest workflow wires all proxy env vars.
+
+    YouTube transcript proxy support only works in CI if the workflow
+    injects the secrets as environment variables into the pipeline step.
+    A missing env var means the feature is silently disabled even when
+    secrets are configured.
+    """
+
+    def test_workflow_passes_webshare_proxy_username(self) -> None:
+        """WEBSHARE_PROXY_USERNAME must be injected from secrets into the digest step."""
+        import yaml
+
+        workflow_path = (
+            __import__("pathlib").Path(__file__).parent.parent
+            / ".github"
+            / "workflows"
+            / "daily-digest.yml"
+        )
+        workflow = yaml.safe_load(workflow_path.read_text())
+        env = workflow["jobs"]["digest"]["steps"][3]["env"]  # "Run digest pipeline" step
+        assert "WEBSHARE_PROXY_USERNAME" in env, (
+            "WEBSHARE_PROXY_USERNAME must be passed to the digest step; "
+            "without it, transcript proxy support is silently disabled in CI"
+        )
+
+    def test_workflow_passes_webshare_proxy_password(self) -> None:
+        """WEBSHARE_PROXY_PASSWORD must be injected from secrets into the digest step."""
+        import yaml
+
+        workflow_path = (
+            __import__("pathlib").Path(__file__).parent.parent
+            / ".github"
+            / "workflows"
+            / "daily-digest.yml"
+        )
+        workflow = yaml.safe_load(workflow_path.read_text())
+        env = workflow["jobs"]["digest"]["steps"][3]["env"]
+        assert "WEBSHARE_PROXY_PASSWORD" in env, (
+            "WEBSHARE_PROXY_PASSWORD must be passed to the digest step; "
+            "without it, transcript proxy support is silently disabled in CI"
+        )
+
+    def test_workflow_passes_youtube_proxy_url(self) -> None:
+        """YOUTUBE_PROXY_URL must be injected from secrets into the digest step."""
+        import yaml
+
+        workflow_path = (
+            __import__("pathlib").Path(__file__).parent.parent
+            / ".github"
+            / "workflows"
+            / "daily-digest.yml"
+        )
+        workflow = yaml.safe_load(workflow_path.read_text())
+        env = workflow["jobs"]["digest"]["steps"][3]["env"]
+        assert "YOUTUBE_PROXY_URL" in env, (
+            "YOUTUBE_PROXY_URL must be passed to the digest step; "
+            "without it, generic proxy support is silently disabled in CI"
+        )
+
 
 class TestIsShort:
     def test_shorts_hashtag_detected(self) -> None:

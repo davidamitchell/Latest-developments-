@@ -13,7 +13,7 @@ Everything here has a free tier sufficient for a daily digest.
 | Component | Cost |
 |---|---|
 | GitHub Actions | Free (public repo or within free-tier minutes) |
-| YouTube RSS + transcripts | Free — no API key |
+| YouTube RSS + transcripts | Free (with proxy) — Webshare free tier covers daily digest; description-only fallback works without proxy |
 | Hacker News API | Free |
 | Resend email | Free up to 3 000 emails/month |
 | Gemini summarisation | Free — Google AI Studio gives 1 500 req/day |
@@ -77,6 +77,44 @@ Omit `GEMINI_API_KEY` and set `summary.enabled: false` in `sources.yaml`. The pi
 GitHub Actions tab → `Daily Digest` → Enable workflow.
 
 Runs at 07:00 UTC by default. To change the time, edit the cron in `.github/workflows/daily-digest.yml` and update `schedule.time_utc` in `sources.yaml` to match (the YAML field is informational only).
+
+---
+
+## YouTube transcript proxy (optional but recommended)
+
+GitHub Actions runners use cloud/datacenter IP addresses that YouTube blocks from its transcript API. Without a proxy, the pipeline falls back to the short video description (~100–200 characters) instead of the full transcript, which produces much weaker summaries.
+
+To get full transcripts, configure one of the following:
+
+### Option A — Webshare residential proxy (recommended)
+
+Webshare provides rotating residential IP addresses that bypass YouTube's block. The free tier covers hundreds of transcript requests per day.
+
+1. Sign up at [webshare.io](https://proxy.webshare.io/register) (free tier is sufficient).
+2. Go to **Proxy** → **Residential** → **Sub-users** → create a sub-user or use your main credentials.
+3. Under **Proxy** → **Overview**, find your **Proxy Username** and **Proxy Password**.
+4. Add two GitHub Secrets:
+
+| Secret | Value |
+|---|---|
+| `WEBSHARE_PROXY_USERNAME` | Your Webshare proxy username |
+| `WEBSHARE_PROXY_PASSWORD` | Your Webshare proxy password |
+
+> The proxy username and password are separate from your Webshare account login. Find them in the Webshare dashboard under **Proxy** → **Overview**.
+
+### Option B — Generic HTTP/HTTPS proxy
+
+If you already run your own HTTP proxy (Squid, Privoxy, or similar):
+
+| Secret | Value |
+|---|---|
+| `YOUTUBE_PROXY_URL` | Full proxy URL, e.g. `http://user:pass@myproxy.example.com:8080` |
+
+Both username + password (Webshare) take precedence over `YOUTUBE_PROXY_URL` if all three are set.
+
+### No proxy configured
+
+The pipeline still runs without any proxy secrets — it just uses the short description fallback. No configuration required to get started.
 
 ---
 
