@@ -1,0 +1,23 @@
+Daily AI Digest — 24 Mar 2026
+========================================
+
+## Nate Jones
+
+### Why even Andrej Karpathy feels behind with AI! #ai #futureofwork
+Source: Nate Jones [YouTube]
+Theme: AI Pace Impact
+Summary: Nate Jones discusses the pervasive feeling of being overwhelmed by AI's rapid advancements, even among experts like Andrej Karpathy. The video underscores the industry's accelerating pace, implying that continuous learning and adaptation are critical for staying current. This highlights the psychological impact of the AI paradigm shift on professionals.
+
+### I Mapped Where Every AI Agent Actually Sits. Most People Pick Wrong.
+Source
+
+────────────────────────────────────────
+Run summary
+  UTC timestamp : 2026-03-24 07:44:57 UTC
+  Total new items: 8
+
+  Sources fetched:
+    YouTube: 3 new item(s)
+    Blogs/RSS: 0 new item(s)
+    Hacker News: 5 new item(s)
+────────────────────────────────────────
