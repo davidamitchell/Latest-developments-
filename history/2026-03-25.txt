@@ -1,0 +1,61 @@
+Daily AI Digest — 25 Mar 2026
+========================================
+
+## Nate Jones
+
+### Nvidia Just Open-Sourced What OpenAI Wants You to Pay Consultants For.
+Source: Nate Jones [YouTube]
+Theme: NVIDIA Open-Source Agents
+Summary: NVIDIA has reportedly open-sourced a framework for building AI agents, democratizing capabilities that OpenAI might typically offer as paid consulting services. This initiative allows engineers to develop sophisticated AI workflows and orchestrate LLMs without proprietary lock-in or high external costs. It underscores NVIDIA's strategic push to enable its ecosystem with foundational tools for agentic AI development.
+
+## Wes Roth
+
+### Claude just killed OpenClaw
+Source: Wes Roth [YouTube]
+Theme: Claude Agentic Breakthrough
+Summary: This video claims Claude's recent advancements have internally absorbed or surpassed capabilities previously associated with "OpenClaw," which likely refers to a system for robust agentic state management or advanced tool use. This suggests Claude has integrated sophisticated agentic features natively, making it a more comprehensive and independent platform for autonomous task execution. It marks a significant step for Claude in reducing reliance on external or specialized hardware/software solutions.
+
+---
+
+## Hacker News
+
+### Malicious litellm_init.pth in litellm 1.82.8 PyPI package – credential stealer
+Source: Hacker News [Hacker News]
+Theme: Supply Chain Security
+Summary: The `litellm` PyPI packages 1.82.7 and 1.82.8 were found to be compromised with a `litellm_init.pth` file designed to steal credentials. This supply chain attack on a widely used LLM proxy library highlights critical security vulnerabilities in the open-source ecosystem, particularly for tools managing sensitive API keys. Engineers should immediately audit their environments and pin dependency versions to mitigate risks.
+
+### Tell HN: Litellm 1.82.7 and 1.82.8 on PyPI are compromised
+Source: Hacker News [Hacker News]
+Theme: Supply Chain Security
+Summary: PyPI versions 1.82.7 and 1.82.8 of the `litellm` package were compromised, containing malware (`litellm_init.pth`) designed for credential exfiltration. This incident, impacting a popular LLM abstraction library, underscores the severe risks of software supply chain attacks in AI/ML development. It necessitates immediate action for developers to verify installations and secure their environments against similar vulnerabilities.
+
+### Show HN: Gemini can now natively embed video, so I built sub-second video search
+Source: Hacker News [Hacker News]
+Theme: Multimodal Video Embedding
+Summary: Gemini now supports native video embedding, allowing direct semantic understanding and vector representation of video content. This capability was leveraged to build a sub-second video search tool, demonstrating practical, high-performance applications for indexing and retrieving information directly from video. This advancement facilitates the creation of new multimodal AI applications that treat video as a first-class data type for analysis.
+
+### Disney Exits OpenAI Deal After AI Giant Shutters Sora
+Source: Hacker News [Hacker News]
+Theme: AI Partnership Shift
+Summary: Disney has reportedly terminated its partnership with OpenAI following the latter's decision to discontinue its Sora AI video generation application. This development highlights the volatility and rapid changes within the AI product landscape, potentially impacting strategic collaborations and commercialization strategies. It suggests that even major AI players are adjusting product focus, with ripple effects on industry partnerships.
+
+### Hypura – A storage-tier-aware LLM inference scheduler for Apple Silicon
+Source: Hacker News [Hacker News]
+Theme: Local LLM Inference
+Summary: Hypura is an LLM inference scheduler for Apple Silicon that intelligently manages model loading and execution across different storage tiers (e.g., DRAM, SSD). This tool optimizes local inference performance and efficiency, especially for large models exceeding RAM capacity, by minimizing data movement bottlenecks. It offers a practical solution for deploying larger LLMs more effectively on consumer-grade hardware.
+
+## Suggested Sources
+**Snyk Blog**: For in-depth analysis and best practices on software supply chain security, directly relevant to the `litellm` compromise.
+**The Gradient**: Offers accessible yet technical articles on new AI research, covering topics like multimodal models and advanced agent architectures.
+**RunDiffusion (YouTube Channel)**: Provides practical guides and benchmarks for local LLM inference and generative model deployment on consumer
+
+────────────────────────────────────────
+Run summary
+  UTC timestamp : 2026-03-25 07:43:53 UTC
+  Total new items: 8
+
+  Sources fetched:
+    YouTube: 2 new item(s)
+    Blogs/RSS: 0 new item(s)
+    Hacker News: 6 new item(s)
+────────────────────────────────────────
