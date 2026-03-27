@@ -1,0 +1,22 @@
+Daily AI Digest — 27 Mar 2026
+========================================
+
+## Nate Jones
+
+### Industrial-scale AI is here: what execs must know! #ai #nvidia #openai
+Source: Nate Jones [YouTube]
+Theme: Industrial AI Adoption
+Summary: This video likely discusses the strategic implications and operational requirements for deploying AI at an enterprise level, moving beyond pilot projects to integrate AI into core business processes. It emphasizes the need for executives to understand the infrastructure, talent, and strategic shifts required for large-scale AI adoption. The takeaway is that industrial AI necessitates a comprehensive, top-down strategy, not just technical implementation.
+
+###
+
+────────────────────────────────────────
+Run summary
+  UTC timestamp : 2026-03-27 07:50:52 UTC
+  Total new items: 11
+
+  Sources fetched:
+    YouTube: 4 new item(s)
+    Blogs/RSS: 0 new item(s)
+    Hacker News: 7 new item(s)
+────────────────────────────────────────
