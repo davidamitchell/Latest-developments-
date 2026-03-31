@@ -1,0 +1,67 @@
+Daily AI Digest — 31 Mar 2026
+========================================
+
+## Nate Jones
+
+### Anthropic, OpenAI, and Microsoft Just Agreed on One File Format. It Changes Everything.
+Source: Nate Jones [YouTube]
+Theme: Interoperable AI Format
+Summary: This video reports a significant agreement among Anthropic, OpenAI, and Microsoft on a unified file format for AI assets. This standardization aims to streamline model exchange, simplify AI application development across diverse platforms, and accelerate the adoption of agentic workflows by ensuring compatibility. The practical implication is a reduction in friction for deploying and integrating AI models and agents, fostering a more interoperable ecosystem.
+
+## Hacker News
+
+### Universal Claude.md – cut Claude output tokens
+Source: Hacker News [Hacker News]
+Theme: LLM Token Optimization
+Summary: This Hacker News discussion highlights a strategy, exemplified by `Universal Claude.md`, for efficiently managing and reducing token usage in Claude's output. By structuring prompts and outputs to minimize verbosity and redundancy, developers can significantly lower inference costs and improve response latency. This optimization is crucial for building cost-effective and performant agentic workflows with token-gated LLMs.
+
+### Learn Claude Code by doing, not reading
+Source: Hacker News [Hacker News]
+Theme: Claude Code Learning
+Summary: This Hacker News item points to an interactive platform (claude.nagdy.me) designed for learning Claude Code through practical, hands-on exercises. This "learning by doing" approach provides immediate feedback, allowing developers to quickly grasp Claude's capabilities for code generation, debugging, and understanding. The resource emphasizes practical application over theoretical knowledge to accelerate skill development in agent-assisted programming.
+
+### Ollama is now powered by MLX on Apple Silicon in preview
+Source: Hacker News [Hacker News]
+Theme: Local LLM Inference
+Summary: Ollama, a popular local LLM runner, now integrates MLX for optimized inference on Apple Silicon in a preview release. This leverages Apple's Metal framework and MLX's efficient array framework to significantly enhance the performance and efficiency of running large language models directly on Mac devices. This development makes deploying powerful models locally more accessible and performant for individual developers.
+
+### Hamilton-Jacobi-Bellman Equation: Reinforcement Learning and Diffusion Models
+Source: Hacker News [Hacker News]
+Theme: RL & Diffusion Models
+Summary: This Hacker News post links to an exploration of the Hamilton-Jacobi-Bellman (HJB) equation, highlighting its fundamental role in connecting reinforcement learning (RL) and diffusion models. It delves into how optimal control theory, specifically the HJB equation, provides a unified theoretical framework for understanding the underlying dynamics of both continuous RL problems and generative processes in diffusion models. This offers a deeper mathematical perspective for designing advanced AI algorithms.
+
+## Suggested Sources
+**The Gradient**: This blog provides in-depth articles on machine learning research, often connecting theoretical concepts and showing their implications for various AI fields, complementing the discussion on HJB equations.
+**AI Infrastructure Alliance (AIIA) Blog**: Focuses on the ecosystem, tooling, and standardization efforts for AI deployment, directly relevant to the new unified file format and interoperability themes.
+**RunDiffusion Blog**: Offers practical insights into running and optimizing generative AI models, including discussions on local inference and efficient model deployment, which aligns with the Ollama and token optimization items.
+
+## TL;DR
+* Major AI players (Anthropic, OpenAI, Microsoft) agreed on a unified file format, which could significantly improve interoperability and deployment of AI models and agents.
+* Ollama's integration of MLX on Apple Silicon substantially boosts local LLM inference performance, making advanced models more accessible on consumer hardware.
+* Practical strategies like `Universal Claude.md` for optimizing Claude's output tokens highlight the crucial importance of cost and latency management in LLM-driven applications.
+Recurring theme: AI agent and LLM ecosystem development, focusing on interoperability, optimization, and practical deployment.
+
+## Item Themes
+- https://www.youtube.com/watch?v=0cVuMHaYEHE | Interoperable AI Format
+- https://news.ycombinator.com/item?id=47581701 | LLM Token Optimization
+- https://news.ycombin.com/item?id=47579229 | Claude Code Learning
+- https://news.ycombinator.com/item?id=47582482 | Local LLM Inference
+- https://news.ycombinator.com/item?id=47571495 | RL & Diffusion Models
+
+## Item Summaries
+- https://www.youtube.com/watch?v=0cVuMHaYEHE | Anthropic, OpenAI, and Microsoft have agreed on a unified file format for AI assets, aiming to streamline model exchange and accelerate agentic workflow adoption. This standardization will reduce friction in deploying and integrating AI models across different platforms.
+- https://news.ycombinator.com/item?id=47581701 | A strategy exemplified by `Universal Claude.md` is discussed for reducing token usage in Claude's output by minimizing verbosity and redundancy. This optimization is crucial for lowering inference costs and improving response latency in LLM-driven applications.
+- https://news.ycombinator.com/item?id=47579229 | An interactive resource (claude.nagdy.me) is highlighted for learning Claude Code through practical, hands-on exercises, providing immediate feedback for developers. This "learning by doing" approach helps quickly grasp Claude's capabilities for code generation and debugging.
+- https://news.ycombinator.com/item?id=47582482 | Ollama now supports MLX for optimized local LLM inference on Apple Silicon in preview, leveraging Apple's Metal framework for enhanced performance. This integration makes running powerful models like Llama 3 or Mistral more efficient on consumer-grade hardware.
+- https://news.ycombinator.com/item?id=47571495 | This post explores the Hamilton-Jacobi-Bellman equation, presenting it as a theoretical framework connecting reinforcement learning and diffusion models. It offers a deeper mathematical perspective on optimal control theory relevant to continuous RL and generative processes.
+
+────────────────────────────────────────
+Run summary
+  UTC timestamp : 2026-03-31 07:59:14 UTC
+  Total new items: 5
+
+  Sources fetched:
+    YouTube: 1 new item(s)
+    Blogs/RSS: 0 new item(s)
+    Hacker News: 4 new item(s)
+────────────────────────────────────────
