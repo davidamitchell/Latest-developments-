@@ -1,0 +1,22 @@
+Daily AI Digest — 01 Apr 2026
+========================================
+
+## Nate Jones
+
+### The AI workflow that replaces your to do list! #ai #futureofwork
+Source: Nate Jones [YouTube]
+Theme: Active AI Systems
+Summary: This video discusses leveraging AI to create active workflow systems that replace traditional to-do lists, moving beyond passive "second brain" storage. It advocates for AI acting as a proactive manager of tasks and information, rather than just a repository. This paradigm shift aims to enhance productivity by offloading executive functions to AI agents capable of planning and execution.
+
+### Your iPhone Is About to Control Every AI App
+
+────────────────────────────────────────
+Run summary
+  UTC timestamp : 2026-04-01 08:07:01 UTC
+  Total new items: 12
+
+  Sources fetched:
+    YouTube: 5 new item(s)
+    Blogs/RSS: 0 new item(s)
+    Hacker News: 7 new item(s)
+────────────────────────────────────────
