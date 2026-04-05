@@ -1,0 +1,49 @@
+Daily AI Digest — 05 Apr 2026
+========================================
+
+## Nate Jones
+
+### The 3 layers AI can and cannot replace in business! #ai #futureofwork
+Source: Nate Jones [YouTube]
+Theme: AI Business Impact
+Summary: This video outlines three distinct layers of business operations, discussing where AI integration is most effective and where human involvement remains irreplaceable. It differentiates between tasks suitable for automation (e.g., data processing) and those requiring human judgment, creativity, or complex interpersonal skills. The takeaway is that successful AI adoption requires strategic identification of workflows that benefit from augmentation rather than full replacement.
+
+### Why AI agents will always be a security target! #ai #futureofwork
+Source: Nate Jones [YouTube]
+Theme: AI Agent Security
+Summary: Nate Jones emphasizes that AI agents, due to their autonomous nature and access to systems, will inherently be prime targets for security exploits. The video likely discusses vulnerabilities such as prompt injection, data poisoning, or unauthorized execution, highlighting the need for robust adversarial training, secure deployment practices, and strict access controls. A key takeaway is that increasing agent autonomy necessitates a proactive and sophisticated security posture.
+
+### Wall Street Just Bet $285 Billion on AI Agents. The Best One Barely Works.
+Source: Nate Jones [YouTube]
+Theme: AI Agent Maturity
+Summary: This video discusses significant financial investment in AI agents, contrasting it with their current practical efficacy, noting that even "the best one barely works." It highlights the gap between high market expectations and current technical limitations or challenges in deploying truly robust, reliable, and autonomous agents. The practical implication is that despite hype and investment, significant engineering and research hurdles remain for agentic AI.
+
+---
+
+## Hacker News
+
+### Claude Code Found a Linux Vulnerability Hidden for 23 Years
+Source: Hacker News [Hacker News]
+Theme: LLM Vulnerability Discovery
+Summary: This Hacker News post reports that Anthropic's Claude Code agent identified a 23-year-old vulnerability in the Linux kernel by autonomously analyzing code, highlighting LLMs' potential in advanced security research. The discovery demonstrates the unexpected capabilities of AI in complex code auditing and vulnerability detection beyond traditional static analysis tools. This implies a future where AI tools could significantly augment cybersecurity efforts.
+
+### Emotion concepts and their function in a large language model
+Source: Hacker News [Hacker News]
+Theme: LLM Internal Mechanisms
+Summary: This Hacker News discussion links to Anthropic's research exploring how LLMs represent and utilize "emotion concepts" internally, suggesting these concepts function as organizational structures aiding reasoning and behavior. The research delves into internal activations within models corresponding to human emotions, indicating these are not merely superficial word associations but potentially deeper representational states impacting model performance. This offers insights into the mechanistic interpretability of LLMs.
+
+### LLM Wiki – example of an "idea file"
+Source: Hacker News [Hacker News]
+Theme: LLM Development Principles
+Summary: This Hacker News post links to an "idea file" by Andrej Karpathy, outlining a minimalist, practical approach to LLM development and experimentation focusing on core concepts and rapid iteration. The concept promotes distilling complex problems into actionable
+
+────────────────────────────────────────
+Run summary
+  UTC timestamp : 2026-04-05 07:45:49 UTC
+  Total new items: 7
+
+  Sources fetched:
+    YouTube: 3 new item(s)
+    Blogs/RSS: 0 new item(s)
+    Hacker News: 4 new item(s)
+────────────────────────────────────────
