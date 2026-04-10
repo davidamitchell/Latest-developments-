@@ -1,0 +1,42 @@
+Daily AI Digest — 10 Apr 2026
+========================================
+
+[AI summarisation failed: ServerError — no model processing was applied. Raw links only.]
+
+## Nate Jones
+
+- If your value is judgment and taste, AI actually helps you! (10 Apr)
+  https://www.youtube.com/watch?v=_H6lbAgBjUo
+- Nasdaq Quietly Changed Its Rules. Now Your 401(k) Pays for SpaceX&#39;s IPO. (09 Apr)
+  https://www.youtube.com/watch?v=9N7qXkmntlU
+- The business layer AI can&#39;t touch and it&#39;s not what you think (08 Apr)
+  https://www.youtube.com/watch?v=I7X2XoYR3jQ
+
+## Wes Roth
+
+- Mythos is about to CRASH the markets (10 Apr)
+  https://www.youtube.com/watch?v=r4JGNJfNQeA
+
+## Hacker News
+
+- Claude mixes up who said what (09 Apr)
+  https://news.ycombinator.com/item?id=47701233
+- Reallocating $100/Month Claude Code Spend to Zed and OpenRouter (09 Apr)
+  https://news.ycombinator.com/item?id=47700972
+- Microsoft is employing dark patterns to goad users into paying for storage? (09 Apr)
+  https://news.ycombinator.com/item?id=47710149
+- The Vercel plugin on Claude Code wants to read your prompts (09 Apr)
+  https://news.ycombinator.com/item?id=47704881
+- ChatGPT Pro now starts at $100/month (09 Apr)
+  https://news.ycombinator.com/item?id=47707253
+
+────────────────────────────────────────
+Run summary
+  UTC timestamp : 2026-04-10 08:13:15 UTC
+  Total new items: 10
+
+  Sources fetched:
+    YouTube: 4 new item(s)
+    Blogs/RSS: 0 new item(s)
+    Hacker News: 6 new item(s)
+────────────────────────────────────────
