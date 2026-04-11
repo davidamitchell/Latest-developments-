@@ -1,0 +1,44 @@
+Daily AI Digest — 11 Apr 2026
+========================================
+
+## Nate Jones
+
+### There Are Only 5 Safe Places to Build in AI Right Now. Are You in One?
+Source: Nate Jones [YouTube]
+Theme: AI Market Strategy
+Summary: This video likely identifies specific, resilient sectors or roles within the evolving AI landscape that offer long-term viability and growth, avoiding highly commoditized or rapidly disrupted areas. It aims to guide AI professionals on where to focus their efforts to build sustainable value. A key takeaway is to choose niches that are either deeply integrated, highly specialized, or involve unique human judgment, rather than general-purpose model development.
+
+---
+
+## Hacker News
+
+### OpenAI backs Illinois bill that would limit when AI labs can be held liable
+Source: Hacker News [Hacker News]
+Theme: AI Policy & Liability
+Summary: OpenAI is supporting an Illinois bill that aims to limit the legal liability of AI labs for harms caused by their models. This initiative seeks to provide a regulatory safe harbor, protecting developers from lawsuits unless negligence or intentional wrongdoing is proven. The practical implication is a potential reduction in legal risk for model providers, which could accelerate AI development but also raises concerns about accountability for AI harms.
+
+### US summons bank bosses over cyber risks from Anthropic's latest AI model
+Source: Hacker News [Hacker News]
+Theme: AI Cyber Risk
+Summary: The US government has reportedly convened bank executives to discuss potential cybersecurity risks stemming from Anthropic's newest AI model, likely referring to Claude Mythos. This highlights growing regulatory concern over the deployment of highly capable LLMs in critical financial infrastructure, specifically regarding their potential for generating or identifying vulnerabilities. A key takeaway is the increasing scrutiny on advanced AI models for their systemic risk, beyond just their beneficial applications.
+
+---
+
+## Suggested Sources
+**Lawfare Blog**: Provides in-depth analysis on the legal, policy, and national security implications of emerging technologies like AI.
+**Center for AI Safety**: Focuses specifically on the technical and societal risks posed by advanced AI systems, offering research and policy recommendations.
+**a16z Blog**: Offers insights into market trends, investment strategies, and the business landscape of new technologies, including sustainable niches within AI.
+
+## TL;DR
+*   OpenAI is actively pushing for a bill in Illinois that would limit the liability of AI labs for
+
+────────────────────────────────────────
+Run summary
+  UTC timestamp : 2026-04-11 07:40:52 UTC
+  Total new items: 3
+
+  Sources fetched:
+    YouTube: 1 new item(s)
+    Blogs/RSS: 0 new item(s)
+    Hacker News: 2 new item(s)
+────────────────────────────────────────
