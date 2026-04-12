@@ -1,0 +1,39 @@
+Daily AI Digest — 12 Apr 2026
+========================================
+
+## Nate Jones
+
+### Big firms are safe Startups are weak The middle is doomed
+Source: Nate Jones [YouTube]
+Theme: AI Business Strategy
+Summary: This video likely argues that AI's disruptive force is creating a barbell economy where large enterprises thrive through scale and data, and agile startups find niches, while traditional mid-sized firms are squeezed out. It emphasizes the need for companies to adapt their strategy to avoid commoditization by AI. A key takeaway is that strategic positioning relative to AI adoption dictates survival and growth in the evolving market.
+
+### AI is splitting the economy—which side are you on?
+Source: Nate Jones [YouTube]
+Theme: AI Economic Impact
+Summary: This video discusses how AI is creating a bifurcated economy, rewarding those who leverage AI to augment their capabilities and penalizing those whose roles are easily automated or commoditized. It likely prompts individuals to evaluate their position and skillset to align with the AI-powered growth side of the market. The implication is a widening gap between AI-enabled and AI-displaced workforces.
+
+### This New Method Just Killed RAM Limitations
+Source: Nate Jones [YouTube]
+Theme: LLM Memory Optimization
+Summary: This video introduces a new method that significantly reduces RAM limitations, likely for large language model (LLM) training or inference. It potentially discusses techniques like offloading, advanced quantization, or novel memory paging to enable larger models or batch sizes on constrained hardware. This breakthrough could lower the barrier to entry for developing and deploying powerful AI models by making more efficient use of available memory.
+
+---
+
+## Wes Roth
+
+### Claude just unlocked the SHOGGOTH...
+Source: Wes Roth [YouTube]
+Theme: Claude Capabilities
+Summary: This video suggests Anthropic's latest Claude model, likely Mythos
+
+────────────────────────────────────────
+Run summary
+  UTC timestamp : 2026-04-12 07:55:04 UTC
+  Total new items: 6
+
+  Sources fetched:
+    YouTube: 4 new item(s)
+    Blogs/RSS: 0 new item(s)
+    Hacker News: 2 new item(s)
+────────────────────────────────────────
