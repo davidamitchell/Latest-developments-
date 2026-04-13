@@ -1,0 +1,37 @@
+Daily AI Digest — 13 Apr 2026
+========================================
+
+[AI summarisation failed: ServerError — no model processing was applied. Raw links only.]
+
+## Nate Jones
+
+- NVIDIA grew 7K employees—and is still 10K short! #artificialintelligence #nextgenai (13 Apr)
+  https://www.youtube.com/watch?v=1tLQC-i3c7Y
+- 66% of companies are cutting entry level jobs for AI! #nextgenai #artificialintelligence (13 Apr)
+  https://www.youtube.com/watch?v=F368zITpbeI
+- I Watched 3 Companies Lay Off Their Managers. All 3 Hit the Same Wall. (12 Apr)
+  https://www.youtube.com/watch?v=zhXgkQ3nYeE
+
+## Hacker News
+
+- Pro Max 5x quota exhausted in 1.5 hours despite moderate usage (12 Apr)
+  https://news.ycombinator.com/item?id=47739260
+- Anthropic downgraded cache TTL on March 6th (12 Apr)
+  https://news.ycombinator.com/item?id=47736476
+- European AI. A playbook to own it (12 Apr)
+  https://news.ycombinator.com/item?id=47743700
+- Tell HN: OpenAI silently removed Study Mode from ChatGPT (12 Apr)
+  https://news.ycombinator.com/item?id=47739305
+- Show HN: Claudraband – Claude Code for the Power User (12 Apr)
+  https://news.ycombinator.com/item?id=47741889
+
+────────────────────────────────────────
+Run summary
+  UTC timestamp : 2026-04-13 08:56:35 UTC
+  Total new items: 8
+
+  Sources fetched:
+    YouTube: 3 new item(s)
+    Blogs/RSS: 0 new item(s)
+    Hacker News: 5 new item(s)
+────────────────────────────────────────
