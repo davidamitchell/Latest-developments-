@@ -1,0 +1,40 @@
+Daily AI Digest — 16 Apr 2026
+========================================
+
+[AI summarisation failed: ServerError — no model processing was applied. Raw links only.]
+
+## Nate Jones
+
+- How the Red Queen memo exposed who will actually survive #tech #AI (16 Apr)
+  https://www.youtube.com/watch?v=WcH97reWDMQ
+- The Real Problem With AI Agents Nobody&#39;s Talking About (15 Apr)
+  https://www.youtube.com/watch?v=2PWJu6uAaoU
+
+## Wes Roth
+
+- HERMES AGENT SETUP: the OpenClaw killer is here (15 Apr)
+  https://www.youtube.com/watch?v=3jNp14bJpgs
+
+## Hacker News
+
+- Stop Using Ollama (16 Apr)
+  https://news.ycombinator.com/item?id=47788385
+- Google Gemma 4 Runs Natively on iPhone with Full Offline AI Inference (15 Apr)
+  https://news.ycombinator.com/item?id=47774971
+- Elevated errors on Claude.ai, API, Claude Code (15 Apr)
+  https://news.ycombinator.com/item?id=47779730
+- Does Gas Town 'steal' usage from users' LLM credits to improve itself? (15 Apr)
+  https://news.ycombinator.com/item?id=47785053
+- Gemini Robotics-ER 1.6 (15 Apr)
+  https://news.ycombinator.com/item?id=47779094
+
+────────────────────────────────────────
+Run summary
+  UTC timestamp : 2026-04-16 08:19:40 UTC
+  Total new items: 11
+
+  Sources fetched:
+    YouTube: 3 new item(s)
+    Blogs/RSS: 0 new item(s)
+    Hacker News: 8 new item(s)
+────────────────────────────────────────
