@@ -1,0 +1,40 @@
+Daily AI Digest — 17 Apr 2026
+========================================
+
+[AI summarisation failed: ServerError — no model processing was applied. Raw links only.]
+
+## Nate Jones
+
+- Tech talent is about to get ugly thanks to this memo #ai #tech #competition (17 Apr)
+  https://www.youtube.com/watch?v=PcmFGurjfFo
+- Your AI Is 50x Faster. You&#39;re Getting 2x. You&#39;re Fixing the Wrong Thing. (16 Apr)
+  https://www.youtube.com/watch?v=XlfumXPPrLY
+
+## Wes Roth
+
+- Claude just forced them to reveal THE TRUTH... (16 Apr)
+  https://www.youtube.com/watch?v=ZVAGTidLVyc
+
+## Hacker News
+
+- Claude Opus 4.7 (16 Apr)
+  https://news.ycombinator.com/item?id=47793411
+- Codex for almost everything (16 Apr)
+  https://news.ycombinator.com/item?id=47796469
+- Qwen3.6-35B-A3B on my laptop drew me a better pelican than Claude Opus 4.7 (16 Apr)
+  https://news.ycombinator.com/item?id=47796830
+- €54k spike in 13h from unrestricted Firebase browser key accessing Gemini APIs (16 Apr)
+  https://news.ycombinator.com/item?id=47791871
+- Cloudflare's AI Platform: an inference layer designed for agents (16 Apr)
+  https://news.ycombinator.com/item?id=47792538
+
+────────────────────────────────────────
+Run summary
+  UTC timestamp : 2026-04-17 08:18:54 UTC
+  Total new items: 8
+
+  Sources fetched:
+    YouTube: 3 new item(s)
+    Blogs/RSS: 0 new item(s)
+    Hacker News: 5 new item(s)
+────────────────────────────────────────
