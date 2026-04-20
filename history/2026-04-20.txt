@@ -1,0 +1,29 @@
+Daily AI Digest — 20 Apr 2026
+========================================
+
+[AI summarisation failed: ServerError — no model processing was applied. Raw links only.]
+
+## Nate Jones
+
+- Why Nothing Going Wrong Is Actually the Scariest Part #AIWakeUp #Implications (20 Apr)
+  https://www.youtube.com/watch?v=VYC5WrlRlmw
+- Block Laid Off Half Its Company for AI. AI Can&#39;t Do the Job. (19 Apr)
+  https://www.youtube.com/watch?v=fm6mYqFAM5c
+
+## Hacker News
+
+- Changes in the system prompt between Claude Opus 4.6 and 4.7 (19 Apr)
+  https://news.ycombinator.com/item?id=47823270
+- Zero-Copy GPU Inference from WebAssembly on Apple Silicon (18 Apr)
+  https://news.ycombinator.com/item?id=47820195
+
+────────────────────────────────────────
+Run summary
+  UTC timestamp : 2026-04-20 09:02:56 UTC
+  Total new items: 4
+
+  Sources fetched:
+    YouTube: 2 new item(s)
+    Blogs/RSS: 0 new item(s)
+    Hacker News: 2 new item(s)
+────────────────────────────────────────
