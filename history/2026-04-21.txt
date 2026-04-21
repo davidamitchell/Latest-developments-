@@ -1,0 +1,38 @@
+Daily AI Digest — 21 Apr 2026
+========================================
+
+[AI summarisation failed: ServerError — no model processing was applied. Raw links only.]
+
+## Nate Jones
+
+- Nobody Knows What You&#39;re Worth Anymore | The AI Job Market Reality (20 Apr)
+  https://www.youtube.com/watch?v=-dJ9WrTG6zQ
+
+## Wes Roth
+
+- OpenAI&#39;s GPT 5.5 is wild... (21 Apr)
+  https://www.youtube.com/watch?v=hrIY-clbdg8
+
+## Hacker News
+
+- NSA is using Anthropic's Mythos despite blacklist (20 Apr)
+  https://news.ycombinator.com/item?id=47832222
+- OpenAI ad partner now selling ChatGPT ad placements based on “prompt relevance” (20 Apr)
+  https://news.ycombinator.com/item?id=47840980
+- Kimi vendor verifier – verify accuracy of inference providers (20 Apr)
+  https://news.ycombinator.com/item?id=47838703
+- Claude Token Counter, now with model comparisons (20 Apr)
+  https://news.ycombinator.com/item?id=47829178
+- Anthropic says OpenClaw-style Claude CLI usage is allowed again (21 Apr)
+  https://news.ycombinator.com/item?id=47844269
+
+────────────────────────────────────────
+Run summary
+  UTC timestamp : 2026-04-21 08:24:12 UTC
+  Total new items: 11
+
+  Sources fetched:
+    YouTube: 2 new item(s)
+    Blogs/RSS: 0 new item(s)
+    Hacker News: 9 new item(s)
+────────────────────────────────────────
