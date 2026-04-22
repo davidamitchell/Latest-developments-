@@ -1,0 +1,42 @@
+Daily AI Digest — 22 Apr 2026
+========================================
+
+[AI summarisation failed: ServerError — no model processing was applied. Raw links only.]
+
+## Nate Jones
+
+- Why Manual Testing Is Dead (This Architecture Proves It) #AI #Testing (22 Apr)
+  https://www.youtube.com/watch?v=_iWauZ6KL6I
+- Your Prompts Didn&#39;t Change. Opus 4.7 Did. (21 Apr)
+  https://www.youtube.com/watch?v=tJB_8mfRgCo
+
+## Wes Roth
+
+- Mythos leaks, SpaceX buys Cursor and OpenAI drops GPT Image 2.0 (22 Apr)
+  https://www.youtube.com/watch?v=ITT9xWeicWM
+- Introducing ChatGPT Images 2.0 (21 Apr)
+  https://www.youtube.com/watch?v=i6WQdQsE0kc
+
+## Hacker News
+
+- ChatGPT Images 2.0 (21 Apr)
+  https://news.ycombinator.com/item?id=47852835
+- Claude Code to be removed from Anthropic's Pro plan? (21 Apr)
+  https://news.ycombinator.com/item?id=47854477
+- Anthropic takes $5B from Amazon and pledges $100B in cloud spending in return (21 Apr)
+  https://news.ycombinator.com/item?id=47848276
+- Claude Code to be removed from Pro Tier? (21 Apr)
+  https://news.ycombinator.com/item?id=47855565
+- Show HN: Mediator.ai – Using Nash bargaining and LLMs to systematize fairness (20 Apr)
+  https://news.ycombinator.com/item?id=47835411
+
+────────────────────────────────────────
+Run summary
+  UTC timestamp : 2026-04-22 08:22:05 UTC
+  Total new items: 9
+
+  Sources fetched:
+    YouTube: 4 new item(s)
+    Blogs/RSS: 0 new item(s)
+    Hacker News: 5 new item(s)
+────────────────────────────────────────
