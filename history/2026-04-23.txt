@@ -1,0 +1,35 @@
+Daily AI Digest — 23 Apr 2026
+========================================
+
+[AI summarisation failed: ServerError — no model processing was applied. Raw links only.]
+
+## Nate Jones
+
+- Dark factories vs everyone else: the real AI divide #ai #engineering (23 Apr)
+  https://www.youtube.com/watch?v=pXxl_-B81b8
+- Karpathy&#39;s Wiki vs. Open Brain. One Fails When You Need It Most. (22 Apr)
+  https://www.youtube.com/watch?v=dxq7WtWxi44
+
+## Hacker News
+
+- Technical, cognitive, and intent debt (22 Apr)
+  https://news.ycombinator.com/item?id=47865661
+- ChatGPT Images 2.0 (21 Apr)
+  https://news.ycombinator.com/item?id=47853000
+- Workspace Agents in ChatGPT (22 Apr)
+  https://news.ycombinator.com/item?id=47866860
+- CrabTrap: An LLM-as-a-judge HTTP proxy to secure agents in production (21 Apr)
+  https://news.ycombinator.com/item?id=47850212
+- Kernel code removals driven by LLM-created security reports (22 Apr)
+  https://news.ycombinator.com/item?id=47862230
+
+────────────────────────────────────────
+Run summary
+  UTC timestamp : 2026-04-23 08:26:23 UTC
+  Total new items: 8
+
+  Sources fetched:
+    YouTube: 2 new item(s)
+    Blogs/RSS: 0 new item(s)
+    Hacker News: 6 new item(s)
+────────────────────────────────────────
