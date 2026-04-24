@@ -1,0 +1,34 @@
+Daily AI Digest — 24 Apr 2026
+========================================
+
+[AI summarisation failed: ServerError — no model processing was applied. Raw links only.]
+
+## Nate Jones
+
+- Your Apps Don&#39;t Need an API Anymore. Codex Just Proved It. (23 Apr)
+  https://www.youtube.com/watch?v=2d9ZmA-4QzU
+
+## Wes Roth
+
+- GPT 5.5 is a BEAST... (24 Apr)
+  https://www.youtube.com/watch?v=evVs-Jtor50
+- GPT 5.5 LET&#39;S GOOOOOOOO! (23 Apr)
+  https://www.youtube.com/watch?v=g8NWmUdMh_E
+
+## Hacker News
+
+- GPT-5.5 (23 Apr)
+  https://news.ycombinator.com/item?id=47879092
+- An update on recent Claude Code quality reports (23 Apr)
+  https://news.ycombinator.com/item?id=47878905
+
+────────────────────────────────────────
+Run summary
+  UTC timestamp : 2026-04-24 08:54:11 UTC
+  Total new items: 5
+
+  Sources fetched:
+    YouTube: 3 new item(s)
+    Blogs/RSS: 0 new item(s)
+    Hacker News: 2 new item(s)
+────────────────────────────────────────
