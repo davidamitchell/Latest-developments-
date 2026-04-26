@@ -1,0 +1,21 @@
+Daily AI Digest — 26 Apr 2026
+========================================
+
+## Nate Jones
+
+### StrongDM&#39;s three person team ships with zero human code review #ai #engineering
+Source: Nate Jones [YouTube]
+URL: https://www.youtube.com/watch?v=eY1u8Ni9ClQ
+Theme: AI Code Review
+Summary: This video claims StrongDM's three-person team is shipping code with zero human code review, relying entirely on AI for this process. This highlights the potential for AI to dramatically streamline development workflows and increase velocity by automating critical quality gates. The key takeaway
+
+────────────────────────────────────────
+Run summary
+  UTC timestamp : 2026-04-26 08:09:18 UTC
+  Total new items: 8
+
+  Sources fetched:
+    YouTube: 2 new item(s)
+    Blogs/RSS: 0 new item(s)
+    Hacker News: 6 new item(s)
+────────────────────────────────────────
