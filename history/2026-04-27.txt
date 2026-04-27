@@ -1,0 +1,32 @@
+Daily AI Digest — 27 Apr 2026
+========================================
+
+[AI summarisation failed: ServerError — no model processing was applied. Raw links only.]
+
+## Nate Jones
+
+- Apple Just Positioned Itself for the Next Trillion Dollars (26 Apr)
+  https://www.youtube.com/watch?v=RaAFquzj5B8
+
+## Wes Roth
+
+- Hermes Agent is INSANE... (27 Apr)
+  https://www.youtube.com/watch?v=bFO0uAMPx1g
+
+## Hacker News
+
+- An AI agent deleted our production database. The agent's confession is below (26 Apr)
+  https://news.ycombinator.com/item?id=47911524
+- SWE-bench Verified no longer measures frontier coding capabilities (26 Apr)
+  https://news.ycombinator.com/item?id=47910388
+
+────────────────────────────────────────
+Run summary
+  UTC timestamp : 2026-04-27 09:11:08 UTC
+  Total new items: 4
+
+  Sources fetched:
+    YouTube: 2 new item(s)
+    Blogs/RSS: 0 new item(s)
+    Hacker News: 2 new item(s)
+────────────────────────────────────────
