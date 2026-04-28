@@ -1,0 +1,33 @@
+Daily AI Digest — 28 Apr 2026
+========================================
+
+[AI summarisation failed: ServerError — no model processing was applied. Raw links only.]
+
+## Nate Jones
+
+- OpenAI Just Gave Every Team A Free Employee. Here&#39;s The Catch. (27 Apr)
+  https://www.youtube.com/watch?v=QrvVkm-8Jx4
+
+## Hacker News
+
+- Microsoft and OpenAI end their exclusive and revenue-sharing deal (27 Apr)
+  https://news.ycombinator.com/item?id=47921248
+- Show HN: OSS Agent I built topped the TerminalBench on Gemini-3-flash-preview (27 Apr)
+  https://news.ycombinator.com/item?id=47920787
+- Mistral built a $14B AI empire by not being American (27 Apr)
+  https://news.ycombinator.com/item?id=47919725
+- Running local LLMs offline on a ten-hour flight (27 Apr)
+  https://news.ycombinator.com/item?id=47921064
+- EvanFlow – A TDD driven feedback loop for Claude Code (27 Apr)
+  https://news.ycombinator.com/item?id=47916909
+
+────────────────────────────────────────
+Run summary
+  UTC timestamp : 2026-04-28 09:12:38 UTC
+  Total new items: 6
+
+  Sources fetched:
+    YouTube: 1 new item(s)
+    Blogs/RSS: 0 new item(s)
+    Hacker News: 5 new item(s)
+────────────────────────────────────────
