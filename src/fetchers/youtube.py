@@ -99,6 +99,7 @@ class YouTubeFetcher:
                     source_name=channel.name,
                     published=published,
                     source_type="YouTube",
+                    source_class="practitioner",
                 )
             )
 

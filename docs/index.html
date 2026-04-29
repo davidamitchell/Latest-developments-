@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Trend Intelligence</title>
+  <link rel="stylesheet" href="css/style.css">
+  <!-- Chart.js for time-series and bar charts -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+<header class="site-header">
+  <h1>AI Trend Intelligence</h1>
+  <p class="subtitle">Triangulated signal from primary sources, practitioner discourse, and operator signals</p>
+  <div class="meta-bar">
+    Last updated: <span id="last-updated">—</span>
+    &nbsp;·&nbsp;
+    <span id="item-count">—</span>
+    &nbsp;·&nbsp;
+    <span id="theme-count">—</span>
+  </div>
+</header>
+
+<nav class="site-nav" aria-label="Site sections">
+  <button class="tab-btn active" data-tab="trends">Trends</button>
+  <button class="tab-btn" data-tab="themes">Themes</button>
+  <button class="tab-btn" data-tab="sources">Sources</button>
+  <button class="tab-btn" data-tab="insights">Insights</button>
+</nav>
+
+<main class="site-main">
+
+  <!-- ── Trends tab ─────────────────────────────────────────── -->
+  <section id="tab-trends" class="tab-panel active">
+
+    <h2 class="section-heading">Trend Phase Chart</h2>
+    <p style="font-size:13px;color:#666;margin:-10px 0 12px">
+      Weighted volume per theme over time. Bands: emerging · scaling · mature · declining.
+    </p>
+    <div class="chart-wrap" style="height:320px" id="trend-chart-wrap">
+      <canvas id="trend-chart"></canvas>
+    </div>
+
+    <h2 class="section-heading">Hype vs Substantiation</h2>
+    <p style="font-size:13px;color:#666;margin:-10px 0 12px">
+      Same themes scored two ways. Gap between panels = hype index for that theme.
+    </p>
+    <div class="hype-split" id="hype-evidence-wrap">
+      <div class="hype-panel">
+        <div class="hype-panel-title evidence">Evidence-weighted score</div>
+        <div style="height:220px"><canvas id="hype-chart-evidence"></canvas></div>
+      </div>
+      <div class="hype-panel">
+        <div class="hype-panel-title media">Media / hype score</div>
+        <div style="height:220px"><canvas id="hype-chart-media"></canvas></div>
+      </div>
+    </div>
+
+    <h2 class="section-heading">All Themes</h2>
+    <div style="overflow-x:auto">
+      <table style="width:100%;border-collapse:collapse;font-size:14px">
+        <thead>
+          <tr style="border-bottom:2px solid #c8d8c0;text-align:left">
+            <th style="padding:8px 10px;color:#4a7c59">Theme</th>
+            <th style="padding:8px 10px;color:#4a7c59">State</th>
+            <th style="padding:8px 10px;color:#4a7c59">Volume</th>
+            <th style="padding:8px 10px;color:#4a7c59">Velocity</th>
+            <th style="padding:8px 10px;color:#4a7c59">Diversity</th>
+            <th style="padding:8px 10px;color:#4a7c59">Hype risk</th>
+            <th style="padding:8px 10px;color:#4a7c59">Confidence</th>
+          </tr>
+        </thead>
+        <tbody id="trend-table-body">
+          <tr>
+            <td colspan="7" style="padding:24px;text-align:center;color:#888;font-size:14px">
+              No data — pipeline has not run yet.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </section>
+
+  <!-- ── Themes tab ─────────────────────────────────────────── -->
+  <section id="tab-themes" class="tab-panel">
+
+    <h2 class="section-heading">Active Themes</h2>
+    <div class="theme-grid" id="theme-grid">
+      <div class="empty-state">
+        <div class="empty-state-icon">📭</div>
+        <h3>No themes yet</h3>
+        <p>Themes appear after the trend pipeline runs.</p>
+      </div>
+    </div>
+
+    <h2 class="section-heading">Source-Class Coverage Heatmap</h2>
+    <p style="font-size:13px;color:#666;margin:-10px 0 12px">
+      Rows = themes. Columns = source classes. High media, low primary = hype risk.
+    </p>
+    <div class="chart-wrap" id="heatmap-container">
+      <div class="empty-state" style="padding:24px">
+        <p style="color:#888;font-size:14px">No heatmap data yet.</p>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ── Sources tab ────────────────────────────────────────── -->
+  <section id="tab-sources" class="tab-panel">
+
+    <h2 class="section-heading">Source-Class Coverage</h2>
+    <p style="font-size:13px;color:#666;margin:-10px 0 16px">
+      Items processed this week by source class. A balanced intake reduces single-source distortion.
+    </p>
+    <div class="source-class-grid" id="source-class-grid">
+      <div class="empty-state">
+        <div class="empty-state-icon">📭</div>
+        <h3>No source data yet</h3>
+        <p>Run the pipeline to populate source coverage.</p>
+      </div>
+    </div>
+
+    <h2 class="section-heading">Cross-Class Confirmation</h2>
+    <p style="font-size:13px;color:#666;margin:-10px 0 12px">
+      A claim only reaches <strong>high-confidence</strong> when supported by ≥ 2 distinct source classes.
+      Items from a single class are flagged as unverified.
+    </p>
+    <div class="chart-wrap">
+      <p style="color:#888;font-size:14px;margin:0">
+        Cross-class confirmation breakdown will appear here once data is available.
+      </p>
+    </div>
+
+  </section>
+
+  <!-- ── Insights tab ───────────────────────────────────────── -->
+  <section id="tab-insights" class="tab-panel">
+
+    <h2 class="section-heading">Key Insights</h2>
+    <p style="font-size:13px;color:#666;margin:-10px 0 12px">
+      Graph-derived insights: each backed by ≥ 2 independent evidence paths.
+      Counter-signals shown explicitly.
+    </p>
+    <div id="insights-container">
+      <div class="empty-state">
+        <div class="empty-state-icon">🔍</div>
+        <h3>No insights yet</h3>
+        <p>Insights are generated from theme relationships. Run the pipeline to populate.</p>
+      </div>
+    </div>
+
+    <h2 class="section-heading">About this system</h2>
+    <div class="chart-wrap" style="font-size:14px;line-height:1.7;color:#444">
+      <p><strong>Source triangulation:</strong> Items are classified into five source classes
+        (primary, operator, practitioner, media, market) and scored on five credibility axes:
+        proximity to the claim, incentive alignment, reproducibility, adoption signal, and time decay.</p>
+      <p><strong>Hype detection:</strong> Items where language intensity is high but evidence density
+        is low are flagged. They are not removed — they are labelled explicitly, because hype is
+        itself a signal about what narratives are being amplified.</p>
+      <p><strong>Trend states:</strong> Each theme is classified as emerging, scaling, mature, or declining
+        based on volume velocity, cross-source diversity, and adoption proxies.
+        A media-only spike does not qualify as a trend.</p>
+      <p><strong>Sources:</strong> YouTube (practitioner), Hacker News (practitioner),
+        Substack newsletters (media), RSS feeds (varies). arXiv, Hugging Face, and operator changelogs
+        are added incrementally.</p>
+    </div>
+
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  AI Trend Intelligence &mdash; updated daily by GitHub Actions &mdash;
+  <a href="adr/README.md" style="color:#4a7c59">Architecture decisions</a>
+</footer>
+
+<script src="js/charts.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

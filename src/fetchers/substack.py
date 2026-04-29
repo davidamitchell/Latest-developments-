@@ -100,6 +100,7 @@ class SubstackFetcher:
                     source_name=pub.name,
                     published=entry.get("published"),
                     source_type="Substack",
+                    source_class="media",
                 )
             )
 

@@ -1,0 +1,360 @@
+/* AI Trend Intelligence — site styles
+   Palette: #4a7c59 green · #2a2a2a text · #f5f0e8 background (matches email) */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 16px;
+  line-height: 1.7;
+  background: #f5f0e8;
+  color: #2a2a2a;
+  margin: 0;
+  padding: 0;
+}
+
+/* ── Layout ─────────────────────────────── */
+.site-header {
+  background: #fff;
+  border-bottom: 3px solid #4a7c59;
+  padding: 16px 20px 12px;
+}
+
+.site-header h1 {
+  font-size: 22px;
+  color: #2a2a2a;
+  margin: 0 0 4px;
+  letter-spacing: .04em;
+}
+
+.subtitle {
+  font-size: 13px;
+  color: #666;
+  margin: 0 0 8px;
+}
+
+.meta-bar {
+  font-size: 13px;
+  color: #555;
+}
+
+.meta-bar .pill {
+  display: inline-block;
+  background: #eaf4ea;
+  color: #2a6040;
+  border-radius: 3px;
+  padding: 1px 7px;
+  font-weight: 700;
+  margin: 0 2px;
+}
+
+/* ── Nav tabs ───────────────────────────── */
+.site-nav {
+  background: #fff;
+  border-bottom: 1px solid #d0c8b8;
+  padding: 0 16px;
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+}
+
+.tab-btn {
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  padding: 10px 16px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #555;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color .15s, border-color .15s;
+}
+
+.tab-btn:hover { color: #4a7c59; }
+
+.tab-btn.active {
+  color: #4a7c59;
+  border-bottom-color: #4a7c59;
+}
+
+/* ── Main container ─────────────────────── */
+.site-main {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 20px 16px;
+}
+
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* ── Section headings ───────────────────── */
+.section-heading {
+  font-size: 17px;
+  font-weight: 700;
+  color: #4a7c59;
+  border-bottom: 2px solid #c8d8c0;
+  padding-bottom: 5px;
+  margin: 24px 0 14px;
+  letter-spacing: .03em;
+}
+
+.section-heading:first-child { margin-top: 0; }
+
+/* ── State badges ───────────────────────── */
+.state-badge {
+  display: inline-block;
+  border-radius: 3px;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+}
+
+.state-emerging  { background: #fff3cd; color: #856404; }
+.state-scaling   { background: #d1f0d1; color: #1a5c2a; }
+.state-mature    { background: #cce5ff; color: #004085; }
+.state-declining { background: #f8d7da; color: #721c24; }
+.state-unknown   { background: #e2e3e5; color: #383d41; }
+
+/* ── Confidence bar ─────────────────────── */
+.confidence-bar {
+  display: inline-block;
+  width: 80px;
+  height: 6px;
+  background: #ddd;
+  border-radius: 3px;
+  vertical-align: middle;
+  margin-left: 6px;
+}
+
+.confidence-fill {
+  height: 100%;
+  background: #4a7c59;
+  border-radius: 3px;
+}
+
+/* ── Theme cards grid ───────────────────── */
+.theme-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.theme-card {
+  background: #fff;
+  border-left: 4px solid #4a7c59;
+  border-radius: 0 4px 4px 0;
+  padding: 14px 16px;
+}
+
+.theme-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  gap: 8px;
+}
+
+.theme-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: #2a2a2a;
+  flex: 1;
+}
+
+.theme-meta {
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.theme-domain {
+  display: inline-block;
+  background: #f0e8ff;
+  color: #5a2a8a;
+  border-radius: 3px;
+  padding: 1px 6px;
+  font-size: 12px;
+  font-weight: 700;
+  margin-right: 6px;
+}
+
+.theme-metrics {
+  display: flex;
+  gap: 14px;
+  font-size: 13px;
+  color: #555;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #eee;
+}
+
+.metric { display: flex; flex-direction: column; }
+.metric-label { font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: .04em; }
+.metric-value { font-weight: 700; color: #2a2a2a; }
+
+/* hype risk colouring */
+.hype-low  { color: #1a5c2a; }
+.hype-mid  { color: #856404; }
+.hype-high { color: #721c24; }
+
+/* ── Chart containers ───────────────────── */
+.chart-wrap {
+  background: #fff;
+  border: 1px solid #d8d0b8;
+  border-radius: 4px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.chart-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #4a7c59;
+  margin: 0 0 12px;
+}
+
+.chart-subtitle {
+  font-size: 12px;
+  color: #888;
+  margin: -8px 0 12px;
+}
+
+/* ── Heatmap ────────────────────────────── */
+.heatmap-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  table-layout: fixed;
+}
+
+.heatmap-table th {
+  background: #f5f0e8;
+  color: #555;
+  font-weight: 700;
+  padding: 6px 10px;
+  text-align: center;
+  border-bottom: 2px solid #c8d8c0;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+
+.heatmap-table th:first-child { text-align: left; }
+
+.heatmap-table td {
+  padding: 6px 10px;
+  text-align: center;
+  border-bottom: 1px solid #eee;
+}
+
+.heatmap-table td:first-child {
+  text-align: left;
+  font-weight: 600;
+  color: #2a2a2a;
+}
+
+.heatmap-table tr:last-child td { border-bottom: none; }
+
+/* Cell heat colours */
+.heat-0 { background: #fff; color: #bbb; }
+.heat-1 { background: #eaf4ea; color: #2a6040; }
+.heat-2 { background: #c8e6c9; color: #1b5e20; }
+.heat-3 { background: #81c784; color: #1b5e20; }
+.heat-4 { background: #4a7c59; color: #fff; }
+
+/* ── Source coverage ─────────────────────── */
+.source-class-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.source-class-card {
+  background: #fff;
+  border-radius: 4px;
+  padding: 14px 16px;
+  border-top: 4px solid #4a7c59;
+}
+
+.source-class-name {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: #555;
+  margin-bottom: 4px;
+}
+
+.source-class-count {
+  font-size: 28px;
+  font-weight: 700;
+  color: #2a2a2a;
+  line-height: 1.2;
+}
+
+.source-class-list {
+  font-size: 12px;
+  color: #888;
+  margin-top: 6px;
+  line-height: 1.4;
+}
+
+/* ── Hype split panel ───────────────────── */
+.hype-split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.hype-panel {
+  background: #fff;
+  border: 1px solid #d8d0b8;
+  border-radius: 4px;
+  padding: 16px;
+}
+
+.hype-panel-title {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  margin-bottom: 12px;
+}
+
+.hype-panel-title.evidence { color: #4a7c59; }
+.hype-panel-title.media    { color: #856404; }
+
+/* ── Empty state ─────────────────────────── */
+.empty-state {
+  text-align: center;
+  padding: 48px 24px;
+  color: #888;
+}
+
+.empty-state-icon { font-size: 40px; margin-bottom: 12px; }
+.empty-state h3 { font-size: 17px; color: #555; margin: 0 0 8px; }
+.empty-state p  { font-size: 14px; margin: 0; }
+
+/* ── Footer ──────────────────────────────── */
+.site-footer {
+  text-align: center;
+  font-size: 12px;
+  color: #999;
+  padding: 24px 16px;
+  border-top: 1px solid #d0c8b8;
+  margin-top: 40px;
+}
+
+/* ── Responsive ──────────────────────────── */
+@media (max-width: 640px) {
+  .site-header h1 { font-size: 18px; }
+  .hype-split { grid-template-columns: 1fr; }
+  .theme-grid { grid-template-columns: 1fr; }
+  .source-class-grid { grid-template-columns: 1fr 1fr; }
+}

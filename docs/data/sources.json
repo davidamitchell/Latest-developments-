@@ -1,0 +1,10 @@
+{
+  "generated": null,
+  "classes": {
+    "primary":      {"count": 0, "sources": []},
+    "operator":     {"count": 0, "sources": []},
+    "practitioner": {"count": 0, "sources": []},
+    "media":        {"count": 0, "sources": []},
+    "market":       {"count": 0, "sources": []}
+  }
+}

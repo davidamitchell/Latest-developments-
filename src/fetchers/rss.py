@@ -118,6 +118,7 @@ class RSSFetcher:
                     source_name=feed_cfg.name,
                     published=entry.get("published"),
                     source_type="RSS",
+                    source_class=feed_cfg.source_class,
                 )
             )
 

@@ -77,6 +77,7 @@ class HackerNewsFetcher:
                     source_name="Hacker News",
                     published=published,
                     source_type="Hacker News",
+                    source_class="practitioner",
                 )
             )
 

@@ -194,6 +194,114 @@ Manage MCP server configs for all AI agent environments from a single manifest.
 
 ---
 
+---
+
+## Epic 10 — GitHub Pages Trend Intelligence Site
+
+Static site at `docs/` showing themes, trend states, hype vs substantiation, and source-class coverage. Auto-updated daily by the trend analysis pipeline.
+
+| # | Slice | Status | Notes |
+|---|---|---|---|
+| 10.1 | Create `docs/index.html` with tab navigation (Trends / Themes / Sources / Insights) | `[x]` | |
+| 10.2 | Create `docs/css/style.css` matching email palette | `[x]` | #4a7c59 green, mobile-first |
+| 10.3 | Create `docs/js/app.js` — data loading and rendering | `[x]` | Degrades gracefully when data empty |
+| 10.4 | Create `docs/js/charts.js` — Chart.js wrappers | `[x]` | Trend phase chart + hype split panels |
+| 10.5 | Create `docs/data/` placeholder JSON files | `[x]` | meta, trends, themes, items, graph, sources |
+| 10.6 | Add trend analysis step to `daily-digest.yml` | `[x]` | Runs `python -m src.trends`; commits `docs/data/` |
+| 10.7 | Write ADR-0016 | `[x]` | Documents Pages architecture and data contract |
+| 10.8 | Enable GitHub Pages in repo settings (docs folder) | `[ ]` | Manual step — requires repo owner access |
+
+**Acceptance:** `docs/index.html` loads in browser; trend data populates after first post-merge pipeline run.
+
+---
+
+## Epic 11 — Source Class Infrastructure
+
+Every item carries a `source_class` label for credibility triangulation.
+
+| # | Slice | Status | Notes |
+|---|---|---|---|
+| 11.1 | Add `source_class` field to `FetchedItem` | `[x]` | Default: `"practitioner"` |
+| 11.2 | Assign source class per fetcher | `[x]` | YouTube/HN=practitioner, Substack=media, RSS=configurable |
+| 11.3 | `src/models.py` — `CanonicalRecord`, `TrendMetrics`, `ThemeNode`, `GraphEdge` | `[x]` | |
+| 11.4 | `source_class` field on `RSSFeed` config | `[x]` | Set per-feed in `sources.yaml` |
+| 11.5 | Tests for source class assignment | `[ ]` | Confirm each fetcher outputs correct class |
+
+---
+
+## Epic 12 — Canonical Record Extraction & Credibility Scoring
+
+| # | Slice | Status | Notes |
+|---|---|---|---|
+| 12.1 | `src/credibility.py` — 5-axis credibility scoring | `[x]` | proximity, incentive, reproducibility, adoption, time_decay |
+| 12.2 | Hype detection | `[x]` | `detect_hype()` — evidence density × source incentive proxy |
+| 12.3 | `extract_records_from_digest()` in `src/trends.py` | `[x]` | Gemini JSON-lines extraction per history digest |
+| 12.4 | Tests for credibility scoring | `[ ]` | Unit tests for each axis and edge cases |
+
+---
+
+## Epic 13 — Theme Clustering & Relationship Graph
+
+| # | Slice | Status | Notes |
+|---|---|---|---|
+| 13.1 | `src/themes.py` — synonym normalization map | `[x]` | ~30 entries; collapses common rebrands |
+| 13.2 | `cluster_themes()` — Gemini-powered clustering | `[x]` | Domain taxonomy enforced; definitions extracted |
+| 13.3 | `build_graph_edges()` — relationship graph | `[x]` | causal/competitive/compositional/contradictory |
+| 13.4 | Tests for clustering | `[ ]` | Idempotency; synonym collapse; graceful API failure |
+
+---
+
+## Epic 14 — Trend State Machine
+
+| # | Slice | Status | Notes |
+|---|---|---|---|
+| 14.1 | `src/trend_state.py` — state classifier | `[x]` | emerging/scaling/mature/declining rules |
+| 14.2 | `compute_velocity()` and `compute_stability()` | `[x]` | Rolling week-over-week metrics |
+| 14.3 | Cross-class confirmation gate | `[x]` | diversity ≥ 2 required for non-declining state |
+| 14.4 | `update_metrics()` — rolling history append | `[x]` | Max 30 snapshots per theme |
+| 14.5 | Tests for state transitions | `[ ]` | Including spike vs trend, diversity gate |
+
+---
+
+## Epic 15 — Site Visualizations (Phase 1)
+
+| # | Slice | Status | Notes |
+|---|---|---|---|
+| 15.1 | Trend phase chart (Chart.js multi-line) | `[x]` | Phase band overlays; renders from trends.json |
+| 15.2 | Hype vs substantiation split panels | `[x]` | Evidence-weighted vs media-weighted side-by-side |
+| 15.3 | Theme cards with state badge and metrics | `[x]` | Item count, hype risk, source diversity |
+| 15.4 | Source-class coverage heatmap | `[x]` | CSS table; rows=themes, cols=classes |
+| 15.5 | Trend state table with confidence bars | `[x]` | Sortable; velocity and diversity columns |
+| 15.6 | Raw data drill-down | `[ ]` | Click theme → item-level provenance panel |
+
+---
+
+## Epic 16 — Site Visualizations (Phase 2)
+
+| # | Slice | Status | Notes |
+|---|---|---|---|
+| 16.1 | Theme graph — D3 force layout | `[ ]` | Node colour=state, size=volume |
+| 16.2 | Evidence ladder — stacked bars per insight | `[ ]` | paper / benchmark / production / pricing |
+| 16.3 | Weekly delta view — new/changed themes only | `[ ]` | Reduces noise; focuses on movement |
+| 16.4 | Novelty vs continuity quadrant plot | `[ ]` | Semantic similarity to corpus × current attention |
+| 16.5 | Influence flow Sankey diagram | `[ ]` | source class → themes → impact vectors |
+
+---
+
+## Epic 17 — Expanded Sources (Incremental)
+
+Add sources one at a time. Each is opt-in via `sources.yaml` (commented out by default).
+
+| # | Slice | Status | Notes |
+|---|---|---|---|
+| 17.1 | `src/fetchers/arxiv.py` — arXiv RSS | `[ ]` | cs.AI, cs.LG, cs.CL; primary class; free |
+| 17.2 | Hugging Face model releases | `[ ]` | RSS or JSON API; primary/operator class |
+| 17.3 | Papers with Code trending | `[ ]` | RSS; primary class; reproducibility proxy |
+| 17.4 | Operator changelogs | `[ ]` | OpenAI/Anthropic/Google release notes RSS; operator class |
+| 17.5 | Reddit r/MachineLearning | `[ ]` | PRAW or JSON API; practitioner class; deferred pending cost review |
+
+---
+
 ## Deferred / Ideas
 
 | Idea | Notes |
@@ -204,3 +312,5 @@ Manage MCP server configs for all AI agent environments from a single manifest.
 | Web UI for config editing | Out of scope for CLI-first approach |
 | Vector store for semantic dedup | Overkill vs. URL-based dedup for now |
 | Per-topic digest segmentation | Could be a future prompt template system |
+| Claim contradiction map | Bipartite graph: claims vs counter-claims; Epic 16 candidate |
+| Adoption proxy dashboard | Job postings + repo stars + pricing changes; Epic 16 candidate |
