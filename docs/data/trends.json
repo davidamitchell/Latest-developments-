@@ -1,25 +1,55 @@
 {
-  "generated": "2026-04-29T17:54:11.779824+00:00",
+  "generated": "2026-04-29T18:00:08.033763+00:00",
   "trends": [
+    {
+      "theme": "Benchmarks & Evals",
+      "domain": "unknown",
+      "definition": "",
+      "state": "unknown",
+      "confidence": 0.412,
+      "volume": 1.47,
+      "velocity": 11.0,
+      "diversity": 1,
+      "adoption_proxy": 0.0,
+      "stability": 1.0,
+      "hype_risk": 0.0,
+      "item_count": 12,
+      "last_seen": "2026-04-29",
+      "source_classes": [
+        "primary"
+      ],
+      "source_class_counts": {
+        "primary": 12
+      },
+      "history": [
+        {
+          "date": "2026-04-27",
+          "volume": 12,
+          "state": "unknown"
+        }
+      ]
+    },
     {
       "theme": "AI Safety & Alignment",
       "domain": "unknown",
       "definition": "",
-      "state": "declining",
-      "confidence": 0.42,
-      "volume": 0.52,
-      "velocity": -0.6667,
-      "diversity": 2,
+      "state": "unknown",
+      "confidence": 0.623,
+      "volume": 0.74,
+      "velocity": 0.0,
+      "diversity": 3,
       "adoption_proxy": 0.0,
-      "stability": 0.646,
+      "stability": 0.667,
       "hype_risk": 0.0,
-      "item_count": 4,
-      "last_seen": "2026-04-15",
+      "item_count": 6,
+      "last_seen": "2026-04-29",
       "source_classes": [
-        "practitioner"
+        "practitioner",
+        "primary"
       ],
       "source_class_counts": {
-        "practitioner": 4
+        "practitioner": 4,
+        "primary": 2
       },
       "history": [
         {
@@ -35,7 +65,117 @@
         {
           "date": "2026-04-13",
           "volume": 1,
-          "state": "declining"
+          "state": "unknown"
+        },
+        {
+          "date": "2026-04-27",
+          "volume": 2,
+          "state": "unknown"
+        }
+      ]
+    },
+    {
+      "theme": "Multi-Agent Systems",
+      "domain": "unknown",
+      "definition": "",
+      "state": "emerging",
+      "confidence": 0.435,
+      "volume": 0.61,
+      "velocity": 4.0,
+      "diversity": 2,
+      "adoption_proxy": 0.0,
+      "stability": 0.4,
+      "hype_risk": 0.0,
+      "item_count": 5,
+      "last_seen": "2026-04-29",
+      "source_classes": [
+        "primary",
+        "practitioner"
+      ],
+      "source_class_counts": {
+        "practitioner": 1,
+        "primary": 4
+      },
+      "history": [
+        {
+          "date": "2026-04-13",
+          "volume": 1,
+          "state": "unknown"
+        },
+        {
+          "date": "2026-04-27",
+          "volume": 4,
+          "state": "emerging"
+        }
+      ]
+    },
+    {
+      "theme": "Retrieval-Augmented Generation",
+      "domain": "unknown",
+      "definition": "",
+      "state": "emerging",
+      "confidence": 0.435,
+      "volume": 0.61,
+      "velocity": 3.0,
+      "diversity": 2,
+      "adoption_proxy": 0.0,
+      "stability": 0.4,
+      "hype_risk": 0.0,
+      "item_count": 5,
+      "last_seen": "2026-04-29",
+      "source_classes": [
+        "primary",
+        "practitioner"
+      ],
+      "source_class_counts": {
+        "practitioner": 1,
+        "primary": 4
+      },
+      "history": [
+        {
+          "date": "2026-03-30",
+          "volume": 1,
+          "state": "unknown"
+        },
+        {
+          "date": "2026-04-27",
+          "volume": 4,
+          "state": "emerging"
+        }
+      ]
+    },
+    {
+      "theme": "Multimodal Models",
+      "domain": "unknown",
+      "definition": "",
+      "state": "emerging",
+      "confidence": 0.435,
+      "volume": 0.61,
+      "velocity": 3.0,
+      "diversity": 2,
+      "adoption_proxy": 0.0,
+      "stability": 0.4,
+      "hype_risk": 0.0,
+      "item_count": 5,
+      "last_seen": "2026-04-29",
+      "source_classes": [
+        "primary",
+        "practitioner"
+      ],
+      "source_class_counts": {
+        "practitioner": 1,
+        "primary": 4
+      },
+      "history": [
+        {
+          "date": "2026-03-23",
+          "volume": 1,
+          "state": "unknown"
+        },
+        {
+          "date": "2026-04-27",
+          "volume": 4,
+          "state": "emerging"
         }
       ]
     },
@@ -44,8 +184,8 @@
       "domain": "unknown",
       "definition": "",
       "state": "declining",
-      "confidence": 0.42,
-      "volume": 0.52,
+      "confidence": 0.415,
+      "volume": 0.49,
       "velocity": -1.0,
       "diversity": 2,
       "adoption_proxy": 0.0,
@@ -72,8 +212,8 @@
       "domain": "unknown",
       "definition": "",
       "state": "declining",
-      "confidence": 0.232,
-      "volume": 0.39,
+      "confidence": 0.228,
+      "volume": 0.37,
       "velocity": -1.0,
       "diversity": 1,
       "adoption_proxy": 0.0,
@@ -104,10 +244,10 @@
       "theme": "Ai Business Strategy",
       "domain": "unknown",
       "definition": "",
-      "state": "unknown",
-      "confidence": 0.21,
-      "volume": 0.26,
-      "velocity": 0.0,
+      "state": "declining",
+      "confidence": 0.208,
+      "volume": 0.25,
+      "velocity": -1.0,
       "diversity": 1,
       "adoption_proxy": 0.0,
       "stability": 1.0,
@@ -124,7 +264,7 @@
         {
           "date": "2026-04-06",
           "volume": 2,
-          "state": "unknown"
+          "state": "declining"
         }
       ]
     },
@@ -133,8 +273,8 @@
       "domain": "unknown",
       "definition": "",
       "state": "declining",
-      "confidence": 0.377,
-      "volume": 0.26,
+      "confidence": 0.375,
+      "volume": 0.25,
       "velocity": -1.0,
       "diversity": 2,
       "adoption_proxy": 0.0,
@@ -166,8 +306,8 @@
       "domain": "unknown",
       "definition": "",
       "state": "declining",
-      "confidence": 0.21,
-      "volume": 0.26,
+      "confidence": 0.208,
+      "volume": 0.25,
       "velocity": -1.0,
       "diversity": 1,
       "adoption_proxy": 0.0,
@@ -199,8 +339,8 @@
       "domain": "unknown",
       "definition": "",
       "state": "declining",
-      "confidence": 0.21,
-      "volume": 0.26,
+      "confidence": 0.208,
+      "volume": 0.25,
       "velocity": -1.0,
       "diversity": 1,
       "adoption_proxy": 0.0,
@@ -232,8 +372,8 @@
       "domain": "unknown",
       "definition": "",
       "state": "declining",
-      "confidence": 0.21,
-      "volume": 0.26,
+      "confidence": 0.208,
+      "volume": 0.25,
       "velocity": -1.0,
       "diversity": 1,
       "adoption_proxy": 0.0,
@@ -260,8 +400,8 @@
       "domain": "unknown",
       "definition": "",
       "state": "declining",
-      "confidence": 0.21,
-      "volume": 0.26,
+      "confidence": 0.208,
+      "volume": 0.25,
       "velocity": -1.0,
       "diversity": 1,
       "adoption_proxy": 0.0,
@@ -293,8 +433,8 @@
       "domain": "unknown",
       "definition": "",
       "state": "declining",
-      "confidence": 0.21,
-      "volume": 0.26,
+      "confidence": 0.208,
+      "volume": 0.25,
       "velocity": -1.0,
       "diversity": 1,
       "adoption_proxy": 0.0,
@@ -318,6 +458,97 @@
           "date": "2026-03-16",
           "volume": 1,
           "state": "declining"
+        }
+      ]
+    },
+    {
+      "theme": "Code Generation",
+      "domain": "unknown",
+      "definition": "",
+      "state": "unknown",
+      "confidence": 0.375,
+      "volume": 0.25,
+      "velocity": 0.0,
+      "diversity": 2,
+      "adoption_proxy": 0.0,
+      "stability": 1.0,
+      "hype_risk": 0.0,
+      "item_count": 2,
+      "last_seen": "2026-04-29",
+      "source_classes": [
+        "practitioner",
+        "primary"
+      ],
+      "source_class_counts": {
+        "practitioner": 1,
+        "primary": 1
+      },
+      "history": [
+        {
+          "date": "2026-03-02",
+          "volume": 1,
+          "state": "unknown"
+        },
+        {
+          "date": "2026-04-27",
+          "volume": 1,
+          "state": "unknown"
+        }
+      ]
+    },
+    {
+      "theme": "Fine-Tuning & Adaptation",
+      "domain": "unknown",
+      "definition": "",
+      "state": "unknown",
+      "confidence": 0.208,
+      "volume": 0.25,
+      "velocity": 1.0,
+      "diversity": 1,
+      "adoption_proxy": 0.0,
+      "stability": 1.0,
+      "hype_risk": 0.0,
+      "item_count": 2,
+      "last_seen": "2026-04-29",
+      "source_classes": [
+        "primary"
+      ],
+      "source_class_counts": {
+        "primary": 2
+      },
+      "history": [
+        {
+          "date": "2026-04-27",
+          "volume": 2,
+          "state": "unknown"
+        }
+      ]
+    },
+    {
+      "theme": "Long-Context Reasoning",
+      "domain": "unknown",
+      "definition": "",
+      "state": "unknown",
+      "confidence": 0.208,
+      "volume": 0.25,
+      "velocity": 1.0,
+      "diversity": 1,
+      "adoption_proxy": 0.0,
+      "stability": 1.0,
+      "hype_risk": 0.0,
+      "item_count": 2,
+      "last_seen": "2026-04-29",
+      "source_classes": [
+        "primary"
+      ],
+      "source_class_counts": {
+        "primary": 2
+      },
+      "history": [
+        {
+          "date": "2026-04-27",
+          "volume": 2,
+          "state": "unknown"
         }
       ]
     }

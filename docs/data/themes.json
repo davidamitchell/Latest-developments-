@@ -1,18 +1,86 @@
 {
-  "generated": "2026-04-29T17:54:11.779824+00:00",
+  "generated": "2026-04-29T18:00:08.033763+00:00",
   "themes": [
+    {
+      "name": "Benchmarks & Evals",
+      "domain": "unknown",
+      "definition": "",
+      "state": "unknown",
+      "item_count": 12,
+      "last_seen": "2026-04-29",
+      "source_classes": [
+        "primary"
+      ],
+      "source_class_counts": {
+        "primary": 12
+      },
+      "hype_risk": 0.0
+    },
     {
       "name": "AI Safety & Alignment",
       "domain": "unknown",
       "definition": "",
-      "state": "declining",
-      "item_count": 4,
-      "last_seen": "2026-04-15",
+      "state": "unknown",
+      "item_count": 6,
+      "last_seen": "2026-04-29",
       "source_classes": [
+        "practitioner",
+        "primary"
+      ],
+      "source_class_counts": {
+        "practitioner": 4,
+        "primary": 2
+      },
+      "hype_risk": 0.0
+    },
+    {
+      "name": "Multi-Agent Systems",
+      "domain": "unknown",
+      "definition": "",
+      "state": "emerging",
+      "item_count": 5,
+      "last_seen": "2026-04-29",
+      "source_classes": [
+        "primary",
         "practitioner"
       ],
       "source_class_counts": {
-        "practitioner": 4
+        "practitioner": 1,
+        "primary": 4
+      },
+      "hype_risk": 0.0
+    },
+    {
+      "name": "Retrieval-Augmented Generation",
+      "domain": "unknown",
+      "definition": "",
+      "state": "emerging",
+      "item_count": 5,
+      "last_seen": "2026-04-29",
+      "source_classes": [
+        "primary",
+        "practitioner"
+      ],
+      "source_class_counts": {
+        "practitioner": 1,
+        "primary": 4
+      },
+      "hype_risk": 0.0
+    },
+    {
+      "name": "Multimodal Models",
+      "domain": "unknown",
+      "definition": "",
+      "state": "emerging",
+      "item_count": 5,
+      "last_seen": "2026-04-29",
+      "source_classes": [
+        "primary",
+        "practitioner"
+      ],
+      "source_class_counts": {
+        "practitioner": 1,
+        "primary": 4
       },
       "hype_risk": 0.0
     },
@@ -50,7 +118,7 @@
       "name": "Ai Business Strategy",
       "domain": "unknown",
       "definition": "",
-      "state": "unknown",
+      "state": "declining",
       "item_count": 2,
       "last_seen": "2026-04-12",
       "source_classes": [
@@ -148,6 +216,53 @@
       ],
       "source_class_counts": {
         "practitioner": 2
+      },
+      "hype_risk": 0.0
+    },
+    {
+      "name": "Code Generation",
+      "domain": "unknown",
+      "definition": "",
+      "state": "unknown",
+      "item_count": 2,
+      "last_seen": "2026-04-29",
+      "source_classes": [
+        "practitioner",
+        "primary"
+      ],
+      "source_class_counts": {
+        "practitioner": 1,
+        "primary": 1
+      },
+      "hype_risk": 0.0
+    },
+    {
+      "name": "Fine-Tuning & Adaptation",
+      "domain": "unknown",
+      "definition": "",
+      "state": "unknown",
+      "item_count": 2,
+      "last_seen": "2026-04-29",
+      "source_classes": [
+        "primary"
+      ],
+      "source_class_counts": {
+        "primary": 2
+      },
+      "hype_risk": 0.0
+    },
+    {
+      "name": "Long-Context Reasoning",
+      "domain": "unknown",
+      "definition": "",
+      "state": "unknown",
+      "item_count": 2,
+      "last_seen": "2026-04-29",
+      "source_classes": [
+        "primary"
+      ],
+      "source_class_counts": {
+        "primary": 2
       },
       "hype_risk": 0.0
     }

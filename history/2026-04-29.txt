@@ -1,0 +1,23 @@
+Daily AI Digest — 29 Apr 2026
+========================================
+
+Here's a summary of the latest AI/ML developments:
+
+## Nate Jones
+
+### Salesforce Killed The Browser. Every Agent Runs Your CRM Now.
+Theme: Agentic CRM
+Summary: This video discusses how AI agents could fundamentally change CRM interaction by operating directly on behalf of users, potentially eliminating the traditional browser-based interface. This signifies a shift towards more autonomous, intent-driven workflows within enterprise applications, suggesting developers should prepare for agent-centric integration patterns. The core idea is enabling agents to execute complex CRM tasks end-to-end without direct human GUI interaction.
+
+
+
+────────────────────────────────────────
+Run summary
+  UTC timestamp : 2026-04-29 17:59:50 UTC
+  Total new items: 12
+
+  Sources fetched:
+    YouTube: 2 new item(s)
+    Blogs/RSS: 0 new item(s)
+    Hacker News: 10 new item(s)
+────────────────────────────────────────

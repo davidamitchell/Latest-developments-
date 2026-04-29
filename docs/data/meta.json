@@ -1,11 +1,12 @@
 {
-  "last_run": "2026-04-29T17:54:11.779824+00:00",
+  "last_run": "2026-04-29T18:00:08.033763+00:00",
   "run_id": "2026-04-29",
-  "item_count": 178,
-  "theme_count": 10,
+  "item_count": 329,
+  "theme_count": 17,
   "source_class_counts": {
-    "youtube": 153,
+    "youtube": 155,
     "blogs/rss": 0,
-    "hacker news": 240
+    "hacker news": 250,
+    "arxiv": 150
   }
 }

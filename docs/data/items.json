@@ -1,6 +1,12 @@
 {
-  "generated": "2026-04-29T17:54:11.779824+00:00",
+  "generated": "2026-04-29T18:00:08.033763+00:00",
   "items": [
+    {
+      "date": "2026-04-29",
+      "theme": "Agentic Crm",
+      "source_class": "practitioner",
+      "source_name": "YouTube"
+    },
     {
       "date": "2026-04-26",
       "theme": "Ai Code Review",
@@ -1068,6 +1074,906 @@
       "theme": "Llm Resource Optimization",
       "source_class": "practitioner",
       "source_name": "YouTube"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "An Intelligent Fault Diagnosis Method For General Aviation Aircraft Based On Mul",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Fine-Tuning & Adaptation",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "The Power Of Power Law: Asymmetry Enables Compositional Reasoning",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "On The Existence Of An Inverse Solution For Preference-Based Reductions In Argum",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Towards Causally Interpretable Wi-Fi Csi-Based Human Activity Recognition With D",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Formalscience: Scalable Human-In-The-Loop Autoformalisation Of Science With Agen",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "A Systematic Approach For Large Language Models Debugging",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "A Decoupled Human-In-The-Loop System For Controlled Autonomy In Agentic Workflow",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Don'T Make The Llm Read The Graph: Make The Graph Think",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Analytica: Soft Propositional Reasoning For Robust And Scalable Llm-Driven Analy",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Multi-Agent Systems",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Physe: A Psychological Framework For Real-Time Ar-Llm Social Engineering Attacks",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Benchmarks & Evals",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "From Coarse To Fine: Self-Adaptive Hierarchical Planning For Llm Agents",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Storytr: Narrative-Centric Video Temporal Retrieval With Theory Of Mind Reasonin",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "AI Safety & Alignment",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Adamamba: Adaptive Frequency-Gated Mamba For Long-Term Time Series Forecasting",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Long-Context Reasoning",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Active Inference: A Method For Phenotyping Agency In Ai Systems?",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Ai Identity: Standards, Gaps, And Research Directions For Ai Agents",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Lego: An Llm Skill-Based Front-End Design Generation Platform",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Multi-Agent Systems",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Constraint-Based Analysis Of Reasoning Shortcuts In Neurosymbolic Learning",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Multi-Agent Systems",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "When Corrective Hints Hurt: Prompt Design In Reasoner-Guided Repair Of Llm Overc",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Industryasseteqa: A Neurosymbolic Operational Intelligence System For Embodied Q",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Arguagent: Ai-Supported Real-Time Grouping For Productive Argumentation In Stem",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Ulterior Motives: Detecting Misaligned Reasoning In Continuous Thought Models",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Escher-Loop: Mutual Evolution By Closed-Loop Self-Referential Optimization",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Agentic Adversarial Rewriting Exposes Architectural Vulnerabilities In Black-Box",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Gca-Bulf: A Bottom-Up Framework For Short-Term Load Forecasting Using Grouped Cr",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Automated Detection Of Pediatric Congenital Heart Disease From Phonocardiograms",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Comparative Study Of Bending Analysis Using Physics-Informed Neural Networks And",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Liquid Neural Network Models For Natural Gas Spot Price Time-Series Forecasting",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Architecture Determines Observability In Transformers",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Query-Efficient Quantum Approximate Optimization Via Graph-Conditioned Trust Reg",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Intrinsic Mutual Information As A Modulator For Preference Optimization",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Minaction.Net: Energy-First Neural Architecture Design -- From Biological Princi",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Long-Context Reasoning",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "A Comparative Analysis On The Performance Of Upper Confidence Bound Algorithms I",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Time-Varying Interaction Graph Ode For Dynamic Graph Representation Learning",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Heterogeneous Variational Inference For Markov Degradation Hazard Models: Discre",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Benchmarks & Evals",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Incompressible Knowledge Probes: Estimating Black-Box Llm Parameter Counts Via F",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "On The Trainability Of Masked Diffusion Language Models Via Blockwise Locality",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Transformer Approximations From Relus",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Contrastive Image-Metadata Pre-Training For Materials Transmission Electron Micr",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Learning With Embedded Linear Equality Constraints Via Variational Bayesian Infe",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Generative Diffusion Models For Spatiotemporal Influenza Forecasting",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "A Unifying Framework For Unsupervised Concept Extraction",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Rethinking Layer Redundancy In Large Language Models: Calibration Objectives And",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Multimodal Models",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Compute Aligned Training: Optimizing For Test Time Inference",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Coreflow: Low-Rank Matrix Generative Models",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Benchmarks & Evals",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Multi-Agent Systems",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Laplace-Bridged Randomized Smoothing For Fast Certified Robustness",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Why Search When You Can Transfer? Amortized Agentic Workflow Design From Structu",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Dynamic Regret For Online Regression In Rkhs Via Discounted Vaw And Subspace App",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Null Measurability At The Symmetrization Interface In Vc Learning",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Elderly-Contextual Data Augmentation Via Speech Synthesis For Elderly Asr",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Large Language Models Explore By Latent Distilling",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Benchmarks & Evals",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Ade: Adaptive Dictionary Embeddings -- Scaling Multi-Anchor Representations To L",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Code Generation",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Benchmarks & Evals",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Dynamic Decision Learning: Test-Time Evolution For Abnormality Grounding In Rare",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "A Survey On Llm-Based Conversational User Simulation",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Don\\'T Stop Early: Scalable Enterprise Deep Research With Controlled Information",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Why Does Reinforcement Learning Generalize? A Feature-Level Mechanistic Study Of",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Faithful Autoformalization Via Roundtrip Verification And Repair",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Dual-Track Cot: Budget-Aware Stepwise Guidance For Small Lms",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Analyzing Llm Reasoning To Uncover Mental Health Stigma",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "The Dynamics Of Delusion: Modeling Bidirectional False Belief Amplification In H",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Diagnosis, Bad Planning & Reasoning. Treatment, Scope -- Planning For Hybrid Que",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Benchmarks & Evals",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "What Makes Good Instruction-Tuning Data? An In-Context Learning Perspective",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Korean Aegyo Speech Shows Systematic F1 Increase To Signal Childlike Qualities",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Fama: Failure-Aware Meta-Agentic Framework For Open-Source Llms In Interactive T",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Frictive Policy Optimization For Llms: Epistemic Intervention, Risk-Sensitive Co",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Retrieval-Augmented Generation",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Barred: Synthetic Training Of Custom Policy Guardrails Via Asymmetric Debate",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Below-Chance Blindness: Prompted Underperformance In Small Llms Produces Positio",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Learning From Medical Entity Trees: An Entity-Centric Medical Data Engineering F",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Legalmidm: Use-Case-Driven Legal Domain Specialization For Korean Large Language",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Faithfulness-Qa: A Counterfactual Entity Substitution Dataset For Training Conte",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Benchmarks & Evals",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Language Corpora For The Dutch Medical Domain",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Wiki Dumps To Training Corpora: South Slavic Case",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Fine-Tuning & Adaptation",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Esica: A Scalable Framework For Text-Guided 3D Medical Image Segmentation",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Learning Illumination Control In Diffusion Models",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Vibetoken: Scaling 1D Image Tokenizers And Autoregressive Models For Dynamic Res",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Interactive Episodic Memory With User Feedback",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Agentic Ai For Remote Sensing: Technical Challenges And Research Directions",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Subjective Portrait Region Cropping In Landscape Videos With Temporal Annotation",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Learning From Noisy Preferences: A Semi-Supervised Learning Approach To Direct P",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Vipo: Visual Preference Optimization At Scale",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "A New Kind Of Network? Review And Reference Implementation Of Neural Cellular Au",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Douc: Dual-Branch Clip For Training-Free Open-Vocabulary Segmentation",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Bifdet: A 3D Bifurcation Detection Dataset For Airway-Tree Modeling",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Shapey: A Principled Framework For Measuring Shape Recognition Capacity Via Near",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Benchmarks & Evals",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "AI Safety & Alignment",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Benchmarks & Evals",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Resetedit: Precise Text-Guided Editing Of Generated Image Via Resettable Startin",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Iam: Identity-Aware Human Motion And Shape Joint Generation",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Benchmarks & Evals",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Lightweight Real-Time Rendering Parameter Optimization Via Xgboost-Driven Lookup",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Benchmarks & Evals",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Image Classification Via Random Dilated Convolution With Multi-Branch Feature Ex",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Towards Seamless Lunar Mosaics: Deep Radiometric Normalization For Cross-Sensor",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "When The Forger Is The Judge: Gpt-Image-2 Cannot Recognize Its Own Faked Documen",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Retrieval-Augmented Generation",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Personalized Cross-Modal Emotional Correlation Learning For Speech-Preserving Fa",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Multimodal Models",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Omnivtg: A Large-Scale Dataset And Training Paradigm For Open-World Video Tempor",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Multimodal Models",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Densescout: Algorithm-System Co-Design For Budgeted Tiny Object Selection On Edg",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Rapid Tracking Through Strongly Scattering Media With Physics-Informed Neuromorp",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Motionbricks: Scalable Real-Time Motions With Modular Latent Generative Model An",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Vision-Sls: Safe Perception-Based Control From Learned Visual Representations Vi",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "An Analysis Of Sensor Selection For Fruit Picking With Suction-Based Grippers",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Asroballet: Closing The Sim2Real Gap Via Friction-Aware Reinforcement Learning F",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Multimodal Models",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Teacar: An Open-Source Autonomous Driving Platform",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Discretertc: Discrete Diffusion Policies Are Natural Asynchronous Executors",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Handful: Sequential Grasp-Conditioned Dexterous Manipulation With Resource Aware",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Dynamic Ugv-Uav Cooperative Path Planning In Uncertain Environments",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Optimal Ugv-Uav Cooperative Partitioning And Inspection Of Shortest Paths",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Slot-Hopping Enabled Loiter Guidance And Automation For Fixed-Wing Uav Corridors",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Anchor: A Physically Grounded Closed-Loop Framework For Robust Home-Service Mobi",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Prodrive: Proactive Planning For Autonomous Driving Via Ego-Environment Co-Evolu",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Robust Graph Matching Through Semantic Relationship Generation For Slam",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Gs-Playground: A High-Throughput Photorealistic Simulator For Vision-Informed Ro",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Egocentric Tactile And Proximity Sensors As Observation Priors For Humanoid Coll",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Retrieval-Augmented Generation",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Slicerrobotms: An Open-Source 3D Slicer Extension For Robot-Assisted Transcrania",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Geglu-Transformer For Imu-To-Emg Estimation With Few-Shot Adaptation",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Learning-Based Dynamics Modeling And Robust Control For Tendon-Driven Continuum",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Reference-Augmented Learning For Precise Tracking Policy Of Tendon-Driven Contin",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Sensitivity-Based Tube Nmpc For Cooperative Aerial Structures Under Parametric U",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Benchmarks & Evals",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Model Distillation",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Variational Neural Belief Parameterizations For Robust Dexterous Grasping Under",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Logic Of Fuzzy Paths",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Asap: An Azimuth-Priority Strip-Based Search Approach To Planar Microphone Array",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Compass: Compact Multi-Channel Prior-Map And Scene Signature For Floor-Plan-Base",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Retrieval-Augmented Generation",
+      "source_class": "primary",
+      "source_name": "arXiv"
+    },
+    {
+      "date": "2026-04-29",
+      "theme": "Bridging The Indoor-Outdoor Gap: Cross-Technology Ranging For Seamless Robot Nav",
+      "source_class": "primary",
+      "source_name": "arXiv"
     }
   ]
 }
