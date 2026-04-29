@@ -233,6 +233,58 @@ def _dates_in_window(all_dates: list[str], window_days: int) -> list[str]:
     return result
 
 
+def _backfill_history(
+    entries: list[tuple[str, str, str]],  # (date_str, source_class, source_name)
+) -> list[dict]:
+    """Build weekly volume snapshots from raw per-day entries.
+
+    Called on first run for a theme to populate the history array from the
+    full archive rather than showing a single point on the chart.
+    """
+    from datetime import timedelta
+
+    week_counts: Counter = Counter()
+    week_sources: dict[str, set] = defaultdict(set)
+
+    for date_str, _cls, name in entries:
+        try:
+            d = datetime.strptime(date_str, "%Y-%m-%d").date()
+        except ValueError:
+            continue
+        week_start = (d - timedelta(days=d.weekday())).strftime("%Y-%m-%d")
+        week_counts[week_start] += 1
+        week_sources[week_start].add(name)
+
+    weeks = sorted(week_counts.keys())
+    if not weeks:
+        return []
+
+    snapshots = []
+    for i, week in enumerate(weeks):
+        count = week_counts[week]
+        prev_count = week_counts.get(weeks[i - 1], 0) if i > 0 else 0
+        velocity = (count - prev_count) / max(prev_count, 1)
+        diversity = len(week_sources[week])
+
+        # Simplified state for historical backfill (no adoption_proxy available)
+        if velocity < -0.05 and prev_count > 0:
+            state = "declining"
+        elif velocity > 0.3 and diversity >= 2:
+            state = "emerging"
+        elif count >= 2 and diversity >= 2:
+            state = "scaling"
+        else:
+            state = "unknown"
+
+        snapshots.append({
+            "date": week,
+            "volume": count,          # raw weekly item count
+            "state": state,
+        })
+
+    return snapshots[-30:]
+
+
 def build_trend_metrics(
     history: list[tuple[str, str, str, str]],  # (date_str, theme, source_class, source_name)
     existing_metrics: dict[str, TrendMetrics],
@@ -295,15 +347,11 @@ def build_trend_metrics(
         volume_factor    = min(1.0, volume / 3)
         confidence = round(diversity_factor * 0.5 + volume_factor * 0.5, 3)
 
-        # Rolling history snapshot
-        prev_history = existing.history or []
-        if not prev_history or prev_history[-1].get("date") != today_str:
-            prev_history = prev_history[-29:]
-            prev_history.append({
-                "date": today_str,
-                "volume": volume,
-                "state": existing.state,
-            })
+        # Rolling history: always recompute weekly snapshots from raw entries.
+        # This gives the chart the full date range regardless of when the
+        # pipeline was first run.  State for the final snapshot is updated
+        # below after classify_state() runs.
+        prev_history = _backfill_history(entries)
 
         stability = compute_stability(prev_history)
         last_seen = max((d for d, _, _ in entries), default=today_str)

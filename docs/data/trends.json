@@ -1,5 +1,5 @@
 {
-  "generated": "2026-04-29T09:23:31.640543+00:00",
+  "generated": "2026-04-29T17:54:11.779824+00:00",
   "trends": [
     {
       "theme": "AI Safety & Alignment",
@@ -11,7 +11,7 @@
       "velocity": -0.6667,
       "diversity": 2,
       "adoption_proxy": 0.0,
-      "stability": 1.0,
+      "stability": 0.646,
       "hype_risk": 0.0,
       "item_count": 4,
       "last_seen": "2026-04-15",
@@ -23,8 +23,18 @@
       },
       "history": [
         {
-          "date": "2026-04-29",
-          "volume": 0.52,
+          "date": "2026-03-09",
+          "volume": 2,
+          "state": "unknown"
+        },
+        {
+          "date": "2026-03-16",
+          "volume": 1,
+          "state": "declining"
+        },
+        {
+          "date": "2026-04-13",
+          "volume": 1,
           "state": "declining"
         }
       ]
@@ -51,8 +61,8 @@
       },
       "history": [
         {
-          "date": "2026-04-29",
-          "volume": 0.52,
+          "date": "2026-03-09",
+          "volume": 4,
           "state": "declining"
         }
       ]
@@ -67,7 +77,7 @@
       "velocity": -1.0,
       "diversity": 1,
       "adoption_proxy": 0.0,
-      "stability": 1.0,
+      "stability": 0.667,
       "hype_risk": 0.0,
       "item_count": 3,
       "last_seen": "2026-04-03",
@@ -79,8 +89,13 @@
       },
       "history": [
         {
-          "date": "2026-04-29",
-          "volume": 0.39,
+          "date": "2026-03-23",
+          "volume": 1,
+          "state": "unknown"
+        },
+        {
+          "date": "2026-03-30",
+          "volume": 2,
           "state": "declining"
         }
       ]
@@ -107,8 +122,8 @@
       },
       "history": [
         {
-          "date": "2026-04-29",
-          "volume": 0.26,
+          "date": "2026-04-06",
+          "volume": 2,
           "state": "unknown"
         }
       ]
@@ -135,8 +150,13 @@
       },
       "history": [
         {
-          "date": "2026-04-29",
-          "volume": 0.26,
+          "date": "2026-03-09",
+          "volume": 1,
+          "state": "unknown"
+        },
+        {
+          "date": "2026-03-30",
+          "volume": 1,
           "state": "declining"
         }
       ]
@@ -163,8 +183,13 @@
       },
       "history": [
         {
-          "date": "2026-04-29",
-          "volume": 0.26,
+          "date": "2026-03-23",
+          "volume": 1,
+          "state": "unknown"
+        },
+        {
+          "date": "2026-03-30",
+          "volume": 1,
           "state": "declining"
         }
       ]
@@ -191,8 +216,13 @@
       },
       "history": [
         {
-          "date": "2026-04-29",
-          "volume": 0.26,
+          "date": "2026-03-16",
+          "volume": 1,
+          "state": "unknown"
+        },
+        {
+          "date": "2026-03-23",
+          "volume": 1,
           "state": "declining"
         }
       ]
@@ -219,8 +249,8 @@
       },
       "history": [
         {
-          "date": "2026-04-29",
-          "volume": 0.26,
+          "date": "2026-03-23",
+          "volume": 2,
           "state": "declining"
         }
       ]
@@ -247,8 +277,13 @@
       },
       "history": [
         {
-          "date": "2026-04-29",
-          "volume": 0.26,
+          "date": "2026-03-16",
+          "volume": 1,
+          "state": "unknown"
+        },
+        {
+          "date": "2026-03-23",
+          "volume": 1,
           "state": "declining"
         }
       ]
@@ -275,8 +310,13 @@
       },
       "history": [
         {
-          "date": "2026-04-29",
-          "volume": 0.26,
+          "date": "2026-03-09",
+          "volume": 1,
+          "state": "unknown"
+        },
+        {
+          "date": "2026-03-16",
+          "volume": 1,
           "state": "declining"
         }
       ]

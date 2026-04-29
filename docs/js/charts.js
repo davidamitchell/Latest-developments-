@@ -10,11 +10,11 @@ const CHART_COLORS = {
   declining: 'rgba(220,  53,  69, 0.8)',
 };
 
+// Phase band thresholds in items/week (integer scale used by history snapshots)
 const PHASE_BANDS = [
-  { label: 'Emerging',  yMin: 0,   yMax: 2.5,  color: 'rgba(255,243,205,0.4)' },
-  { label: 'Scaling',   yMin: 2.5, yMax: 6,    color: 'rgba(209,240,209,0.4)' },
-  { label: 'Mature',    yMin: 6,   yMax: 8,    color: 'rgba(204,229,255,0.4)' },
-  { label: 'Declining', yMin: 8,   yMax: 10,   color: 'rgba(248,215,218,0.4)' },
+  { label: 'Low activity',  yMin: 0, yMax: 2,  color: 'rgba(255,243,205,0.3)' },
+  { label: 'Active',        yMin: 2, yMax: 5,  color: 'rgba(209,240,209,0.3)' },
+  { label: 'High activity', yMin: 5, yMax: 10, color: 'rgba(204,229,255,0.3)' },
 ];
 
 let _trendChart  = null;
@@ -51,9 +51,10 @@ function renderTrendChart(canvasId, trends) {
       borderColor: color,
       backgroundColor: color.replace('0.8', '0.1'),
       borderWidth: 2,
-      pointRadius: 3,
-      tension: 0.3,
-      spanGaps: true,
+      pointRadius: 4,
+      pointHoverRadius: 6,
+      tension: 0.2,
+      spanGaps: false,   // don't connect across weeks with no data
     };
   });
 
@@ -68,8 +69,10 @@ function renderTrendChart(canvasId, trends) {
         legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 12 } } },
         tooltip: {
           callbacks: {
-            label: ctx => ` ${ctx.dataset.label}: ${(ctx.parsed.y ?? 0).toFixed(2)}`,
+            label: ctx => ctx.parsed.y === null ? null
+              : ` ${ctx.dataset.label}: ${ctx.parsed.y} item${ctx.parsed.y !== 1 ? 's' : ''}`,
           },
+          filter: item => item.parsed.y !== null,
         },
         annotation: buildPhaseBandAnnotations(),
       },
@@ -80,7 +83,8 @@ function renderTrendChart(canvasId, trends) {
         },
         y: {
           min: 0,
-          title: { display: true, text: 'Weighted volume', font: { size: 11 } },
+          ticks: { stepSize: 1, precision: 0 },
+          title: { display: true, text: 'Items per week', font: { size: 11 } },
           grid: { color: 'rgba(0,0,0,0.05)' },
         },
       },
