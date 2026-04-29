@@ -63,7 +63,7 @@ function renderTrendChart(canvasId, trends, colorMap) {
       label: t.theme,
       data: labels.map(d => pointMap[d] ?? null),
       borderColor: color,
-      backgroundColor: color + '1a',  // hex alpha ≈ 10% fill under the line
+      backgroundColor: hexAlpha(color, 0.1),
       borderWidth: 2,
       pointRadius: 4,
       pointHoverRadius: 6,
@@ -248,6 +248,17 @@ function renderHeatmap(containerId, themes, classes, colorMap) {
 }
 
 /* ── Utilities ──────────────────────────────────────────────────────── */
+
+/**
+ * Append a 2-digit hex alpha to a 6-digit hex colour string.
+ * Example: hexAlpha('#00C3A5', 0.5) → '#00C3A580'
+ * @param {string} hex   - 6-digit hex colour (with #)
+ * @param {number} alpha - opacity 0–1
+ * @returns {string} 8-digit hex colour
+ */
+function hexAlpha(hex, alpha) {
+  return hex + Math.round(alpha * 255).toString(16).padStart(2, '0');
+}
 
 function escHtml(str) {
   return String(str)

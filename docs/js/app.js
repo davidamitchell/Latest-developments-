@@ -53,6 +53,8 @@ function themeColor(name) {
 }
 
 // Return hex + 2-digit alpha (e.g. '#00C3A580' for 50% opacity)
+// Defined in charts.js (loaded before app.js); redeclared here to allow
+// app.js to be used standalone in tests without charts.js.
 function hexAlpha(hex, alpha) {
   return hex + Math.round(alpha * 255).toString(16).padStart(2, '0');
 }
@@ -298,14 +300,14 @@ function renderSourcesTab(data) {
   const rows = sources.map(s => {
     const cls   = s.source_class || 'practitioner';
     const color = CLASS_COLORS[cls] || '#555';
-    const badge = `<span class="source-badge" style="background:${color}20;color:${color};border:1px solid ${color}40">${escHtml(cls)}</span>`;
+    const badge = `<span class="source-badge" style="background:${hexAlpha(color, 0.12)};color:${color};border:1px solid ${hexAlpha(color, 0.25)}">${escHtml(cls)}</span>`;
     const dateRange = s.first_seen && s.last_seen
       ? `${s.first_seen} → ${s.last_seen}`
       : '—';
     const themes = (s.top_themes || []).slice(0, 3)
       .map(t => {
         const tc = themeColor(t);
-        return `<span class="theme-pill" style="border-color:${tc}40;color:${tc}">${escHtml(t)}</span>`;
+        return `<span class="theme-pill" style="border-color:${hexAlpha(tc, 0.25)};color:${tc}">${escHtml(t)}</span>`;
       })
       .join(' ');
     return `
