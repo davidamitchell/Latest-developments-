@@ -669,7 +669,93 @@ Charts used state-based colouring (emerging=amber, scaling=teal, etc.) so themes
 
 ---
 
-## Deferred / Ideas
+## W-0018
+
+status: spike
+created: 2026-04-29
+updated: 2026-04-29
+
+### Outcome
+
+Determine which of the 14 people and 23 institutions tracked by the-deep-archive project have RSS feeds, newsletters, or other machine-readable content endpoints that could be added to `config/sources.yaml`. Produce a prioritised shortlist with source type, URL, and recommended `source_class` for each candidate.
+
+### Context
+
+The site https://the-deep-archive.netlify.app/ tracks high-signal sources on AI + work. The source catalogue (below) covers academics, AI lab leaders, consultancies, analyst firms, and standards bodies — a richer set than the current HN + YouTube + arXiv pipeline. Many will be `media` or `operator` class, filling credibility gaps in cross-class confirmation.
+
+### Spike scope (time-box: 2 h)
+
+1. For each person entry: check if they publish a personal newsletter (Substack, Beehiiv, Revue, Ghost), blog (RSS), or LinkedIn newsletter with an RSS endpoint.
+2. For each institution entry: check for RSS news feeds, research publication feeds, or report release pages.
+3. Classify each candidate by feasibility: `✓ has RSS`, `~ newsletter (check)`, `✗ no feed`.
+4. Record recommended `source_class`: primary / operator / practitioner / media / market.
+5. Output a markdown table in the spike result section below.
+
+### Source catalogue
+
+#### People (from the-deep-archive.netlify.app)
+
+| ID | Name | Affiliation | Priority | Expertise |
+|---|---|---|---|---|
+| p1 | Prof. Majd Sakr | Carnegie Mellon University | High | Human+agent collaboration, skill atrophy, human-centred AI |
+| p2 | Ethan Mollick | Wharton School, UPenn | High | Jagged frontier of AI, augmentation models, practical AI adoption |
+| p3 | Connor Grennan | NYU Stern | High | People & change, AI adoption readiness |
+| p4 | Karim R. Lakhani | Harvard Business School | High | AI-driven business transformation, organisational redesign |
+| p5 | Thomas H. Davenport | Babson College / MIT IDE | High | AI strategy, analytics, enterprise AI adoption |
+| p6 | George Westerman | MIT Sloan | Medium | Digital transformation, executive leadership and technology |
+| p7 | Harang Ju | Johns Hopkins / MIT IDE | Medium | AI agents, human-AI collaboration |
+| p8 | Jared Spataro | Microsoft | High | Enterprise AI adoption, Copilot ecosystem, future of work with AI |
+| p9 | Satya Nadella | Microsoft | Medium | Enterprise AI strategy, platform transformation |
+| p10 | Dario Amodei | Anthropic | Medium | AI safety, agentic systems, responsible AI development |
+| p11 | Sam Altman | OpenAI | Medium | AI capabilities trajectory, AGI, enterprise AI |
+| p12 | Josh Bersin | Josh Bersin Company | High | HR technology, agentic HR, workforce transformation |
+| p13 | Jan-Emmanuel De Neve | University of Oxford (Saïd) | Medium | Wellbeing economics, employee perception of AI |
+| p14 | Peter McCrory | Anthropic | High | Labour-market effects of AI, productivity, displacement |
+
+#### Institutions (from the-deep-archive.netlify.app)
+
+| ID | Name | Type | Priority | Focus |
+|---|---|---|---|---|
+| i1 | Harvard Business Review (HBR) | Academic / Media | High | AI strategy, leadership, organisational change |
+| i2 | MIT (Sloan, CSAIL, Media Lab) | Academic | High | AI research, future of work, technology and society |
+| i3 | Carnegie Mellon University | Academic | High | HCI, AI systems, robotics |
+| i4 | Anthropic | AI Technology Company | High | AI safety, agentic systems, human-AI interaction |
+| i5 | OpenAI | AI Technology Company | High | Foundation models, agentic AI, enterprise AI adoption |
+| i6 | Microsoft | AI Technology Company | High | Enterprise AI integration, Copilot ecosystem, productivity AI |
+| i7 | Google / DeepMind | AI Technology Company | High | Foundation models, AI research, enterprise AI |
+| i8 | AWS | AI Technology Company | Medium | Cloud AI infrastructure, enterprise AI services |
+| i9 | McKinsey & Company | Consulting | Medium | AI economic impact, enterprise adoption, organisational change |
+| i10 | BCG | Consulting | Medium | AI strategy, workforce transformation |
+| i11 | Deloitte | Consulting | Medium | Enterprise AI, AI governance, tech trends |
+| i12 | Accenture | Consulting | Medium | AI at scale, technology strategy |
+| i13 | KPMG | Consulting | Medium | AI at scale, enterprise AI adoption, agent-driven reinvention |
+| i14 | IDC | Analyst Firm | Medium | Workforce transformation, human-AI collaboration |
+| i15 | Gartner | Analyst Firm | High | Strategic predictions, technology trends, enterprise AI |
+| i16 | Forrester | Analyst Firm | Medium | Enterprise software, business models, AI predictions |
+| i17 | Cognitive World | Media / Commentary | Medium | Cognitive science, AI impact on human capabilities |
+| i18 | Training Industry | Media / Professional | Low | L&D, workforce development, upskilling |
+| i19 | PwC | Consulting | Medium | AI business predictions, enterprise AI strategy |
+| i20 | Agentic AI Foundation (AAIF) | Standards Body | High | Open standards for agentic AI, MCP, interoperability |
+| i21 | Cloud Security Alliance (CSA) | Standards / Research | Medium | AI agent governance, agentic security, AI controls frameworks |
+| i22 | Grant Thornton | Consulting / Advisory | Medium | AI governance audits, AI ROI, enterprise adoption |
+| i23 | Stanford HAI | Academic / Research | High | Annual AI Index, AI policy and economics, capability benchmarks |
+
+### Spike result
+
+_To be filled when spike is executed._
+
+| Source | Feed URL | Source class | Priority | Notes |
+|---|---|---|---|---|
+| _(to be completed)_ | | | | |
+
+### Notes
+
+- Spike should be executed before implementing any new fetchers from this list
+- Cross-reference with existing `sources.yaml` — several institution blogs (OpenAI, Anthropic, Google AI) may already be partially covered under W-0009
+- People feeds (Substack newsletters) are likely `practitioner` class; institutional reports are `media` or `primary`
+
+---
+
 
 | Idea | Notes |
 |---|---|
