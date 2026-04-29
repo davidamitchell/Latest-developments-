@@ -1,5 +1,9 @@
 {
+<<<<<<< HEAD
   "generated": "2026-04-29T18:04:35.035141+00:00",
+=======
+  "generated": "2026-04-29T18:00:08.033763+00:00",
+>>>>>>> origin/claude/trend-detection-system-3StIE
   "classes": {
     "primary": {
       "count": 0,
@@ -10,8 +14,9 @@
       "sources": []
     },
     "practitioner": {
-      "count": 393,
+      "count": 555,
       "sources": [
+        "Arxiv",
         "Blogs/Rss",
         "Hacker News",
         "Youtube"
@@ -28,12 +33,27 @@
   },
   "sources": [
     {
+      "name": "arXiv",
+      "source_class": "primary",
+      "item_count": 150,
+      "first_seen": "2026-04-29",
+      "last_seen": "2026-04-29",
+      "days_active": 1,
+      "top_themes": [
+        "Benchmarks & Evals",
+        "Multi-Agent Systems",
+        "Multimodal Models",
+        "Retrieval-Augmented Generation",
+        "Fine-Tuning & Adaptation"
+      ]
+    },
+    {
       "name": "YouTube",
       "source_class": "practitioner",
-      "item_count": 99,
+      "item_count": 100,
       "first_seen": "2026-03-03",
-      "last_seen": "2026-04-26",
-      "days_active": 45,
+      "last_seen": "2026-04-29",
+      "days_active": 46,
       "top_themes": [
         "Agentic Workflows",
         "AI Business Strategy",
