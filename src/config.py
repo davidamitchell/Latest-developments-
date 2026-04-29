@@ -65,9 +65,17 @@ class ArxivConfig:
 
 
 @dataclass
+class HuggingFaceConfig:
+    enabled: bool = False   # opt-in; enable in sources.yaml when ready
+    max_models: int = 50
+    min_downloads: int = 100
+
+
+@dataclass
 class TrendsConfig:
     enabled: bool = True
     arxiv: ArxivConfig = field(default_factory=ArxivConfig)
+    huggingface: HuggingFaceConfig = field(default_factory=HuggingFaceConfig)
 
 
 @dataclass
@@ -211,12 +219,18 @@ def load_config(path: Path = Path("config/sources.yaml")) -> Config:
 
     tr = raw.get("trends", {})
     ax = tr.get("arxiv", {})
+    hf = tr.get("huggingface", {})
     trends = TrendsConfig(
         enabled=tr.get("enabled", True),
         arxiv=ArxivConfig(
             enabled=ax.get("enabled", True),
             categories=_yaml_list(ax.get("categories")) or ["cs.AI", "cs.LG", "cs.CL"],
             max_papers=ax.get("max_papers", 30),
+        ),
+        huggingface=HuggingFaceConfig(
+            enabled=hf.get("enabled", False),
+            max_models=hf.get("max_models", 50),
+            min_downloads=hf.get("min_downloads", 100),
         ),
     )
 

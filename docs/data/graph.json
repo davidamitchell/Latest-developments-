@@ -1,6 +1,24 @@
 {
-  "generated": "2026-04-29T17:54:11.779824+00:00",
+  "generated": "2026-04-29T18:04:35.035141+00:00",
   "nodes": [
+    {
+      "id": "Agentic Workflows",
+      "domain": "unknown",
+      "state": "declining",
+      "volume": 0.91
+    },
+    {
+      "id": "AI Business Strategy",
+      "domain": "unknown",
+      "state": "declining",
+      "volume": 0.78
+    },
+    {
+      "id": "AI Workforce & Jobs",
+      "domain": "unknown",
+      "state": "declining",
+      "volume": 0.65
+    },
     {
       "id": "AI Safety & Alignment",
       "domain": "unknown",
@@ -8,49 +26,37 @@
       "volume": 0.52
     },
     {
-      "id": "Ai Workforce Impact",
+      "id": "AI Infrastructure",
       "domain": "unknown",
       "state": "declining",
       "volume": 0.52
     },
     {
-      "id": "Local Llm Inference",
+      "id": "LLM Capabilities",
       "domain": "unknown",
       "state": "declining",
       "volume": 0.39
     },
     {
-      "id": "Ai Business Strategy",
-      "domain": "unknown",
-      "state": "unknown",
-      "volume": 0.26
-    },
-    {
-      "id": "Ai Infrastructure Strategy",
+      "id": "Local LLM Applications",
       "domain": "unknown",
       "state": "declining",
-      "volume": 0.26
+      "volume": 0.39
     },
     {
-      "id": "Advanced Llm Capabilities",
+      "id": "Local LLM Inference",
       "domain": "unknown",
       "state": "declining",
-      "volume": 0.26
-    },
-    {
-      "id": "Local Llm Applications",
-      "domain": "unknown",
-      "state": "declining",
-      "volume": 0.26
+      "volume": 0.39
     },
     {
       "id": "Supply Chain Security",
       "domain": "unknown",
       "state": "declining",
-      "volume": 0.26
+      "volume": 0.39
     },
     {
-      "id": "Ai Pace Impact",
+      "id": "AI Development Pace",
       "domain": "unknown",
       "state": "declining",
       "volume": 0.26

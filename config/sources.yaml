@@ -325,3 +325,10 @@ trends:
   #     - name: "Anthropic News"
   #       url: "https://www.anthropic.com/news"
   #       source_class: "operator"
+
+  # Hugging Face model releases — primary class.
+  # Enable once arXiv is confirmed stable.
+  huggingface:
+    enabled: false      # set to true to activate
+    max_models: 50
+    min_downloads: 100  # filter out low-activity models

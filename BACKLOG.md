@@ -295,7 +295,7 @@ Add sources one at a time. Each is opt-in via `sources.yaml` (commented out by d
 | # | Slice | Status | Notes |
 |---|---|---|---|
 | 17.1 | `src/fetchers/arxiv.py` — arXiv RSS | `[x]` | cs.AI, cs.LG, cs.CL, cs.CV, cs.RO; primary class; free. See W-0006. |
-| 17.2 | Hugging Face model releases | `[ ]` | RSS or JSON API; primary/operator class |
+| 17.2 | Hugging Face model releases | `[x]` | Public models JSON API; primary class; `enabled: false` by default. See W-0007. |
 | 17.3 | Papers with Code trending | `[ ]` | RSS; primary class; reproducibility proxy |
 | 17.4 | Operator changelogs | `[ ]` | OpenAI/Anthropic/Google release notes RSS; operator class |
 | 17.5 | Reddit r/MachineLearning | `[ ]` | PRAW or JSON API; practitioner class; deferred pending cost review |
@@ -371,24 +371,24 @@ Source-class heatmap on the Sources page renders correctly on mobile: columns ar
 
 ## W-0005
 
-status: needing_refinement
+status: ready
 created: 2026-04-29
 updated: 2026-04-29
 
 ### Outcome
 
-Theme quality is measurably better: themes have recognisable, stable names (e.g. "Agentic Workflows" not "Ai Workforce Impact"), domains are populated (not "unknown"), and synonyms are collapsed (e.g. "tool use" ≡ "function calling" ≡ "tool calling" → "Agent Tool Use").
+Theme `domain` fields are populated with values from the taxonomy (multimodal, agents, infra, reasoning, safety, evals, data, hardware) and `definition` fields contain human-readable descriptions. Currently both are always empty/unknown.
 
 ### Context
 
-Current themes are derived from Gemini output in history files and are inconsistently named. All `domain` fields show "unknown". The synonym normalisation map in `src/themes.py` exists but is not called from `src/trends.py`. Gemini-powered clustering is implemented but not wired in because no API key was available locally; key is confirmed present in GitHub Secrets.
+Synonym normalisation (W-0015) and acronym fixing are done. What remains is the Gemini-powered step: assigning canonical domain and writing a one-sentence definition per theme. `cluster_themes()` in `src/themes.py` does this but is not called from `src/trends.py`. GEMINI_API_KEY is present in GitHub Secrets but not available locally; the call must degrade gracefully when the key is absent.
 
 ### Notes
 
-- Wire `cluster_themes()` from `src/themes.py` into `src/trends.py` so Gemini normalises theme names each run
-- Enforce domain taxonomy: multimodal, agents, infra, reasoning, safety, evals, data, hardware
-- Validate synonym map covers common rebrands; add missing entries
-- Consider whether theme names should be title-cased consistently
+- Call `cluster_themes(theme_names, existing_themes)` in `src/trends.py` after metrics are computed
+- Merge returned domain + definition into each `TrendMetrics` object before writing JSON
+- Guard with `if os.environ.get("GEMINI_API_KEY"):` so local `--no-fetch` runs still work
+- Enforce domain taxonomy list from `src/themes.py DOMAIN_TAXONOMY`
 
 ---
 
@@ -419,31 +419,30 @@ arXiv RSS is free, no API key needed, and provides the highest-credibility prima
 
 ## W-0007
 
-status: needing_refinement
+status: done
 created: 2026-04-29
 updated: 2026-04-29
 
 ### Outcome
 
-The trend pipeline fetches new model releases from Hugging Face (model cards RSS / JSON API) as `source_class="primary"`, contributing to cross-class confirmation for model-related themes.
+The trend pipeline fetches recently-updated text-generation models from Hugging Face Hub as `source_class="primary"`, gated by `min_downloads` to filter noise.
 
 ### Context
 
-HuggingFace model releases provide a high-frequency signal for capability advances, new architectures, and fine-tuning trends. Available via RSS at `https://huggingface.co/models` (sorted by recent) or the public models JSON API — no auth needed.
+Adds a second primary-class source alongside arXiv, improving cross-class confirmation for model-capability themes.
 
 ### Notes
 
-- Implement after arXiv (W-0006) is stable
-- Create `src/fetchers/huggingface.py`
-- Source class: primary (model cards) or operator (if vendor-released)
-- Limit to models with ≥ 100 downloads to reduce noise
-- Add `trends.huggingface` section to `config/sources.yaml`
+- `src/fetchers/huggingface.py` — `HuggingFaceFetcher`; uses public models JSON API; no auth
+- Filters on `pipeline_tag` ∈ relevant LLM tasks and `downloads ≥ min_downloads` (default 100)
+- `config/sources.yaml` `trends.huggingface` section, `enabled: false` by default — set to `true` to activate
+- 9 tests in `tests/test_fetchers_huggingface.py`; 269 total passing
 
 ---
 
 ## W-0008
 
-status: needing_refinement
+status: ready
 created: 2026-04-29
 updated: 2026-04-29
 
@@ -466,7 +465,7 @@ Papers with Code tracks papers with GitHub repos and benchmark results. A paper 
 
 ## W-0009
 
-status: needing_refinement
+status: ready
 created: 2026-04-29
 updated: 2026-04-29
 
@@ -490,7 +489,7 @@ Operator signals (changelogs, pricing changes, API updates) reveal what vendors 
 
 ## W-0010
 
-status: needing_refinement
+status: ready
 created: 2026-04-29
 updated: 2026-04-29
 
@@ -513,7 +512,7 @@ Replicate's trending models page reflects real deployment activity — a strong 
 
 ## W-0011
 
-status: needing_refinement
+status: ready
 created: 2026-04-29
 updated: 2026-04-29
 
@@ -537,7 +536,7 @@ OpenReview exposes a public API. Accepted papers at top venues represent the hig
 
 ## W-0012
 
-status: needing_refinement
+status: ready
 created: 2026-04-29
 updated: 2026-04-29
 
@@ -561,7 +560,7 @@ Adoption proxy was defined in the initial architecture but not implemented. It i
 
 ## W-0013
 
-status: needing_refinement
+status: ready
 created: 2026-04-29
 updated: 2026-04-29
 
@@ -584,7 +583,7 @@ These test slices were explicitly planned in Epics 11–14 but not yet written. 
 
 ## W-0014
 
-status: needing_refinement
+status: ready
 created: 2026-04-29
 updated: 2026-04-29
 
@@ -607,23 +606,40 @@ Domain and definition fields are declared in `TrendMetrics` and `ThemeNode` but 
 
 ## W-0015
 
-status: needing_refinement
+status: done
 created: 2026-04-29
 updated: 2026-04-29
 
 ### Outcome
 
-Semantic equivalence collapse prevents theme fragmentation from rebranding: "tool use", "function calling", and "tool calling" are merged into a single canonical theme. The synonym map in `src/themes.py` covers all known rebrands from the session's 30-entry normalisation map.
+Semantic equivalence collapse prevents theme fragmentation from rebranding: "tool use", "function calling", and "tool calling" are merged into a single canonical theme. Theme names use correct acronym casing (AI, LLM, not Ai, Llm).
 
 ### Context
 
-Without synonym collapse, each new marketing term for the same concept spawns a separate thin theme with low volume and diversity, which never reaches a meaningful state classification. The synonym map exists in `src/themes.py` but `normalise_theme()` is not called on parsed history entries in `src/trends.py`.
+Without synonym collapse, each new marketing term for the same concept spawned a separate thin theme. Acronym breakage from `.title()` ("Ai Workforce Impact") made themes unreadable.
 
 ### Notes
 
-- Call `normalise_theme(name)` on each theme name in `parse_history_file()` in `src/trends.py`
-- Validate the ~30 synonym entries cover current history themes
-- Add test: same content with alternate phrasings produces identical theme output
+- `normalize_theme_name()` in `src/themes.py` expanded to ~60 synonym entries covering workforce, infrastructure, capabilities, safety, coding, etc.
+- `_ACRONYM_FIXES` post-processes title-cased output to restore AI, LLM, RAG, API, GPU, etc.
+- `normalize_theme_name()` applied as catch-all in `src/trends.py run()` before themes enter `all_entries`
+
+---
+
+## W-0016
+
+status: done
+created: 2026-04-29
+updated: 2026-04-29
+
+### Outcome
+
+A `workflow_dispatch`-only `rebuild-site.yml` GitHub Actions workflow rebuilds `docs/data/` and commits it without running the email digest. Supports `no_fetch` boolean input to skip live sources.
+
+### Notes
+
+- `.github/workflows/rebuild-site.yml`
+- Runs `python -m src.trends [--no-fetch]` and commits `docs/data/` with `[skip ci]`
 
 ---
 

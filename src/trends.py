@@ -23,6 +23,7 @@ from pathlib import Path
 
 from src.config import load_config
 from src.fetchers.arxiv import ArxivFetcher
+from src.fetchers.huggingface import HuggingFaceFetcher
 from src.logger import setup_logging
 from src.models import ThemeNode, TrendMetrics
 from src.themes import normalize_theme_name
@@ -453,6 +454,30 @@ def _fetch_arxiv(
     return entries
 
 
+def _fetch_huggingface(
+    trends_cfg,
+    today_str: str,
+) -> list[tuple[str, str, str, str]]:
+    """Fetch HuggingFace model releases and return theme-day entries."""
+    try:
+        fetcher = HuggingFaceFetcher(
+            max_models=trends_cfg.huggingface.max_models,
+            min_downloads=trends_cfg.huggingface.min_downloads,
+        )
+        items = fetcher.fetch(already_processed=set())
+    except Exception as exc:
+        logger.warning("HuggingFace fetch failed — skipping: %s", exc)
+        return []
+
+    entries: list[tuple[str, str, str, str]] = []
+    for item in items:
+        raw_theme = item.title[:80]
+        theme = normalize_theme_name(raw_theme)
+        pub_date = item.published.strftime("%Y-%m-%d") if item.published else today_str
+        entries.append((pub_date, theme, "primary", "Hugging Face"))
+    return entries
+
+
 # ── Main pipeline ─────────────────────────────────────────────────────
 
 
@@ -495,19 +520,24 @@ def run(
 
         entries, src_counts = parse_history_file(date_str, text)
         for theme, cls, name in entries:
-            all_entries.append((date_str, theme, cls, name))
+            all_entries.append((date_str, normalize_theme_name(theme), cls, name))
         for src, count in src_counts.items():
             all_source_counts[src.lower()] += count
 
     logger.info("Extracted %d theme-day entries across %d files", len(all_entries), len(txt_files))
 
-    # ── 1b. Fetch live arXiv papers (primary source class) ───────────
-    if fetch_live and trends_cfg.enabled and trends_cfg.arxiv.enabled:
-        arxiv_items = _fetch_arxiv(trends_cfg, today_str)
-        all_entries.extend(arxiv_items)
-        if arxiv_items:
-            all_source_counts["arxiv"] += len(arxiv_items)
-            logger.info("arXiv: added %d theme-day entries", len(arxiv_items))
+    # ── 1b. Fetch live sources (primary/operator class) ──────────────
+    if fetch_live and trends_cfg.enabled:
+        if trends_cfg.arxiv.enabled:
+            arxiv_items = _fetch_arxiv(trends_cfg, today_str)
+            all_entries.extend(arxiv_items)
+            if arxiv_items:
+                all_source_counts["arxiv"] += len(arxiv_items)
+        if trends_cfg.huggingface.enabled:
+            hf_items = _fetch_huggingface(trends_cfg, today_str)
+            all_entries.extend(hf_items)
+            if hf_items:
+                all_source_counts["hugging face"] += len(hf_items)
     else:
         logger.info("Live fetching disabled — using history only")
 

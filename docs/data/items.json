@@ -1,9 +1,9 @@
 {
-  "generated": "2026-04-29T17:54:11.779824+00:00",
+  "generated": "2026-04-29T18:04:35.035141+00:00",
   "items": [
     {
       "date": "2026-04-26",
-      "theme": "Ai Code Review",
+      "theme": "AI Code Review",
       "source_class": "practitioner",
       "source_name": "YouTube"
     },
@@ -33,7 +33,7 @@
     },
     {
       "date": "2026-04-19",
-      "theme": "Agentic Web Transformation",
+      "theme": "Agentic Workflows",
       "source_class": "practitioner",
       "source_name": "YouTube"
     },
@@ -69,13 +69,13 @@
     },
     {
       "date": "2026-04-18",
-      "theme": "Agentic Infrastructure",
+      "theme": "Agentic Workflows",
       "source_class": "practitioner",
       "source_name": "YouTube"
     },
     {
       "date": "2026-04-18",
-      "theme": "Llm Context Management",
+      "theme": "LLM Context Management",
       "source_class": "practitioner",
       "source_name": "YouTube"
     },
@@ -111,13 +111,13 @@
     },
     {
       "date": "2026-04-15",
-      "theme": "Ai Career Strategy",
+      "theme": "AI Career Strategy",
       "source_class": "practitioner",
       "source_name": "YouTube"
     },
     {
       "date": "2026-04-15",
-      "theme": "Ai Business Challenges",
+      "theme": "AI Business Strategy",
       "source_class": "practitioner",
       "source_name": "YouTube"
     },
@@ -129,7 +129,7 @@
     },
     {
       "date": "2026-04-15",
-      "theme": "Financial Ai Agents",
+      "theme": "Financial AI Agents",
       "source_class": "practitioner",
       "source_name": "Hacker News"
     },
@@ -153,31 +153,31 @@
     },
     {
       "date": "2026-04-14",
-      "theme": "Ai Skill Adoption",
+      "theme": "AI Skill Adoption",
       "source_class": "practitioner",
       "source_name": "YouTube"
     },
     {
       "date": "2026-04-14",
-      "theme": "Ai Implementation Risks",
+      "theme": "AI Implementation Risks",
       "source_class": "practitioner",
       "source_name": "YouTube"
     },
     {
       "date": "2026-04-12",
-      "theme": "Ai Business Strategy",
+      "theme": "AI Business Strategy",
       "source_class": "practitioner",
       "source_name": "YouTube"
     },
     {
       "date": "2026-04-12",
-      "theme": "Ai Economic Impact",
+      "theme": "AI Economic Impact",
       "source_class": "practitioner",
       "source_name": "YouTube"
     },
     {
       "date": "2026-04-12",
-      "theme": "Llm Memory Optimization",
+      "theme": "LLM Memory Optimization",
       "source_class": "practitioner",
       "source_name": "YouTube"
     },
@@ -189,31 +189,31 @@
     },
     {
       "date": "2026-04-11",
-      "theme": "Ai Market Strategy",
+      "theme": "AI Market Strategy",
       "source_class": "practitioner",
       "source_name": "YouTube"
     },
     {
       "date": "2026-04-11",
-      "theme": "Ai Policy & Liability",
+      "theme": "AI Policy & Liability",
       "source_class": "practitioner",
       "source_name": "Hacker News"
     },
     {
       "date": "2026-04-11",
-      "theme": "Ai Cyber Risk",
+      "theme": "AI Cyber Risk",
       "source_class": "practitioner",
       "source_name": "Hacker News"
     },
     {
       "date": "2026-04-08",
-      "theme": "Ai Infrastructure Power",
+      "theme": "AI Infrastructure",
       "source_class": "practitioner",
       "source_name": "YouTube"
     },
     {
       "date": "2026-04-08",
-      "theme": "Ai Agent Economic Impact",
+      "theme": "AI Agent Economic Impact",
       "source_class": "practitioner",
       "source_name": "YouTube"
     },
@@ -225,7 +225,7 @@
     },
     {
       "date": "2026-04-08",
-      "theme": "Ai Security Initiative",
+      "theme": "AI Security Initiative",
       "source_class": "practitioner",
       "source_name": "Hacker News"
     },
@@ -237,67 +237,67 @@
     },
     {
       "date": "2026-04-07",
-      "theme": "Ai Career Skills",
+      "theme": "AI Career Skills",
       "source_class": "practitioner",
       "source_name": "YouTube"
     },
     {
       "date": "2026-04-07",
-      "theme": "Ai Agent Architecture",
+      "theme": "AI Agent Architecture",
       "source_class": "practitioner",
       "source_name": "YouTube"
     },
     {
       "date": "2026-04-07",
-      "theme": "Llm Performance Regression",
+      "theme": "LLM Performance Regression",
       "source_class": "practitioner",
       "source_name": "YouTube"
     },
     {
       "date": "2026-04-07",
-      "theme": "Llm Capabilities & Impact",
+      "theme": "LLM Capabilities",
       "source_class": "practitioner",
       "source_name": "YouTube"
     },
     {
       "date": "2026-04-06",
-      "theme": "Ai Business Strategy",
+      "theme": "AI Business Strategy",
       "source_class": "practitioner",
       "source_name": "YouTube"
     },
     {
       "date": "2026-04-05",
-      "theme": "Ai Business Impact",
+      "theme": "AI Business Strategy",
       "source_class": "practitioner",
       "source_name": "YouTube"
     },
     {
       "date": "2026-04-05",
-      "theme": "Ai Agent Security",
+      "theme": "AI Agent Security",
       "source_class": "practitioner",
       "source_name": "YouTube"
     },
     {
       "date": "2026-04-05",
-      "theme": "Ai Agent Maturity",
+      "theme": "AI Agent Maturity",
       "source_class": "practitioner",
       "source_name": "YouTube"
     },
     {
       "date": "2026-04-05",
-      "theme": "Llm Vulnerability Discovery",
+      "theme": "LLM Vulnerability Discovery",
       "source_class": "practitioner",
       "source_name": "Hacker News"
     },
     {
       "date": "2026-04-05",
-      "theme": "Llm Internal Mechanisms",
+      "theme": "LLM Internal Mechanisms",
       "source_class": "practitioner",
       "source_name": "Hacker News"
     },
     {
       "date": "2026-04-05",
-      "theme": "Llm Development Principles",
+      "theme": "LLM Development Principles",
       "source_class": "practitioner",
       "source_name": "Hacker News"
     },
@@ -315,13 +315,13 @@
     },
     {
       "date": "2026-04-04",
-      "theme": "Llm Policy Change",
+      "theme": "LLM Policy Change",
       "source_class": "practitioner",
       "source_name": "Hacker News"
     },
     {
       "date": "2026-04-04",
-      "theme": "Local Llm Deployment",
+      "theme": "Local LLM Applications",
       "source_class": "practitioner",
       "source_name": "Hacker News"
     },
@@ -333,91 +333,91 @@
     },
     {
       "date": "2026-04-03",
-      "theme": "Ai Infrastructure Strategy",
+      "theme": "AI Infrastructure",
       "source_class": "practitioner",
       "source_name": "YouTube"
     },
     {
       "date": "2026-04-03",
-      "theme": "Llm Usage Optimization",
+      "theme": "LLM Usage Optimization",
       "source_class": "practitioner",
       "source_name": "YouTube"
     },
     {
       "date": "2026-04-03",
-      "theme": "Llm Capability Replication",
+      "theme": "LLM Capability Replication",
       "source_class": "practitioner",
       "source_name": "YouTube"
     },
     {
       "date": "2026-04-03",
-      "theme": "Open-Source Llm Release",
+      "theme": "Open-Source LLM Release",
       "source_class": "practitioner",
       "source_name": "Hacker News"
     },
     {
       "date": "2026-04-03",
-      "theme": "Local Llm Inference",
+      "theme": "Local LLM Inference",
       "source_class": "practitioner",
       "source_name": "Hacker News"
     },
     {
       "date": "2026-04-03",
-      "theme": "Ai Industry Acquisition",
+      "theme": "AI Industry Acquisition",
       "source_class": "practitioner",
       "source_name": "Hacker News"
     },
     {
       "date": "2026-04-03",
-      "theme": "Llm Security/Ip",
+      "theme": "LLM Security/Ip",
       "source_class": "practitioner",
       "source_name": "Hacker News"
     },
     {
       "date": "2026-04-03",
-      "theme": "Llm Community Dynamics",
+      "theme": "LLM Community Dynamics",
       "source_class": "practitioner",
       "source_name": "Hacker News"
     },
     {
       "date": "2026-04-02",
-      "theme": "Advanced Llm Capabilities",
+      "theme": "LLM Capabilities",
       "source_class": "practitioner",
       "source_name": "YouTube"
     },
     {
       "date": "2026-04-02",
-      "theme": "Llm Security Exploits",
+      "theme": "LLM Security Exploits",
       "source_class": "practitioner",
       "source_name": "Hacker News"
     },
     {
       "date": "2026-04-02",
-      "theme": "Openai Business Strategy",
+      "theme": "AI Business Strategy",
       "source_class": "practitioner",
       "source_name": "Hacker News"
     },
     {
       "date": "2026-04-02",
-      "theme": "Ai Market Dynamics",
+      "theme": "AI Market Dynamics",
       "source_class": "practitioner",
       "source_name": "Hacker News"
     },
     {
       "date": "2026-04-01",
-      "theme": "Active Ai Systems",
+      "theme": "Active AI Systems",
       "source_class": "practitioner",
       "source_name": "YouTube"
     },
     {
       "date": "2026-03-31",
-      "theme": "Interoperable Ai Format",
+      "theme": "Interoperable AI Format",
       "source_class": "practitioner",
       "source_name": "YouTube"
     },
     {
       "date": "2026-03-31",
-      "theme": "Llm Token Optimization",
+      "theme": "LLM Token Optimization",
       "source_class": "practitioner",
       "source_name": "Hacker News"
     },
@@ -429,7 +429,7 @@
     },
     {
       "date": "2026-03-31",
-      "theme": "Local Llm Inference",
+      "theme": "Local LLM Inference",
       "source_class": "practitioner",
       "source_name": "Hacker News"
     },
@@ -441,73 +441,73 @@
     },
     {
       "date": "2026-03-30",
-      "theme": "Personal Ai Assistants",
+      "theme": "Personal AI Assistants",
       "source_class": "practitioner",
       "source_name": "YouTube"
     },
     {
       "date": "2026-03-30",
-      "theme": "Ai Hardware Supply Chain",
+      "theme": "Supply Chain Security",
       "source_class": "practitioner",
       "source_name": "YouTube"
     },
     {
       "date": "2026-03-30",
-      "theme": "Ai Chip Optimization",
+      "theme": "AI Chip Optimization",
       "source_class": "practitioner",
       "source_name": "YouTube"
     },
     {
       "date": "2026-03-30",
-      "theme": "Ai App Security",
+      "theme": "AI App Security",
       "source_class": "practitioner",
       "source_name": "Hacker News"
     },
     {
       "date": "2026-03-30",
-      "theme": "Ai Agent Autonomy Risks",
+      "theme": "AI Agent Autonomy Risks",
       "source_class": "practitioner",
       "source_name": "Hacker News"
     },
     {
       "date": "2026-03-29",
-      "theme": "Enterprise Ai Deployment",
+      "theme": "Enterprise AI Deployment",
       "source_class": "practitioner",
       "source_name": "YouTube"
     },
     {
       "date": "2026-03-29",
-      "theme": "Autonomous Ai Agents",
+      "theme": "Autonomous AI Agents",
       "source_class": "practitioner",
       "source_name": "YouTube"
     },
     {
       "date": "2026-03-29",
-      "theme": "Advanced Llm Capabilities",
+      "theme": "LLM Capabilities",
       "source_class": "practitioner",
       "source_name": "YouTube"
     },
     {
       "date": "2026-03-29",
-      "theme": "Ai In Formal Verification",
+      "theme": "AI In Formal Verification",
       "source_class": "practitioner",
       "source_name": "Hacker News"
     },
     {
       "date": "2026-03-28",
-      "theme": "Ai Infrastructure Investment",
+      "theme": "AI Infrastructure",
       "source_class": "practitioner",
       "source_name": "YouTube"
     },
     {
       "date": "2026-03-28",
-      "theme": "Executive Ai Adoption",
+      "theme": "Executive AI Adoption",
       "source_class": "practitioner",
       "source_name": "YouTube"
     },
     {
       "date": "2026-03-28",
-      "theme": "Ai-Driven Design Tools",
+      "theme": "AI-Driven Design Tools",
       "source_class": "practitioner",
       "source_name": "YouTube"
     },
@@ -519,7 +519,7 @@
     },
     {
       "date": "2026-03-28",
-      "theme": "Web-Scheduled Ai Tasks",
+      "theme": "Web-Scheduled AI Tasks",
       "source_class": "practitioner",
       "source_name": "Hacker News"
     },
@@ -531,7 +531,7 @@
     },
     {
       "date": "2026-03-27",
-      "theme": "Industrial Ai Adoption",
+      "theme": "Industrial AI Adoption",
       "source_class": "practitioner",
       "source_name": "YouTube"
     },
@@ -549,13 +549,13 @@
     },
     {
       "date": "2026-03-26",
-      "theme": "Local Llm Applications",
+      "theme": "Local LLM Applications",
       "source_class": "practitioner",
       "source_name": "Hacker News"
     },
     {
       "date": "2026-03-26",
-      "theme": "Llm Code Utility",
+      "theme": "LLM Code Utility",
       "source_class": "practitioner",
       "source_name": "Hacker News"
     },
@@ -567,7 +567,7 @@
     },
     {
       "date": "2026-03-25",
-      "theme": "Claude Agentic Breakthrough",
+      "theme": "Agentic Workflows",
       "source_class": "practitioner",
       "source_name": "YouTube"
     },
@@ -591,25 +591,25 @@
     },
     {
       "date": "2026-03-25",
-      "theme": "Ai Partnership Shift",
+      "theme": "AI Partnership Shift",
       "source_class": "practitioner",
       "source_name": "Hacker News"
     },
     {
       "date": "2026-03-25",
-      "theme": "Local Llm Inference",
+      "theme": "Local LLM Inference",
       "source_class": "practitioner",
       "source_name": "Hacker News"
     },
     {
       "date": "2026-03-24",
-      "theme": "Ai Pace Impact",
+      "theme": "AI Development Pace",
       "source_class": "practitioner",
       "source_name": "YouTube"
     },
     {
       "date": "2026-03-23",
-      "theme": "Agentic Delegation",
+      "theme": "Agentic Workflows",
       "source_class": "practitioner",
       "source_name": "YouTube"
     },
@@ -621,7 +621,7 @@
     },
     {
       "date": "2026-03-23",
-      "theme": "Ai Tool Transparency",
+      "theme": "AI Tool Transparency",
       "source_class": "practitioner",
       "source_name": "YouTube"
     },
@@ -633,19 +633,19 @@
     },
     {
       "date": "2026-03-22",
-      "theme": "Ai Delegation Strategy",
+      "theme": "AI Delegation Strategy",
       "source_class": "practitioner",
       "source_name": "YouTube"
     },
     {
       "date": "2026-03-21",
-      "theme": "Agentic Capability",
+      "theme": "Agentic Workflows",
       "source_class": "practitioner",
       "source_name": "YouTube"
     },
     {
       "date": "2026-03-21",
-      "theme": "Ai Developer Tools",
+      "theme": "AI Developer Tools",
       "source_class": "practitioner",
       "source_name": "YouTube"
     },
@@ -657,25 +657,25 @@
     },
     {
       "date": "2026-03-21",
-      "theme": "Local Llm Applications",
+      "theme": "Local LLM Applications",
       "source_class": "practitioner",
       "source_name": "Hacker News"
     },
     {
       "date": "2026-03-20",
-      "theme": "Ai Pace Impact",
+      "theme": "AI Development Pace",
       "source_class": "practitioner",
       "source_name": "YouTube"
     },
     {
       "date": "2026-03-20",
-      "theme": "Agentic Search Critique",
+      "theme": "Agentic Workflows",
       "source_class": "practitioner",
       "source_name": "YouTube"
     },
     {
       "date": "2026-03-20",
-      "theme": "Ai Industry News",
+      "theme": "AI Industry News",
       "source_class": "practitioner",
       "source_name": "YouTube"
     },
@@ -687,7 +687,7 @@
     },
     {
       "date": "2026-03-20",
-      "theme": "Ai Legal Dispute",
+      "theme": "AI Legal Dispute",
       "source_class": "practitioner",
       "source_name": "Hacker News"
     },
@@ -699,19 +699,19 @@
     },
     {
       "date": "2026-03-20",
-      "theme": "Llm Architectural Insight",
+      "theme": "LLM Architectural Insight",
       "source_class": "practitioner",
       "source_name": "Hacker News"
     },
     {
       "date": "2026-03-20",
-      "theme": "Ai User Preferences",
+      "theme": "AI User Preferences",
       "source_class": "practitioner",
       "source_name": "Hacker News"
     },
     {
       "date": "2026-03-19",
-      "theme": "Agentic Workflow",
+      "theme": "Agentic Workflows",
       "source_class": "practitioner",
       "source_name": "YouTube"
     },
@@ -729,7 +729,7 @@
     },
     {
       "date": "2026-03-19",
-      "theme": "Openai Strategy",
+      "theme": "AI Business Strategy",
       "source_class": "practitioner",
       "source_name": "Hacker News"
     },
@@ -747,13 +747,13 @@
     },
     {
       "date": "2026-03-19",
-      "theme": "Llm Trust/Reliability",
+      "theme": "LLM Trust/Reliability",
       "source_class": "practitioner",
       "source_name": "Hacker News"
     },
     {
       "date": "2026-03-18",
-      "theme": "Llm Web Interaction",
+      "theme": "LLM Web Interaction",
       "source_class": "practitioner",
       "source_name": "YouTube"
     },
@@ -783,97 +783,97 @@
     },
     {
       "date": "2026-03-17",
-      "theme": "Llm Data Loss",
+      "theme": "LLM Data Loss",
       "source_class": "practitioner",
       "source_name": "YouTube"
     },
     {
       "date": "2026-03-17",
-      "theme": "Ai In Frontend Dev",
+      "theme": "AI In Frontend Dev",
       "source_class": "practitioner",
       "source_name": "YouTube"
     },
     {
       "date": "2026-03-17",
-      "theme": "Ai Agent Autonomy",
+      "theme": "AI Agent Autonomy",
       "source_class": "practitioner",
       "source_name": "YouTube"
     },
     {
       "date": "2026-03-17",
-      "theme": "Ai Hardware Ecosystem",
+      "theme": "AI Hardware Ecosystem",
       "source_class": "practitioner",
       "source_name": "YouTube"
     },
     {
       "date": "2026-03-17",
-      "theme": "Formal Verification/Ai Agent",
+      "theme": "Formal Verification/AI Agent",
       "source_class": "practitioner",
       "source_name": "Hacker News"
     },
     {
       "date": "2026-03-17",
-      "theme": "Ai Game Development",
+      "theme": "AI Game Development",
       "source_class": "practitioner",
       "source_name": "Hacker News"
     },
     {
       "date": "2026-03-16",
-      "theme": "Ai Productivity",
+      "theme": "AI Productivity",
       "source_class": "practitioner",
       "source_name": "YouTube"
     },
     {
       "date": "2026-03-16",
-      "theme": "Ai Team Dynamics",
+      "theme": "AI Team Dynamics",
       "source_class": "practitioner",
       "source_name": "YouTube"
     },
     {
       "date": "2026-03-15",
-      "theme": "Ai Output Reliability",
+      "theme": "AI Output Reliability",
       "source_class": "practitioner",
       "source_name": "YouTube"
     },
     {
       "date": "2026-03-15",
-      "theme": "Ai Agent Control",
+      "theme": "AI Agent Control",
       "source_class": "practitioner",
       "source_name": "YouTube"
     },
     {
       "date": "2026-03-15",
-      "theme": "Ai Workforce Impact",
+      "theme": "AI Workforce & Jobs",
       "source_class": "practitioner",
       "source_name": "YouTube"
     },
     {
       "date": "2026-03-15",
-      "theme": "Llm Commercial Strategy",
+      "theme": "LLM Commercial Strategy",
       "source_class": "practitioner",
       "source_name": "Hacker News"
     },
     {
       "date": "2026-03-15",
-      "theme": "Llm Ecosystem",
+      "theme": "LLM Ecosystem",
       "source_class": "practitioner",
       "source_name": "Hacker News"
     },
     {
       "date": "2026-03-14",
-      "theme": "Ai Agent Memory",
+      "theme": "AI Agent Memory",
       "source_class": "practitioner",
       "source_name": "YouTube"
     },
     {
       "date": "2026-03-14",
-      "theme": "Ai Skill Development",
+      "theme": "AI Skill Development",
       "source_class": "practitioner",
       "source_name": "YouTube"
     },
     {
       "date": "2026-03-14",
-      "theme": "Llm Context Window",
+      "theme": "LLM Context Window",
       "source_class": "practitioner",
       "source_name": "Hacker News"
     },
@@ -885,13 +885,13 @@
     },
     {
       "date": "2026-03-14",
-      "theme": "Ai Workforce Impact",
+      "theme": "AI Workforce & Jobs",
       "source_class": "practitioner",
       "source_name": "Hacker News"
     },
     {
       "date": "2026-03-14",
-      "theme": "Llm Software Reliability",
+      "theme": "LLM Software Reliability",
       "source_class": "practitioner",
       "source_name": "Hacker News"
     },
@@ -903,7 +903,7 @@
     },
     {
       "date": "2026-03-13",
-      "theme": "Ai Workforce Impact",
+      "theme": "AI Workforce & Jobs",
       "source_class": "practitioner",
       "source_name": "YouTube"
     },
@@ -921,7 +921,7 @@
     },
     {
       "date": "2026-03-12",
-      "theme": "Ai Research Convergence",
+      "theme": "AI Research Convergence",
       "source_class": "practitioner",
       "source_name": "YouTube"
     },
@@ -933,31 +933,31 @@
     },
     {
       "date": "2026-03-12",
-      "theme": "Ai Governance Debate",
+      "theme": "AI Governance Debate",
       "source_class": "practitioner",
       "source_name": "Hacker News"
     },
     {
       "date": "2026-03-12",
-      "theme": "Open-Source Ai Agents",
+      "theme": "Open-Source AI Agents",
       "source_class": "practitioner",
       "source_name": "Hacker News"
     },
     {
       "date": "2026-03-11",
-      "theme": "Ai Output Validation",
+      "theme": "AI Output Validation",
       "source_class": "practitioner",
       "source_name": "YouTube"
     },
     {
       "date": "2026-03-11",
-      "theme": "Ai In Workforce",
+      "theme": "AI Workforce & Jobs",
       "source_class": "practitioner",
       "source_name": "YouTube"
     },
     {
       "date": "2026-03-10",
-      "theme": "Proactive Ai",
+      "theme": "Proactive AI",
       "source_class": "practitioner",
       "source_name": "YouTube"
     },
@@ -969,7 +969,7 @@
     },
     {
       "date": "2026-03-10",
-      "theme": "Ai Infrastructure Strategy",
+      "theme": "AI Infrastructure",
       "source_class": "practitioner",
       "source_name": "Hacker News"
     },
@@ -981,13 +981,13 @@
     },
     {
       "date": "2026-03-09",
-      "theme": "Ai Workforce Impact",
+      "theme": "AI Workforce & Jobs",
       "source_class": "practitioner",
       "source_name": "YouTube"
     },
     {
       "date": "2026-03-09",
-      "theme": "Ai Team Efficiency",
+      "theme": "AI Team Efficiency",
       "source_class": "practitioner",
       "source_name": "YouTube"
     },
@@ -1005,7 +1005,7 @@
     },
     {
       "date": "2026-03-08",
-      "theme": "Ai In Fe Dev",
+      "theme": "AI In Fe Dev",
       "source_class": "practitioner",
       "source_name": "YouTube"
     },
@@ -1017,55 +1017,55 @@
     },
     {
       "date": "2026-03-07",
-      "theme": "Ai Security Audits",
+      "theme": "AI Security Audits",
       "source_class": "practitioner",
       "source_name": "Hacker News"
     },
     {
       "date": "2026-03-07",
-      "theme": "Llm Productivity Impact",
+      "theme": "LLM Productivity Impact",
       "source_class": "practitioner",
       "source_name": "Hacker News"
     },
     {
       "date": "2026-03-06",
-      "theme": "Ai Middleware Cost",
+      "theme": "AI Middleware Cost",
       "source_class": "practitioner",
       "source_name": "YouTube"
     },
     {
       "date": "2026-03-05",
-      "theme": "Ai Chip Strategy",
+      "theme": "AI Chip Strategy",
       "source_class": "practitioner",
       "source_name": "YouTube"
     },
     {
       "date": "2026-03-04",
-      "theme": "Ai Commentary",
+      "theme": "AI Commentary",
       "source_class": "practitioner",
       "source_name": "YouTube"
     },
     {
       "date": "2026-03-03",
-      "theme": "Local Ai Workflow",
+      "theme": "Local AI Workflow",
       "source_class": "practitioner",
       "source_name": "YouTube"
     },
     {
       "date": "2026-03-03",
-      "theme": "Llm Misuse",
+      "theme": "LLM Misuse",
       "source_class": "practitioner",
       "source_name": "YouTube"
     },
     {
       "date": "2026-03-03",
-      "theme": "Llm Tooling Issues",
+      "theme": "LLM Tooling Issues",
       "source_class": "practitioner",
       "source_name": "YouTube"
     },
     {
       "date": "2026-03-03",
-      "theme": "Llm Resource Optimization",
+      "theme": "LLM Resource Optimization",
       "source_class": "practitioner",
       "source_name": "YouTube"
     }

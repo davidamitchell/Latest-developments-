@@ -25,59 +25,120 @@ DOMAIN_TAXONOMY: list[str] = [
 # Keyword → canonical theme name for fast normalization without an API call.
 # These collapse common synonyms before Gemini sees the text.
 _SYNONYM_MAP: dict[str, str] = {
-    "tool use":         "Agent Tool Use",
-    "function calling": "Agent Tool Use",
-    "tool calling":     "Agent Tool Use",
-    "function call":    "Agent Tool Use",
-    "rag":              "Retrieval-Augmented Generation",
+    # Agentic
+    "tool use":           "Agent Tool Use",
+    "function calling":   "Agent Tool Use",
+    "tool calling":       "Agent Tool Use",
+    "function call":      "Agent Tool Use",
+    "agent reliability":  "Agent Reliability",
+    "multi-agent":        "Multi-Agent Systems",
+    "multiagent":         "Multi-Agent Systems",
+    "agentic":            "Agentic Workflows",
+    # Retrieval / RAG
+    "rag":                "Retrieval-Augmented Generation",
     "retrieval augmented": "Retrieval-Augmented Generation",
-    "rlhf":             "RLHF & Alignment",
-    "rlaif":            "RLHF & Alignment",
-    "dpo":              "RLHF & Alignment",
-    "inference cost":   "Inference Cost Reduction",
+    # Alignment / Safety
+    "rlhf":               "RLHF & Alignment",
+    "rlaif":              "RLHF & Alignment",
+    "dpo":                "RLHF & Alignment",
+    "safety":             "AI Safety & Alignment",
+    "alignment":          "AI Safety & Alignment",
+    "jailbreak":          "AI Safety & Alignment",
+    "red team":           "AI Safety & Alignment",
+    # Inference / Cost
+    "inference cost":     "Inference Cost Reduction",
     "inference efficiency": "Inference Cost Reduction",
-    "llm cost":         "Inference Cost Reduction",
-    "agent reliability": "Agent Reliability",
-    "multi-agent":      "Multi-Agent Systems",
-    "multiagent":       "Multi-Agent Systems",
-    "synthetic data":   "Synthetic Data Pipelines",
-    "data synthesis":   "Synthetic Data Pipelines",
-    "reasoning model":  "Long-Context Reasoning",
-    "chain of thought": "Long-Context Reasoning",
-    "long context":     "Long-Context Reasoning",
-    "context length":   "Long-Context Reasoning",
-    "fine-tuning":      "Fine-Tuning & Adaptation",
-    "finetuning":       "Fine-Tuning & Adaptation",
-    "lora":             "Fine-Tuning & Adaptation",
-    "distillation":     "Model Distillation",
-    "model compression": "Model Distillation",
-    "quantization":     "Model Distillation",
-    "benchmark":        "Benchmarks & Evals",
-    "evaluation":       "Benchmarks & Evals",
-    "leaderboard":      "Benchmarks & Evals",
-    "safety":           "AI Safety & Alignment",
-    "alignment":        "AI Safety & Alignment",
-    "jailbreak":        "AI Safety & Alignment",
-    "red team":         "AI Safety & Alignment",
-    "multimodal":       "Multimodal Models",
-    "vision language":  "Multimodal Models",
-    "vla":              "Multimodal Models",
-    "open source model": "Open-Source Models",
-    "open weight":      "Open-Source Models",
-    "open weights":     "Open-Source Models",
-    "code generation":  "Code Generation",
-    "coding model":     "Code Generation",
-    "ai coding":        "Code Generation",
+    "llm cost":           "Inference Cost Reduction",
+    "local llm inference": "Local LLM Inference",
+    "local llm":          "Local LLM Applications",
+    # Reasoning / Context
+    "reasoning model":    "Long-Context Reasoning",
+    "chain of thought":   "Long-Context Reasoning",
+    "long context":       "Long-Context Reasoning",
+    "context length":     "Long-Context Reasoning",
+    # Fine-tuning
+    "fine-tuning":        "Fine-Tuning & Adaptation",
+    "finetuning":         "Fine-Tuning & Adaptation",
+    "lora":               "Fine-Tuning & Adaptation",
+    # Distillation / Compression
+    "distillation":       "Model Distillation",
+    "model compression":  "Model Distillation",
+    "quantization":       "Model Distillation",
+    # Evals
+    "benchmark":          "Benchmarks & Evals",
+    "evaluation":         "Benchmarks & Evals",
+    "leaderboard":        "Benchmarks & Evals",
+    # Multimodal
+    "multimodal":         "Multimodal Models",
+    "vision language":    "Multimodal Models",
+    "vla":                "Multimodal Models",
+    # Open source
+    "open source model":  "Open-Source Models",
+    "open weight":        "Open-Source Models",
+    "open weights":       "Open-Source Models",
+    # Coding
+    "code generation":    "Code Generation",
+    "coding model":       "Code Generation",
+    "ai coding":          "Code Generation",
+    # Data
+    "synthetic data":     "Synthetic Data Pipelines",
+    "data synthesis":     "Synthetic Data Pipelines",
+    # Workforce / Jobs
+    "workforce":          "AI Workforce & Jobs",
+    "job displacement":   "AI Workforce & Jobs",
+    "labour":             "AI Workforce & Jobs",
+    "employment":         "AI Workforce & Jobs",
+    # Infrastructure / Cost
+    "ai infrastructure":  "AI Infrastructure",
+    "gpu cost":           "AI Infrastructure",
+    "datacenter":         "AI Infrastructure",
+    # Supply chain
+    "supply chain":       "Supply Chain Security",
+    # Capabilities
+    "llm capabilities":   "LLM Capabilities",
+    "advanced llm":       "LLM Capabilities",
+    "frontier model":     "LLM Capabilities",
+    # Business / Strategy
+    "ai business":        "AI Business Strategy",
+    "ai strategy":        "AI Business Strategy",
+    # Pace / Acceleration
+    "ai pace":            "AI Development Pace",
+    "acceleration":       "AI Development Pace",
 }
+
+# Known acronyms that title() breaks — restored after title-casing.
+_ACRONYM_FIXES: list[tuple[str, str]] = [
+    ("Ai ",  "AI "),
+    (" Ai",  " AI"),
+    ("Llm",  "LLM"),
+    ("Rlhf", "RLHF"),
+    ("Rag",  "RAG"),
+    ("Api",  "API"),
+    ("Gpu",  "GPU"),
+    ("Vla",  "VLA"),
+    ("Dpo",  "DPO"),
+    ("Lora", "LoRA"),
+    ("Nlp",  "NLP"),
+    ("Ml ",  "ML "),
+    (" Ml",  " ML"),
+]
 
 
 def normalize_theme_name(raw: str) -> str:
-    """Apply synonym map to collapse common rebranding variants."""
+    """Collapse synonyms and title-case with acronym preservation."""
     lower = raw.lower().strip()
+    # Longest-match synonym lookup
     for pattern, canonical in _SYNONYM_MAP.items():
         if pattern in lower:
             return canonical
-    return raw.strip().title()
+    # Title-case with acronym fixes
+    result = raw.strip().title()
+    for broken, fixed in _ACRONYM_FIXES:
+        result = result.replace(broken, fixed)
+    # Also fix trailing acronym (no trailing space)
+    result = re.sub(r"\bAi\b", "AI", result)
+    result = re.sub(r"\bLlm\b", "LLM", result)
+    return result
 
 
 def _build_clustering_prompt(records: list[CanonicalRecord], existing_themes: list[str]) -> str:

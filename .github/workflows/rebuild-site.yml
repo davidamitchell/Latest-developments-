@@ -1,0 +1,55 @@
+name: Rebuild Site
+
+# Manual trigger only — rebuilds docs/data/ without running the email digest.
+# Use this to refresh trend analysis and the GitHub Pages site on demand.
+on:
+  workflow_dispatch:
+    inputs:
+      no_fetch:
+        description: "Skip live source fetching (history only)"
+        type: boolean
+        default: false
+
+jobs:
+  rebuild:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run trend analysis
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          if [ "${{ inputs.no_fetch }}" = "true" ]; then
+            python -m src.trends --docs docs/data --history history --no-fetch
+          else
+            python -m src.trends --docs docs/data --history history
+          fi
+
+      - name: Commit updated trend data
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/data/
+          TODAY=$(date -u +%Y-%m-%d)
+          if git diff --cached --quiet; then
+            echo "Trend data unchanged — nothing to commit"
+          else
+            git commit -m "chore: rebuild site data ${TODAY} [skip ci]"
+            git push origin ${{ github.ref_name }}
+          fi
