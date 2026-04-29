@@ -427,7 +427,7 @@ def run(docs_data_dir: Path, history_dir: Path, dry_run: bool = False) -> None:
         for m in metrics
     ]
 
-    # ── 5. Source class coverage ──────────────────────────────────────
+    # ── 5. Source class coverage + per-source stats ───────────────────
     source_class_info: dict[str, dict] = {}
     class_source_names: dict[str, set] = defaultdict(set)
     for src_lower, _ in all_source_counts.items():
@@ -443,6 +443,35 @@ def run(docs_data_dir: Path, history_dir: Path, dry_run: bool = False) -> None:
             "count": total,
             "sources": sorted(class_source_names.get(cls, [])),
         }
+
+    # Per-source detail: group all_entries by source_name
+    per_source: dict[str, dict] = {}
+    for date_str, theme, cls, name in all_entries:
+        if name not in per_source:
+            per_source[name] = {
+                "name": name,
+                "source_class": cls,
+                "item_count": 0,
+                "dates": set(),
+                "theme_counts": Counter(),
+            }
+        per_source[name]["item_count"] += 1
+        per_source[name]["dates"].add(date_str)
+        per_source[name]["theme_counts"][theme] += 1
+
+    source_list = []
+    for name, info in sorted(per_source.items(), key=lambda x: -x[1]["item_count"]):
+        dates_sorted = sorted(info["dates"])
+        top_themes = [t for t, _ in info["theme_counts"].most_common(5)]
+        source_list.append({
+            "name": name,
+            "source_class": info["source_class"],
+            "item_count": info["item_count"],
+            "first_seen": dates_sorted[0] if dates_sorted else "",
+            "last_seen": dates_sorted[-1] if dates_sorted else "",
+            "days_active": len(info["dates"]),
+            "top_themes": top_themes,
+        })
 
     # ── 6. Simple co-occurrence graph (no API) ────────────────────────
     # Themes that appear on the same day → compositional edge candidate
@@ -513,6 +542,7 @@ def run(docs_data_dir: Path, history_dir: Path, dry_run: bool = False) -> None:
     (docs_data_dir / "sources.json").write_text(json.dumps({
         "generated": now_iso,
         "classes": source_class_info,
+        "sources": source_list,
     }, indent=2))
 
     logger.info(

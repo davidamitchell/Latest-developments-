@@ -190,10 +190,20 @@ function renderThemeCards(themes) {
 
 /* ── Sources tab ────────────────────────────────────────────────────── */
 
+const CLASS_COLORS = {
+  primary:      '#4a7c59',
+  operator:     '#1a5c96',
+  practitioner: '#856404',
+  media:        '#5a2a8a',
+  market:       '#721c24',
+};
+
 function renderSourcesTab(data) {
   const classes = data?.classes;
+  const sources = data?.sources || [];
 
   const grid = document.getElementById('source-class-grid');
+  const table = document.getElementById('source-detail-table');
   if (!grid) return;
 
   if (!classes) {
@@ -201,20 +211,12 @@ function renderSourcesTab(data) {
     return;
   }
 
-  const classColors = {
-    primary:      '#4a7c59',
-    operator:     '#1a5c96',
-    practitioner: '#856404',
-    media:        '#5a2a8a',
-    market:       '#721c24',
-  };
-
+  // ── Class summary cards ──────────────────────────────────────────
   grid.innerHTML = SOURCE_CLASSES.map(cls => {
-    const info   = classes[cls] || { count: 0, sources: [] };
-    const color  = classColors[cls] || '#555';
-    const list   = (info.sources || []).join(', ') || 'none configured';
-    const desc   = sourceClassDesc(cls);
-
+    const info  = classes[cls] || { count: 0, sources: [] };
+    const color = CLASS_COLORS[cls] || '#555';
+    const list  = (info.sources || []).join(', ') || 'none configured';
+    const desc  = sourceClassDesc(cls);
     return `
       <div class="source-class-card" style="border-top-color:${color}">
         <div class="source-class-name" style="color:${color}">${escHtml(cls)}</div>
@@ -223,6 +225,50 @@ function renderSourcesTab(data) {
         <p style="font-size:11px;color:#aaa;margin:6px 0 0;line-height:1.4">${desc}</p>
       </div>`;
   }).join('');
+
+  // ── Per-source detail table ──────────────────────────────────────
+  if (!table) return;
+
+  if (sources.length === 0) {
+    table.innerHTML = '<p style="color:#aaa;font-size:13px">No per-source data available yet.</p>';
+    return;
+  }
+
+  const rows = sources.map(s => {
+    const cls   = s.source_class || 'practitioner';
+    const color = CLASS_COLORS[cls] || '#555';
+    const badge = `<span class="source-badge" style="background:${color}20;color:${color};border:1px solid ${color}40">${escHtml(cls)}</span>`;
+    const dateRange = s.first_seen && s.last_seen
+      ? `${s.first_seen} → ${s.last_seen}`
+      : '—';
+    const themes = (s.top_themes || []).slice(0, 3)
+      .map(t => `<span class="theme-pill">${escHtml(t)}</span>`)
+      .join(' ');
+    return `
+      <tr>
+        <td class="source-name-cell">${escHtml(s.name)}</td>
+        <td>${badge}</td>
+        <td class="num-cell">${s.item_count ?? 0}</td>
+        <td class="num-cell">${s.days_active ?? 0}</td>
+        <td class="date-cell">${escHtml(dateRange)}</td>
+        <td class="themes-cell">${themes || '—'}</td>
+      </tr>`;
+  }).join('');
+
+  table.innerHTML = `
+    <table class="source-table">
+      <thead>
+        <tr>
+          <th>Source</th>
+          <th>Class</th>
+          <th>Items</th>
+          <th>Active days</th>
+          <th>Date range</th>
+          <th>Top themes</th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>`;
 }
 
 function sourceClassDesc(cls) {

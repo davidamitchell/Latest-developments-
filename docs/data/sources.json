@@ -1,5 +1,5 @@
 {
-  "generated": "2026-04-29T09:05:56.523646+00:00",
+  "generated": "2026-04-29T09:23:31.640543+00:00",
   "classes": {
     "primary": {
       "count": 0,
@@ -25,5 +25,48 @@
       "count": 0,
       "sources": []
     }
-  }
+  },
+  "sources": [
+    {
+      "name": "YouTube",
+      "source_class": "practitioner",
+      "item_count": 99,
+      "first_seen": "2026-03-03",
+      "last_seen": "2026-04-26",
+      "days_active": 45,
+      "top_themes": [
+        "AI Safety & Alignment",
+        "Ai Workforce Impact",
+        "Ai Business Strategy",
+        "Advanced Llm Capabilities",
+        "Ai Pace Impact"
+      ]
+    },
+    {
+      "name": "Hacker News",
+      "source_class": "practitioner",
+      "item_count": 78,
+      "first_seen": "2026-03-07",
+      "last_seen": "2026-04-25",
+      "days_active": 27,
+      "top_themes": [
+        "Local Llm Inference",
+        "Local Llm Applications",
+        "Supply Chain Security",
+        "Claude Quality Concerns",
+        "Anthropic Investment"
+      ]
+    },
+    {
+      "name": "Other",
+      "source_class": "practitioner",
+      "item_count": 1,
+      "first_seen": "2026-03-31",
+      "last_seen": "2026-03-31",
+      "days_active": 1,
+      "top_themes": [
+        "Claude Code Learning"
+      ]
+    }
+  ]
 }

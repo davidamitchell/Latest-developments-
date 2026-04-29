@@ -304,6 +304,73 @@ body {
   line-height: 1.4;
 }
 
+/* ── Source detail table ────────────────── */
+.source-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+
+.source-table th {
+  text-align: left;
+  padding: 8px 12px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: #888;
+  border-bottom: 2px solid #d8d0b8;
+  white-space: nowrap;
+}
+
+.source-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #ece7da;
+  vertical-align: middle;
+}
+
+.source-table tbody tr:hover { background: #faf7f0; }
+
+.source-name-cell {
+  font-weight: 600;
+  color: #2a2a2a;
+}
+
+.num-cell {
+  text-align: right;
+  color: #555;
+  font-variant-numeric: tabular-nums;
+}
+
+.date-cell {
+  color: #888;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.themes-cell { max-width: 280px; }
+
+.source-badge {
+  display: inline-block;
+  padding: 2px 7px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.theme-pill {
+  display: inline-block;
+  background: #f0ece0;
+  color: #555;
+  border-radius: 10px;
+  padding: 2px 7px;
+  font-size: 11px;
+  margin: 2px 2px 2px 0;
+  white-space: nowrap;
+}
+
 /* ── Hype split panel ───────────────────── */
 .hype-split {
   display: grid;
