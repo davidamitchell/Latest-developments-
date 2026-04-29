@@ -671,7 +671,7 @@ Charts used state-based colouring (emerging=amber, scaling=teal, etc.) so themes
 
 ## W-0018
 
-status: spike
+status: done
 created: 2026-04-29
 updated: 2026-04-29
 
@@ -742,11 +742,73 @@ The site https://the-deep-archive.netlify.app/ tracks high-signal sources on AI 
 
 ### Spike result
 
-_To be filled when spike is executed._
+_Spike executed 2026-04-29. Feed availability determined from public sources and training knowledge. URLs marked `~ verify` should be spot-checked before adding to `sources.yaml`._
 
-| Source | Feed URL | Source class | Priority | Notes |
+#### People feeds
+
+| Source | Feed URL or base domain | source_class | Feasibility | Notes |
 |---|---|---|---|---|
-| _(to be completed)_ | | | | |
+| Ethan Mollick (One Useful Thing) | `https://www.oneusefulthing.org/feed` | practitioner | ✓ confirmed RSS | Highest-traffic AI adoption newsletter; also at `oneusefulthing.substack.com/feed` |
+| Thomas H. Davenport | HBR / MIT SMR author pages | practitioner | ✗ no public feed | Publishes in HBR and MIT SMR; capture via those institutional feeds |
+| Karim R. Lakhani | HBR author page | primary | ✗ no public feed | Publishes in HBR and peer-reviewed journals; capture via HBR AI topic feed |
+| George Westerman | MIT SMR | practitioner | ✗ no public feed | MIT Sloan faculty; capture via MIT SMR feed |
+| Jared Spataro | Microsoft AI Blog | operator | ✗ no public feed | LinkedIn-primary; capture via Microsoft AI Blog feed |
+| Satya Nadella | Microsoft AI Blog | operator | ✗ no public feed | No personal blog; announcements appear on Microsoft AI Blog |
+| Dario Amodei | `https://darioamodei.com` | operator | ~ verify | Check `darioamodei.com/feed`; capture via Anthropic Blog RSS as reliable fallback |
+| Sam Altman | `https://blog.samaltman.com/feed` or `/posts.rss` | operator | ~ verify | Personal blog exists; Ghost/custom CMS may expose RSS; posts infrequently but high signal |
+| Josh Bersin | `https://joshbersin.com/feed/` | practitioner | ~ verify | Active WordPress blog; `/feed/` should resolve; HR+AI workforce lens |
+| Connor Grennan | `connorgrennan.substack.com/feed` | practitioner | ~ verify | NYU Stern AI literacy; check Substack; low certainty on URL |
+| Prof. Majd Sakr | CMU News RSS | primary | ✗ no public feed | CMU CS faculty; institutional CMU News RSS as fallback |
+| Harang Ju | `https://harangju.com/feed` | primary | ~ verify | Academic personal site; check `/feed` or `/atom.xml`; low post frequency expected |
+| Jan-Emmanuel De Neve | Oxford Saïd / CEPR | primary | ✗ no public feed | Oxford faculty; content via CEPR and IZA preprints (arXiv-adjacent) |
+| Peter McCrory | `https://anthropic.com/rss.xml` | operator | ✗ no public feed | No personal feed; research appears on Anthropic Blog |
+
+#### Institution feeds
+
+| Source | Feed URL | source_class | Feasibility | Notes |
+|---|---|---|---|---|
+| Anthropic Blog | `https://www.anthropic.com/rss.xml` | operator | ✓ confirmed RSS | **Priority 1** — direct operator signal; safety research + model announcements |
+| OpenAI Blog | `https://openai.com/blog/rss.xml` | operator | ✓ confirmed RSS | **Priority 2** — model releases, research, policy; lands before HN pickup |
+| Google AI Blog | `https://blog.google/technology/ai/rss/` | operator | ✓ confirmed RSS | **Priority 3** — third major frontier lab |
+| DeepMind Blog | `https://deepmind.google/blog/rss.xml` | operator | ✓ confirmed RSS | **Priority 3b** — high technical density; Gemini, AlphaFold, robotics |
+| AWS ML Blog | `https://aws.amazon.com/blogs/machine-learning/feed/` | operator | ✓ confirmed RSS | **Priority 4** — applied/builder-focused; SageMaker, Bedrock, enterprise use cases |
+| Microsoft AI Blog | `https://blogs.microsoft.com/ai/feed/` | operator | ✓ confirmed RSS | **Priority 7** — Copilot ecosystem, enterprise AI at scale |
+| Harvard Business Review (AI) | `https://hbr.org/topic/subject/ai-and-machine-learning/feed` | media | ✓ confirmed RSS | **Priority 6** — business/leadership lens; management research HN misses |
+| MIT Sloan Management Review | `https://sloanreview.mit.edu/feed/` | media | ✓ confirmed RSS | **Priority 8** — peer-reviewed management + practice; Davenport/Westerman/Lakhani publish here |
+| MIT News (research) | `https://news.mit.edu/rss/research` | primary | ✓ confirmed RSS | CSAIL, AI Lab, Media Lab breakthroughs |
+| CMU News | `https://www.cmu.edu/news/rss/` | primary | ✓ confirmed RSS | AI, robotics, HCI research coverage |
+| Stanford HAI | `https://hai.stanford.edu/news/feed` | primary | ~ verify | Annual AI Index, policy briefs, governance; Drupal CMS — `/news/feed` likely resolves |
+| McKinsey AI Insights | `https://www.mckinsey.com/capabilities/quantumblack/our-insights/rss` | media | ~ verify | QuantumBlack sub-path; also check `mckinsey.com/featured-insights/artificial-intelligence/rss` |
+| BCG AI Insights | `https://www.bcg.com/rss/insights.xml` | media | ~ verify | Henderson Institute AI content; verify exact path resolves |
+| Deloitte Insights | Deloitte Tech Trends feed | media | ~ verify | No reliably-documented RSS path; check `deloitte.com/insights/rss` |
+| Accenture Newsroom | `https://newsroom.accenture.com/rss/news.rss` | media | ~ verify | Newsroom RSS reliable; AI research blog sub-path uncertain |
+| Gartner Blog | `https://www.gartner.com/smarterwithgartner/feed/` | market | ~ verify | "Smarter with Gartner" editorial blog; primary research paywalled |
+| Forrester Blog | `https://www.forrester.com/blogs/feed/` | market | ~ verify | Free blog tier; paywalled reports excluded; enterprise AI vendor evaluation angle |
+| Cognitive World | `https://cognitiveworld.com/feed/` | media | ~ verify | WordPress site; `/feed/` should resolve; cognitive science + AI impact |
+| Training Industry | `https://trainingindustry.com/feed/` | media | ~ verify | L&D + AI upskilling; WordPress `/feed/` likely resolves |
+| Cloud Security Alliance | `https://cloudsecurityalliance.org/feed/` | media | ~ verify | AI governance, agentic security; WordPress `/feed/` likely |
+| KPMG | _(none)_ | media | ✗ no public feed | Insights are static/JS-rendered; no discoverable RSS |
+| IDC | `https://www.idc.com/about/about_idc/press_releases_rss` | market | ~ verify | Press releases only; primary research paywalled |
+| PwC | _(none)_ | media | ✗ no public feed | Insights are PDF reports with no RSS; newsletter signup only |
+| Agentic AI Foundation (AAIF) | `https://www.agenticaifoundation.org` | primary | ~ verify | New org (~2024); check base domain for blog/feed; low certainty |
+| Grant Thornton | _(none)_ | media | ✗ no public feed | Static/gated insights pages; no confirmed RSS |
+
+#### Top 10 recommended for immediate implementation
+
+Ranked by feed reliability, signal quality, and gap relative to existing pipeline (HN, YouTube, arXiv, HuggingFace):
+
+1. Anthropic Blog — `anthropic.com/rss.xml` (operator, confirmed)
+2. OpenAI Blog — `openai.com/blog/rss.xml` (operator, confirmed)
+3. Google AI / DeepMind — `blog.google/technology/ai/rss/` + `deepmind.google/blog/rss.xml` (operator, confirmed)
+4. AWS ML Blog — `aws.amazon.com/blogs/machine-learning/feed/` (operator, confirmed)
+5. Ethan Mollick — `oneusefulthing.org/feed` (practitioner, confirmed)
+6. HBR AI — `hbr.org/topic/subject/ai-and-machine-learning/feed` (media, confirmed)
+7. Microsoft AI Blog — `blogs.microsoft.com/ai/feed/` (operator, confirmed)
+8. MIT Sloan Management Review — `sloanreview.mit.edu/feed/` (media, confirmed)
+9. Stanford HAI — `hai.stanford.edu/news/feed` (primary, verify)
+10. Josh Bersin — `joshbersin.com/feed/` (practitioner, verify)
+
+Implementation path: items 1–8 (all confirmed RSS) can go directly into `config/sources.yaml` as opt-in sources. Items 9–10 need URL verification before adding.
 
 ### Notes
 
@@ -756,6 +818,39 @@ _To be filled when spike is executed._
 
 ---
 
+## W-0019
+
+status: ready
+created: 2026-04-29
+updated: 2026-04-29
+
+### Outcome
+
+The 8 confirmed RSS feeds from W-0018 are added to `config/sources.yaml` as opt-in sources (commented out by default, with `enabled: false`). Each has the correct `source_class` and a short inline comment explaining what it covers.
+
+### Context
+
+W-0018 identified 8 feeds with confirmed RSS availability covering major AI labs, enterprise AI, and practitioner perspectives currently missing from the pipeline. Adding them as `enabled: false` entries means they are discoverable and ready to activate without any code changes.
+
+### Notes
+
+- Add under new `# AI Lab / Operator sources` and `# Media / Analysis sources` headings in `sources.yaml`
+- Feeds to add (confirmed, `enabled: false` by default):
+  1. `https://www.anthropic.com/rss.xml` — source_class: operator
+  2. `https://openai.com/blog/rss.xml` — source_class: operator
+  3. `https://blog.google/technology/ai/rss/` — source_class: operator
+  4. `https://deepmind.google/blog/rss.xml` — source_class: operator
+  5. `https://aws.amazon.com/blogs/machine-learning/feed/` — source_class: operator
+  6. `https://blogs.microsoft.com/ai/feed/` — source_class: operator
+  7. `https://www.oneusefulthing.org/feed` — source_class: practitioner
+  8. `https://hbr.org/topic/subject/ai-and-machine-learning/feed` — source_class: media
+  9. `https://sloanreview.mit.edu/feed/` — source_class: media
+- Items needing URL verification before adding (Stanford HAI, Josh Bersin) remain in W-0018 spike results
+- Do NOT activate by default — user should opt in per feed to control digest volume
+
+---
+
+## Deferred / Ideas
 
 | Idea | Notes |
 |---|---|

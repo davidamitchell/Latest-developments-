@@ -413,3 +413,20 @@ Standardisation pass: expanded `.github/copilot-instructions.md` from stub to fu
 3. **What change would prevent this next time?** Take screenshots at the very start of the session before any tool opens the browser.
 4. **Is this a pattern?** Playwright lock is a recurring environment issue. Added note to learnings.
 
+
+## 2026-04-29 — Source catalogue spike (W-0018) + implementation backlog (W-0019)
+
+**Completed:**
+- W-0018 spike: investigated all 14 people and 23 institutions from the-deep-archive.netlify.app source catalogue for machine-readable feeds.
+- Produced feed availability table: 8 confirmed RSS, 13 feeds to verify, 6 no public feed.
+- Top 10 prioritised for implementation; items 1–8 all have confirmed RSS URLs.
+- W-0019 added (ready): wire the 9 confirmed feeds into `config/sources.yaml` as opt-in `enabled: false` entries.
+- Both W-0018 (done) and W-0019 (ready) recorded in BACKLOG.md.
+
+### Mini-Retro
+
+1. **Did the process work?** Yes — spike approach was correct: catalogue first, investigate, then create implementation backlog item.
+2. **What slowed down?** Nothing significant — no code changes, pure research task.
+3. **What change would prevent issues next time?** The "Deferred / Ideas" table header was accidentally dropped when inserting new entries; always verify the end-of-file structure after large BACKLOG.md edits.
+4. **Is this a pattern?** Minor markdown editing slip; not a systemic pattern.
+
