@@ -392,3 +392,24 @@ Standardisation pass: expanded `.github/copilot-instructions.md` from stub to fu
 2. **What slowed down or went wrong?** Playwright browser was locked; couldn't take a live screenshot. Verified CSS correctness by inspection only.
 3. **What change would prevent this next time?** Kill any leftover browser processes before attempting visual verification. Also: running `ruff check .` across the full project earlier would have caught all 6 lint errors in a single pass instead of iteratively.
 4. **Is this a pattern?** Unused imports from new feature branches: **yes, recurring**. Should add `ruff check --fix` as a pre-commit step or make it part of the slice completion checklist.
+
+## 2026-04-29 — Per-theme unique colour system (W-0017)
+
+**Completed:**
+- Added W-0017 to BACKLOG.md (done).
+- Implemented `THEME_PALETTE` (20 high-contrast hues) and `buildThemeColorMap()` in `docs/js/app.js`. Theme names are sorted alphabetically before palette assignment so the same theme always gets the same colour regardless of JSON ordering.
+- Threaded `colorMap` parameter through `renderTrendChart`, `renderHypeCharts`, `renderHeatmap` in `docs/js/charts.js`.
+- Trend table: coloured circle swatch before each theme name.
+- Theme cards: `border-left-color` and name text coloured per theme.
+- Hype bar charts: per-bar colours instead of single teal/yellow.
+- Heatmap: theme name column coloured.
+- Source table theme pills: coloured border from theme colour.
+- `learnings.md` updated.
+
+### Mini-Retro
+
+1. **Did the process work?** Yes — the architecture was clean: build colour map once from all theme names, share via module-level variable, pass as parameter to chart functions.
+2. **What slowed down or went wrong?** Playwright browser locked again — no screenshot possible. Verified correctness via Node.js tests of the colour logic.
+3. **What change would prevent this next time?** Take screenshots at the very start of the session before any tool opens the browser.
+4. **Is this a pattern?** Playwright lock is a recurring environment issue. Added note to learnings.
+

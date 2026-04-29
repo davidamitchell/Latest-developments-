@@ -7,6 +7,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Added
+- **Per-theme unique colour system**: every theme is assigned a unique, maximally-contrasting hex colour from a 20-slot palette. The same colour is used everywhere that theme appears — trend chart lines, hype bar charts, trend table swatch, theme card border and name, heatmap row label, source table theme pills. Assignment is deterministic (alphabetical sort before palette slot), so colours are stable across page reloads.
 - **Dark mode GitHub Pages site**: converted `docs/` dashboard to dark mode using IBM Plex Mono font and Research site palette (`#0d0d0d` bg, `#00C3A5` teal, `#E8A1A8` dusk, `#252b33` borders)
 - `learnings.md`: session notes capturing patterns, friction, and root causes
 

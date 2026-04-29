@@ -7,6 +7,56 @@
 const DATA_DIR = 'data/';
 const SOURCE_CLASSES = ['primary', 'operator', 'practitioner', 'media', 'market'];
 
+/* ── Theme Colour System ─────────────────────────────────────────────── */
+
+// 20-slot palette with hues distributed evenly across the wheel.
+// Designed for legibility on the dark (#0d0d0d) background.
+// Sequence is perceptually ordered to maximise contrast between neighbours.
+const THEME_PALETTE = [
+  '#00C3A5', // teal
+  '#ff6348', // red-orange
+  '#a29bfe', // lavender
+  '#ffa502', // amber
+  '#74b9ff', // sky blue
+  '#2ed573', // green
+  '#fd79a8', // bubblegum
+  '#eccc68', // yellow
+  '#6c5ce7', // violet
+  '#ff6b81', // rose
+  '#00cec9', // cyan
+  '#e17055', // salmon
+  '#55efc4', // aquamarine
+  '#d63031', // scarlet
+  '#fdcb6e', // gold
+  '#1e90ff', // dodger blue
+  '#b8e994', // lime
+  '#5352ed', // indigo
+  '#f8c291', // peach
+  '#00b894', // mint
+];
+
+// Maps theme name → hex colour. Built once from all loaded theme names.
+// Sorted alphabetically before assignment so the mapping is stable across
+// page reloads even if theme order in the JSON changes.
+let THEME_COLOR_MAP = {};
+
+function buildThemeColorMap(allThemeNames) {
+  const sorted = [...new Set(allThemeNames)].sort();
+  THEME_COLOR_MAP = {};
+  sorted.forEach((name, i) => {
+    THEME_COLOR_MAP[name] = THEME_PALETTE[i % THEME_PALETTE.length];
+  });
+}
+
+function themeColor(name) {
+  return THEME_COLOR_MAP[name] || '#999';
+}
+
+// Return hex + 2-digit alpha (e.g. '#00C3A580' for 50% opacity)
+function hexAlpha(hex, alpha) {
+  return hex + Math.round(alpha * 255).toString(16).padStart(2, '0');
+}
+
 /* ── Bootstrap ──────────────────────────────────────────────────────── */
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -36,6 +86,13 @@ async function loadAll() {
     fetchJson('themes.json'),
     fetchJson('sources.json'),
   ]);
+
+  // Build colour map from all theme names across both data files before rendering.
+  const allNames = [
+    ...(trendsData?.trends || []).map(t => t.theme),
+    ...(themesData?.themes  || []).map(t => t.name),
+  ];
+  buildThemeColorMap(allNames);
 
   renderMeta(meta);
   renderTrendsTab(trendsData);
@@ -89,10 +146,10 @@ function renderTrendsTab(data) {
   }
 
   // Trend phase chart
-  renderTrendChart('trend-chart', trends);
+  renderTrendChart('trend-chart', trends, THEME_COLOR_MAP);
 
   // Hype vs substantiation
-  renderHypeCharts('hype-chart-evidence', 'hype-chart-media', trends);
+  renderHypeCharts('hype-chart-evidence', 'hype-chart-media', trends, THEME_COLOR_MAP);
 
   // Trend summary table
   renderTrendTable(trends);
@@ -109,10 +166,13 @@ function renderTrendTable(trends) {
                     : 'hype-low';
     const confPct = Math.round((t.confidence ?? 0) * 100);
     const vel = t.velocity >= 0 ? `+${t.velocity.toFixed(2)}` : t.velocity.toFixed(2);
+    const color = themeColor(t.theme);
 
     return `
       <tr>
-        <td><strong>${escHtml(t.theme)}</strong></td>
+        <td>
+          <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${color};margin-right:7px;flex-shrink:0;vertical-align:middle"></span><strong>${escHtml(t.theme)}</strong>
+        </td>
         <td><span class="state-badge state-${escHtml(state)}">${escHtml(state)}</span></td>
         <td>${(t.volume ?? 0).toFixed(1)}</td>
         <td>${vel}</td>
@@ -142,7 +202,7 @@ function renderThemesTab(data) {
   }
 
   renderThemeCards(themes);
-  renderHeatmap('heatmap-container', themes, SOURCE_CLASSES);
+  renderHeatmap('heatmap-container', themes, SOURCE_CLASSES, THEME_COLOR_MAP);
 }
 
 function renderThemeCards(themes) {
@@ -158,11 +218,12 @@ function renderThemeCards(themes) {
     const lastSeen = t.last_seen
       ? new Date(t.last_seen).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
       : '—';
+    const color = themeColor(t.name);
 
     return `
-      <div class="theme-card">
+      <div class="theme-card" style="border-left-color:${color}">
         <div class="theme-card-header">
-          <span class="theme-name">${escHtml(t.name)}</span>
+          <span class="theme-name" style="color:${color}">${escHtml(t.name)}</span>
           <span class="state-badge state-${escHtml(state)}">${escHtml(state)}</span>
         </div>
         <div class="theme-meta">
@@ -242,7 +303,10 @@ function renderSourcesTab(data) {
       ? `${s.first_seen} → ${s.last_seen}`
       : '—';
     const themes = (s.top_themes || []).slice(0, 3)
-      .map(t => `<span class="theme-pill">${escHtml(t)}</span>`)
+      .map(t => {
+        const tc = themeColor(t);
+        return `<span class="theme-pill" style="border-color:${tc}40;color:${tc}">${escHtml(t)}</span>`;
+      })
       .join(' ');
     return `
       <tr>

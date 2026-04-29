@@ -643,6 +643,32 @@ A `workflow_dispatch`-only `rebuild-site.yml` GitHub Actions workflow rebuilds `
 
 ---
 
+## W-0017
+
+status: done
+created: 2026-04-29
+updated: 2026-04-29
+
+### Outcome
+
+Every theme is assigned a unique, persistent hex colour from a 20-slot high-contrast palette. The same colour is used everywhere that theme appears: trend chart line, hype bar, trend table swatch, theme card border, heatmap row label.
+
+### Context
+
+Charts used state-based colouring (emerging=amber, scaling=teal, etc.) so themes in the same state were indistinguishable. Requested in PR comment: colours must be unique and maximally contrasting.
+
+### Notes
+
+- `THEME_PALETTE` in `app.js` — 20 hues spanning the full wheel at high saturation/lightness for dark background legibility
+- `buildThemeColorMap(allNames)` assigns palette slots by alphabetical sort so the mapping is stable across page loads
+- `themeColor(name)` helper used by every render function
+- `renderTrendChart`, `renderHypeCharts`, `renderHeatmap` each accept an optional `colorMap` parameter
+- Theme cards: `border-left-color` set to theme colour
+- Trend table: 8×8 px coloured swatch before theme name
+- Hype bar charts: per-bar `backgroundColor` array keyed to theme colour
+
+---
+
 ## Deferred / Ideas
 
 | Idea | Notes |

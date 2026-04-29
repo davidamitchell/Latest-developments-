@@ -1,6 +1,8 @@
 /* charts.js — Chart.js wrappers for the trend intelligence site.
    All functions are no-ops if data is missing or empty.
-   Dark mode palette matches css/style.css: bg #0d0d0d, teal #00C3A5, dusk #E8A1A8. */
+   Dark mode palette matches css/style.css: bg #0d0d0d, teal #00C3A5, dusk #E8A1A8.
+   Theme-specific colours are passed in via the colorMap parameter and assigned
+   by app.js::buildThemeColorMap() before any chart is rendered. */
 
 'use strict';
 
@@ -9,7 +11,8 @@ Chart.defaults.color = '#666';
 Chart.defaults.borderColor = '#252b33';
 Chart.defaults.backgroundColor = '#0f1115';
 
-const CHART_COLORS = {
+// Fallback state colours — used only when no colorMap entry is found for a theme
+const STATE_COLORS = {
   emerging:  'rgba(245, 200,  66, 0.85)',
   scaling:   'rgba(  0, 195, 165, 0.85)',
   mature:    'rgba(100, 149, 237, 0.85)',
@@ -31,10 +34,12 @@ let _hypaBarMedia    = null;
 
 /**
  * Render a multi-line time-series chart showing composite score per theme.
+ * Each theme line uses its unique colour from colorMap.
  * @param {string}   canvasId  - ID of <canvas> element
  * @param {Array}    trends    - trends.json .trends array
+ * @param {Object}   colorMap  - { themeName: hexColor } from buildThemeColorMap()
  */
-function renderTrendChart(canvasId, trends) {
+function renderTrendChart(canvasId, trends, colorMap) {
   const canvas = document.getElementById(canvasId);
   if (!canvas || !trends || trends.length === 0) return;
 
@@ -47,15 +52,18 @@ function renderTrendChart(canvasId, trends) {
 
   if (labels.length === 0) return;
 
-  const datasets = trends.slice(0, 8).map((t, i) => {
-    const color = CHART_COLORS[t.state] || `hsl(${i * 40}, 60%, 50%)`;
+  const datasets = trends.slice(0, 12).map((t, i) => {
+    // Prefer theme-specific colour; fall back to state colour or hsl spread
+    const color = (colorMap && colorMap[t.theme])
+      || STATE_COLORS[t.state]
+      || `hsl(${i * 30}, 70%, 60%)`;
     const pointMap = {};
     (t.history || []).forEach(h => { pointMap[h.date] = h.volume ?? 0; });
     return {
       label: t.theme,
       data: labels.map(d => pointMap[d] ?? null),
       borderColor: color,
-      backgroundColor: color.replace('0.8', '0.1'),
+      backgroundColor: color + '1a',  // hex alpha ≈ 10% fill under the line
       borderWidth: 2,
       pointRadius: 4,
       pointHoverRadius: 6,
@@ -72,7 +80,17 @@ function renderTrendChart(canvasId, trends) {
       maintainAspectRatio: false,
       interaction: { mode: 'index', intersect: false },
       plugins: {
-        legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 12 } } },
+        legend: {
+          position: 'bottom',
+          labels: {
+            boxWidth: 12,
+            font: { size: 11 },
+            color: '#999',
+            // Draw a circle rather than a box so the legend matches the dot on the chart
+            usePointStyle: true,
+            pointStyle: 'circle',
+          },
+        },
         tooltip: {
           callbacks: {
             label: ctx => ctx.parsed.y === null ? null
@@ -119,11 +137,13 @@ function buildPhaseBandAnnotations() {
 
 /**
  * Render paired horizontal bar charts: evidence-weighted vs media-weighted.
+ * Each bar is coloured by its theme colour for consistency across the dashboard.
  * @param {string} evidenceCanvasId
  * @param {string} mediaCanvasId
  * @param {Array}  trends
+ * @param {Object} colorMap  - { themeName: hexColor }
  */
-function renderHypeCharts(evidenceCanvasId, mediaCanvasId, trends) {
+function renderHypeCharts(evidenceCanvasId, mediaCanvasId, trends, colorMap) {
   const evCanvas  = document.getElementById(evidenceCanvasId);
   const medCanvas = document.getElementById(mediaCanvasId);
   if (!evCanvas || !medCanvas || !trends || trends.length === 0) return;
@@ -131,15 +151,20 @@ function renderHypeCharts(evidenceCanvasId, mediaCanvasId, trends) {
   if (_hypaBarEvidence) { _hypaBarEvidence.destroy(); _hypaBarEvidence = null; }
   if (_hypaBarMedia)    { _hypaBarMedia.destroy();    _hypaBarMedia = null; }
 
-  const labels = trends.slice(0, 10).map(t => t.theme);
+  const top = trends.slice(0, 10);
+  const labels = top.map(t => t.theme);
+
+  // Per-theme colours with hex alpha
+  const bgColors     = top.map(t => ((colorMap && colorMap[t.theme]) || '#00C3A5') + '55');
+  const borderColors = top.map(t => (colorMap && colorMap[t.theme]) || '#00C3A5');
 
   // Evidence-weighted score: volume * (1 - hype_risk) * confidence
-  const evidenceScores = trends.slice(0, 10).map(t =>
+  const evidenceScores = top.map(t =>
     +(((t.volume ?? 0) * (1 - (t.hype_risk ?? 0)) * (t.confidence ?? 0.5))).toFixed(2)
   );
 
   // Media-weighted score: volume * hype_risk (simplified proxy)
-  const mediaScores = trends.slice(0, 10).map(t =>
+  const mediaScores = top.map(t =>
     +(((t.volume ?? 0) * (t.hype_risk ?? 0)).toFixed(2))
   );
 
@@ -154,7 +179,7 @@ function renderHypeCharts(evidenceCanvasId, mediaCanvasId, trends) {
         grid: { color: 'rgba(255,255,255,0.05)' },
         ticks: { font: { size: 11 }, color: '#666' },
       },
-      y: { ticks: { font: { size: 12 }, color: '#999' } },
+      y: { ticks: { font: { size: 11 }, color: '#999' } },
     },
   };
 
@@ -162,12 +187,7 @@ function renderHypeCharts(evidenceCanvasId, mediaCanvasId, trends) {
     type: 'bar',
     data: {
       labels,
-      datasets: [{
-        data: evidenceScores,
-        backgroundColor: 'rgba(0,195,165,0.5)',
-        borderColor: '#00C3A5',
-        borderWidth: 1,
-      }],
+      datasets: [{ data: evidenceScores, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1 }],
     },
     options: { ...sharedOptions },
   });
@@ -176,12 +196,7 @@ function renderHypeCharts(evidenceCanvasId, mediaCanvasId, trends) {
     type: 'bar',
     data: {
       labels,
-      datasets: [{
-        data: mediaScores,
-        backgroundColor: 'rgba(245,200,66,0.5)',
-        borderColor: '#f5c842',
-        borderWidth: 1,
-      }],
+      datasets: [{ data: mediaScores, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1 }],
     },
     options: { ...sharedOptions },
   });
@@ -191,11 +206,13 @@ function renderHypeCharts(evidenceCanvasId, mediaCanvasId, trends) {
 
 /**
  * Build a DOM heatmap table: rows=themes, cols=source classes.
+ * Theme names in the first column are coloured by their theme colour.
  * @param {string}  containerId
  * @param {Array}   themes   - themes.json .themes array
  * @param {Array}   classes  - ordered list of class names
+ * @param {Object}  colorMap - { themeName: hexColor }
  */
-function renderHeatmap(containerId, themes, classes) {
+function renderHeatmap(containerId, themes, classes, colorMap) {
   const container = document.getElementById(containerId);
   if (!container || !themes || themes.length === 0) return;
 
@@ -204,12 +221,13 @@ function renderHeatmap(containerId, themes, classes) {
   ));
 
   const rows = themes.slice(0, 12).map(t => {
+    const color = (colorMap && colorMap[t.name]) || '#e6e6e6';
     const cells = classes.map(c => {
       const v = t.source_class_counts?.[c] ?? 0;
       const heat = Math.round((v / maxVal) * 4);
       return `<td class="heat-${heat}" title="${c}: ${v}">${v || '—'}</td>`;
     }).join('');
-    return `<tr><td>${escHtml(t.name)}</td>${cells}</tr>`;
+    return `<tr><td style="color:${color};font-weight:500">${escHtml(t.name)}</td>${cells}</tr>`;
   }).join('');
 
   const CLASS_ABBR = {

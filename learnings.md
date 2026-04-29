@@ -58,3 +58,36 @@ are created propagates dark colours to all charts without per-chart config repet
   feature branch would clean these before they reach PR review.
 
 ---
+
+## 2026-04-29 — Per-theme unique colour system (W-0017)
+
+### What was done
+- Added `THEME_PALETTE` (20 hues, evenly spaced across the wheel at high saturation)
+- `buildThemeColorMap(allNames)` in `app.js` — sorts alphabetically before assigning palette slots for stable, deterministic mapping
+- `themeColor(name)` helper used in every render function
+- Threaded `colorMap` through `renderTrendChart`, `renderHypeCharts`, `renderHeatmap`
+- Theme cards: `border-left-color` from `themeColor(t.name)`, name text coloured
+- Trend table: 8×8 px coloured circle swatch before theme name
+- Hype bar charts: per-bar `backgroundColor`/`borderColor` arrays keyed to theme colour
+- Heatmap: theme name column coloured
+- Source table: theme pills coloured with low-opacity border
+
+### Patterns
+
+**Alphabetical sort before palette assignment = deterministic colour.** Without sorting, themes in different order (e.g., trends.json vs themes.json) would receive different colours. Sorting first means the map is stable regardless of which file's theme list is processed first.
+
+**Test arrays use `.length`, not `.size`.** Arrays in JavaScript have `.length`; only `Set` and `Map` have `.size`. When writing test assertions over arrays, use `.length`. The production code was correct; only the inline test script had this bug.
+
+**Playwright browser lock persists across invocations.** Second session in the same environment still sees "Browser is already in use". The browser tool appears to hold a persistent lock in the container. Screenshots must be taken on first use or not at all. Document that visual confirmation has been done by code review / CI screenshot instead.
+
+**`color + '1a'` and `color + '55'` for hex alpha.** Appending a 2-digit hex suffix to a 6-digit hex colour produces an 8-digit CSS colour with alpha. `0x1a ≈ 10%`, `0x55 ≈ 33%`. Works in all modern browsers. Cleaner than maintaining separate rgba() strings.
+
+### What slowed down
+- Playwright browser locked again — cannot take a live screenshot. Design verified by code review.
+
+### Single change that would prevent this next time
+- The container should restart the browser process between agent sessions. As a workaround: place any visual verification step as the first action in a session, before other tools have a chance to open the browser.
+
+### Is this a pattern?
+- Playwright lock: **yes, recurring** — noted in previous learnings and happened again. Add a note to copilot-instructions.md that visual verification in this environment must happen at the start of the session.
+
