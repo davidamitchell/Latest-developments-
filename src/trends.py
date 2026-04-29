@@ -1,11 +1,10 @@
-"""Trend analysis pipeline.
+"""Trend analysis pipeline — works entirely from existing history/*.txt files.
 
-Reads history/*.txt and the current day's items, extracts canonical records via
-Gemini, scores credibility, clusters themes, updates trend state, and writes
-structured JSON to docs/data/ for the GitHub Pages site.
+No API key required. Parses the structured sections already written by the
+summariser (## Item Themes, inline Theme: labels) and computes rolling metrics.
 
-Usage (called from daily-digest workflow after the main digest):
-    python -m src.trends [--docs DOCS_DIR] [--history HISTORY_DIR] [--dry-run]
+Usage:
+    python -m src.trends [--docs docs/data] [--history history] [--dry-run] [--debug]
 """
 
 from __future__ import annotations
@@ -13,145 +12,342 @@ from __future__ import annotations
 import argparse
 import json
 import logging
-import os
 import re
 import sys
-from collections import Counter
+from collections import Counter, defaultdict
 from dataclasses import asdict
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from pathlib import Path
 
-from google import genai
-from google.genai import errors as genai_errors
-from google.genai import types
-
-from src.credibility import detect_hype, score_credibility
 from src.logger import setup_logging
-from src.models import CanonicalRecord, GraphEdge, ThemeNode, TrendMetrics
-from src.themes import build_graph_edges, build_theme_nodes, cluster_themes, normalize_theme_name
-from src.trend_state import classify_state, update_metrics
+from src.models import ThemeNode, TrendMetrics
+from src.themes import normalize_theme_name
+from src.trend_state import classify_state, compute_stability, compute_velocity
 
 logger = logging.getLogger(__name__)
 
-_MAX_HISTORY_FILES = 30   # days of history to load for trend analysis
-_MAX_CONTENT_CHARS = 2000  # chars to keep from each history digest for the Gemini prompt
-_MIN_ITEMS_FOR_TREND = 2   # minimum items before a theme gets a state classification
+# Minimum times a theme must appear across history to be included in output.
+_MIN_THEME_APPEARANCES = 2
+
+# Rolling window for volume calculation (days).
+_VOLUME_WINDOW_DAYS = 14
+
+# Source class inferred from URL domain.
+_URL_SOURCE_CLASS: list[tuple[str, str]] = [
+    ("youtube.com",         "practitioner"),
+    ("youtu.be",            "practitioner"),
+    ("news.ycombinator.com","practitioner"),
+    ("hacker",              "practitioner"),
+    ("substack.com",        "media"),
+    ("arxiv.org",           "primary"),
+    ("huggingface.co",      "primary"),
+    ("paperswithcode.com",  "primary"),
+    ("openreview.net",      "primary"),
+    ("github.com",          "primary"),
+    ("openai.com",          "operator"),
+    ("anthropic.com",       "operator"),
+    ("deepmind.google",     "operator"),
+    ("blog.google",         "operator"),
+    ("azure.com",           "operator"),
+    ("aws.amazon.com",      "operator"),
+    ("techcrunch.com",      "media"),
+    ("technologyreview.mit","media"),
+    ("theinformation.com",  "media"),
+]
+
+# URL pattern → human-readable source name (for diversity counting).
+# Diversity is measured in distinct source *names* (YouTube ≠ Hacker News),
+# not source *classes* (both are "practitioner"). This gives a meaningful
+# cross-source confirmation signal with the current source set.
+_URL_SOURCE_NAME: list[tuple[str, str]] = [
+    ("youtube.com",          "YouTube"),
+    ("youtu.be",             "YouTube"),
+    ("news.ycombinator.com", "Hacker News"),
+    ("substack.com",         "Substack"),
+    ("arxiv.org",            "arXiv"),
+    ("huggingface.co",       "Hugging Face"),
+    ("paperswithcode.com",   "Papers With Code"),
+    ("github.com",           "GitHub"),
+    ("openai.com",           "OpenAI"),
+    ("anthropic.com",        "Anthropic"),
+]
+
+# Source type name → class (from run summary section).
+_SOURCE_TYPE_CLASS: dict[str, str] = {
+    "youtube":    "practitioner",
+    "hacker news":"practitioner",
+    "blogs/rss":  "practitioner",
+    "substack":   "media",
+    "rss":        "practitioner",
+}
 
 
-# ── Record extraction ────────────────────────────────────────────────
+# ── Parsers ──────────────────────────────────────────────────────────
 
 
-def _build_extraction_prompt(digest_text: str) -> str:
-    return f"""You are a structured data extractor for AI/ML research trend analysis.
-
-Given the digest text below, extract a canonical record for each distinct item mentioned.
-
-For each item output one JSON object per line (JSON-lines format), no markdown:
-{{"url":"...","title":"...","claim":"one sentence","evidence_type":"experiment|benchmark|anecdote|announcement|analysis|unknown","domain":"multimodal|agents|infra|reasoning|safety|evals|data|hardware|general|unknown","technique":"short phrase or empty","impact_vector":"cost|latency|capability|safety|adoption|unknown","actors":["name1"],"source_class":"primary|operator|practitioner|media|market"}}
-
-Rules:
-- claim: the single most important assertion in the item (≤ 25 words)
-- evidence_type: how the claim is supported
-- domain: primary AI/ML domain affected
-- technique: specific method (e.g. "RLHF", "LoRA", "RAG") or empty string
-- impact_vector: primary dimension of change
-- actors: organisations or models mentioned
-- source_class: classification of the original source
-
-Digest:
----
-{digest_text[:8000]}
----
-"""
+def _infer_source_class(url: str) -> str:
+    """Infer source class from URL domain without any API call."""
+    url_lower = url.lower()
+    for pattern, cls in _URL_SOURCE_CLASS:
+        if pattern in url_lower:
+            return cls
+    return "practitioner"
 
 
-def extract_records_from_digest(
-    digest_text: str,
-    default_date: str = "",
-) -> list[CanonicalRecord]:
-    """Call Gemini to extract canonical records from a plain-text digest."""
-    if not digest_text.strip():
+def _infer_source_name(url: str) -> str:
+    """Infer a human-readable source name from URL for diversity counting."""
+    url_lower = url.lower()
+    for pattern, name in _URL_SOURCE_NAME:
+        if pattern in url_lower:
+            return name
+    return "Other"
+
+
+def _parse_item_themes_section(text: str) -> dict[str, str]:
+    """Extract url → theme from '## Item Themes' section.
+
+    Format:
+        ## Item Themes
+        - https://... | Theme Label
+    """
+    themes: dict[str, str] = {}
+    pattern = re.compile(
+        r"(?:^|\n)\s*##\s*Item Themes\s*\n(.*?)(?=\n##\s|\n[─═]{4,}|\Z)",
+        re.DOTALL | re.IGNORECASE,
+    )
+    match = pattern.search(text)
+    if not match:
+        return themes
+    for line in match.group(1).splitlines():
+        stripped = line.strip().lstrip("- ").strip()
+        if " | " in stripped:
+            url_part, theme_part = stripped.split(" | ", 1)
+            url_part = url_part.strip()
+            theme_part = theme_part.strip()
+            if url_part and theme_part:
+                themes[url_part] = normalize_theme_name(theme_part)
+    return themes
+
+
+def _parse_inline_themes(text: str) -> list[str]:
+    """Extract theme labels from inline 'Theme: X' format.
+
+    Format:
+        Theme: Multi-Agent Systems
+        Summary: ...
+    """
+    return [
+        normalize_theme_name(m.group(1).strip())
+        for m in re.finditer(r"^Theme:\s*(.+)$", text, re.MULTILINE)
+    ]
+
+
+def _parse_run_summary_sources(text: str) -> dict[str, int]:
+    """Extract source type → item count from the Run summary block.
+
+    Format:
+        Sources fetched:
+          YouTube: 3 new item(s)
+          Hacker News: 5 new item(s)
+    """
+    sources: dict[str, int] = {}
+    in_sources = False
+    for line in text.splitlines():
+        if "Sources fetched:" in line:
+            in_sources = True
+            continue
+        if in_sources:
+            m = re.match(r"\s+([^:]+):\s*(\d+)\s+new item", line, re.IGNORECASE)
+            if m:
+                sources[m.group(1).strip()] = int(m.group(2))
+            elif line.strip() and not line.startswith(" "):
+                break
+    return sources
+
+
+def parse_history_file(
+    date_str: str, text: str
+) -> tuple[list[tuple[str, str, str]], dict[str, int]]:
+    """Parse a history file into (theme_entries, source_counts).
+
+    theme_entries: list of (theme_name, source_class, source_name).
+    source_counts: dict of source_type_name → count from the run summary.
+    """
+    if "AI summarisation failed" in text and "## Item Themes" not in text:
+        return [], _parse_run_summary_sources(text)
+
+    source_counts = _parse_run_summary_sources(text)
+    entries: list[tuple[str, str, str]] = []
+
+    # Prefer structured ## Item Themes section (newest prompt format)
+    structured = _parse_item_themes_section(text)
+    if structured:
+        for url, theme in structured.items():
+            cls  = _infer_source_class(url)
+            name = _infer_source_name(url)
+            entries.append((theme, cls, name))
+        return entries, source_counts
+
+    # Fall back to inline Theme: labels (older prompt format)
+    inline_themes = _parse_inline_themes(text)
+    if inline_themes:
+        yt_count  = source_counts.get("YouTube", 0)
+        sub_count = source_counts.get("Substack", 0) + source_counts.get("Blogs/RSS", 0)
+        total     = sum(source_counts.values()) or 1
+
+        for i, theme in enumerate(inline_themes):
+            cum = i % total if total > 0 else 0
+            if cum < yt_count:
+                cls, name = "practitioner", "YouTube"
+            elif cum < yt_count + sub_count:
+                cls, name = "media", "Substack"
+            else:
+                cls, name = "practitioner", "Hacker News"
+            entries.append((theme, cls, name))
+        return entries, source_counts
+
+    return [], source_counts
+
+
+# ── Aggregation ──────────────────────────────────────────────────────
+
+
+def _dates_in_window(all_dates: list[str], window_days: int) -> list[str]:
+    """Return dates within the last *window_days* of the most recent date."""
+    if not all_dates:
         return []
-
-    client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY", ""))
-    prompt = _build_extraction_prompt(digest_text)
-
-    try:
-        response = client.models.generate_content(
-            model="gemini-2.5-flash",
-            contents=prompt,
-            config=types.GenerateContentConfig(max_output_tokens=4096),
-        )
-        raw = response.text.strip()
-    except genai_errors.APIError as exc:
-        logger.warning("Gemini extraction failed: %s", exc)
-        return []
-
-    records: list[CanonicalRecord] = []
-    for line in raw.splitlines():
-        line = line.strip()
-        if not line or not line.startswith("{"):
-            continue
-        try:
-            data = json.loads(line)
-        except json.JSONDecodeError:
-            continue
-        if not data.get("url") and not data.get("title"):
-            continue
-        rec = CanonicalRecord(
-            url=data.get("url", ""),
-            title=data.get("title", ""),
-            source_class=data.get("source_class", "practitioner"),
-            claim=data.get("claim", ""),
-            evidence_type=data.get("evidence_type", "unknown"),
-            domain=data.get("domain", "unknown"),
-            technique=data.get("technique", ""),
-            impact_vector=data.get("impact_vector", "unknown"),
-            actors=data.get("actors", []),
-            date=default_date,
-        )
-        rec.credibility_score = score_credibility(rec)
-        rec.hype_risk = detect_hype(rec)
-        records.append(rec)
-
-    logger.info("Extracted %d canonical records from digest", len(records))
-    return records
-
-
-# ── History loading ──────────────────────────────────────────────────
-
-
-def load_history_digests(history_dir: Path, max_files: int = _MAX_HISTORY_FILES) -> list[tuple[str, str]]:
-    """Return list of (date_str, digest_text) pairs, most recent first."""
-    txt_files = sorted(history_dir.glob("*.txt"), reverse=True)[:max_files]
+    sorted_dates = sorted(all_dates, reverse=True)
+    cutoff = (
+        datetime.strptime(sorted_dates[0], "%Y-%m-%d").date()
+        if sorted_dates else date.today()
+    )
     result = []
-    for f in txt_files:
-        date_str = f.stem  # filename is YYYY-MM-DD
-        try:
-            text = f.read_text(encoding="utf-8")
-        except OSError as exc:
-            logger.warning("Could not read %s: %s", f, exc)
-            continue
-        result.append((date_str, text))
+    for d in sorted_dates:
+        delta = (cutoff - datetime.strptime(d, "%Y-%m-%d").date()).days
+        if delta <= window_days:
+            result.append(d)
     return result
 
 
-# ── Existing state loading / saving ──────────────────────────────────
+def build_trend_metrics(
+    history: list[tuple[str, str, str, str]],  # (date_str, theme, source_class, source_name)
+    existing_metrics: dict[str, TrendMetrics],
+    today_str: str,
+) -> list[TrendMetrics]:
+    """Compute TrendMetrics for every theme from the full history."""
+
+    # Group by theme: store (date, source_class, source_name) tuples
+    theme_entries: dict[str, list[tuple[str, str, str]]] = defaultdict(list)
+    for date_str, theme, cls, name in history:
+        theme_entries[theme].append((date_str, cls, name))
+
+    all_dates = sorted({d for d, _, _, _ in history}, reverse=True)
+
+    # Span of history in weeks (used for per-week volume normalisation)
+    if len(all_dates) >= 2:
+        oldest = datetime.strptime(all_dates[-1], "%Y-%m-%d").date()
+        newest = datetime.strptime(all_dates[0],  "%Y-%m-%d").date()
+        span_weeks = max(1.0, (newest - oldest).days / 7)
+    else:
+        span_weeks = 1.0
+
+    # Recent and previous windows for velocity
+    recent_dates = set(_dates_in_window(all_dates, _VOLUME_WINDOW_DAYS))
+    prev_dates   = set(_dates_in_window(all_dates, _VOLUME_WINDOW_DAYS * 2)) - recent_dates
+
+    metrics_list: list[TrendMetrics] = []
+
+    for theme, entries in theme_entries.items():
+        if len(entries) < _MIN_THEME_APPEARANCES:
+            continue
+
+        existing = existing_metrics.get(theme, TrendMetrics(theme=theme))
+
+        # Volume: average weekly appearance rate across full history
+        volume = round(len(entries) / span_weeks, 2)
+
+        # Velocity: recent window count vs previous window count (relative)
+        recent_count = sum(1 for d, _, _ in entries if d in recent_dates)
+        prev_count   = sum(1 for d, _, _ in entries if d in prev_dates)
+        vel_prev = prev_count or max(1, len(entries) - recent_count)
+        velocity = round((recent_count - vel_prev) / vel_prev, 4)
+
+        # Source class distribution (for hype risk)
+        sc_counter: Counter = Counter(cls for _, cls, _ in entries)
+        source_classes = [cls for cls, _ in sc_counter.most_common()]
+
+        # Diversity: count of distinct source *names* (YouTube ≠ Hacker News,
+        # even though both are "practitioner").  This gives a meaningful
+        # cross-source confirmation signal with the current source set.
+        source_name_counter: Counter = Counter(name for _, _, name in entries)
+        diversity = len(source_name_counter)
+
+        # Hype risk: fraction of media-class entries
+        media_count = sc_counter.get("media", 0)
+        hype_risk = round(media_count / max(len(entries), 1), 3)
+
+        # Confidence: diversity and volume relative to history span
+        diversity_factor = min(1.0, diversity / 3)
+        volume_factor    = min(1.0, volume / 3)
+        confidence = round(diversity_factor * 0.5 + volume_factor * 0.5, 3)
+
+        # Rolling history snapshot
+        prev_history = existing.history or []
+        if not prev_history or prev_history[-1].get("date") != today_str:
+            prev_history = prev_history[-29:]
+            prev_history.append({
+                "date": today_str,
+                "volume": volume,
+                "state": existing.state,
+            })
+
+        stability = compute_stability(prev_history)
+        last_seen = max((d for d, _, _ in entries), default=today_str)
+
+        m = TrendMetrics(
+            theme=theme,
+            domain=existing.domain or "unknown",
+            definition=existing.definition,
+            state="unknown",
+            confidence=confidence,
+            volume=volume,
+            velocity=velocity,
+            diversity=diversity,
+            adoption_proxy=0.0,
+            stability=stability,
+            hype_risk=hype_risk,
+            item_count=len(entries),
+            last_seen=last_seen,
+            source_classes=source_classes,
+            source_class_counts=dict(sc_counter),
+            history=prev_history,
+        )
+        m.state = classify_state(m)
+
+        if m.history:
+            m.history[-1]["state"] = m.state
+
+        metrics_list.append(m)
+
+    metrics_list.sort(key=lambda m: m.volume, reverse=True)
+    return metrics_list
 
 
-def load_existing_data(docs_data_dir: Path) -> tuple[list[TrendMetrics], list[ThemeNode], list[GraphEdge]]:
-    """Load previously written trends.json, themes.json, graph.json."""
-    trends: list[TrendMetrics] = []
-    themes: list[ThemeNode] = []
-    edges: list[GraphEdge] = []
+# ── Existing state loading ────────────────────────────────────────────
 
+
+def _load_existing_metrics(docs_data_dir: Path) -> dict[str, TrendMetrics]:
     trends_path = docs_data_dir / "trends.json"
-    if trends_path.exists():
-        try:
-            raw = json.loads(trends_path.read_text())
-            for t in raw.get("trends", []):
-                m = TrendMetrics(
-                    theme=t.get("theme", ""),
+    if not trends_path.exists():
+        return {}
+    try:
+        raw = json.loads(trends_path.read_text())
+        result = {}
+        for t in raw.get("trends", []):
+            name = t.get("theme", "")
+            if name:
+                result[name] = TrendMetrics(
+                    theme=name,
                     domain=t.get("domain", "unknown"),
                     definition=t.get("definition", ""),
                     state=t.get("state", "unknown"),
@@ -168,260 +364,194 @@ def load_existing_data(docs_data_dir: Path) -> tuple[list[TrendMetrics], list[Th
                     source_class_counts=t.get("source_class_counts", {}),
                     history=t.get("history", []),
                 )
-                trends.append(m)
-        except (json.JSONDecodeError, KeyError) as exc:
-            logger.warning("Could not load trends.json: %s", exc)
-
-    themes_path = docs_data_dir / "themes.json"
-    if themes_path.exists():
-        try:
-            raw = json.loads(themes_path.read_text())
-            for t in raw.get("themes", []):
-                themes.append(ThemeNode(
-                    name=t.get("name", ""),
-                    domain=t.get("domain", "unknown"),
-                    definition=t.get("definition", ""),
-                    state=t.get("state", "unknown"),
-                    item_count=t.get("item_count", 0),
-                    last_seen=t.get("last_seen", ""),
-                    source_classes=t.get("source_classes", []),
-                    source_class_counts=t.get("source_class_counts", {}),
-                    hype_risk=t.get("hype_risk", 0.0),
-                ))
-        except (json.JSONDecodeError, KeyError) as exc:
-            logger.warning("Could not load themes.json: %s", exc)
-
-    return trends, themes, edges
-
-
-# ── Trend metrics computation ─────────────────────────────────────────
-
-
-def compute_theme_metrics(
-    theme_name: str,
-    records_for_theme: list[CanonicalRecord],
-    existing: TrendMetrics | None,
-    today_str: str,
-    theme_def: str = "",
-    theme_domain: str = "unknown",
-) -> TrendMetrics:
-    """Compute updated TrendMetrics for a single theme from today's records."""
-    metrics = existing or TrendMetrics(theme=theme_name)
-
-    # Update definition and domain if we have new data
-    if theme_def:
-        metrics.definition = theme_def
-    if theme_domain and theme_domain != "unknown":
-        metrics.domain = theme_domain
-
-    # Credibility-weighted volume for today
-    today_volume = sum(r.credibility_score for r in records_for_theme)
-
-    # Source class diversity
-    sc_counter: Counter = Counter(r.source_class for r in records_for_theme)
-    metrics.source_class_counts = dict(sc_counter)
-    metrics.source_classes = [cls for cls, _ in sc_counter.most_common()]
-    metrics.diversity = len(sc_counter)
-
-    # Hype risk: average across items
-    if records_for_theme:
-        metrics.hype_risk = round(
-            sum(r.hype_risk for r in records_for_theme) / len(records_for_theme), 3
-        )
-
-    metrics.item_count = len(records_for_theme)
-    metrics.last_seen = today_str
-
-    # Confidence: based on cross-class support (diversity) and credibility
-    avg_cred = (sum(r.credibility_score for r in records_for_theme) / len(records_for_theme)
-                if records_for_theme else 0.5)
-    diversity_factor = min(1.0, metrics.diversity / 3)
-    metrics.confidence = round(avg_cred * 0.6 + diversity_factor * 0.4, 3)
-
-    # Update rolling history and state via trend_state module
-    metrics = update_metrics(metrics, today_volume, today_str)
-
-    return metrics
-
-
-# ── JSON serialization ───────────────────────────────────────────────
-
-
-def _safe_asdict(obj) -> dict:
-    """Convert a dataclass to dict, handling nested lists of dataclasses."""
-    d = asdict(obj)
-    return d
+        return result
+    except (json.JSONDecodeError, KeyError) as exc:
+        logger.warning("Could not load existing trends.json: %s", exc)
+        return {}
 
 
 # ── Main pipeline ─────────────────────────────────────────────────────
 
 
-def run(
-    docs_data_dir: Path,
-    history_dir: Path,
-    dry_run: bool = False,
-) -> None:
-    """Run the trend analysis pipeline and write docs/data/*.json."""
+def run(docs_data_dir: Path, history_dir: Path, dry_run: bool = False) -> None:
     today_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-    now_iso = datetime.now(timezone.utc).isoformat()
+    now_iso   = datetime.now(timezone.utc).isoformat()
 
-    logger.info("Trend analysis: loading history from %s", history_dir)
-    history = load_history_digests(history_dir)
-    if not history:
-        logger.warning("No history files found — skipping trend analysis")
+    # ── 1. Load and parse all history files ──────────────────────────
+    txt_files = sorted(history_dir.glob("*.txt"), reverse=True)
+    if not txt_files:
+        logger.warning("No history files found in %s — nothing to process", history_dir)
         return
 
-    logger.info("Loaded %d history files", len(history))
+    logger.info("Parsing %d history files from %s", len(txt_files), history_dir)
 
-    # Load existing state
-    existing_trends, existing_themes, _ = load_existing_data(docs_data_dir)
-    existing_trend_map = {m.theme: m for m in existing_trends}
-    existing_theme_names = [t.name for t in existing_themes]
+    all_entries: list[tuple[str, str, str, str]] = []  # (date_str, theme, source_class, source_name)
+    all_source_counts: Counter = Counter()         # source_type_name → total count
 
-    # Extract canonical records from all history digests
-    all_records: list[CanonicalRecord] = []
-    # Only process the most recent N days for the actual extraction to bound cost
-    for date_str, digest_text in history[:14]:
-        records = extract_records_from_digest(digest_text, default_date=date_str)
-        all_records.extend(records)
-
-    if not all_records:
-        logger.warning("No canonical records extracted — skipping theme clustering")
-        return
-
-    logger.info("Extracted %d canonical records total", len(all_records))
-
-    # Cluster into themes
-    url_to_theme, definitions, relationships = cluster_themes(all_records, existing_theme_names)
-
-    # Group records by theme for this run
-    theme_records: dict[str, list[CanonicalRecord]] = {}
-    for rec in all_records:
-        theme = url_to_theme.get(rec.url, normalize_theme_name(rec.domain or "General"))
-        theme_records.setdefault(theme, []).append(rec)
-
-    # Build theme definitions lookup
-    def_map = {d["theme"]: d for d in definitions}
-
-    # Compute trend metrics per theme
-    updated_metrics: list[TrendMetrics] = []
-    for theme_name, recs in sorted(theme_records.items()):
-        if len(recs) < _MIN_ITEMS_FOR_TREND:
+    for f in txt_files:
+        date_str = f.stem  # YYYY-MM-DD
+        try:
+            text = f.read_text(encoding="utf-8")
+        except OSError as exc:
+            logger.warning("Cannot read %s: %s", f, exc)
             continue
-        defn = def_map.get(theme_name, {})
-        existing = existing_trend_map.get(theme_name)
-        metrics = compute_theme_metrics(
-            theme_name=theme_name,
-            records_for_theme=recs,
-            existing=existing,
-            today_str=today_str,
-            theme_def=defn.get("definition", ""),
-            theme_domain=defn.get("domain", "unknown"),
+
+        entries, src_counts = parse_history_file(date_str, text)
+        for theme, cls, name in entries:
+            all_entries.append((date_str, theme, cls, name))
+        for src, count in src_counts.items():
+            all_source_counts[src.lower()] += count
+
+    logger.info("Extracted %d theme-day entries across %d files", len(all_entries), len(txt_files))
+
+    # ── 2. Load existing rolling state ───────────────────────────────
+    existing = _load_existing_metrics(docs_data_dir)
+
+    # ── 3. Compute trend metrics ──────────────────────────────────────
+    metrics = build_trend_metrics(all_entries, existing, today_str)
+    logger.info("Computed metrics for %d themes", len(metrics))
+
+    # ── 4. Build theme nodes (for themes tab) ─────────────────────────
+    theme_nodes: list[ThemeNode] = [
+        ThemeNode(
+            name=m.theme,
+            domain=m.domain,
+            definition=m.definition,
+            state=m.state,
+            item_count=m.item_count,
+            last_seen=m.last_seen,
+            source_classes=m.source_classes,
+            source_class_counts=m.source_class_counts,
+            hype_risk=m.hype_risk,
         )
-        updated_metrics.append(metrics)
+        for m in metrics
+    ]
 
-    # Sort by credibility-weighted volume desc
-    updated_metrics.sort(key=lambda m: m.volume, reverse=True)
-
-    # Build theme nodes
-    nodes = build_theme_nodes(all_records, url_to_theme, definitions, existing_themes)
-    for node in nodes:
-        # Sync state from metrics
-        m = next((m for m in updated_metrics if m.theme == node.name), None)
-        if m:
-            node.state = m.state
-            node.hype_risk = m.hype_risk
-            node.item_count = m.item_count
-
-    # Build graph edges
-    edges = build_graph_edges(relationships)
-
-    # Source class coverage stats
-    all_sc: Counter = Counter(r.source_class for r in all_records)
+    # ── 5. Source class coverage ──────────────────────────────────────
     source_class_info: dict[str, dict] = {}
+    class_source_names: dict[str, set] = defaultdict(set)
+    for src_lower, _ in all_source_counts.items():
+        cls = _SOURCE_TYPE_CLASS.get(src_lower, "practitioner")
+        class_source_names[cls].add(src_lower.title())
+
     for cls in ("primary", "operator", "practitioner", "media", "market"):
+        total = sum(
+            count for src, count in all_source_counts.items()
+            if _SOURCE_TYPE_CLASS.get(src, "practitioner") == cls
+        )
         source_class_info[cls] = {
-            "count": all_sc.get(cls, 0),
-            "sources": list({r.source_name for r in all_records if r.source_class == cls}),
+            "count": total,
+            "sources": sorted(class_source_names.get(cls, [])),
         }
 
-    # ── Write output ─────────────────────────────────────────────────
+    # ── 6. Simple co-occurrence graph (no API) ────────────────────────
+    # Themes that appear on the same day → compositional edge candidate
+    dates_per_theme: dict[str, set] = defaultdict(set)
+    for date_str, theme, _, _name in all_entries:
+        dates_per_theme[theme].add(date_str)
 
+    top_themes = {m.theme for m in metrics[:15]}
+    edges: list[dict] = []
+    theme_list = [m.theme for m in metrics if m.theme in top_themes]
+    for i, t1 in enumerate(theme_list):
+        for t2 in theme_list[i + 1:]:
+            shared = len(dates_per_theme[t1] & dates_per_theme[t2])
+            if shared >= 3:
+                edges.append({
+                    "source": t1, "target": t2,
+                    "rel_type": "compositional",
+                    "weight": shared,
+                })
+    edges.sort(key=lambda e: e["weight"], reverse=True)
+
+    # ── 7. Write output ───────────────────────────────────────────────
     if dry_run:
-        logger.info("[dry-run] Would write %d themes, %d trend metrics to %s",
-                    len(nodes), len(updated_metrics), docs_data_dir)
+        logger.info(
+            "[dry-run] Would write %d themes, %d metrics, %d graph edges to %s",
+            len(theme_nodes), len(metrics), len(edges), docs_data_dir,
+        )
+        _preview(metrics[:5])
         return
 
     docs_data_dir.mkdir(parents=True, exist_ok=True)
 
-    # meta.json
-    meta = {
+    (docs_data_dir / "meta.json").write_text(json.dumps({
         "last_run": now_iso,
         "run_id": today_str,
-        "item_count": len(all_records),
-        "theme_count": len(updated_metrics),
-        "source_class_counts": dict(all_sc),
-    }
-    (docs_data_dir / "meta.json").write_text(json.dumps(meta, indent=2))
+        "item_count": len(all_entries),
+        "theme_count": len(metrics),
+        "source_class_counts": dict(all_source_counts),
+    }, indent=2))
 
-    # trends.json
-    trends_out = {
+    (docs_data_dir / "trends.json").write_text(json.dumps({
         "generated": now_iso,
-        "trends": [_safe_asdict(m) for m in updated_metrics],
-    }
-    (docs_data_dir / "trends.json").write_text(json.dumps(trends_out, indent=2))
+        "trends": [asdict(m) for m in metrics],
+    }, indent=2))
 
-    # themes.json
-    themes_out = {
+    (docs_data_dir / "themes.json").write_text(json.dumps({
         "generated": now_iso,
-        "themes": [_safe_asdict(n) for n in nodes],
-    }
-    (docs_data_dir / "themes.json").write_text(json.dumps(themes_out, indent=2))
+        "themes": [asdict(n) for n in theme_nodes],
+    }, indent=2))
 
-    # graph.json
-    graph_out = {
+    (docs_data_dir / "graph.json").write_text(json.dumps({
         "generated": now_iso,
-        "nodes": [{"id": n.name, "domain": n.domain, "state": n.state, "volume": m.volume if (m := next((x for x in updated_metrics if x.theme == n.name), None)) else 0} for n in nodes],
-        "edges": [_safe_asdict(e) for e in edges],
-    }
-    (docs_data_dir / "graph.json").write_text(json.dumps(graph_out, indent=2))
+        "nodes": [
+            {"id": m.theme, "domain": m.domain, "state": m.state, "volume": m.volume}
+            for m in metrics
+        ],
+        "edges": edges,
+    }, indent=2))
 
-    # items.json (last 30 days of records)
-    items_out = {
+    (docs_data_dir / "items.json").write_text(json.dumps({
         "generated": now_iso,
-        "items": [_safe_asdict(r) for r in all_records],
-    }
-    (docs_data_dir / "items.json").write_text(json.dumps(items_out, indent=2))
+        "items": [
+            {"date": d, "theme": t, "source_class": c, "source_name": n}
+            for d, t, c, n in all_entries
+        ],
+    }, indent=2))
 
-    # sources.json
-    sources_out = {
+    (docs_data_dir / "sources.json").write_text(json.dumps({
         "generated": now_iso,
         "classes": source_class_info,
-    }
-    (docs_data_dir / "sources.json").write_text(json.dumps(sources_out, indent=2))
+    }, indent=2))
 
     logger.info(
-        "Trend analysis complete: %d themes, %d metrics, %d edges written to %s",
-        len(nodes), len(updated_metrics), len(edges), docs_data_dir,
+        "Trend analysis complete: %d themes, %d graph edges → %s",
+        len(metrics), len(edges), docs_data_dir,
     )
+    _preview(metrics[:5])
 
 
-# ── CLI entry point ──────────────────────────────────────────────────
+def _preview(metrics: list[TrendMetrics]) -> None:
+    for m in metrics:
+        logger.info(
+            "  %-35s  state=%-10s  vol=%.1f  vel=%+.2f  div=%d  hype=%.0f%%",
+            m.theme, m.state, m.volume, m.velocity, m.diversity, m.hype_risk * 100,
+        )
+
+
+# ── CLI ───────────────────────────────────────────────────────────────
 
 
 def main(argv: list[str] | None = None) -> None:
-    parser = argparse.ArgumentParser(description="Trend analysis pipeline")
-    parser.add_argument("--docs", default="docs/data", help="Path to docs/data/ directory")
-    parser.add_argument("--history", default="history", help="Path to history/ directory")
-    parser.add_argument("--dry-run", action="store_true", help="Skip writing output files")
-    parser.add_argument("--debug", action="store_true", help="Enable debug logging")
+    parser = argparse.ArgumentParser(description="Trend analysis pipeline (no API required)")
+    parser.add_argument("--docs",    default="docs/data", help="Path to docs/data/ directory")
+    parser.add_argument("--history", default="history",   help="Path to history/ directory")
+    parser.add_argument("--dry-run", action="store_true", help="Preview output without writing files")
+    parser.add_argument("--debug",   action="store_true", help="Enable debug logging")
     args = parser.parse_args(argv)
 
     setup_logging(debug=args.debug)
 
     repo_root = Path(__file__).parent.parent
-    docs_data_dir = Path(args.docs) if Path(args.docs).is_absolute() else repo_root / args.docs
-    history_dir = Path(args.history) if Path(args.history).is_absolute() else repo_root / args.history
+    docs_data_dir = (
+        Path(args.docs) if Path(args.docs).is_absolute()
+        else repo_root / args.docs
+    )
+    history_dir = (
+        Path(args.history) if Path(args.history).is_absolute()
+        else repo_root / args.history
+    )
 
     if not history_dir.exists():
         logger.error("History directory not found: %s", history_dir)

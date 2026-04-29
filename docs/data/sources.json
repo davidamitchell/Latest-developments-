@@ -1,10 +1,29 @@
 {
-  "generated": null,
+  "generated": "2026-04-29T09:05:56.523646+00:00",
   "classes": {
-    "primary":      {"count": 0, "sources": []},
-    "operator":     {"count": 0, "sources": []},
-    "practitioner": {"count": 0, "sources": []},
-    "media":        {"count": 0, "sources": []},
-    "market":       {"count": 0, "sources": []}
+    "primary": {
+      "count": 0,
+      "sources": []
+    },
+    "operator": {
+      "count": 0,
+      "sources": []
+    },
+    "practitioner": {
+      "count": 393,
+      "sources": [
+        "Blogs/Rss",
+        "Hacker News",
+        "Youtube"
+      ]
+    },
+    "media": {
+      "count": 0,
+      "sources": []
+    },
+    "market": {
+      "count": 0,
+      "sources": []
+    }
   }
 }

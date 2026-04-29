@@ -1,7 +1,11 @@
 {
-  "last_run": null,
-  "run_id": null,
-  "item_count": 0,
-  "theme_count": 0,
-  "source_class_counts": {}
+  "last_run": "2026-04-29T09:05:56.523646+00:00",
+  "run_id": "2026-04-29",
+  "item_count": 178,
+  "theme_count": 10,
+  "source_class_counts": {
+    "youtube": 153,
+    "blogs/rss": 0,
+    "hacker news": 240
+  }
 }

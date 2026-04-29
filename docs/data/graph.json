@@ -1,5 +1,66 @@
 {
-  "generated": null,
-  "nodes": [],
+  "generated": "2026-04-29T09:05:56.523646+00:00",
+  "nodes": [
+    {
+      "id": "AI Safety & Alignment",
+      "domain": "unknown",
+      "state": "declining",
+      "volume": 0.52
+    },
+    {
+      "id": "Ai Workforce Impact",
+      "domain": "unknown",
+      "state": "declining",
+      "volume": 0.52
+    },
+    {
+      "id": "Local Llm Inference",
+      "domain": "unknown",
+      "state": "declining",
+      "volume": 0.39
+    },
+    {
+      "id": "Ai Business Strategy",
+      "domain": "unknown",
+      "state": "unknown",
+      "volume": 0.26
+    },
+    {
+      "id": "Ai Infrastructure Strategy",
+      "domain": "unknown",
+      "state": "declining",
+      "volume": 0.26
+    },
+    {
+      "id": "Advanced Llm Capabilities",
+      "domain": "unknown",
+      "state": "declining",
+      "volume": 0.26
+    },
+    {
+      "id": "Local Llm Applications",
+      "domain": "unknown",
+      "state": "declining",
+      "volume": 0.26
+    },
+    {
+      "id": "Supply Chain Security",
+      "domain": "unknown",
+      "state": "declining",
+      "volume": 0.26
+    },
+    {
+      "id": "Ai Pace Impact",
+      "domain": "unknown",
+      "state": "declining",
+      "volume": 0.26
+    },
+    {
+      "id": "Agent Reliability",
+      "domain": "unknown",
+      "state": "declining",
+      "volume": 0.26
+    }
+  ],
   "edges": []
 }

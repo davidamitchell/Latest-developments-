@@ -1,6 +1,6 @@
 # Progress
 
-Last updated: 2026-03-07
+Last updated: 2026-04-29
 
 ---
 
@@ -28,6 +28,43 @@ Last updated: 2026-03-07
 ---
 
 ## Work Log
+
+### 2026-04-29 — Session 15
+
+**Branch:** `claude/trend-detection-system-3StIE`
+
+**Completed:**
+- **GitHub Pages trend intelligence site** (`docs/index.html`, `docs/css/style.css`, `docs/js/app.js`, `docs/js/charts.js`): 4-tab dashboard (Trends / Themes / Sources / Insights); chart wrappers for trend phase chart, hype split panels, source-class heatmap; degrades gracefully when data is empty.
+- **`src/models.py`**: `CanonicalRecord`, `TrendMetrics`, `ThemeNode`, `GraphEdge` dataclasses.
+- **`src/credibility.py`**: 5-axis credibility scoring (proximity, incentive, reproducibility, adoption, time_decay); hype detection.
+- **`src/themes.py`**: synonym normalization map (~30 entries); `cluster_themes()` and `build_graph_edges()` — available for optional Gemini-powered enhancement later.
+- **`src/trend_state.py`**: `classify_state()` state machine (emerging/scaling/mature/declining); `compute_velocity()`, `compute_stability()`, `update_metrics()`.
+- **`src/trends.py`**: No-API-key trend pipeline. Parses `## Item Themes` (15 files), inline `Theme:` labels (45 files), and plain-link fallbacks (12 files) from `history/*.txt`. Computes per-week volume, velocity, diversity (by source name not source class), hype risk, and trend state. Writes `docs/data/*.json`. Runs in seconds from `python -m src.trends`.
+- **`src/fetchers/__init__.py`**: `source_class` field added to `FetchedItem` (default: `"practitioner"`).
+- **Fetchers updated**: YouTube/HN → `"practitioner"`, Substack → `"media"`, RSS → configurable via `config/sources.yaml`.
+- **`src/config.py`**: `source_class` field on `RSSFeed`.
+- **`.github/workflows/daily-digest.yml`**: Added "Run trend analysis" step; commit step now also stages `docs/data/`.
+- **`docs/adr/0016-github-pages-trend-intelligence-site.md`**: ADR documenting Pages architecture and data contract.
+- `BACKLOG.md` extended with Epics 10–17.
+- `CHANGELOG.md` updated.
+
+**Key design decisions:**
+- Trend pipeline reads existing history files rather than re-calling Gemini. All structured data (`## Item Themes`, `Theme:` labels) was already written by the summariser — no additional API cost or key requirement.
+- Diversity is measured by distinct source *names* (YouTube ≠ Hacker News) not source *classes* (both are "practitioner"). This gives a meaningful cross-source signal with the current source set.
+- Volume is per-week average over full history span, not a windowed count. Windowed count near-zeroed everything because recent Gemini failures left recent history files without theme sections.
+- Co-occurrence graph edges (themes sharing ≥3 dates) are computed without API; more expressive relationship types (causal, competitive) deferred to Epic 13 with optional Gemini enhancement.
+
+**Mini-Retro:**
+
+1. **Did the process work?** Planning was thorough. Implementation was fast once the no-API approach was clear. The site, Python modules, and data pipeline all work end-to-end.
+
+2. **What slowed down or went wrong?** The original `src/trends.py` called Gemini for record extraction and theme clustering — redundant, since the history files already contain AI-extracted themes, and blocked without a local API key. This was caught during execution, not design. Root cause: I designed for the ideal data model (canonical records) without checking what data already existed in the repo.
+
+3. **What single change would prevent this next time?** Before designing any pipeline step that reads existing data, inspect the data format first. A 5-minute `head history/*.txt` check would have made the no-API approach obvious from the start. Add to working methodology: "Check what data already exists before planning extraction."
+
+4. **Is this a pattern?** Yes — assuming external dependencies are available (API key) without checking the local environment. The repo instructions say credentials come from GitHub Secrets; locally they don't exist. This should have been the first constraint checked, not discovered at run time.
+
+---
 
 ### 2026-03-02 — Session 14
 
