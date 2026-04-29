@@ -7,6 +7,16 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Added
+- **Dark mode GitHub Pages site**: converted `docs/` dashboard to dark mode using IBM Plex Mono font and Research site palette (`#0d0d0d` bg, `#00C3A5` teal, `#E8A1A8` dusk, `#252b33` borders)
+- `learnings.md`: session notes capturing patterns, friction, and root causes
+
+### Fixed
+- **CodeQL unused imports** removed from `src/credibility.py` (`SourceClass`), `src/fetchers/arxiv.py` (`UTC`), `src/models.py` (`datetime`), `src/trends.py` (`compute_velocity`), `tests/test_fetchers_arxiv.py` (`UTC`, `datetime`, `pytest`)
+- **CodeQL unused globals** removed from `src/fetchers/arxiv.py` (`_NS_ATOM`, `_ARXIV_NS`)
+- **CodeQL empty except** in `src/fetchers/arxiv.py` replaced with `contextlib.suppress` and explanatory comment
+- Additional ruff lint fixes in `src/fetchers/huggingface.py`, `tests/test_fetchers_huggingface.py`, `src/summariser.py` (F401, SIM105, N806)
+
+### Added
 - **GitHub Pages trend intelligence site** (`docs/index.html`, `docs/css/`, `docs/js/`): static dashboard showing themes, trend states, hype vs substantiation split, and source-class coverage heatmap — auto-updated daily
 - **Trend analysis pipeline** (`src/trends.py`): reads history, extracts canonical records via Gemini, clusters themes, computes rolling trend metrics, writes structured JSON to `docs/data/`
 - **Canonical record model** (`src/models.py`): `CanonicalRecord`, `TrendMetrics`, `ThemeNode`, `GraphEdge` dataclasses

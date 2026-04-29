@@ -7,8 +7,9 @@ Source class: primary (model cards represent direct capability evidence).
 
 from __future__ import annotations
 
+import contextlib
 import logging
-from datetime import UTC, datetime
+from datetime import datetime
 
 import httpx
 
@@ -115,16 +116,14 @@ class HuggingFaceFetcher:
 
             content = "\n".join(content_parts)[:_MAX_CONTENT_CHARS]
 
-            # Parse lastModified date
+            # Parse lastModified date; non-standard formats silently skipped.
             pub_date: datetime | None = None
             last_modified = model.get("lastModified") or model.get("updatedAt")
             if last_modified:
-                try:
+                with contextlib.suppress(ValueError):
                     pub_date = datetime.fromisoformat(
                         last_modified.replace("Z", "+00:00")
                     )
-                except ValueError:
-                    pass
 
             # Title: use model_id, prettified
             title = model_id.split("/")[-1].replace("-", " ").replace("_", " ").title()

@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 import math
-from datetime import date, datetime, timezone
+from datetime import UTC, date, datetime
 
-from src.models import CanonicalRecord, SourceClass
+from src.models import CanonicalRecord
 
 # ── Proximity weights by source class ────────────────────────────────
 _PROXIMITY: dict[str, float] = {
@@ -58,7 +58,7 @@ def time_decay(date_str: str, reference: date | None = None) -> float:
         item_date = datetime.fromisoformat(date_str).date()
     except ValueError:
         return 0.8
-    ref = reference or datetime.now(timezone.utc).date()
+    ref = reference or datetime.now(UTC).date()
     age_days = max(0, (ref - item_date).days)
     return math.exp(-math.log(2) * age_days / _HALF_LIFE_DAYS)
 

@@ -1,20 +1,26 @@
 /* charts.js — Chart.js wrappers for the trend intelligence site.
-   All functions are no-ops if data is missing or empty. */
+   All functions are no-ops if data is missing or empty.
+   Dark mode palette matches css/style.css: bg #0d0d0d, teal #00C3A5, dusk #E8A1A8. */
 
 'use strict';
 
+// Dark-mode chart defaults applied globally
+Chart.defaults.color = '#666';
+Chart.defaults.borderColor = '#252b33';
+Chart.defaults.backgroundColor = '#0f1115';
+
 const CHART_COLORS = {
-  emerging:  'rgba(255, 193,   7, 0.8)',
-  scaling:   'rgba( 74, 124,  89, 0.8)',
-  mature:    'rgba( 26,  92, 150, 0.8)',
-  declining: 'rgba(220,  53,  69, 0.8)',
+  emerging:  'rgba(245, 200,  66, 0.85)',
+  scaling:   'rgba(  0, 195, 165, 0.85)',
+  mature:    'rgba(100, 149, 237, 0.85)',
+  declining: 'rgba(232, 161, 168, 0.85)',
 };
 
 // Phase band thresholds in items/week (integer scale used by history snapshots)
 const PHASE_BANDS = [
-  { label: 'Low activity',  yMin: 0, yMax: 2,  color: 'rgba(255,243,205,0.3)' },
-  { label: 'Active',        yMin: 2, yMax: 5,  color: 'rgba(209,240,209,0.3)' },
-  { label: 'High activity', yMin: 5, yMax: 10, color: 'rgba(204,229,255,0.3)' },
+  { label: 'Low activity',  yMin: 0, yMax: 2,  color: 'rgba(245,200,66,0.07)' },
+  { label: 'Active',        yMin: 2, yMax: 5,  color: 'rgba(0,195,165,0.07)' },
+  { label: 'High activity', yMin: 5, yMax: 10, color: 'rgba(100,149,237,0.07)' },
 ];
 
 let _trendChart  = null;
@@ -78,14 +84,14 @@ function renderTrendChart(canvasId, trends) {
       },
       scales: {
         x: {
-          ticks: { maxTicksLimit: 8, font: { size: 11 } },
-          grid: { color: 'rgba(0,0,0,0.05)' },
+          ticks: { maxTicksLimit: 8, font: { size: 11 }, color: '#666' },
+          grid: { color: 'rgba(255,255,255,0.05)' },
         },
         y: {
           min: 0,
-          ticks: { stepSize: 1, precision: 0 },
-          title: { display: true, text: 'Items per week', font: { size: 11 } },
-          grid: { color: 'rgba(0,0,0,0.05)' },
+          ticks: { stepSize: 1, precision: 0, color: '#666' },
+          title: { display: true, text: 'Items per week', font: { size: 11 }, color: '#666' },
+          grid: { color: 'rgba(255,255,255,0.05)' },
         },
       },
     },
@@ -143,8 +149,12 @@ function renderHypeCharts(evidenceCanvasId, mediaCanvasId, trends) {
     indexAxis: 'y',
     plugins: { legend: { display: false } },
     scales: {
-      x: { min: 0, grid: { color: 'rgba(0,0,0,0.05)' }, ticks: { font: { size: 11 } } },
-      y: { ticks: { font: { size: 12 } } },
+      x: {
+        min: 0,
+        grid: { color: 'rgba(255,255,255,0.05)' },
+        ticks: { font: { size: 11 }, color: '#666' },
+      },
+      y: { ticks: { font: { size: 12 }, color: '#999' } },
     },
   };
 
@@ -154,8 +164,8 @@ function renderHypeCharts(evidenceCanvasId, mediaCanvasId, trends) {
       labels,
       datasets: [{
         data: evidenceScores,
-        backgroundColor: 'rgba(74,124,89,0.7)',
-        borderColor: '#4a7c59',
+        backgroundColor: 'rgba(0,195,165,0.5)',
+        borderColor: '#00C3A5',
         borderWidth: 1,
       }],
     },
@@ -168,8 +178,8 @@ function renderHypeCharts(evidenceCanvasId, mediaCanvasId, trends) {
       labels,
       datasets: [{
         data: mediaScores,
-        backgroundColor: 'rgba(220,163,0,0.7)',
-        borderColor: '#d0a000',
+        backgroundColor: 'rgba(245,200,66,0.5)',
+        borderColor: '#f5c842',
         borderWidth: 1,
       }],
     },

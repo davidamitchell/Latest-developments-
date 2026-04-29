@@ -7,9 +7,10 @@ Source class: primary (closest to the claim; peer-submitted research).
 
 from __future__ import annotations
 
+import contextlib
 import logging
 import xml.etree.ElementTree as ET
-from datetime import UTC, datetime
+from datetime import datetime
 from email.utils import parsedate_to_datetime
 
 import httpx
@@ -18,9 +19,6 @@ from src.fetchers import FetchedItem
 from src.retry import with_backoff
 
 logger = logging.getLogger(__name__)
-
-_NS_ATOM = "http://www.w3.org/2005/Atom"
-_ARXIV_NS = "http://arxiv.org/schemas/atom"
 
 _FEED_URL = "https://rss.arxiv.org/rss/{category}"
 
@@ -96,14 +94,12 @@ class ArxivFetcher:
             description = (desc_el.text or "").strip() if desc_el is not None else ""
             content = description[:_MAX_CONTENT_CHARS]
 
-            # Parse pubDate if present
+            # Parse pubDate if present; non-standard formats are silently ignored.
             pub_date: datetime | None = None
             pubdate_el = item_el.find("pubDate")
             if pubdate_el is not None and pubdate_el.text:
-                try:
+                with contextlib.suppress(Exception):
                     pub_date = parsedate_to_datetime(pubdate_el.text.strip())
-                except Exception:
-                    pass
 
             item_id = f"arxiv:{norm_url}"
             items.append(FetchedItem(

@@ -629,10 +629,10 @@ def summarise(
     logger.info("Summarising %d item(s) with %s", len(items), config.model)
 
     client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY", ""))
-    _MAX_ATTEMPTS = 4
-    _BACKOFF_BASE = 15  # seconds — 15, 30, 60
+    max_attempts = 4
+    backoff_base = 15  # seconds — 15, 30, 60
     last_error: genai_errors.APIError | None = None
-    for attempt in range(1, _MAX_ATTEMPTS + 1):
+    for attempt in range(1, max_attempts + 1):
         try:
             response = client.models.generate_content(
                 model=config.model,
@@ -646,17 +646,17 @@ def summarise(
         except genai_errors.ServerError as e:
             # 5xx — transient overload or server error; retry with backoff
             last_error = e
-            if attempt < _MAX_ATTEMPTS:
-                wait = _BACKOFF_BASE * (2 ** (attempt - 1))
+            if attempt < max_attempts:
+                wait = backoff_base * (2 ** (attempt - 1))
                 logger.warning(
                     "Gemini server error (attempt %d/%d), retrying in %ds: %s",
-                    attempt, _MAX_ATTEMPTS, wait, e,
+                    attempt, max_attempts, wait, e,
                 )
                 time.sleep(wait)
             else:
                 logger.warning(
                     "Gemini server error after %d attempts — falling back to link digest: %s",
-                    _MAX_ATTEMPTS, e,
+                    max_attempts, e,
                 )
         except genai_errors.ClientError as e:
             # 4xx — bad key, quota, invalid request; no point retrying

@@ -18,7 +18,7 @@ import re
 import sys
 from collections import Counter, defaultdict
 from dataclasses import asdict
-from datetime import date, datetime, timezone
+from datetime import UTC, date, datetime
 from pathlib import Path
 
 from src.config import load_config
@@ -27,7 +27,7 @@ from src.fetchers.huggingface import HuggingFaceFetcher
 from src.logger import setup_logging
 from src.models import ThemeNode, TrendMetrics
 from src.themes import normalize_theme_name
-from src.trend_state import classify_state, compute_stability, compute_velocity
+from src.trend_state import classify_state, compute_stability
 
 logger = logging.getLogger(__name__)
 
@@ -424,7 +424,7 @@ def _load_existing_metrics(docs_data_dir: Path) -> dict[str, TrendMetrics]:
 
 
 def _fetch_arxiv(
-    trends_cfg,  # TrendsConfig
+    trends_cfg,  # TrendsConfig — type annotation skipped to avoid circular import
     today_str: str,
 ) -> list[tuple[str, str, str, str]]:
     """Fetch arXiv papers and return (date, theme, source_class, source_name) tuples.
@@ -432,7 +432,6 @@ def _fetch_arxiv(
     Each paper's title is used as the theme name (normalised), so arXiv papers
     add primary-class signal to the theme diversity count.
     """
-    from src.config import TrendsConfig  # local import avoids circular at module level
     try:
         fetcher = ArxivFetcher(
             categories=trends_cfg.arxiv.categories,
@@ -487,8 +486,8 @@ def run(
     dry_run: bool = False,
     fetch_live: bool = True,
 ) -> None:
-    today_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-    now_iso   = datetime.now(timezone.utc).isoformat()
+    today_str = datetime.now(UTC).strftime("%Y-%m-%d")
+    now_iso   = datetime.now(UTC).isoformat()
 
     # ── 0. Load config (for trend sources) ───────────────────────────
     try:

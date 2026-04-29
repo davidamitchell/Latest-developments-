@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from datetime import UTC, datetime
 from unittest.mock import MagicMock, patch
 
 from src.fetchers.huggingface import HuggingFaceFetcher

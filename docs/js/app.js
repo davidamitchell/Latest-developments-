@@ -169,7 +169,7 @@ function renderThemeCards(themes) {
           ${domain ? `<span class="theme-domain">${escHtml(domain)}</span>` : ''}
           Last seen: ${lastSeen}
         </div>
-        ${t.definition ? `<p style="font-size:13px;color:#555;margin:0 0 8px;line-height:1.5">${escHtml(t.definition)}</p>` : ''}
+        ${t.definition ? `<p style="font-size:0.75rem;color:#999;margin:0 0 8px;line-height:1.5">${escHtml(t.definition)}</p>` : ''}
         <div class="theme-metrics">
           <span class="metric">
             <span class="metric-label">Items</span>
@@ -191,11 +191,11 @@ function renderThemeCards(themes) {
 /* ── Sources tab ────────────────────────────────────────────────────── */
 
 const CLASS_COLORS = {
-  primary:      '#4a7c59',
-  operator:     '#1a5c96',
-  practitioner: '#856404',
-  media:        '#5a2a8a',
-  market:       '#721c24',
+  primary:      '#00C3A5',
+  operator:     '#6495ed',
+  practitioner: '#f5c842',
+  media:        '#9b7ed4',
+  market:       '#E8A1A8',
 };
 
 function renderSourcesTab(data) {
@@ -222,7 +222,7 @@ function renderSourcesTab(data) {
         <div class="source-class-name" style="color:${color}">${escHtml(cls)}</div>
         <div class="source-class-count">${info.count ?? 0}</div>
         <div class="source-class-list">${escHtml(list)}</div>
-        <p style="font-size:11px;color:#aaa;margin:6px 0 0;line-height:1.4">${desc}</p>
+        <p style="font-size:0.7rem;color:#555;margin:6px 0 0;line-height:1.4">${desc}</p>
       </div>`;
   }).join('');
 
@@ -230,7 +230,7 @@ function renderSourcesTab(data) {
   if (!table) return;
 
   if (sources.length === 0) {
-    table.innerHTML = '<p style="color:#aaa;font-size:13px">No per-source data available yet.</p>';
+    table.innerHTML = '<p style="color:#555;font-size:0.75rem">No per-source data available yet.</p>';
     return;
   }
 

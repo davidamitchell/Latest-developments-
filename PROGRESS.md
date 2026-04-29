@@ -376,3 +376,19 @@ Standardisation pass: expanded `.github/copilot-instructions.md` from stub to fu
 2. **What slowed down or went wrong?** Nothing. All six changes were straightforward textual edits.
 3. **What change would prevent this next time?** Nothing to change — the problem statement was precise and the target locations were unambiguous.
 4. **Is this a pattern?** No — first alignment pass against personal Copilot instructions.
+
+## 2026-04-29 — CodeQL fixes + dark mode GitHub Pages site
+
+**Completed:**
+- Fixed all 8 CodeQL security alerts: removed unused imports from `src/credibility.py`, `src/fetchers/arxiv.py`, `src/models.py`, `src/trends.py`, `tests/test_fetchers_arxiv.py`; removed unused globals `_NS_ATOM`/`_ARXIV_NS` from `src/fetchers/arxiv.py`; replaced empty `except: pass` with `contextlib.suppress` + comment.
+- Extended ruff cleanup to 3 additional files not in CodeQL alerts but failing the linter: `src/fetchers/huggingface.py`, `tests/test_fetchers_huggingface.py`, `src/summariser.py`.
+- Converted GitHub Pages dashboard to dark mode: IBM Plex Mono font, `#0d0d0d` background, `#00C3A5` teal accent, `#E8A1A8` dusk accent, sharp corners, uppercase micro-labels. Inspired by davidamitchell.github.io/Research.
+- Updated Chart.js global defaults in `charts.js` for dark canvas rendering.
+- Created `learnings.md` to capture patterns and root causes.
+
+### Mini-Retro
+
+1. **Did the process work?** Yes — CodeQL fixes were straightforward once the pattern was identified. Dark mode CSS was a clean rewrite against known design tokens.
+2. **What slowed down or went wrong?** Playwright browser was locked; couldn't take a live screenshot. Verified CSS correctness by inspection only.
+3. **What change would prevent this next time?** Kill any leftover browser processes before attempting visual verification. Also: running `ruff check .` across the full project earlier would have caught all 6 lint errors in a single pass instead of iteratively.
+4. **Is this a pattern?** Unused imports from new feature branches: **yes, recurring**. Should add `ruff check --fix` as a pre-commit step or make it part of the slice completion checklist.
