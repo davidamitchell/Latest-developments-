@@ -294,11 +294,336 @@ Add sources one at a time. Each is opt-in via `sources.yaml` (commented out by d
 
 | # | Slice | Status | Notes |
 |---|---|---|---|
-| 17.1 | `src/fetchers/arxiv.py` — arXiv RSS | `[ ]` | cs.AI, cs.LG, cs.CL; primary class; free |
+| 17.1 | `src/fetchers/arxiv.py` — arXiv RSS | `[x]` | cs.AI, cs.LG, cs.CL, cs.CV, cs.RO; primary class; free. See W-0006. |
 | 17.2 | Hugging Face model releases | `[ ]` | RSS or JSON API; primary/operator class |
 | 17.3 | Papers with Code trending | `[ ]` | RSS; primary class; reproducibility proxy |
 | 17.4 | Operator changelogs | `[ ]` | OpenAI/Anthropic/Google release notes RSS; operator class |
 | 17.5 | Reddit r/MachineLearning | `[ ]` | PRAW or JSON API; practitioner class; deferred pending cost review |
+
+---
+
+---
+
+## W-0002
+
+status: done
+created: 2026-04-29
+updated: 2026-04-29
+
+### Outcome
+
+Gemini 5xx overload errors (503 UNAVAILABLE) are retried up to 4 times with 15 / 30 / 60 s exponential backoff before falling back to the link digest. 4xx errors (bad key, quota) fall back immediately.
+
+### Context
+
+Pipeline was falling back to plain link digest on any `APIError`, including transient Gemini overload spikes. History files show `[AI summarisation failed]` notices that would have succeeded on a second attempt.
+
+### Notes
+
+- Distinguishes `ServerError` (5xx, retry) from `ClientError` (4xx, no retry)
+- Implemented in `src/summariser.py`
+
+---
+
+## W-0003
+
+status: done
+created: 2026-04-29
+updated: 2026-04-29
+
+### Outcome
+
+The Sources page shows a full per-source table: source name, class badge, item count, active days, date range (first → last seen), and top 5 themes. Data is written to `docs/data/sources.json` by the trend pipeline.
+
+### Context
+
+Previously Sources tab only showed aggregate per-class cards with no breakdown of individual sources.
+
+### Notes
+
+- `src/trends.py` computes `per_source` dict from `all_entries` and writes `sources` list to `sources.json`
+- `docs/js/app.js` `renderSourcesTab()` renders scrollable table with colour-coded class badges and theme pills
+
+---
+
+## W-0004
+
+status: done
+created: 2026-04-29
+updated: 2026-04-29
+
+### Outcome
+
+Source-class heatmap on the Sources page renders correctly on mobile: columns are horizontally scrollable and headers use readable abbreviations (Pri / Ops / Prac / Med / Mkt with full name on hover).
+
+### Context
+
+`table-layout: fixed` distributed 6 columns equally across ~375 px, making "practitioner" unreadable on phones.
+
+### Notes
+
+- Added `.heatmap-scroll` wrapper with `overflow-x: auto`
+- Removed `table-layout: fixed`; added `min-width: 380px` so table scrolls rather than collapses
+- `<abbr title="full">abbr</abbr>` header cells in `charts.js`
+- Mobile breakpoint hides `.themes-cell` on source detail table to reduce crowding
+
+---
+
+## W-0005
+
+status: needing_refinement
+created: 2026-04-29
+updated: 2026-04-29
+
+### Outcome
+
+Theme quality is measurably better: themes have recognisable, stable names (e.g. "Agentic Workflows" not "Ai Workforce Impact"), domains are populated (not "unknown"), and synonyms are collapsed (e.g. "tool use" ≡ "function calling" ≡ "tool calling" → "Agent Tool Use").
+
+### Context
+
+Current themes are derived from Gemini output in history files and are inconsistently named. All `domain` fields show "unknown". The synonym normalisation map in `src/themes.py` exists but is not called from `src/trends.py`. Gemini-powered clustering is implemented but not wired in because no API key was available locally; key is confirmed present in GitHub Secrets.
+
+### Notes
+
+- Wire `cluster_themes()` from `src/themes.py` into `src/trends.py` so Gemini normalises theme names each run
+- Enforce domain taxonomy: multimodal, agents, infra, reasoning, safety, evals, data, hardware
+- Validate synonym map covers common rebrands; add missing entries
+- Consider whether theme names should be title-cased consistently
+
+---
+
+## W-0006
+
+status: done
+created: 2026-04-29
+updated: 2026-04-29
+
+### Outcome
+
+The trend pipeline fetches papers from arXiv (categories cs.AI, cs.LG, cs.CL, cs.CV, cs.RO) daily and includes them in trend analysis as `source_class="primary"`. The email digest pipeline is unchanged.
+
+### Context
+
+arXiv RSS is free, no API key needed, and provides the highest-credibility primary signal (papers, benchmarks). Adding it enables cross-class confirmation: a theme seen in arXiv + HN crosses the diversity ≥ 2 gate and can be classified as "emerging" rather than "unknown".
+
+### Notes
+
+- Create `src/fetchers/arxiv.py` — `ArxivFetcher` class fetching RSS for each category
+- Add `trends.arxiv` config section to `config/sources.yaml` (commented out by default in email section, enabled in trends section)
+- Add `ArxivConfig` / `TrendsConfig` to `src/config.py`
+- Update `src/trends.py` to instantiate `ArxivFetcher`, fetch papers, and merge with history-parsed entries
+- NOT wired into `src/main.py` — trends pipeline only
+- Write tests in `tests/test_fetchers_arxiv.py`
+
+---
+
+## W-0007
+
+status: needing_refinement
+created: 2026-04-29
+updated: 2026-04-29
+
+### Outcome
+
+The trend pipeline fetches new model releases from Hugging Face (model cards RSS / JSON API) as `source_class="primary"`, contributing to cross-class confirmation for model-related themes.
+
+### Context
+
+HuggingFace model releases provide a high-frequency signal for capability advances, new architectures, and fine-tuning trends. Available via RSS at `https://huggingface.co/models` (sorted by recent) or the public models JSON API — no auth needed.
+
+### Notes
+
+- Implement after arXiv (W-0006) is stable
+- Create `src/fetchers/huggingface.py`
+- Source class: primary (model cards) or operator (if vendor-released)
+- Limit to models with ≥ 100 downloads to reduce noise
+- Add `trends.huggingface` section to `config/sources.yaml`
+
+---
+
+## W-0008
+
+status: needing_refinement
+created: 2026-04-29
+updated: 2026-04-29
+
+### Outcome
+
+The trend pipeline fetches trending papers from Papers with Code as `source_class="primary"`, adding reproducibility signal (code availability) to credibility scoring.
+
+### Context
+
+Papers with Code tracks papers with GitHub repos and benchmark results. A paper appearing here means code exists (reproducibility proxy score = 1.0 in the credibility formula). Feed available at `https://paperswithcode.com/latest` RSS.
+
+### Notes
+
+- Create `src/fetchers/paperswithcode.py`
+- Set `has_code=True` flag on fetched items to inform credibility scoring
+- Papers with Code also has a public JSON API: `https://paperswithcode.com/api/v1/papers/`
+- Implement after arXiv (W-0006)
+
+---
+
+## W-0009
+
+status: needing_refinement
+created: 2026-04-29
+updated: 2026-04-29
+
+### Outcome
+
+The trend pipeline ingests operator changelogs from OpenAI, Anthropic, and Google as `source_class="operator"`, enabling cross-class confirmation between primary papers and vendor releases.
+
+### Context
+
+Operator signals (changelogs, pricing changes, API updates) reveal what vendors are actually shipping. Combined with primary sources they confirm capability claims. All three have RSS or scrapeable pages: OpenAI changelog at `https://platform.openai.com/docs/changelog`, Anthropic news RSS, Google AI Blog RSS.
+
+### Notes
+
+- Create `src/fetchers/operator_changelog.py`
+- Source class: operator
+- Three initial targets: OpenAI platform changelog, Anthropic news, Google AI Blog
+- Add `trends.operator_sources` config section
+- Implement after arXiv (W-0006) and HuggingFace (W-0007)
+
+---
+
+## W-0010
+
+status: needing_refinement
+created: 2026-04-29
+updated: 2026-04-29
+
+### Outcome
+
+The trend pipeline fetches new and trending models from Replicate as `source_class="operator"`, surfacing what practitioners are actually deploying and running in production.
+
+### Context
+
+Replicate's trending models page reflects real deployment activity — a strong adoption proxy signal distinct from paper citations. Available via their public API: `https://api.replicate.com/v1/models` (no auth for public models).
+
+### Notes
+
+- Create `src/fetchers/replicate.py`
+- Source class: operator (vendor-hosted deployment)
+- Sort by run count (descending) to surface most-used models
+- Implement after operator changelogs (W-0009)
+
+---
+
+## W-0011
+
+status: needing_refinement
+created: 2026-04-29
+updated: 2026-04-29
+
+### Outcome
+
+OpenReview submissions and accepted papers are fetched as `source_class="primary"` for NeurIPS, ICML, ICLR venues, providing peer-review quality signal distinct from raw arXiv preprints.
+
+### Context
+
+OpenReview exposes a public API. Accepted papers at top venues represent the highest-quality primary signal — peer-reviewed, reproducible claims. This differentiates "paper posted on arXiv" from "paper accepted at ICLR".
+
+### Notes
+
+- Create `src/fetchers/openreview.py`
+- Use OpenReview public API: `https://api2.openreview.net/notes`
+- Filter: `venueid` in [NeurIPS 2025, ICLR 2025, ICML 2025] and invitation = acceptance decision
+- Source class: primary; set `evidence_type="experiment"` for accepted papers
+- Implement after W-0006 arXiv is stable
+
+---
+
+## W-0012
+
+status: needing_refinement
+created: 2026-04-29
+updated: 2026-04-29
+
+### Outcome
+
+The adoption proxy composite score (`adoption_proxy` field in `TrendMetrics`) is computed from real signals: GitHub repo star velocity for top theme-related repos, job posting count for role keywords, and pricing/tier changes from operator sources. Currently always `0.0`.
+
+### Context
+
+Adoption proxy was defined in the initial architecture but not implemented. It is needed for accurate state classification (Scaling requires rising adoption; Mature requires high adoption). Without it, no theme can ever reach Scaling or Mature state.
+
+### Notes
+
+- GitHub stars: use GH API (no auth needed for public repos, rate-limited)
+- Job postings: LinkedIn / Indeed scrape (complex, deferred); interim proxy = HN "Who's Hiring" posts
+- Pricing signal: detect price changes in operator changelog items
+- Start with GitHub stars only as a minimal viable adoption signal
+- Add `adoption_proxy` calculation to `src/trend_state.py`
+
+---
+
+## W-0013
+
+status: needing_refinement
+created: 2026-04-29
+updated: 2026-04-29
+
+### Outcome
+
+All four pending test gaps are filled: (11.5) source class per fetcher, (12.4) credibility scoring axes, (13.4) theme clustering idempotency, (14.5) trend state transitions including diversity gate and spike-vs-trend edge cases.
+
+### Context
+
+These test slices were explicitly planned in Epics 11–14 but not yet written. They are needed before the trend pipeline is considered production-ready.
+
+### Notes
+
+- `tests/test_source_class.py` — assert each fetcher sets correct `source_class`
+- `tests/test_credibility.py` — unit test each of the 5 axes and the time decay function
+- `tests/test_themes.py` — idempotency of synonym normalisation; graceful API failure fallback
+- `tests/test_trend_state.py` — extend existing; add diversity gate cases, velocity edge cases
+
+---
+
+## W-0014
+
+status: needing_refinement
+created: 2026-04-29
+updated: 2026-04-29
+
+### Outcome
+
+Theme domain fields in `trends.json` and `themes.json` are populated with values from the taxonomy (multimodal, agents, infra, reasoning, safety, evals, data, hardware) rather than "unknown". All themes have human-readable definitions.
+
+### Context
+
+Domain and definition fields are declared in `TrendMetrics` and `ThemeNode` but always default to "unknown" and "". This makes the site less useful and prevents domain-based filtering. The `cluster_themes()` function in `src/themes.py` uses Gemini to assign domains but is not wired into `src/trends.py`.
+
+### Notes
+
+- Wire `cluster_themes()` call into `src/trends.py` — requires GEMINI_API_KEY (available in GitHub Secrets, not locally)
+- Run daily in CI where key is present
+- Add graceful fallback (keep "unknown") when key not available (local dev)
+- Dependent on W-0005 (theme quality)
+
+---
+
+## W-0015
+
+status: needing_refinement
+created: 2026-04-29
+updated: 2026-04-29
+
+### Outcome
+
+Semantic equivalence collapse prevents theme fragmentation from rebranding: "tool use", "function calling", and "tool calling" are merged into a single canonical theme. The synonym map in `src/themes.py` covers all known rebrands from the session's 30-entry normalisation map.
+
+### Context
+
+Without synonym collapse, each new marketing term for the same concept spawns a separate thin theme with low volume and diversity, which never reaches a meaningful state classification. The synonym map exists in `src/themes.py` but `normalise_theme()` is not called on parsed history entries in `src/trends.py`.
+
+### Notes
+
+- Call `normalise_theme(name)` on each theme name in `parse_history_file()` in `src/trends.py`
+- Validate the ~30 synonym entries cover current history themes
+- Add test: same content with alternate phrasings produces identical theme output
 
 ---
 

@@ -1,10 +1,12 @@
-"""Trend analysis pipeline — works entirely from existing history/*.txt files.
+"""Trend analysis pipeline.
 
-No API key required. Parses the structured sections already written by the
-summariser (## Item Themes, inline Theme: labels) and computes rolling metrics.
+Reads history/*.txt files for theme signals from the email pipeline,
+and optionally fetches live arXiv papers (primary source class) to
+enrich cross-class confirmation. Writes docs/data/*.json for the site.
 
 Usage:
     python -m src.trends [--docs docs/data] [--history history] [--dry-run] [--debug]
+    python -m src.trends --no-fetch   # history-only, no network calls
 """
 
 from __future__ import annotations
@@ -19,6 +21,8 @@ from dataclasses import asdict
 from datetime import date, datetime, timezone
 from pathlib import Path
 
+from src.config import load_config
+from src.fetchers.arxiv import ArxivFetcher
 from src.logger import setup_logging
 from src.models import ThemeNode, TrendMetrics
 from src.themes import normalize_theme_name
@@ -370,12 +374,57 @@ def _load_existing_metrics(docs_data_dir: Path) -> dict[str, TrendMetrics]:
         return {}
 
 
+def _fetch_arxiv(
+    trends_cfg,  # TrendsConfig
+    today_str: str,
+) -> list[tuple[str, str, str, str]]:
+    """Fetch arXiv papers and return (date, theme, source_class, source_name) tuples.
+
+    Each paper's title is used as the theme name (normalised), so arXiv papers
+    add primary-class signal to the theme diversity count.
+    """
+    from src.config import TrendsConfig  # local import avoids circular at module level
+    try:
+        fetcher = ArxivFetcher(
+            categories=trends_cfg.arxiv.categories,
+            max_papers=trends_cfg.arxiv.max_papers,
+        )
+        items = fetcher.fetch(already_processed=set())
+    except Exception as exc:
+        logger.warning("arXiv fetch failed — skipping: %s", exc)
+        return []
+
+    entries: list[tuple[str, str, str, str]] = []
+    for item in items:
+        # Use normalised title as an approximate theme signal.
+        # Real theme clustering (W-0005) will improve this.
+        raw_theme = item.title[:80]  # cap length for display
+        theme = normalize_theme_name(raw_theme)
+        pub_date = item.published.strftime("%Y-%m-%d") if item.published else today_str
+        entries.append((pub_date, theme, "primary", "arXiv"))
+    return entries
+
+
 # ── Main pipeline ─────────────────────────────────────────────────────
 
 
-def run(docs_data_dir: Path, history_dir: Path, dry_run: bool = False) -> None:
+def run(
+    docs_data_dir: Path,
+    history_dir: Path,
+    dry_run: bool = False,
+    fetch_live: bool = True,
+) -> None:
     today_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     now_iso   = datetime.now(timezone.utc).isoformat()
+
+    # ── 0. Load config (for trend sources) ───────────────────────────
+    try:
+        cfg = load_config()
+        trends_cfg = cfg.trends
+    except Exception as exc:
+        logger.warning("Could not load config, using defaults: %s", exc)
+        from src.config import TrendsConfig
+        trends_cfg = TrendsConfig()
 
     # ── 1. Load and parse all history files ──────────────────────────
     txt_files = sorted(history_dir.glob("*.txt"), reverse=True)
@@ -403,6 +452,16 @@ def run(docs_data_dir: Path, history_dir: Path, dry_run: bool = False) -> None:
             all_source_counts[src.lower()] += count
 
     logger.info("Extracted %d theme-day entries across %d files", len(all_entries), len(txt_files))
+
+    # ── 1b. Fetch live arXiv papers (primary source class) ───────────
+    if fetch_live and trends_cfg.enabled and trends_cfg.arxiv.enabled:
+        arxiv_items = _fetch_arxiv(trends_cfg, today_str)
+        all_entries.extend(arxiv_items)
+        if arxiv_items:
+            all_source_counts["arxiv"] += len(arxiv_items)
+            logger.info("arXiv: added %d theme-day entries", len(arxiv_items))
+    else:
+        logger.info("Live fetching disabled — using history only")
 
     # ── 2. Load existing rolling state ───────────────────────────────
     existing = _load_existing_metrics(docs_data_dir)
@@ -564,11 +623,12 @@ def _preview(metrics: list[TrendMetrics]) -> None:
 
 
 def main(argv: list[str] | None = None) -> None:
-    parser = argparse.ArgumentParser(description="Trend analysis pipeline (no API required)")
-    parser.add_argument("--docs",    default="docs/data", help="Path to docs/data/ directory")
-    parser.add_argument("--history", default="history",   help="Path to history/ directory")
-    parser.add_argument("--dry-run", action="store_true", help="Preview output without writing files")
-    parser.add_argument("--debug",   action="store_true", help="Enable debug logging")
+    parser = argparse.ArgumentParser(description="Trend analysis pipeline")
+    parser.add_argument("--docs",     default="docs/data", help="Path to docs/data/ directory")
+    parser.add_argument("--history",  default="history",   help="Path to history/ directory")
+    parser.add_argument("--dry-run",  action="store_true", help="Preview output without writing files")
+    parser.add_argument("--no-fetch", action="store_true", help="Skip live source fetching; history only")
+    parser.add_argument("--debug",    action="store_true", help="Enable debug logging")
     args = parser.parse_args(argv)
 
     setup_logging(debug=args.debug)
@@ -587,7 +647,12 @@ def main(argv: list[str] | None = None) -> None:
         logger.error("History directory not found: %s", history_dir)
         sys.exit(1)
 
-    run(docs_data_dir=docs_data_dir, history_dir=history_dir, dry_run=args.dry_run)
+    run(
+        docs_data_dir=docs_data_dir,
+        history_dir=history_dir,
+        dry_run=args.dry_run,
+        fetch_live=not args.no_fetch,
+    )
 
 
 if __name__ == "__main__":

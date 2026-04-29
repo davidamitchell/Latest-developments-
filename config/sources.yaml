@@ -289,3 +289,39 @@ logging:
   # Write logs to a file in addition to stdout (useful in Codespaces)
   # Set to null to disable file logging
   log_file: null  # e.g. "logs/digest.log"
+
+# ---------------------------------------------------------------------------
+# Trend analysis sources (trends pipeline only — NOT used by email digest)
+# ---------------------------------------------------------------------------
+trends:
+  enabled: true
+
+  # arXiv RSS — free, no API key. Source class: primary.
+  arxiv:
+    enabled: true
+    categories:
+      - cs.AI    # Artificial Intelligence
+      - cs.LG    # Machine Learning
+      - cs.CL    # Computation and Language (NLP)
+      - cs.CV    # Computer Vision
+      - cs.RO    # Robotics
+    max_papers: 30  # per category per run
+
+  # Future sources (add enabled: true when ready):
+  # huggingface:
+  #   enabled: false
+  #   max_models: 50
+  #
+  # paperswithcode:
+  #   enabled: false
+  #   max_papers: 20
+  #
+  # operator_sources:
+  #   enabled: false
+  #   feeds:
+  #     - name: "OpenAI Changelog"
+  #       url: "https://platform.openai.com/docs/changelog"
+  #       source_class: "operator"
+  #     - name: "Anthropic News"
+  #       url: "https://www.anthropic.com/news"
+  #       source_class: "operator"

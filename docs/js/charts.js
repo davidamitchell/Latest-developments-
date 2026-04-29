@@ -198,13 +198,21 @@ function renderHeatmap(containerId, themes, classes) {
     return `<tr><td>${escHtml(t.name)}</td>${cells}</tr>`;
   }).join('');
 
-  const headerCells = classes.map(c => `<th>${escHtml(c)}</th>`).join('');
+  const CLASS_ABBR = {
+    primary: 'Pri', operator: 'Ops', practitioner: 'Prac', media: 'Med', market: 'Mkt',
+  };
+  const headerCells = classes.map(c => {
+    const abbr = CLASS_ABBR[c] || c;
+    return `<th><abbr title="${escHtml(c)}">${escHtml(abbr)}</abbr></th>`;
+  }).join('');
 
   container.innerHTML = `
-    <table class="heatmap-table">
-      <thead><tr><th>Theme</th>${headerCells}</tr></thead>
-      <tbody>${rows}</tbody>
-    </table>`;
+    <div class="heatmap-scroll">
+      <table class="heatmap-table">
+        <thead><tr><th>Theme</th>${headerCells}</tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
 }
 
 /* ── Utilities ──────────────────────────────────────────────────────── */

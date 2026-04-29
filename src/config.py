@@ -58,6 +58,19 @@ class HackerNewsConfig:
 
 
 @dataclass
+class ArxivConfig:
+    enabled: bool = True
+    categories: list[str] = field(default_factory=lambda: ["cs.AI", "cs.LG", "cs.CL"])
+    max_papers: int = 30
+
+
+@dataclass
+class TrendsConfig:
+    enabled: bool = True
+    arxiv: ArxivConfig = field(default_factory=ArxivConfig)
+
+
+@dataclass
 class SummaryConfig:
     enabled: bool = True  # False → skip AI; produce a plain link-list digest instead
     model: str = "gemini-2.5-flash"
@@ -95,6 +108,7 @@ class Config:
     history: HistoryConfig = field(default_factory=HistoryConfig)
     email: EmailConfig = field(default_factory=EmailConfig)
     logging: LoggingConfig = field(default_factory=LoggingConfig)
+    trends: TrendsConfig = field(default_factory=TrendsConfig)
 
 
 def _yaml_list(value: list | None) -> list:
@@ -195,6 +209,17 @@ def load_config(path: Path = Path("config/sources.yaml")) -> Config:
         log_file=lg.get("log_file"),
     )
 
+    tr = raw.get("trends", {})
+    ax = tr.get("arxiv", {})
+    trends = TrendsConfig(
+        enabled=tr.get("enabled", True),
+        arxiv=ArxivConfig(
+            enabled=ax.get("enabled", True),
+            categories=_yaml_list(ax.get("categories")) or ["cs.AI", "cs.LG", "cs.CL"],
+            max_papers=ax.get("max_papers", 30),
+        ),
+    )
+
     return Config(
         youtube=youtube,
         blogs=blogs,
@@ -204,4 +229,5 @@ def load_config(path: Path = Path("config/sources.yaml")) -> Config:
         history=history,
         email=email,
         logging=logging_cfg,
+        trends=trends,
     )

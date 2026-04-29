@@ -224,11 +224,16 @@ body {
 }
 
 /* ── Heatmap ────────────────────────────── */
+.heatmap-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
 .heatmap-table {
   width: 100%;
+  min-width: 380px;
   border-collapse: collapse;
   font-size: 13px;
-  table-layout: fixed;
 }
 
 .heatmap-table th {
@@ -424,4 +429,6 @@ body {
   .hype-split { grid-template-columns: 1fr; }
   .theme-grid { grid-template-columns: 1fr; }
   .source-class-grid { grid-template-columns: 1fr 1fr; }
+  .source-table th, .source-table td { padding: 8px 6px; }
+  .themes-cell { display: none; }
 }
