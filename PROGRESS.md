@@ -457,3 +457,35 @@ Standardisation pass: expanded `.github/copilot-instructions.md` from stub to fu
 3. **What single change would prevent this next time?** Before writing any new mocking: run `grep "patch" tests/test_fetchers_<target>.py | head -5` to see the established mock target in the existing test file. The internal helper function pattern (`_fetch_url`, `_fetch_json`) is now documented in learnings.md.
 
 4. **Is this a pattern?** Yes — this is the second time the wrong mock target was used for an httpx-backed fetcher. Added a note to learnings.md: _"Fetchers with `_fetch_url`/`_fetch_json` wrappers must be patched at the wrapper, not at `httpx.get`."_
+
+---
+
+## 2026-04-30 — W-0008, W-0009, W-0010, W-0011: Four new trend pipeline fetchers
+
+**Completed:**
+
+- **W-0008 (done) — Papers with Code fetcher:** `src/fetchers/paperswithcode.py`. Fetches trending papers from `https://paperswithcode.com/api/v1/papers/?ordering=-stars`. `source_class="primary"`, `has_code=True` on every item (triggers `reproducibility=1.0` in credibility scoring). `PapersWithCodeConfig` (fields: `enabled`, `page_size`, `min_stars`) added to `src/config.py`; `trends.paperswithcode` section in `config/sources.yaml`; wired into `src/trends.py`. 10 tests in `tests/test_fetchers_paperswithcode.py`.
+
+- **W-0009 (done) — Operator changelog fetcher:** `src/fetchers/operator_changelog.py`. RSS fetcher infrastructure reused; fetches 6 confirmed AI lab RSS feeds (Anthropic, OpenAI, Google AI, DeepMind, AWS ML, Microsoft AI) as `source_class="operator"`. `OperatorChangelogConfig` (fields: `enabled`, `feeds: list[str]`) in `src/config.py`; `trends.operator_sources` section in `config/sources.yaml`. 6 tests in `tests/test_fetchers_operator_changelog.py` (happy path, per-feed failure continues, source_class assertion, dedup by URL).
+
+- **W-0010 (done) — Replicate fetcher:** `src/fetchers/replicate.py`. Fetches popular public models from `https://api.replicate.com/v1/models?order=run_count` (no auth). `source_class="operator"`. `ReplicateConfig` (fields: `enabled`, `limit`) in `src/config.py`; `trends.replicate` in `config/sources.yaml`. 8 tests in `tests/test_fetchers_replicate.py`.
+
+- **W-0011 (done) — OpenReview fetcher:** `src/fetchers/openreview.py`. Fetches accepted papers from `https://api2.openreview.net/notes` for ICLR/NeurIPS/ICML 2025 venues. `source_class="primary"`, `evidence_type="experiment"`. `OpenReviewConfig` (fields: `enabled`, `venues: list[str]`, `limit`) in `src/config.py`; `trends.openreview` in `config/sources.yaml`. 9 tests in `tests/test_fetchers_openreview.py`.
+
+- **Shared data model updates:**
+  - `has_code: bool = False` added to `FetchedItem` (in `src/fetchers/__init__.py`) and `CanonicalRecord` (in `src/models.py`).
+  - `evidence_type: str = ""` added to `FetchedItem`.
+  - `score_credibility()` in `src/credibility.py` now sets `reproducibility=1.0` when `record.has_code is True`.
+
+**Test count:** 402 passing, 1 skipped (up from 369).
+**ruff check:** clean. **ruff format:** clean.
+
+### Mini-Retro
+
+1. **Did the process work?** Yes. The four fetchers are structurally similar enough that a clear pattern emerged after W-0008: wrap the API call in `with_backoff`, return early on unexpected format, catch per-item exceptions, log + continue. The pattern held cleanly for all four.
+
+2. **What slowed down?** Minor ruff N806 lint issues (module-level `_KNOWN` constants placed inside functions). Caught by ruff before tests ran. Fix: inline dicts should be lowercase when inside a function scope, or better — move them to module level.
+
+3. **What single change would prevent this next time?** Always declare lookup dicts (`_KNOWN`, `_LABELS`, etc.) at module level if they're logically constant, even if only used in one function. This avoids N806 and marginally improves performance.
+
+4. **Is this a pattern?** Yes — the `_KNOWN` variable naming issue appeared in two separate fetchers in the same session. Adding a note to `learnings.md`: _"Module-level lookup dicts must be lowercase only if inside a function. Move to module level or use all-lowercase name."_

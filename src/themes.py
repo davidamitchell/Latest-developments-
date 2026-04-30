@@ -18,109 +18,116 @@ logger = logging.getLogger(__name__)
 
 # ── Canonical domain taxonomy ────────────────────────────────────────
 DOMAIN_TAXONOMY: list[str] = [
-    "multimodal", "agents", "infra", "reasoning",
-    "safety", "evals", "data", "hardware", "general",
+    "multimodal",
+    "agents",
+    "infra",
+    "reasoning",
+    "safety",
+    "evals",
+    "data",
+    "hardware",
+    "general",
 ]
 
 # Keyword → canonical theme name for fast normalization without an API call.
 # These collapse common synonyms before Gemini sees the text.
 _SYNONYM_MAP: dict[str, str] = {
     # Agentic
-    "tool use":           "Agent Tool Use",
-    "function calling":   "Agent Tool Use",
-    "tool calling":       "Agent Tool Use",
-    "function call":      "Agent Tool Use",
-    "agent reliability":  "Agent Reliability",
-    "multi-agent":        "Multi-Agent Systems",
-    "multiagent":         "Multi-Agent Systems",
-    "agentic":            "Agentic Workflows",
+    "tool use": "Agent Tool Use",
+    "function calling": "Agent Tool Use",
+    "tool calling": "Agent Tool Use",
+    "function call": "Agent Tool Use",
+    "agent reliability": "Agent Reliability",
+    "multi-agent": "Multi-Agent Systems",
+    "multiagent": "Multi-Agent Systems",
+    "agentic": "Agentic Workflows",
     # Retrieval / RAG
-    "rag":                "Retrieval-Augmented Generation",
+    "rag": "Retrieval-Augmented Generation",
     "retrieval augmented": "Retrieval-Augmented Generation",
     # Alignment / Safety
-    "rlhf":               "RLHF & Alignment",
-    "rlaif":              "RLHF & Alignment",
-    "dpo":                "RLHF & Alignment",
-    "safety":             "AI Safety & Alignment",
-    "alignment":          "AI Safety & Alignment",
-    "jailbreak":          "AI Safety & Alignment",
-    "red team":           "AI Safety & Alignment",
+    "rlhf": "RLHF & Alignment",
+    "rlaif": "RLHF & Alignment",
+    "dpo": "RLHF & Alignment",
+    "safety": "AI Safety & Alignment",
+    "alignment": "AI Safety & Alignment",
+    "jailbreak": "AI Safety & Alignment",
+    "red team": "AI Safety & Alignment",
     # Inference / Cost
-    "inference cost":     "Inference Cost Reduction",
+    "inference cost": "Inference Cost Reduction",
     "inference efficiency": "Inference Cost Reduction",
-    "llm cost":           "Inference Cost Reduction",
+    "llm cost": "Inference Cost Reduction",
     "local llm inference": "Local LLM Inference",
-    "local llm":          "Local LLM Applications",
+    "local llm": "Local LLM Applications",
     # Reasoning / Context
-    "reasoning model":    "Long-Context Reasoning",
-    "chain of thought":   "Long-Context Reasoning",
-    "long context":       "Long-Context Reasoning",
-    "context length":     "Long-Context Reasoning",
+    "reasoning model": "Long-Context Reasoning",
+    "chain of thought": "Long-Context Reasoning",
+    "long context": "Long-Context Reasoning",
+    "context length": "Long-Context Reasoning",
     # Fine-tuning
-    "fine-tuning":        "Fine-Tuning & Adaptation",
-    "finetuning":         "Fine-Tuning & Adaptation",
-    "lora":               "Fine-Tuning & Adaptation",
+    "fine-tuning": "Fine-Tuning & Adaptation",
+    "finetuning": "Fine-Tuning & Adaptation",
+    "lora": "Fine-Tuning & Adaptation",
     # Distillation / Compression
-    "distillation":       "Model Distillation",
-    "model compression":  "Model Distillation",
-    "quantization":       "Model Distillation",
+    "distillation": "Model Distillation",
+    "model compression": "Model Distillation",
+    "quantization": "Model Distillation",
     # Evals
-    "benchmark":          "Benchmarks & Evals",
-    "evaluation":         "Benchmarks & Evals",
-    "leaderboard":        "Benchmarks & Evals",
+    "benchmark": "Benchmarks & Evals",
+    "evaluation": "Benchmarks & Evals",
+    "leaderboard": "Benchmarks & Evals",
     # Multimodal
-    "multimodal":         "Multimodal Models",
-    "vision language":    "Multimodal Models",
-    "vla":                "Multimodal Models",
+    "multimodal": "Multimodal Models",
+    "vision language": "Multimodal Models",
+    "vla": "Multimodal Models",
     # Open source
-    "open source model":  "Open-Source Models",
-    "open weight":        "Open-Source Models",
-    "open weights":       "Open-Source Models",
+    "open source model": "Open-Source Models",
+    "open weight": "Open-Source Models",
+    "open weights": "Open-Source Models",
     # Coding
-    "code generation":    "Code Generation",
-    "coding model":       "Code Generation",
-    "ai coding":          "Code Generation",
+    "code generation": "Code Generation",
+    "coding model": "Code Generation",
+    "ai coding": "Code Generation",
     # Data
-    "synthetic data":     "Synthetic Data Pipelines",
-    "data synthesis":     "Synthetic Data Pipelines",
+    "synthetic data": "Synthetic Data Pipelines",
+    "data synthesis": "Synthetic Data Pipelines",
     # Workforce / Jobs
-    "workforce":          "AI Workforce & Jobs",
-    "job displacement":   "AI Workforce & Jobs",
-    "labour":             "AI Workforce & Jobs",
-    "employment":         "AI Workforce & Jobs",
+    "workforce": "AI Workforce & Jobs",
+    "job displacement": "AI Workforce & Jobs",
+    "labour": "AI Workforce & Jobs",
+    "employment": "AI Workforce & Jobs",
     # Infrastructure / Cost
-    "ai infrastructure":  "AI Infrastructure",
-    "gpu cost":           "AI Infrastructure",
-    "datacenter":         "AI Infrastructure",
+    "ai infrastructure": "AI Infrastructure",
+    "gpu cost": "AI Infrastructure",
+    "datacenter": "AI Infrastructure",
     # Supply chain
-    "supply chain":       "Supply Chain Security",
+    "supply chain": "Supply Chain Security",
     # Capabilities
-    "llm capabilities":   "LLM Capabilities",
-    "advanced llm":       "LLM Capabilities",
-    "frontier model":     "LLM Capabilities",
+    "llm capabilities": "LLM Capabilities",
+    "advanced llm": "LLM Capabilities",
+    "frontier model": "LLM Capabilities",
     # Business / Strategy
-    "ai business":        "AI Business Strategy",
-    "ai strategy":        "AI Business Strategy",
+    "ai business": "AI Business Strategy",
+    "ai strategy": "AI Business Strategy",
     # Pace / Acceleration
-    "ai pace":            "AI Development Pace",
-    "acceleration":       "AI Development Pace",
+    "ai pace": "AI Development Pace",
+    "acceleration": "AI Development Pace",
 }
 
 # Known acronyms that title() breaks — restored after title-casing.
 _ACRONYM_FIXES: list[tuple[str, str]] = [
-    ("Ai ",  "AI "),
-    (" Ai",  " AI"),
-    ("Llm",  "LLM"),
+    ("Ai ", "AI "),
+    (" Ai", " AI"),
+    ("Llm", "LLM"),
     ("Rlhf", "RLHF"),
-    ("Rag",  "RAG"),
-    ("Api",  "API"),
-    ("Gpu",  "GPU"),
-    ("Vla",  "VLA"),
-    ("Dpo",  "DPO"),
+    ("Rag", "RAG"),
+    ("Api", "API"),
+    ("Gpu", "GPU"),
+    ("Vla", "VLA"),
+    ("Dpo", "DPO"),
     ("Lora", "LoRA"),
-    ("Nlp",  "NLP"),
-    ("Ml ",  "ML "),
-    (" Ml",  " ML"),
+    ("Nlp", "NLP"),
+    ("Ml ", "ML "),
+    (" Ml", " ML"),
 ]
 
 
@@ -146,7 +153,9 @@ def _build_clustering_prompt(records: list[CanonicalRecord], existing_themes: li
         f"- URL: {r.url}\n  Claim: {r.claim or r.title}\n  Domain: {r.domain}\n  Evidence: {r.evidence_type}"
         for r in records[:60]  # cap to keep token budget bounded
     )
-    existing_block = "\n".join(f"- {t}" for t in existing_themes) if existing_themes else "None yet."
+    existing_block = (
+        "\n".join(f"- {t}" for t in existing_themes) if existing_themes else "None yet."
+    )
 
     return f"""You are a theme clustering engine for AI/ML research trend analysis.
 
@@ -302,10 +311,12 @@ def build_graph_edges(relationships: list[dict]) -> list[GraphEdge]:
         if key in seen:
             continue
         seen.add(key)
-        edges.append(GraphEdge(
-            source=src,
-            target=tgt,
-            rel_type=rel,
-            weight=float(r.get("weight", 1.0)),
-        ))
+        edges.append(
+            GraphEdge(
+                source=src,
+                target=tgt,
+                rel_type=rel,
+                weight=float(r.get("weight", 1.0)),
+            )
+        )
     return edges

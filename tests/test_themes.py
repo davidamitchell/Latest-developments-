@@ -16,6 +16,7 @@ from src.themes import (
 # normalize_theme_name — idempotency
 # ---------------------------------------------------------------------------
 
+
 class TestNormalizeThemeName:
     def test_idempotent_on_canonical_form(self):
         """Normalizing an already-normalized name returns the same value."""
@@ -86,6 +87,7 @@ class TestNormalizeThemeName:
 # cluster_themes — graceful API failure fallback
 # ---------------------------------------------------------------------------
 
+
 def _make_records(*titles: str) -> list[CanonicalRecord]:
     return [
         CanonicalRecord(
@@ -141,15 +143,36 @@ class TestClusterThemes:
 
         gemini_payload = {
             "assignments": [
-                {"url": "https://example.com/0", "theme": "Inference Cost Reduction", "domain": "infra"},
-                {"url": "https://example.com/1", "theme": "Fine-Tuning & Adaptation", "domain": "general"},
+                {
+                    "url": "https://example.com/0",
+                    "theme": "Inference Cost Reduction",
+                    "domain": "infra",
+                },
+                {
+                    "url": "https://example.com/1",
+                    "theme": "Fine-Tuning & Adaptation",
+                    "domain": "general",
+                },
             ],
             "theme_definitions": [
-                {"theme": "Inference Cost Reduction", "domain": "infra", "definition": "Reducing the compute cost of running LLMs at inference time."},
-                {"theme": "Fine-Tuning & Adaptation", "domain": "general", "definition": "Adapting pre-trained models to specific tasks."},
+                {
+                    "theme": "Inference Cost Reduction",
+                    "domain": "infra",
+                    "definition": "Reducing the compute cost of running LLMs at inference time.",
+                },
+                {
+                    "theme": "Fine-Tuning & Adaptation",
+                    "domain": "general",
+                    "definition": "Adapting pre-trained models to specific tasks.",
+                },
             ],
             "relationships": [
-                {"source": "Inference Cost Reduction", "target": "Fine-Tuning & Adaptation", "rel_type": "causal", "weight": 1},
+                {
+                    "source": "Inference Cost Reduction",
+                    "target": "Fine-Tuning & Adaptation",
+                    "rel_type": "causal",
+                    "weight": 1,
+                },
             ],
         }
 
@@ -173,8 +196,16 @@ class TestClusterThemes:
         records = _make_records("New benchmark results")
 
         payload = {
-            "assignments": [{"url": "https://example.com/0", "theme": "Benchmarks & Evals", "domain": "evals"}],
-            "theme_definitions": [{"theme": "Benchmarks & Evals", "domain": "evals", "definition": "Testing model performance."}],
+            "assignments": [
+                {"url": "https://example.com/0", "theme": "Benchmarks & Evals", "domain": "evals"}
+            ],
+            "theme_definitions": [
+                {
+                    "theme": "Benchmarks & Evals",
+                    "domain": "evals",
+                    "definition": "Testing model performance.",
+                }
+            ],
             "relationships": [],
         }
         fenced = f"```json\n{json.dumps(payload)}\n```"
@@ -194,9 +225,20 @@ class TestClusterThemes:
 # DOMAIN_TAXONOMY completeness
 # ---------------------------------------------------------------------------
 
+
 class TestDomainTaxonomy:
     def test_taxonomy_has_expected_entries(self):
-        expected = {"multimodal", "agents", "infra", "reasoning", "safety", "evals", "data", "hardware", "general"}
+        expected = {
+            "multimodal",
+            "agents",
+            "infra",
+            "reasoning",
+            "safety",
+            "evals",
+            "data",
+            "hardware",
+            "general",
+        }
         assert set(DOMAIN_TAXONOMY) >= expected
 
     def test_taxonomy_entries_are_lowercase(self):

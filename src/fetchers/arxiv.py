@@ -102,15 +102,17 @@ class ArxivFetcher:
                     pub_date = parsedate_to_datetime(pubdate_el.text.strip())
 
             item_id = f"arxiv:{norm_url}"
-            items.append(FetchedItem(
-                id=item_id,
-                title=title,
-                url=norm_url,
-                content=content,
-                source_name="arXiv",
-                source_type="arXiv",
-                source_class="primary",
-                published=pub_date,
-            ))
+            items.append(
+                FetchedItem(
+                    id=item_id,
+                    title=title,
+                    url=norm_url,
+                    content=content,
+                    source_name="arXiv",
+                    source_type="arXiv",
+                    source_class="primary",
+                    published=pub_date,
+                )
+            )
 
         return items

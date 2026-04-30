@@ -650,13 +650,17 @@ def summarise(
                 wait = backoff_base * (2 ** (attempt - 1))
                 logger.warning(
                     "Gemini server error (attempt %d/%d), retrying in %ds: %s",
-                    attempt, max_attempts, wait, e,
+                    attempt,
+                    max_attempts,
+                    wait,
+                    e,
                 )
                 time.sleep(wait)
             else:
                 logger.warning(
                     "Gemini server error after %d attempts — falling back to link digest: %s",
-                    max_attempts, e,
+                    max_attempts,
+                    e,
                 )
         except genai_errors.ClientError as e:
             # 4xx — bad key, quota, invalid request; no point retrying

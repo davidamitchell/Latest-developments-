@@ -23,6 +23,7 @@ from src.trend_state import (
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 def _metrics(
     velocity: float = 0.0,
     volume: float = 0.0,
@@ -46,6 +47,7 @@ def _metrics(
 # Diversity gate (Rule 1)
 # ---------------------------------------------------------------------------
 
+
 class TestDiversityGate:
     def test_low_diversity_positive_velocity_gives_unknown(self):
         """Single-source signal — cannot confirm emerging trend."""
@@ -62,13 +64,16 @@ class TestDiversityGate:
         assert classify_state(m) == "declining"
 
     def test_minimum_diversity_allows_classification(self):
-        m = _metrics(velocity=_VEL_EMERGING_MIN + 0.05, volume=1.0, diversity=_MIN_DIVERSITY_FOR_TREND)
+        m = _metrics(
+            velocity=_VEL_EMERGING_MIN + 0.05, volume=1.0, diversity=_MIN_DIVERSITY_FOR_TREND
+        )
         assert classify_state(m) == "emerging"
 
 
 # ---------------------------------------------------------------------------
 # Declining (Rule 2)
 # ---------------------------------------------------------------------------
+
 
 class TestDecliningState:
     def test_negative_velocity_is_declining(self):
@@ -95,6 +100,7 @@ class TestDecliningState:
 # Emerging (Rule 3)
 # ---------------------------------------------------------------------------
 
+
 class TestEmergingState:
     def test_fast_rising_low_volume_multi_source_is_emerging(self):
         m = _metrics(
@@ -117,6 +123,7 @@ class TestEmergingState:
 # ---------------------------------------------------------------------------
 # Scaling (Rule 4)
 # ---------------------------------------------------------------------------
+
 
 class TestScalingState:
     def test_high_velocity_high_volume_multi_source_is_scaling(self):
@@ -148,6 +155,7 @@ class TestScalingState:
 # ---------------------------------------------------------------------------
 # Mature (Rule 5)
 # ---------------------------------------------------------------------------
+
 
 class TestMatureState:
     def test_stable_high_volume_is_mature(self):
@@ -188,6 +196,7 @@ class TestMatureState:
 # Default → unknown
 # ---------------------------------------------------------------------------
 
+
 class TestUnknownDefault:
     def test_no_signal_is_unknown(self):
         m = _metrics(velocity=0.0, volume=0.0, diversity=0)
@@ -201,6 +210,7 @@ class TestUnknownDefault:
 # ---------------------------------------------------------------------------
 # compute_velocity
 # ---------------------------------------------------------------------------
+
 
 class TestComputeVelocity:
     def test_returns_zero_with_no_history(self):
@@ -236,6 +246,7 @@ class TestComputeVelocity:
 # compute_stability
 # ---------------------------------------------------------------------------
 
+
 class TestComputeStability:
     def test_constant_volume_is_perfectly_stable(self):
         history = [{"volume": 3.0}, {"volume": 3.0}, {"volume": 3.0}]
@@ -268,16 +279,22 @@ class TestComputeStability:
 # update_metrics
 # ---------------------------------------------------------------------------
 
+
 class TestUpdateMetrics:
     def test_appends_snapshot_to_history(self):
-        m = _metrics(volume=2.0, history=[{"date": "2026-01-14", "volume": 1.0, "state": "emerging"}])
+        m = _metrics(
+            volume=2.0, history=[{"date": "2026-01-14", "volume": 1.0, "state": "emerging"}]
+        )
         updated = update_metrics(m, new_volume=2.5, today_str="2026-01-15")
         assert len(updated.history) == 2
         assert updated.history[-1]["date"] == "2026-01-15"
         assert updated.history[-1]["volume"] == pytest.approx(2.5)
 
     def test_history_capped_at_max(self):
-        history = [{"date": f"2026-01-{i:02d}", "volume": float(i), "state": "unknown"} for i in range(1, 32)]
+        history = [
+            {"date": f"2026-01-{i:02d}", "volume": float(i), "state": "unknown"}
+            for i in range(1, 32)
+        ]
         m = _metrics(history=history)
         updated = update_metrics(m, new_volume=5.0, today_str="2026-02-01", max_history=30)
         assert len(updated.history) <= 30

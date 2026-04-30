@@ -442,9 +442,9 @@ Adds a second primary-class source alongside arXiv, improving cross-class confir
 
 ## W-0008
 
-status: ready
+status: done
 created: 2026-04-29
-updated: 2026-04-29
+updated: 2026-04-30
 
 ### Outcome
 
@@ -465,9 +465,9 @@ Papers with Code tracks papers with GitHub repos and benchmark results. A paper 
 
 ## W-0009
 
-status: ready
+status: done
 created: 2026-04-29
-updated: 2026-04-29
+updated: 2026-04-30
 
 ### Outcome
 
@@ -489,9 +489,9 @@ Operator signals (changelogs, pricing changes, API updates) reveal what vendors 
 
 ## W-0010
 
-status: ready
+status: done
 created: 2026-04-29
-updated: 2026-04-29
+updated: 2026-04-30
 
 ### Outcome
 
@@ -512,9 +512,9 @@ Replicate's trending models page reflects real deployment activity — a strong 
 
 ## W-0011
 
-status: ready
+status: done
 created: 2026-04-29
-updated: 2026-04-29
+updated: 2026-04-30
 
 ### Outcome
 
