@@ -1,0 +1,27 @@
+Daily AI Digest — 30 Apr 2026
+========================================
+
+[AI summarisation failed: ServerError — no model processing was applied. Raw links only.]
+
+## Nate Jones
+
+- Boring beats brilliant when scope explodes #effort #reality (30 Apr)
+  https://www.youtube.com/watch?v=eXhG0boQM_0
+
+## Hacker News
+
+- HERMES.md in commit messages causes requests to route to extra usage billing (29 Apr)
+  https://news.ycombinator.com/item?id=47952722
+- Where the goblins came from (30 Apr)
+  https://news.ycombinator.com/item?id=47957688
+
+────────────────────────────────────────
+Run summary
+  UTC timestamp : 2026-04-30 09:06:16 UTC
+  Total new items: 3
+
+  Sources fetched:
+    YouTube: 1 new item(s)
+    Blogs/RSS: 0 new item(s)
+    Hacker News: 2 new item(s)
+────────────────────────────────────────

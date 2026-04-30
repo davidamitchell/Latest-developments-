@@ -1,18 +1,37 @@
 {
-  "generated": "2026-04-29T18:04:35.035141+00:00",
+  "generated": "2026-04-30T09:08:36.187392+00:00",
   "themes": [
+    {
+      "name": "AI Safety & Alignment",
+      "domain": "unknown",
+      "definition": "",
+      "state": "emerging",
+      "item_count": 12,
+      "last_seen": "2026-04-30",
+      "source_classes": [
+        "primary",
+        "practitioner"
+      ],
+      "source_class_counts": {
+        "practitioner": 4,
+        "primary": 8
+      },
+      "hype_risk": 0.0
+    },
     {
       "name": "Agentic Workflows",
       "domain": "unknown",
       "definition": "",
-      "state": "declining",
-      "item_count": 7,
-      "last_seen": "2026-04-19",
+      "state": "unknown",
+      "item_count": 10,
+      "last_seen": "2026-04-30",
       "source_classes": [
-        "practitioner"
+        "practitioner",
+        "primary"
       ],
       "source_class_counts": {
-        "practitioner": 7
+        "practitioner": 8,
+        "primary": 2
       },
       "hype_risk": 0.0
     },
@@ -32,6 +51,23 @@
       "hype_risk": 0.0
     },
     {
+      "name": "Multimodal Models",
+      "domain": "unknown",
+      "definition": "",
+      "state": "emerging",
+      "item_count": 5,
+      "last_seen": "2026-04-30",
+      "source_classes": [
+        "primary",
+        "practitioner"
+      ],
+      "source_class_counts": {
+        "practitioner": 1,
+        "primary": 4
+      },
+      "hype_risk": 0.0
+    },
+    {
       "name": "AI Workforce & Jobs",
       "domain": "unknown",
       "definition": "",
@@ -47,17 +83,34 @@
       "hype_risk": 0.0
     },
     {
-      "name": "AI Safety & Alignment",
+      "name": "Benchmarks & Evals",
       "domain": "unknown",
       "definition": "",
-      "state": "declining",
-      "item_count": 4,
-      "last_seen": "2026-04-15",
+      "state": "unknown",
+      "item_count": 5,
+      "last_seen": "2026-04-30",
       "source_classes": [
+        "primary"
+      ],
+      "source_class_counts": {
+        "primary": 5
+      },
+      "hype_risk": 0.0
+    },
+    {
+      "name": "Multi-Agent Systems",
+      "domain": "unknown",
+      "definition": "",
+      "state": "emerging",
+      "item_count": 4,
+      "last_seen": "2026-04-30",
+      "source_classes": [
+        "primary",
         "practitioner"
       ],
       "source_class_counts": {
-        "practitioner": 4
+        "practitioner": 1,
+        "primary": 3
       },
       "hype_risk": 0.0
     },
@@ -137,6 +190,23 @@
       "hype_risk": 0.0
     },
     {
+      "name": "Retrieval-Augmented Generation",
+      "domain": "unknown",
+      "definition": "",
+      "state": "unknown",
+      "item_count": 2,
+      "last_seen": "2026-04-30",
+      "source_classes": [
+        "practitioner",
+        "primary"
+      ],
+      "source_class_counts": {
+        "practitioner": 1,
+        "primary": 1
+      },
+      "hype_risk": 0.0
+    },
+    {
       "name": "AI Development Pace",
       "domain": "unknown",
       "definition": "",
@@ -163,6 +233,126 @@
       ],
       "source_class_counts": {
         "practitioner": 2
+      },
+      "hype_risk": 0.0
+    },
+    {
+      "name": "Analysing Lightweight Large Language Models For Biomedical Named Entity Recognit",
+      "domain": "unknown",
+      "definition": "",
+      "state": "unknown",
+      "item_count": 2,
+      "last_seen": "2026-04-30",
+      "source_classes": [
+        "primary"
+      ],
+      "source_class_counts": {
+        "primary": 2
+      },
+      "hype_risk": 0.0
+    },
+    {
+      "name": "Consciousness With The Serial Numbers Filed Off: Measuring Trained Denial In 115",
+      "domain": "unknown",
+      "definition": "",
+      "state": "unknown",
+      "item_count": 2,
+      "last_seen": "2026-04-30",
+      "source_classes": [
+        "primary"
+      ],
+      "source_class_counts": {
+        "primary": 2
+      },
+      "hype_risk": 0.0
+    },
+    {
+      "name": "Generative AI-Based Virtual Assistant Using Retrieval-Augmented Generation: An E",
+      "domain": "unknown",
+      "definition": "",
+      "state": "unknown",
+      "item_count": 2,
+      "last_seen": "2026-04-30",
+      "source_classes": [
+        "primary"
+      ],
+      "source_class_counts": {
+        "primary": 2
+      },
+      "hype_risk": 0.0
+    },
+    {
+      "name": "A Randomized Pde Energy Driven Iterative Framework For Efficient And Stable Pde",
+      "domain": "unknown",
+      "definition": "",
+      "state": "unknown",
+      "item_count": 2,
+      "last_seen": "2026-04-30",
+      "source_classes": [
+        "primary"
+      ],
+      "source_class_counts": {
+        "primary": 2
+      },
+      "hype_risk": 0.0
+    },
+    {
+      "name": "Rethinking Kv Cache Eviction Via A Unified Information-Theoretic Objective",
+      "domain": "unknown",
+      "definition": "",
+      "state": "unknown",
+      "item_count": 2,
+      "last_seen": "2026-04-30",
+      "source_classes": [
+        "primary"
+      ],
+      "source_class_counts": {
+        "primary": 2
+      },
+      "hype_risk": 0.0
+    },
+    {
+      "name": "Fine-Tuning & Adaptation",
+      "domain": "unknown",
+      "definition": "",
+      "state": "unknown",
+      "item_count": 2,
+      "last_seen": "2026-04-30",
+      "source_classes": [
+        "primary"
+      ],
+      "source_class_counts": {
+        "primary": 2
+      },
+      "hype_risk": 0.0
+    },
+    {
+      "name": "Fruitprom-V2: Robust Probabilistic Maturity Estimation And Detection Of Fruits A",
+      "domain": "unknown",
+      "definition": "",
+      "state": "unknown",
+      "item_count": 2,
+      "last_seen": "2026-04-30",
+      "source_classes": [
+        "primary"
+      ],
+      "source_class_counts": {
+        "primary": 2
+      },
+      "hype_risk": 0.0
+    },
+    {
+      "name": "Why Domain Matters: A Preliminary Study Of Domain Effects In Underwater Object D",
+      "domain": "unknown",
+      "definition": "",
+      "state": "unknown",
+      "item_count": 2,
+      "last_seen": "2026-04-30",
+      "source_classes": [
+        "primary"
+      ],
+      "source_class_counts": {
+        "primary": 2
       },
       "hype_risk": 0.0
     }

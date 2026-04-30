@@ -1,19 +1,12 @@
 {
-<<<<<<< HEAD
-  "last_run": "2026-04-29T18:04:35.035141+00:00",
-  "run_id": "2026-04-29",
-  "item_count": 178,
-  "theme_count": 11,
-=======
-  "last_run": "2026-04-29T18:00:08.033763+00:00",
-  "run_id": "2026-04-29",
+  "last_run": "2026-04-30T09:08:36.187392+00:00",
+  "run_id": "2026-04-30",
   "item_count": 329,
-  "theme_count": 17,
->>>>>>> origin/claude/trend-detection-system-3StIE
+  "theme_count": 23,
   "source_class_counts": {
-    "youtube": 155,
+    "youtube": 156,
     "blogs/rss": 0,
-    "hacker news": 250,
+    "hacker news": 252,
     "arxiv": 150
   }
 }

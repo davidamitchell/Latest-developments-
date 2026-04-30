@@ -1,144 +1,143 @@
 {
-<<<<<<< HEAD
-  "generated": "2026-04-29T18:04:35.035141+00:00",
+  "generated": "2026-04-30T09:08:36.187392+00:00",
   "nodes": [
+    {
+      "id": "AI Safety & Alignment",
+      "domain": "unknown",
+      "state": "emerging",
+      "volume": 1.45
+    },
     {
       "id": "Agentic Workflows",
       "domain": "unknown",
-      "state": "declining",
-      "volume": 0.91
+      "state": "unknown",
+      "volume": 1.21
     },
     {
       "id": "AI Business Strategy",
       "domain": "unknown",
       "state": "declining",
-      "volume": 0.78
-    },
-    {
-      "id": "AI Workforce & Jobs",
-      "domain": "unknown",
-      "state": "declining",
-      "volume": 0.65
-=======
-  "generated": "2026-04-29T18:00:08.033763+00:00",
-  "nodes": [
-    {
-      "id": "Benchmarks & Evals",
-      "domain": "unknown",
-      "state": "unknown",
-      "volume": 1.47
->>>>>>> origin/claude/trend-detection-system-3StIE
-    },
-    {
-      "id": "AI Safety & Alignment",
-      "domain": "unknown",
-      "state": "unknown",
-      "volume": 0.74
-    },
-    {
-      "id": "Multi-Agent Systems",
-      "domain": "unknown",
-      "state": "emerging",
-      "volume": 0.61
-    },
-    {
-      "id": "Retrieval-Augmented Generation",
-      "domain": "unknown",
-      "state": "emerging",
-      "volume": 0.61
+      "volume": 0.72
     },
     {
       "id": "Multimodal Models",
       "domain": "unknown",
       "state": "emerging",
-      "volume": 0.61
+      "volume": 0.6
+    },
+    {
+      "id": "AI Workforce & Jobs",
+      "domain": "unknown",
+      "state": "declining",
+      "volume": 0.6
+    },
+    {
+      "id": "Benchmarks & Evals",
+      "domain": "unknown",
+      "state": "unknown",
+      "volume": 0.6
+    },
+    {
+      "id": "Multi-Agent Systems",
+      "domain": "unknown",
+      "state": "emerging",
+      "volume": 0.48
     },
     {
       "id": "AI Infrastructure",
       "domain": "unknown",
       "state": "declining",
-      "volume": 0.49
+      "volume": 0.48
     },
     {
       "id": "LLM Capabilities",
       "domain": "unknown",
       "state": "declining",
-      "volume": 0.37
+      "volume": 0.36
     },
     {
-<<<<<<< HEAD
       "id": "Local LLM Applications",
       "domain": "unknown",
       "state": "declining",
-      "volume": 0.39
-=======
-      "id": "Ai Business Strategy",
-      "domain": "unknown",
-      "state": "declining",
-      "volume": 0.25
-    },
-    {
-      "id": "Ai Infrastructure Strategy",
-      "domain": "unknown",
-      "state": "declining",
-      "volume": 0.25
->>>>>>> origin/claude/trend-detection-system-3StIE
+      "volume": 0.36
     },
     {
       "id": "Local LLM Inference",
       "domain": "unknown",
       "state": "declining",
-<<<<<<< HEAD
-      "volume": 0.39
-=======
-      "volume": 0.25
-    },
-    {
-      "id": "Local Llm Applications",
-      "domain": "unknown",
-      "state": "declining",
-      "volume": 0.25
->>>>>>> origin/claude/trend-detection-system-3StIE
+      "volume": 0.36
     },
     {
       "id": "Supply Chain Security",
       "domain": "unknown",
       "state": "declining",
-<<<<<<< HEAD
-      "volume": 0.39
-=======
-      "volume": 0.25
->>>>>>> origin/claude/trend-detection-system-3StIE
+      "volume": 0.36
+    },
+    {
+      "id": "Retrieval-Augmented Generation",
+      "domain": "unknown",
+      "state": "unknown",
+      "volume": 0.24
     },
     {
       "id": "AI Development Pace",
       "domain": "unknown",
       "state": "declining",
-      "volume": 0.25
+      "volume": 0.24
     },
     {
       "id": "Agent Reliability",
       "domain": "unknown",
       "state": "declining",
-      "volume": 0.25
+      "volume": 0.24
     },
     {
-      "id": "Code Generation",
+      "id": "Analysing Lightweight Large Language Models For Biomedical Named Entity Recognit",
       "domain": "unknown",
       "state": "unknown",
-      "volume": 0.25
+      "volume": 0.24
+    },
+    {
+      "id": "Consciousness With The Serial Numbers Filed Off: Measuring Trained Denial In 115",
+      "domain": "unknown",
+      "state": "unknown",
+      "volume": 0.24
+    },
+    {
+      "id": "Generative AI-Based Virtual Assistant Using Retrieval-Augmented Generation: An E",
+      "domain": "unknown",
+      "state": "unknown",
+      "volume": 0.24
+    },
+    {
+      "id": "A Randomized Pde Energy Driven Iterative Framework For Efficient And Stable Pde",
+      "domain": "unknown",
+      "state": "unknown",
+      "volume": 0.24
+    },
+    {
+      "id": "Rethinking Kv Cache Eviction Via A Unified Information-Theoretic Objective",
+      "domain": "unknown",
+      "state": "unknown",
+      "volume": 0.24
     },
     {
       "id": "Fine-Tuning & Adaptation",
       "domain": "unknown",
       "state": "unknown",
-      "volume": 0.25
+      "volume": 0.24
     },
     {
-      "id": "Long-Context Reasoning",
+      "id": "Fruitprom-V2: Robust Probabilistic Maturity Estimation And Detection Of Fruits A",
       "domain": "unknown",
       "state": "unknown",
-      "volume": 0.25
+      "volume": 0.24
+    },
+    {
+      "id": "Why Domain Matters: A Preliminary Study Of Domain Effects In Underwater Object D",
+      "domain": "unknown",
+      "state": "unknown",
+      "volume": 0.24
     }
   ],
   "edges": []
