@@ -14,6 +14,7 @@ from __future__ import annotations
 import argparse
 import json
 import logging
+import os
 import re
 import sys
 from collections import Counter, defaultdict
@@ -552,8 +553,7 @@ def run(
     # one-sentence definition for each theme.  It requires GEMINI_API_KEY
     # which is available in GitHub Actions but not in local --no-fetch runs.
     # Graceful fallback: keep "unknown" domain and empty definition.
-    import os as _os  # noqa: PLC0415
-    if _os.environ.get("GEMINI_API_KEY"):
+    if os.environ.get("GEMINI_API_KEY"):
         try:
             theme_records = [
                 CanonicalRecord(

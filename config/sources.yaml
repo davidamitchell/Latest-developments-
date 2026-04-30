@@ -146,7 +146,8 @@ blogs:
     # - name: "The Gradient"
     #   url: "https://thegradient.pub/rss/"
 
-    # ── AI Lab / Operator blogs (W-0019 — source catalogue from the-deep-archive) ──
+    # ── AI Lab / Operator blogs (W-0019) ──────────────────────────────
+    # Sources identified in a research spike against ai-at-work tracking sources.
     # All have confirmed RSS feeds. Enable individually by uncommenting.
     # Each has source_class set — used by the trend credibility pipeline.
     #

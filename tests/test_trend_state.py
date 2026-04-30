@@ -70,7 +70,7 @@ class TestDiversityGate:
 # Declining (Rule 2)
 # ---------------------------------------------------------------------------
 
-class TestDeclingState:
+class TestDecliningState:
     def test_negative_velocity_is_declining(self):
         m = _metrics(velocity=_VEL_DECLINING_MAX - 0.01, diversity=3)
         assert classify_state(m) == "declining"
