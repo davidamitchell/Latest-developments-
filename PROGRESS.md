@@ -1,6 +1,6 @@
 # Progress
 
-Last updated: 2026-04-29
+Last updated: 2026-04-30
 
 ---
 
@@ -29,7 +29,28 @@ Last updated: 2026-04-29
 
 ## Work Log
 
-### 2026-04-30 — Session 16 (W-0014)
+### 2026-04-30 — Backlog additions (W-0020, W-0021, W-0022)
+
+**Branch:** `copilot/add-backlog-items-tracking`
+
+**Completed:**
+- **W-0020** — Token Cost & Provider Pricing Intelligence: tracks token pricing from major providers (price per million tokens, tier changes, model deprecations). Candidate sources: Artificial Analysis, OpenRouter models JSON API, operator changelog keyword extension. `source_class: market`.
+- **W-0021** — Token Provider Market Entrant Tracking: surfaces new and emerging inference providers (Groq, Together AI, Fireworks, Cerebras, Lambda Labs, Perplexity) alongside the major labs. Candidate sources: provider blogs checked for RSS endpoints; GitHub releases feeds as fallback. `source_class: operator`.
+- **W-0022** — Local Model Running / Hosting Sources: adds opt-in sources for the on-device/self-hosted segment — Ollama, llama.cpp, LocalAI GitHub releases, LM Studio, Simon Willison's blog. Notes r/LocalLLaMA as deferred (matches existing Reddit deferral in Epic 17.5). Also notes adding `local_model` theme alias to synonym map. `source_class: practitioner`.
+
+**Mini-Retro:**
+
+1. **Did the process work?** Yes. Issue was clearly scoped; three work items map cleanly to the three stated outcomes.
+
+2. **What slowed down or went wrong?** Nothing significant. The backlog-manager skill wasn't accessible (submodule not initialized in the agent environment), but the W-entry format was fully documented in the existing backlog, so the pattern was easy to replicate.
+
+3. **What single change would prevent this next time?** Consider adding a brief "how to add a W-entry" note in the README or BACKLOG.md preamble so the pattern is explicitly documented rather than inferred from examples.
+
+4. **Is this a pattern?** The submodule-not-initialised issue appears each session. Worth raising in backlog as an agent environment setup item (copilot-setup-steps).
+
+---
+
+
 
 **Branch:** `copilot/add-trafilatura-dependency`
 
