@@ -40,25 +40,25 @@ _VOLUME_WINDOW_DAYS = 14
 
 # Source class inferred from URL domain.
 _URL_SOURCE_CLASS: list[tuple[str, str]] = [
-    ("youtube.com",         "practitioner"),
-    ("youtu.be",            "practitioner"),
-    ("news.ycombinator.com","practitioner"),
-    ("hacker",              "practitioner"),
-    ("substack.com",        "media"),
-    ("arxiv.org",           "primary"),
-    ("huggingface.co",      "primary"),
-    ("paperswithcode.com",  "primary"),
-    ("openreview.net",      "primary"),
-    ("github.com",          "primary"),
-    ("openai.com",          "operator"),
-    ("anthropic.com",       "operator"),
-    ("deepmind.google",     "operator"),
-    ("blog.google",         "operator"),
-    ("azure.com",           "operator"),
-    ("aws.amazon.com",      "operator"),
-    ("techcrunch.com",      "media"),
-    ("technologyreview.mit","media"),
-    ("theinformation.com",  "media"),
+    ("youtube.com", "practitioner"),
+    ("youtu.be", "practitioner"),
+    ("news.ycombinator.com", "practitioner"),
+    ("hacker", "practitioner"),
+    ("substack.com", "media"),
+    ("arxiv.org", "primary"),
+    ("huggingface.co", "primary"),
+    ("paperswithcode.com", "primary"),
+    ("openreview.net", "primary"),
+    ("github.com", "primary"),
+    ("openai.com", "operator"),
+    ("anthropic.com", "operator"),
+    ("deepmind.google", "operator"),
+    ("blog.google", "operator"),
+    ("azure.com", "operator"),
+    ("aws.amazon.com", "operator"),
+    ("techcrunch.com", "media"),
+    ("technologyreview.mit", "media"),
+    ("theinformation.com", "media"),
 ]
 
 # URL pattern → human-readable source name (for diversity counting).
@@ -66,25 +66,25 @@ _URL_SOURCE_CLASS: list[tuple[str, str]] = [
 # not source *classes* (both are "practitioner"). This gives a meaningful
 # cross-source confirmation signal with the current source set.
 _URL_SOURCE_NAME: list[tuple[str, str]] = [
-    ("youtube.com",          "YouTube"),
-    ("youtu.be",             "YouTube"),
+    ("youtube.com", "YouTube"),
+    ("youtu.be", "YouTube"),
     ("news.ycombinator.com", "Hacker News"),
-    ("substack.com",         "Substack"),
-    ("arxiv.org",            "arXiv"),
-    ("huggingface.co",       "Hugging Face"),
-    ("paperswithcode.com",   "Papers With Code"),
-    ("github.com",           "GitHub"),
-    ("openai.com",           "OpenAI"),
-    ("anthropic.com",        "Anthropic"),
+    ("substack.com", "Substack"),
+    ("arxiv.org", "arXiv"),
+    ("huggingface.co", "Hugging Face"),
+    ("paperswithcode.com", "Papers With Code"),
+    ("github.com", "GitHub"),
+    ("openai.com", "OpenAI"),
+    ("anthropic.com", "Anthropic"),
 ]
 
 # Source type name → class (from run summary section).
 _SOURCE_TYPE_CLASS: dict[str, str] = {
-    "youtube":    "practitioner",
-    "hacker news":"practitioner",
-    "blogs/rss":  "practitioner",
-    "substack":   "media",
-    "rss":        "practitioner",
+    "youtube": "practitioner",
+    "hacker news": "practitioner",
+    "blogs/rss": "practitioner",
+    "substack": "media",
+    "rss": "practitioner",
 }
 
 
@@ -189,7 +189,7 @@ def parse_history_file(
     structured = _parse_item_themes_section(text)
     if structured:
         for url, theme in structured.items():
-            cls  = _infer_source_class(url)
+            cls = _infer_source_class(url)
             name = _infer_source_name(url)
             entries.append((theme, cls, name))
         return entries, source_counts
@@ -197,9 +197,9 @@ def parse_history_file(
     # Fall back to inline Theme: labels (older prompt format)
     inline_themes = _parse_inline_themes(text)
     if inline_themes:
-        yt_count  = source_counts.get("YouTube", 0)
+        yt_count = source_counts.get("YouTube", 0)
         sub_count = source_counts.get("Substack", 0) + source_counts.get("Blogs/RSS", 0)
-        total     = sum(source_counts.values()) or 1
+        total = sum(source_counts.values()) or 1
 
         for i, theme in enumerate(inline_themes):
             cum = i % total if total > 0 else 0
@@ -223,10 +223,7 @@ def _dates_in_window(all_dates: list[str], window_days: int) -> list[str]:
     if not all_dates:
         return []
     sorted_dates = sorted(all_dates, reverse=True)
-    cutoff = (
-        datetime.strptime(sorted_dates[0], "%Y-%m-%d").date()
-        if sorted_dates else date.today()
-    )
+    cutoff = datetime.strptime(sorted_dates[0], "%Y-%m-%d").date() if sorted_dates else date.today()
     result = []
     for d in sorted_dates:
         delta = (cutoff - datetime.strptime(d, "%Y-%m-%d").date()).days
@@ -278,11 +275,13 @@ def _backfill_history(
         else:
             state = "unknown"
 
-        snapshots.append({
-            "date": week,
-            "volume": count,          # raw weekly item count
-            "state": state,
-        })
+        snapshots.append(
+            {
+                "date": week,
+                "volume": count,  # raw weekly item count
+                "state": state,
+            }
+        )
 
     return snapshots[-30:]
 
@@ -304,14 +303,14 @@ def build_trend_metrics(
     # Span of history in weeks (used for per-week volume normalisation)
     if len(all_dates) >= 2:
         oldest = datetime.strptime(all_dates[-1], "%Y-%m-%d").date()
-        newest = datetime.strptime(all_dates[0],  "%Y-%m-%d").date()
+        newest = datetime.strptime(all_dates[0], "%Y-%m-%d").date()
         span_weeks = max(1.0, (newest - oldest).days / 7)
     else:
         span_weeks = 1.0
 
     # Recent and previous windows for velocity
     recent_dates = set(_dates_in_window(all_dates, _VOLUME_WINDOW_DAYS))
-    prev_dates   = set(_dates_in_window(all_dates, _VOLUME_WINDOW_DAYS * 2)) - recent_dates
+    prev_dates = set(_dates_in_window(all_dates, _VOLUME_WINDOW_DAYS * 2)) - recent_dates
 
     metrics_list: list[TrendMetrics] = []
 
@@ -326,7 +325,7 @@ def build_trend_metrics(
 
         # Velocity: recent window count vs previous window count (relative)
         recent_count = sum(1 for d, _, _ in entries if d in recent_dates)
-        prev_count   = sum(1 for d, _, _ in entries if d in prev_dates)
+        prev_count = sum(1 for d, _, _ in entries if d in prev_dates)
         vel_prev = prev_count or max(1, len(entries) - recent_count)
         velocity = round((recent_count - vel_prev) / vel_prev, 4)
 
@@ -346,7 +345,7 @@ def build_trend_metrics(
 
         # Confidence: diversity and volume relative to history span
         diversity_factor = min(1.0, diversity / 3)
-        volume_factor    = min(1.0, volume / 3)
+        volume_factor = min(1.0, volume / 3)
         confidence = round(diversity_factor * 0.5 + volume_factor * 0.5, 3)
 
         # Rolling history: always recompute weekly snapshots from raw entries.
@@ -488,7 +487,7 @@ def run(
     fetch_live: bool = True,
 ) -> None:
     today_str = datetime.now(UTC).strftime("%Y-%m-%d")
-    now_iso   = datetime.now(UTC).isoformat()
+    now_iso = datetime.now(UTC).isoformat()
 
     # ── 0. Load config (for trend sources) ───────────────────────────
     try:
@@ -497,6 +496,7 @@ def run(
     except Exception as exc:
         logger.warning("Could not load config, using defaults: %s", exc)
         from src.config import TrendsConfig
+
         trends_cfg = TrendsConfig()
 
     # ── 1. Load and parse all history files ──────────────────────────
@@ -507,8 +507,10 @@ def run(
 
     logger.info("Parsing %d history files from %s", len(txt_files), history_dir)
 
-    all_entries: list[tuple[str, str, str, str]] = []  # (date_str, theme, source_class, source_name)
-    all_source_counts: Counter = Counter()         # source_type_name → total count
+    all_entries: list[
+        tuple[str, str, str, str]
+    ] = []  # (date_str, theme, source_class, source_name)
+    all_source_counts: Counter = Counter()  # source_type_name → total count
 
     for f in txt_files:
         date_str = f.stem  # YYYY-MM-DD
@@ -569,9 +571,7 @@ def run(
             _, theme_definitions, gemini_edges = cluster_themes(theme_records, existing_theme_names)
 
             def_lookup: dict[str, dict] = {
-                td["theme"]: td
-                for td in theme_definitions
-                if td.get("theme")
+                td["theme"]: td for td in theme_definitions if td.get("theme")
             }
             for m in metrics:
                 if m.theme in def_lookup:
@@ -615,7 +615,8 @@ def run(
 
     for cls in ("primary", "operator", "practitioner", "media", "market"):
         total = sum(
-            count for src, count in all_source_counts.items()
+            count
+            for src, count in all_source_counts.items()
             if _SOURCE_TYPE_CLASS.get(src, "practitioner") == cls
         )
         source_class_info[cls] = {
@@ -642,15 +643,17 @@ def run(
     for name, info in sorted(per_source.items(), key=lambda x: -x[1]["item_count"]):
         dates_sorted = sorted(info["dates"])
         top_themes = [t for t, _ in info["theme_counts"].most_common(5)]
-        source_list.append({
-            "name": name,
-            "source_class": info["source_class"],
-            "item_count": info["item_count"],
-            "first_seen": dates_sorted[0] if dates_sorted else "",
-            "last_seen": dates_sorted[-1] if dates_sorted else "",
-            "days_active": len(info["dates"]),
-            "top_themes": top_themes,
-        })
+        source_list.append(
+            {
+                "name": name,
+                "source_class": info["source_class"],
+                "item_count": info["item_count"],
+                "first_seen": dates_sorted[0] if dates_sorted else "",
+                "last_seen": dates_sorted[-1] if dates_sorted else "",
+                "days_active": len(info["dates"]),
+                "top_themes": top_themes,
+            }
+        )
 
     # ── 6. Graph: co-occurrence + Gemini-derived relationships ──────────
     # Themes that appear on the same day → compositional edge candidate.
@@ -664,14 +667,17 @@ def run(
     edges: list[dict] = []
     theme_list = [m.theme for m in metrics if m.theme in top_themes]
     for i, t1 in enumerate(theme_list):
-        for t2 in theme_list[i + 1:]:
+        for t2 in theme_list[i + 1 :]:
             shared = len(dates_per_theme[t1] & dates_per_theme[t2])
             if shared >= 3:
-                edges.append({
-                    "source": t1, "target": t2,
-                    "rel_type": "compositional",
-                    "weight": shared,
-                })
+                edges.append(
+                    {
+                        "source": t1,
+                        "target": t2,
+                        "rel_type": "compositional",
+                        "weight": shared,
+                    }
+                )
     edges.sort(key=lambda e: e["weight"], reverse=True)
 
     # Merge Gemini-derived edges (W-0005): replace or extend co-occurrence set
@@ -687,57 +693,92 @@ def run(
     if dry_run:
         logger.info(
             "[dry-run] Would write %d themes, %d metrics, %d graph edges to %s",
-            len(theme_nodes), len(metrics), len(edges), docs_data_dir,
+            len(theme_nodes),
+            len(metrics),
+            len(edges),
+            docs_data_dir,
         )
         _preview(metrics[:5])
         return
 
     docs_data_dir.mkdir(parents=True, exist_ok=True)
 
-    (docs_data_dir / "meta.json").write_text(json.dumps({
-        "last_run": now_iso,
-        "run_id": today_str,
-        "item_count": len(all_entries),
-        "theme_count": len(metrics),
-        "source_class_counts": dict(all_source_counts),
-    }, indent=2))
+    (docs_data_dir / "meta.json").write_text(
+        json.dumps(
+            {
+                "last_run": now_iso,
+                "run_id": today_str,
+                "item_count": len(all_entries),
+                "theme_count": len(metrics),
+                "source_class_counts": dict(all_source_counts),
+            },
+            indent=2,
+        )
+    )
 
-    (docs_data_dir / "trends.json").write_text(json.dumps({
-        "generated": now_iso,
-        "trends": [asdict(m) for m in metrics],
-    }, indent=2))
+    (docs_data_dir / "trends.json").write_text(
+        json.dumps(
+            {
+                "generated": now_iso,
+                "trends": [asdict(m) for m in metrics],
+            },
+            indent=2,
+        )
+    )
 
-    (docs_data_dir / "themes.json").write_text(json.dumps({
-        "generated": now_iso,
-        "themes": [asdict(n) for n in theme_nodes],
-    }, indent=2))
+    (docs_data_dir / "themes.json").write_text(
+        json.dumps(
+            {
+                "generated": now_iso,
+                "themes": [asdict(n) for n in theme_nodes],
+            },
+            indent=2,
+        )
+    )
 
-    (docs_data_dir / "graph.json").write_text(json.dumps({
-        "generated": now_iso,
-        "nodes": [
-            {"id": m.theme, "domain": m.domain, "state": m.state, "volume": m.volume}
-            for m in metrics
-        ],
-        "edges": edges,
-    }, indent=2))
+    (docs_data_dir / "graph.json").write_text(
+        json.dumps(
+            {
+                "generated": now_iso,
+                "nodes": [
+                    {"id": m.theme, "domain": m.domain, "state": m.state, "volume": m.volume}
+                    for m in metrics
+                ],
+                "edges": edges,
+            },
+            indent=2,
+        )
+    )
 
-    (docs_data_dir / "items.json").write_text(json.dumps({
-        "generated": now_iso,
-        "items": [
-            {"date": d, "theme": t, "source_class": c, "source_name": n}
-            for d, t, c, n in all_entries
-        ],
-    }, indent=2))
+    (docs_data_dir / "items.json").write_text(
+        json.dumps(
+            {
+                "generated": now_iso,
+                "items": [
+                    {"date": d, "theme": t, "source_class": c, "source_name": n}
+                    for d, t, c, n in all_entries
+                ],
+            },
+            indent=2,
+        )
+    )
 
-    (docs_data_dir / "sources.json").write_text(json.dumps({
-        "generated": now_iso,
-        "classes": source_class_info,
-        "sources": source_list,
-    }, indent=2))
+    (docs_data_dir / "sources.json").write_text(
+        json.dumps(
+            {
+                "generated": now_iso,
+                "classes": source_class_info,
+                "sources": source_list,
+            },
+            indent=2,
+        )
+    )
 
     logger.info(
         "Trend analysis complete: %d themes, %d graph edges → %s",
-        len(metrics), len(edges), docs_data_dir,
+        len(metrics),
+        len(edges),
+        docs_data_dir,
     )
     _preview(metrics[:5])
 
@@ -746,7 +787,12 @@ def _preview(metrics: list[TrendMetrics]) -> None:
     for m in metrics:
         logger.info(
             "  %-35s  state=%-10s  vol=%.1f  vel=%+.2f  div=%d  hype=%.0f%%",
-            m.theme, m.state, m.volume, m.velocity, m.diversity, m.hype_risk * 100,
+            m.theme,
+            m.state,
+            m.volume,
+            m.velocity,
+            m.diversity,
+            m.hype_risk * 100,
         )
 
 
@@ -755,23 +801,23 @@ def _preview(metrics: list[TrendMetrics]) -> None:
 
 def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(description="Trend analysis pipeline")
-    parser.add_argument("--docs",     default="docs/data", help="Path to docs/data/ directory")
-    parser.add_argument("--history",  default="history",   help="Path to history/ directory")
-    parser.add_argument("--dry-run",  action="store_true", help="Preview output without writing files")
-    parser.add_argument("--no-fetch", action="store_true", help="Skip live source fetching; history only")
-    parser.add_argument("--debug",    action="store_true", help="Enable debug logging")
+    parser.add_argument("--docs", default="docs/data", help="Path to docs/data/ directory")
+    parser.add_argument("--history", default="history", help="Path to history/ directory")
+    parser.add_argument(
+        "--dry-run", action="store_true", help="Preview output without writing files"
+    )
+    parser.add_argument(
+        "--no-fetch", action="store_true", help="Skip live source fetching; history only"
+    )
+    parser.add_argument("--debug", action="store_true", help="Enable debug logging")
     args = parser.parse_args(argv)
 
     setup_logging(debug=args.debug)
 
     repo_root = Path(__file__).parent.parent
-    docs_data_dir = (
-        Path(args.docs) if Path(args.docs).is_absolute()
-        else repo_root / args.docs
-    )
+    docs_data_dir = Path(args.docs) if Path(args.docs).is_absolute() else repo_root / args.docs
     history_dir = (
-        Path(args.history) if Path(args.history).is_absolute()
-        else repo_root / args.history
+        Path(args.history) if Path(args.history).is_absolute() else repo_root / args.history
     )
 
     if not history_dir.exists():

@@ -6,7 +6,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from src.emailer import send_digest
+from src.emailer import main, send_digest
 
 
 def _env(provider: str = "gmail") -> dict[str, str]:
@@ -139,3 +139,43 @@ class TestSendDigest:
         payload = mock_post.call_args.kwargs["json"]
         assert payload["text"] == "Plain"
         assert payload["html"] == "<b>HTML content</b>"
+
+
+class TestEmailerCLI:
+    """Tests for the src.emailer CLI mode (slice 7.3)."""
+
+    def test_cli_sends_email_with_subject_and_body(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        for k, v in _env("gmail").items():
+            monkeypatch.setenv(k, v)
+
+        mock_server = MagicMock()
+        mock_server.__enter__ = lambda s: s
+        mock_server.__exit__ = MagicMock(return_value=False)
+
+        with patch("src.emailer.smtplib.SMTP_SSL", return_value=mock_server):
+            main(["--subject", "Pipeline FAILED", "--body", "Check the logs."])
+
+        mock_server.sendmail.assert_called_once()
+        raw_message = mock_server.sendmail.call_args.args[2]
+        assert "Pipeline FAILED" in raw_message
+
+    def test_cli_exits_nonzero_on_missing_env(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.delenv("EMAIL_SENDER", raising=False)
+        monkeypatch.delenv("EMAIL_RECIPIENT", raising=False)
+
+        with pytest.raises(SystemExit) as exc_info:
+            main(["--subject", "Alert", "--body", "Something broke"])
+
+        assert exc_info.value.code != 0
+
+    def test_cli_exits_nonzero_when_send_fails(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        for k, v in _env("gmail").items():
+            monkeypatch.setenv(k, v)
+
+        with (
+            patch("src.emailer.smtplib.SMTP_SSL", side_effect=OSError("SMTP refused")),
+            pytest.raises(SystemExit) as exc_info,
+        ):
+            main(["--subject", "Alert", "--body", "Something broke"])
+
+        assert exc_info.value.code != 0

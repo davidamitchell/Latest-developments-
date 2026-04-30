@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
+import argparse
 import logging
 import os
 import smtplib
+import sys
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
@@ -122,3 +124,31 @@ def _send_resend(
     )
     response.raise_for_status()
     logger.info("Email sent via Resend (status %s)", response.status_code)
+
+
+def main(argv: list[str] | None = None) -> None:
+    """CLI entry point for sending a plain-text alert email.
+
+    Usage::
+
+        python -m src.emailer --subject "Alert subject" --body "Alert body"
+
+    Reads the same environment variables as the digest pipeline (EMAIL_PROVIDER,
+    EMAIL_SENDER, EMAIL_PASSWORD / RESEND_API_KEY, EMAIL_RECIPIENT).
+    Exits non-zero on failure.
+    """
+    logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
+    parser = argparse.ArgumentParser(description="Send a plain-text alert email")
+    parser.add_argument("--subject", required=True, help="Email subject line")
+    parser.add_argument("--body", required=True, help="Plain-text email body")
+    args = parser.parse_args(argv)
+
+    try:
+        send_digest(args.subject, args.body)
+    except Exception as exc:
+        logger.error("Failed to send alert email: %s", exc)
+        sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()

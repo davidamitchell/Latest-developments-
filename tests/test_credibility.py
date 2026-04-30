@@ -19,6 +19,7 @@ from src.models import CanonicalRecord
 # Helper
 # ---------------------------------------------------------------------------
 
+
 def _record(
     source_class: str = "practitioner",
     evidence_type: str = "unknown",
@@ -37,6 +38,7 @@ def _record(
 # ---------------------------------------------------------------------------
 # time_decay
 # ---------------------------------------------------------------------------
+
 
 class TestTimeDecay:
     def test_today_item_is_close_to_one(self):
@@ -80,6 +82,7 @@ class TestTimeDecay:
 # ---------------------------------------------------------------------------
 # score_credibility — axis checks
 # ---------------------------------------------------------------------------
+
 
 class TestScoreCredibility:
     def test_primary_experiment_is_high(self):
@@ -133,6 +136,7 @@ class TestScoreCredibility:
 # detect_hype
 # ---------------------------------------------------------------------------
 
+
 class TestDetectHype:
     def test_operator_announcement_is_high_hype(self):
         rec = _record(source_class="operator", evidence_type="announcement")
@@ -174,8 +178,11 @@ class TestDetectHype:
 # Proximity axis completeness
 # ---------------------------------------------------------------------------
 
+
 class TestProximityAxis:
-    @pytest.mark.parametrize("source_class", ["primary", "operator", "practitioner", "media", "market"])
+    @pytest.mark.parametrize(
+        "source_class", ["primary", "operator", "practitioner", "media", "market"]
+    )
     def test_all_source_classes_have_proximity(self, source_class: str):
         assert source_class in _PROXIMITY
 
@@ -190,10 +197,12 @@ class TestProximityAxis:
 # Reproducibility axis completeness
 # ---------------------------------------------------------------------------
 
+
 class TestReproducibilityAxis:
-    @pytest.mark.parametrize("evidence_type", [
-        "experiment", "benchmark", "analysis", "anecdote", "announcement", "unknown"
-    ])
+    @pytest.mark.parametrize(
+        "evidence_type",
+        ["experiment", "benchmark", "analysis", "anecdote", "announcement", "unknown"],
+    )
     def test_all_evidence_types_have_reproducibility(self, evidence_type: str):
         assert evidence_type in _REPRODUCIBILITY
 
