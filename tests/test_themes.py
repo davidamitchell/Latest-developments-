@@ -8,6 +8,7 @@ from unittest.mock import MagicMock, patch
 from src.models import CanonicalRecord
 from src.themes import (
     DOMAIN_TAXONOMY,
+    build_graph_edges,
     cluster_themes,
     normalize_theme_name,
 )
@@ -243,3 +244,84 @@ class TestDomainTaxonomy:
 
     def test_taxonomy_entries_are_lowercase(self):
         assert all(d == d.lower() for d in DOMAIN_TAXONOMY)
+
+
+# ---------------------------------------------------------------------------
+# build_graph_edges
+# ---------------------------------------------------------------------------
+
+
+class TestBuildGraphEdges:
+    def test_empty_input_returns_empty_list(self):
+        assert build_graph_edges([]) == []
+
+    def test_converts_relationship_dict_to_graph_edge(self):
+        rels = [{"source": "Theme A", "target": "Theme B", "rel_type": "causal", "weight": 2}]
+        edges = build_graph_edges(rels)
+        assert len(edges) == 1
+        assert edges[0].source == "Theme A"
+        assert edges[0].target == "Theme B"
+        assert edges[0].rel_type == "causal"
+        assert edges[0].weight == 2.0
+
+    def test_deduplicates_identical_edges(self):
+        rel = {"source": "Theme A", "target": "Theme B", "rel_type": "causal", "weight": 1}
+        edges = build_graph_edges([rel, rel, rel])
+        assert len(edges) == 1
+
+    def test_same_source_and_target_different_rel_type_kept_separate(self):
+        rels = [
+            {"source": "Theme A", "target": "Theme B", "rel_type": "causal", "weight": 1},
+            {"source": "Theme A", "target": "Theme B", "rel_type": "competitive", "weight": 1},
+        ]
+        edges = build_graph_edges(rels)
+        assert len(edges) == 2
+
+    def test_self_referential_edges_skipped(self):
+        rels = [{"source": "Theme A", "target": "Theme A", "rel_type": "causal", "weight": 1}]
+        edges = build_graph_edges(rels)
+        assert edges == []
+
+    def test_edges_with_missing_source_or_target_skipped(self):
+        rels = [
+            {"source": "", "target": "Theme B", "rel_type": "causal", "weight": 1},
+            {"source": "Theme A", "target": "", "rel_type": "causal", "weight": 1},
+            {"source": "Theme A", "target": "Theme B", "rel_type": "causal", "weight": 1},
+        ]
+        edges = build_graph_edges(rels)
+        assert len(edges) == 1
+        assert edges[0].source == "Theme A"
+
+    def test_default_weight_is_one(self):
+        rels = [{"source": "Theme A", "target": "Theme B", "rel_type": "causal"}]
+        edges = build_graph_edges(rels)
+        assert edges[0].weight == 1.0
+
+    def test_default_rel_type_is_causal(self):
+        rels = [{"source": "Theme A", "target": "Theme B"}]
+        edges = build_graph_edges(rels)
+        assert edges[0].rel_type == "causal"
+
+    def test_multiple_distinct_edges_all_returned(self):
+        rels = [
+            {
+                "source": "Inference Cost Reduction",
+                "target": "Agent Tool Use",
+                "rel_type": "causal",
+                "weight": 1,
+            },
+            {
+                "source": "Agent Tool Use",
+                "target": "Multi-Agent Systems",
+                "rel_type": "compositional",
+                "weight": 2,
+            },
+            {
+                "source": "Inference Cost Reduction",
+                "target": "Multi-Agent Systems",
+                "rel_type": "causal",
+                "weight": 1,
+            },
+        ]
+        edges = build_graph_edges(rels)
+        assert len(edges) == 3

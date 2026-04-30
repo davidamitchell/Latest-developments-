@@ -6,7 +6,7 @@ from datetime import datetime
 from unittest.mock import patch
 
 from src.config import HackerNewsConfig
-from src.fetchers.hackernews import HackerNewsFetcher, _parse_hn_date
+from src.fetchers.hackernews import HackerNewsFetcher, _fetch_article_text, _parse_hn_date
 
 
 def _make_config(**kwargs: object) -> HackerNewsConfig:
@@ -222,8 +222,104 @@ class TestHackerNewsFetcher:
 
         assert items == []
 
+    def test_article_text_included_in_content_when_available(self) -> None:
+        """When trafilatura extracts article text, it is included in item content."""
+        cfg = _make_config()
+        hit = _make_hit("42", url="https://example.com/article")
 
-class TestParseHnDate:
+        with (
+            patch(
+                "src.fetchers.hackernews._fetch_algolia",
+                return_value=_algolia_response([hit]),
+            ),
+            patch(
+                "src.fetchers.hackernews._fetch_article_text",
+                return_value="Full article body text here.",
+            ),
+        ):
+            items = HackerNewsFetcher(cfg).fetch(set())
+
+        assert len(items) == 1
+        assert "Full article body text here." in items[0].content
+
+    def test_fallback_to_metadata_when_article_fetch_fails(self) -> None:
+        """When article fetch returns None, content falls back to points/comments metadata."""
+        cfg = _make_config()
+        hit = _make_hit("42", points=300, num_comments=42, url="https://example.com/article")
+
+        with (
+            patch(
+                "src.fetchers.hackernews._fetch_algolia",
+                return_value=_algolia_response([hit]),
+            ),
+            patch(
+                "src.fetchers.hackernews._fetch_article_text",
+                return_value=None,
+            ),
+        ):
+            items = HackerNewsFetcher(cfg).fetch(set())
+
+        assert len(items) == 1
+        assert "Points: 300" in items[0].content
+        assert "Comments: 42" in items[0].content
+        # Article text should not appear
+        assert "Article text:" not in items[0].content
+
+    def test_fallback_when_no_article_url(self) -> None:
+        """Stories without an external URL still produce an item with metadata content."""
+        cfg = _make_config()
+        hit = _make_hit("55", url="")
+        hit["url"] = None
+
+        with patch(
+            "src.fetchers.hackernews._fetch_algolia",
+            return_value=_algolia_response([hit]),
+        ):
+            items = HackerNewsFetcher(cfg).fetch(set())
+
+        assert len(items) == 1
+        assert "Points:" in items[0].content
+        assert "Article text:" not in items[0].content
+
+
+class TestFetchArticleText:
+    def test_returns_text_on_success(self) -> None:
+        """Returns extracted text when trafilatura succeeds."""
+        with (
+            patch("src.fetchers.hackernews.trafilatura.fetch_url", return_value="<html>...</html>"),
+            patch("src.fetchers.hackernews.trafilatura.extract", return_value="Extracted article."),
+        ):
+            result = _fetch_article_text("https://example.com/article")
+
+        assert result == "Extracted article."
+
+    def test_returns_none_when_fetch_returns_nothing(self) -> None:
+        """Returns None when trafilatura.fetch_url returns None or empty string."""
+        with patch("src.fetchers.hackernews.trafilatura.fetch_url", return_value=None):
+            result = _fetch_article_text("https://example.com/article")
+
+        assert result is None
+
+    def test_returns_none_when_extract_returns_nothing(self) -> None:
+        """Returns None when trafilatura.extract returns None (e.g. paywall)."""
+        with (
+            patch("src.fetchers.hackernews.trafilatura.fetch_url", return_value="<html>...</html>"),
+            patch("src.fetchers.hackernews.trafilatura.extract", return_value=None),
+        ):
+            result = _fetch_article_text("https://example.com/article")
+
+        assert result is None
+
+    def test_returns_none_on_exception(self) -> None:
+        """Never raises — returns None when fetch throws any exception."""
+        with patch(
+            "src.fetchers.hackernews.trafilatura.fetch_url",
+            side_effect=OSError("connection refused"),
+        ):
+            result = _fetch_article_text("https://example.com/article")
+
+        assert result is None
+
     def test_parses_algolia_timestamp(self) -> None:
         result = _parse_hn_date("2026-02-21T07:00:00.000Z")
         assert result is not None

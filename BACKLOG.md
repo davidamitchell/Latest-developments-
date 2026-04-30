@@ -118,7 +118,7 @@ Top AI/LLM stories from HN included in digest.
 | # | Slice | Status | Notes |
 |---|---|---|---|
 | 5.1 | `src/fetchers/hackernews.py` — query HN Algolia API for top stories | `[x]` | Filter by keyword list and min score from config; deduplicates by Algolia `objectID` |
-| 5.2 | Fetch linked article text (best-effort; skip paywalled) | `[ ]` | Use `trafilatura` for article extraction |
+| 5.2 | Fetch linked article text (best-effort; skip paywalled) | `[x]` | `trafilatura` — best-effort; falls back to HN metadata on any failure |
 | 5.3 | Deduplication by HN story ID | `[x]` | Uses `objectID` as stable dedup key |
 | 5.4 | Include HN section in digest email | `[x]` | Wired into `src/main.py` alongside YouTube and RSS fetchers |
 
@@ -153,7 +153,7 @@ Pipeline degrades gracefully; failures are surfaced.
 |---|---|---|---|
 | 7.1 | Per-source retry with exponential backoff (3 attempts) | `[x]` | `src/retry.py` — `with_backoff()` used by all fetchers and the summariser |
 | 7.2 | Source failure logs error and continues; digest still sent | `[x]` | Both `YouTubeFetcher` and `RSSFetcher` catch per-source exceptions and continue; pipeline proceeds with whatever items were successfully fetched |
-| 7.3 | Workflow failure sends alert email | `[ ]` | Uses GitHub Actions failure notification |
+| 7.3 | Workflow failure sends alert email | `[x]` | `python -m src.emailer --subject/--body` CLI; `if: failure()` step in daily-digest.yml |
 | 7.4 | `pytest` suite with mocked network for all fetchers | `[x]` | Tests in `tests/test_fetchers_*.py` cover YouTube, RSS, and HN fetchers with mocked network |
 | 7.5 | `ruff` linting enforced in CI | `[x]` | `.github/workflows/ci.yml` — runs `ruff check` + `ruff format --check` + `pytest` on every push/PR |
 | 7.6 | Smoke tests in `tests/test_smoke.py`: exercise the full pipeline (`main()`) with mocked network; assert exit 0, no crash, digest contains expected structure even when fetchers or Gemini fail | `[x]` | Catches integration-level regressions that unit tests miss |
@@ -225,7 +225,7 @@ Every item carries a `source_class` label for credibility triangulation.
 | 11.2 | Assign source class per fetcher | `[x]` | YouTube/HN=practitioner, Substack=media, RSS=configurable |
 | 11.3 | `src/models.py` — `CanonicalRecord`, `TrendMetrics`, `ThemeNode`, `GraphEdge` | `[x]` | |
 | 11.4 | `source_class` field on `RSSFeed` config | `[x]` | Set per-feed in `sources.yaml` |
-| 11.5 | Tests for source class assignment | `[ ]` | Confirm each fetcher outputs correct class |
+| 11.5 | Tests for source class assignment | `[x]` | tests/test_source_class.py — 8 tests |
 
 ---
 
@@ -236,7 +236,7 @@ Every item carries a `source_class` label for credibility triangulation.
 | 12.1 | `src/credibility.py` — 5-axis credibility scoring | `[x]` | proximity, incentive, reproducibility, adoption, time_decay |
 | 12.2 | Hype detection | `[x]` | `detect_hype()` — evidence density × source incentive proxy |
 | 12.3 | `extract_records_from_digest()` in `src/trends.py` | `[x]` | Gemini JSON-lines extraction per history digest |
-| 12.4 | Tests for credibility scoring | `[ ]` | Unit tests for each axis and edge cases |
+| 12.4 | Tests for credibility scoring | `[x]` | tests/test_credibility.py — 35 tests |
 
 ---
 
@@ -247,7 +247,7 @@ Every item carries a `source_class` label for credibility triangulation.
 | 13.1 | `src/themes.py` — synonym normalization map | `[x]` | ~30 entries; collapses common rebrands |
 | 13.2 | `cluster_themes()` — Gemini-powered clustering | `[x]` | Domain taxonomy enforced; definitions extracted |
 | 13.3 | `build_graph_edges()` — relationship graph | `[x]` | causal/competitive/compositional/contradictory |
-| 13.4 | Tests for clustering | `[ ]` | Idempotency; synonym collapse; graceful API failure |
+| 13.4 | Tests for clustering | `[x]` | Idempotency; synonym collapse; graceful API failure; build_graph_edges |
 
 ---
 
@@ -259,7 +259,7 @@ Every item carries a `source_class` label for credibility triangulation.
 | 14.2 | `compute_velocity()` and `compute_stability()` | `[x]` | Rolling week-over-week metrics |
 | 14.3 | Cross-class confirmation gate | `[x]` | diversity ≥ 2 required for non-declining state |
 | 14.4 | `update_metrics()` — rolling history append | `[x]` | Max 30 snapshots per theme |
-| 14.5 | Tests for state transitions | `[ ]` | Including spike vs trend, diversity gate |
+| 14.5 | Tests for state transitions | `[x]` | tests/test_trend_state.py — 35 tests (extended) |
 
 ---
 

@@ -16,6 +16,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `PapersWithCodeConfig`, `OperatorChangelogConfig`, `ReplicateConfig`, `OpenReviewConfig` added to `src/config.py` and `TrendsConfig`.
 - All four sources added to `config/sources.yaml` under `trends.*` (`enabled: false` by default).
 - All four fetchers wired into `src/trends.py`.
+- **HN article text extraction** (slice 5.2): Hacker News fetcher now attempts to extract full article text via `trafilatura` for each story with an external URL. Best-effort — falls back to HN metadata (points/comments) on any failure, paywall, or empty extraction. Never raises.
+- **Workflow failure alert email** (slice 7.3): `src/emailer.py` now supports a CLI mode (`python -m src.emailer --subject "..." --body "..."`). Daily Digest workflow has a `if: failure()` step that sends a plain-text alert email when the pipeline fails.
 - **Per-theme unique colour system**: every theme is assigned a unique, maximally-contrasting hex colour from a 20-slot palette. The same colour is used everywhere that theme appears — trend chart lines, hype bar charts, trend table swatch, theme card border and name, heatmap row label, source table theme pills. Assignment is deterministic (alphabetical sort before palette slot), so colours are stable across page reloads.
 - **Dark mode GitHub Pages site**: converted `docs/` dashboard to dark mode using IBM Plex Mono font and Research site palette (`#0d0d0d` bg, `#00C3A5` teal, `#E8A1A8` dusk, `#252b33` borders)
 - `learnings.md`: session notes capturing patterns, friction, and root causes
