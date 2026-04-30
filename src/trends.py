@@ -25,8 +25,8 @@ from src.config import load_config
 from src.fetchers.arxiv import ArxivFetcher
 from src.fetchers.huggingface import HuggingFaceFetcher
 from src.logger import setup_logging
-from src.models import ThemeNode, TrendMetrics
-from src.themes import normalize_theme_name
+from src.models import CanonicalRecord, ThemeNode, TrendMetrics
+from src.themes import cluster_themes, normalize_theme_name
 from src.trend_state import classify_state, compute_stability
 
 logger = logging.getLogger(__name__)
@@ -547,6 +547,49 @@ def run(
     metrics = build_trend_metrics(all_entries, existing, today_str)
     logger.info("Computed metrics for %d themes", len(metrics))
 
+    # ── 3b. Enrich theme metadata via Gemini (W-0005) ─────────────────
+    # cluster_themes() uses Gemini to assign canonical domain + write a
+    # one-sentence definition for each theme.  It requires GEMINI_API_KEY
+    # which is available in GitHub Actions but not in local --no-fetch runs.
+    # Graceful fallback: keep "unknown" domain and empty definition.
+    import os as _os  # noqa: PLC0415
+    if _os.environ.get("GEMINI_API_KEY"):
+        try:
+            theme_records = [
+                CanonicalRecord(
+                    url=f"theme://{m.theme}",
+                    title=m.theme,
+                    source_class="practitioner",
+                    claim=m.theme,
+                    domain="unknown",  # type: ignore[arg-type]
+                )
+                for m in metrics
+            ]
+            existing_theme_names = [m.theme for m in metrics]
+            _, theme_definitions, gemini_edges = cluster_themes(theme_records, existing_theme_names)
+
+            def_lookup: dict[str, dict] = {
+                td["theme"]: td
+                for td in theme_definitions
+                if td.get("theme")
+            }
+            for m in metrics:
+                if m.theme in def_lookup:
+                    meta = def_lookup[m.theme]
+                    if not m.domain or m.domain == "unknown":
+                        m.domain = meta.get("domain", "unknown")
+                    if not m.definition:
+                        m.definition = meta.get("definition", "")
+
+            logger.info("Gemini theme enrichment: %d themes updated", len(def_lookup))
+            _gemini_edges: list[dict] = gemini_edges
+        except Exception as exc:
+            logger.warning("Gemini theme enrichment failed — skipping: %s", exc)
+            _gemini_edges = []
+    else:
+        logger.debug("GEMINI_API_KEY not set — skipping Gemini theme enrichment")
+        _gemini_edges = []
+
     # ── 4. Build theme nodes (for themes tab) ─────────────────────────
     theme_nodes: list[ThemeNode] = [
         ThemeNode(
@@ -609,8 +652,10 @@ def run(
             "top_themes": top_themes,
         })
 
-    # ── 6. Simple co-occurrence graph (no API) ────────────────────────
-    # Themes that appear on the same day → compositional edge candidate
+    # ── 6. Graph: co-occurrence + Gemini-derived relationships ──────────
+    # Themes that appear on the same day → compositional edge candidate.
+    # Gemini-derived edges (from cluster_themes) are merged and take precedence
+    # over co-occurrence edges for the same source/target pair.
     dates_per_theme: dict[str, set] = defaultdict(set)
     for date_str, theme, _, _name in all_entries:
         dates_per_theme[theme].add(date_str)
@@ -628,6 +673,15 @@ def run(
                     "weight": shared,
                 })
     edges.sort(key=lambda e: e["weight"], reverse=True)
+
+    # Merge Gemini-derived edges (W-0005): replace or extend co-occurrence set
+    if _gemini_edges:
+        existing_pairs = {(e["source"], e["target"]) for e in edges}
+        for ge in _gemini_edges:
+            pair = (ge.get("source", ""), ge.get("target", ""))
+            if pair not in existing_pairs and pair[0] and pair[1]:
+                edges.append(ge)
+                existing_pairs.add(pair)
 
     # ── 7. Write output ───────────────────────────────────────────────
     if dry_run:

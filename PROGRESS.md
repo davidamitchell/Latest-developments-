@@ -430,3 +430,30 @@ Standardisation pass: expanded `.github/copilot-instructions.md` from stub to fu
 3. **What change would prevent issues next time?** The "Deferred / Ideas" table header was accidentally dropped when inserting new entries; always verify the end-of-file structure after large BACKLOG.md edits.
 4. **Is this a pattern?** Minor markdown editing slip; not a systemic pattern.
 
+
+
+## 2026-04-30 — Backlog batch: W-0019, W-0013, W-0005/W-0014
+
+**Completed:**
+
+- **W-0019 (done):** Added 9 confirmed RSS feeds to `config/sources.yaml` as opt-in commented-out entries with correct `source_class`. Added in both `blogs.rss` section (email digest) and `trends.operator_rss` section (trend pipeline). Each entry has inline comment explaining signal type and priority.
+
+- **W-0013 (done):** Filled all 4 pending test gaps. 100 new tests added (369 total, up from 269):
+  - `tests/test_source_class.py` — 8 tests: asserts each fetcher (YouTube, HN, Substack, RSS ×3, arXiv, HuggingFace) emits the correct `source_class` on `FetchedItem`
+  - `tests/test_credibility.py` — 35 tests: 5-axis credibility scoring, time decay, hype detection; boundary checks on all source class + evidence type combinations
+  - `tests/test_themes.py` — 22 tests: synonym normalization idempotency, graceful API failure fallback, valid Gemini response parsing, markdown fence stripping, domain taxonomy completeness
+  - `tests/test_trend_state.py` — 35 tests: diversity gate (spike vs trend), declining/emerging/scaling/mature transitions, velocity edge cases, stability calculation, update_metrics rollover
+
+- **W-0005/W-0014 (done, combined):** `cluster_themes()` is now wired into `src/trends.py run()`. After metrics are computed, if `GEMINI_API_KEY` is set, Gemini assigns a canonical domain and one-sentence definition to each theme. Results are merged back into `TrendMetrics` before writing `trends.json`/`themes.json`. Gemini relationship edges extend `graph.json` beyond co-occurrence-only edges. Graceful fallback: if key absent, domain stays "unknown", definition stays empty — no runtime error.
+
+**ruff check:** clean. All 369 tests pass.
+
+### Mini-Retro
+
+1. **Did the process work?** Yes — working top-down through the "ready" backlog items by estimated value and effort worked well. Tests were written to the existing module behaviour, not an idealised interface.
+
+2. **What slowed down?** Two issues in test_source_class.py: (a) YouTube fetcher created before `os.environ.get` was patched so `_api_key` was already `""` by the time `fetch()` ran; (b) RSS/Substack tests used `httpx.get` patching when the fetchers use `_fetch_url` / `_fetch_json` internal helpers instead. Lesson: always look at how the existing tests for the same module mock things, not just how the module is imported.
+
+3. **What single change would prevent this next time?** Before writing any new mocking: run `grep "patch" tests/test_fetchers_<target>.py | head -5` to see the established mock target in the existing test file. The internal helper function pattern (`_fetch_url`, `_fetch_json`) is now documented in learnings.md.
+
+4. **Is this a pattern?** Yes — this is the second time the wrong mock target was used for an httpx-backed fetcher. Added a note to learnings.md: _"Fetchers with `_fetch_url`/`_fetch_json` wrappers must be patched at the wrapper, not at `httpx.get`."_

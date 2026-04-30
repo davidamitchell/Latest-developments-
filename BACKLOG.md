@@ -371,13 +371,13 @@ Source-class heatmap on the Sources page renders correctly on mobile: columns ar
 
 ## W-0005
 
-status: ready
+status: done
 created: 2026-04-29
-updated: 2026-04-29
+updated: 2026-04-30
 
 ### Outcome
 
-Theme `domain` fields are populated with values from the taxonomy (multimodal, agents, infra, reasoning, safety, evals, data, hardware) and `definition` fields contain human-readable descriptions. Currently both are always empty/unknown.
+`cluster_themes()` is now called from `src/trends.py run()` after metrics are computed (W-0005/W-0014 combined). When `GEMINI_API_KEY` is set, Gemini assigns canonical domains and writes one-sentence definitions for all themes before writing `trends.json` and `themes.json`. Gemini-derived relationship edges are also merged into `graph.json`. Graceful fallback: when key is absent, domain stays "unknown" and definition stays empty — no code change needed for local `--no-fetch` runs.
 
 ### Context
 
@@ -560,13 +560,13 @@ Adoption proxy was defined in the initial architecture but not implemented. It i
 
 ## W-0013
 
-status: ready
+status: done
 created: 2026-04-29
-updated: 2026-04-29
+updated: 2026-04-30
 
 ### Outcome
 
-All four pending test gaps are filled: (11.5) source class per fetcher, (12.4) credibility scoring axes, (13.4) theme clustering idempotency, (14.5) trend state transitions including diversity gate and spike-vs-trend edge cases.
+All four pending test gaps filled. 100 new tests added across 4 files (369 total, up from 269).
 
 ### Context
 
@@ -583,24 +583,13 @@ These test slices were explicitly planned in Epics 11–14 but not yet written. 
 
 ## W-0014
 
-status: ready
+status: done
 created: 2026-04-29
-updated: 2026-04-29
+updated: 2026-04-30
 
 ### Outcome
 
-Theme domain fields in `trends.json` and `themes.json` are populated with values from the taxonomy (multimodal, agents, infra, reasoning, safety, evals, data, hardware) rather than "unknown". All themes have human-readable definitions.
-
-### Context
-
-Domain and definition fields are declared in `TrendMetrics` and `ThemeNode` but always default to "unknown" and "". This makes the site less useful and prevents domain-based filtering. The `cluster_themes()` function in `src/themes.py` uses Gemini to assign domains but is not wired into `src/trends.py`.
-
-### Notes
-
-- Wire `cluster_themes()` call into `src/trends.py` — requires GEMINI_API_KEY (available in GitHub Secrets, not locally)
-- Run daily in CI where key is present
-- Add graceful fallback (keep "unknown") when key not available (local dev)
-- Dependent on W-0005 (theme quality)
+Completed as part of W-0005. Theme domain and definition fields are now populated by `cluster_themes()` in `src/trends.py` when `GEMINI_API_KEY` is present.
 
 ---
 
@@ -820,13 +809,13 @@ Implementation path: items 1–8 (all confirmed RSS) can go directly into `confi
 
 ## W-0019
 
-status: ready
+status: done
 created: 2026-04-29
-updated: 2026-04-29
+updated: 2026-04-30
 
 ### Outcome
 
-The 8 confirmed RSS feeds from W-0018 are added to `config/sources.yaml` as opt-in sources (commented out by default, with `enabled: false`). Each has the correct `source_class` and a short inline comment explaining what it covers.
+The 9 confirmed RSS feeds from W-0018 are added to `config/sources.yaml` as opt-in sources (commented out, ready to activate). Each entry has the correct `source_class` and a short inline comment. Added in both the `blogs.rss` section (for email digest use) and the `trends.operator_rss` section (for trend pipeline use).
 
 ### Context
 

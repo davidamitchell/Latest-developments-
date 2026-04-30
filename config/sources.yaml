@@ -146,6 +146,52 @@ blogs:
     # - name: "The Gradient"
     #   url: "https://thegradient.pub/rss/"
 
+    # ── AI Lab / Operator blogs (W-0019 — source catalogue from the-deep-archive) ──
+    # All have confirmed RSS feeds. Enable individually by uncommenting.
+    # Each has source_class set — used by the trend credibility pipeline.
+    #
+    # - name: "Anthropic Blog"
+    #   url: "https://www.anthropic.com/rss.xml"
+    #   source_class: "operator"
+    #
+    # - name: "OpenAI Blog"
+    #   url: "https://openai.com/blog/rss.xml"
+    #   source_class: "operator"
+    #
+    # - name: "Google AI Blog"
+    #   url: "https://blog.google/technology/ai/rss/"
+    #   source_class: "operator"
+    #
+    # - name: "DeepMind Blog"
+    #   url: "https://deepmind.google/blog/rss.xml"
+    #   source_class: "operator"
+    #
+    # - name: "AWS Machine Learning Blog"
+    #   url: "https://aws.amazon.com/blogs/machine-learning/feed/"
+    #   source_class: "operator"
+    #
+    # - name: "Microsoft AI Blog"
+    #   url: "https://blogs.microsoft.com/ai/feed/"
+    #   source_class: "operator"
+
+    # ── Practitioner / Media (W-0019) ──
+    # - name: "Ethan Mollick — One Useful Thing"
+    #   url: "https://www.oneusefulthing.org/feed"
+    #   source_class: "practitioner"
+    #   # High-signal newsletter on practical AI adoption (Wharton/UPenn).
+    #   # Covers the "jagged frontier" — where AI works and where it doesn't.
+    #
+    # - name: "HBR — AI & Machine Learning"
+    #   url: "https://hbr.org/topic/subject/ai-and-machine-learning/feed"
+    #   source_class: "media"
+    #   # Business/leadership lens on AI strategy and organisational change.
+    #   # Davenport, Lakhani, Westerman all publish here.
+    #
+    # - name: "MIT Sloan Management Review"
+    #   url: "https://sloanreview.mit.edu/feed/"
+    #   source_class: "media"
+    #   # Peer-reviewed management research meeting practice; AI + future of work.
+
 # ---------------------------------------------------------------------------
 # Hacker News
 # ---------------------------------------------------------------------------
@@ -332,3 +378,39 @@ trends:
     enabled: false      # set to true to activate
     max_models: 50
     min_downloads: 100  # filter out low-activity models
+
+  # ── Operator / Media RSS feeds for trends pipeline (W-0019) ──
+  # These feeds are fetched by the trend analysis pipeline (src/trends.py),
+  # NOT the email digest. They add operator-class signal for cross-class
+  # confirmation. All URLs are confirmed RSS. Enable individually.
+  #
+  # operator_rss:
+  #   enabled: false
+  #   feeds:
+  #     - name: "Anthropic Blog"
+  #       url: "https://www.anthropic.com/rss.xml"
+  #       source_class: "operator"
+  #     - name: "OpenAI Blog"
+  #       url: "https://openai.com/blog/rss.xml"
+  #       source_class: "operator"
+  #     - name: "Google AI Blog"
+  #       url: "https://blog.google/technology/ai/rss/"
+  #       source_class: "operator"
+  #     - name: "DeepMind Blog"
+  #       url: "https://deepmind.google/blog/rss.xml"
+  #       source_class: "operator"
+  #     - name: "AWS Machine Learning Blog"
+  #       url: "https://aws.amazon.com/blogs/machine-learning/feed/"
+  #       source_class: "operator"
+  #     - name: "Microsoft AI Blog"
+  #       url: "https://blogs.microsoft.com/ai/feed/"
+  #       source_class: "operator"
+  #     - name: "Ethan Mollick — One Useful Thing"
+  #       url: "https://www.oneusefulthing.org/feed"
+  #       source_class: "practitioner"
+  #     - name: "HBR — AI & Machine Learning"
+  #       url: "https://hbr.org/topic/subject/ai-and-machine-learning/feed"
+  #       source_class: "media"
+  #     - name: "MIT Sloan Management Review"
+  #       url: "https://sloanreview.mit.edu/feed/"
+  #       source_class: "media"

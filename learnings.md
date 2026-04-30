@@ -91,3 +91,32 @@ are created propagates dark colours to all charts without per-chart config repet
 ### Is this a pattern?
 - Playwright lock: **yes, recurring** — noted in previous learnings and happened again. Add a note to copilot-instructions.md that visual verification in this environment must happen at the start of the session.
 
+
+---
+
+## 2026-04-30
+
+### Mock target for fetchers with internal helpers
+
+**Pattern:** Several fetchers (RSS, Substack) wrap `httpx.get` in an internal `_fetch_url` / `_fetch_json` function. Tests must patch the *wrapper*, not `httpx.get`, because `httpx.get` is not the outermost call visible to the test.
+
+- `src.fetchers.rss._fetch_url` — returns `bytes`
+- `src.fetchers.substack._fetch_json` — returns `list[dict]`
+- `src.fetchers.arxiv` — uses `httpx.get` directly, so patch `httpx.get`
+- `src.fetchers.huggingface` — uses `httpx.get` directly, so patch `src.fetchers.huggingface.httpx.get`
+
+**Check before writing mocks:** `grep "patch" tests/test_fetchers_<target>.py | head -5`
+
+### YouTube fetcher _api_key is set in __init__
+
+`YouTubeFetcher._api_key` is read from `os.environ.get("YOUTUBE_API_KEY", "")` in `__init__`, not in `fetch()`. The patch must be active when the fetcher is *instantiated*, not only when `fetch()` is called.
+
+```python
+with patch("src.fetchers.youtube.os.environ.get", return_value="fake-key"):
+    fetcher = YouTubeFetcher(config=cfg)
+    ...  # then call fetch() inside here too, or set fetcher._api_key = "fake-key"
+```
+
+### W-0005: os import inside run() to avoid circular import risk
+
+The `import os as _os` inside `run()` avoids polluting the module namespace with a redundant `os` import when `os` is already imported at the top. A cleaner alternative is just to add `import os` to the top-level imports — but the inline import is acceptable for a small guard block.
