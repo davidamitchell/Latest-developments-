@@ -114,3 +114,16 @@ jobs:
             git commit -m "chore: update state, history, and trend data ${TODAY} [skip ci]"
             git push origin ${{ github.ref_name }}
           fi
+
+      - name: Send failure alert email
+        if: failure()
+        env:
+          EMAIL_PROVIDER: ${{ secrets.EMAIL_PROVIDER }}
+          EMAIL_SENDER: ${{ secrets.EMAIL_SENDER }}
+          EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          EMAIL_RECIPIENT: ${{ secrets.EMAIL_RECIPIENT }}
+        run: |
+          python -m src.emailer \
+            --subject "Daily digest FAILED $(date -u +%Y-%m-%d)" \
+            --body "Workflow failed. Check: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"

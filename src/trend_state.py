@@ -8,14 +8,14 @@ from src.models import TrendMetrics, TrendState
 _MIN_DIVERSITY_FOR_TREND = 2
 
 # Velocity thresholds (week-over-week credibility-weighted volume change)
-_VEL_EMERGING_MIN  =  0.1
-_VEL_SCALING_MIN   =  0.15
-_VEL_MATURE_MAX    =  0.15  # near-zero velocity
+_VEL_EMERGING_MIN = 0.1
+_VEL_SCALING_MIN = 0.15
+_VEL_MATURE_MAX = 0.15  # near-zero velocity
 _VEL_DECLINING_MAX = -0.05
 
 # Volume thresholds (weekly credibility-weighted item count)
 _VOL_SCALING_MIN = 2.0
-_VOL_MATURE_MIN  = 4.0
+_VOL_MATURE_MIN = 4.0
 
 
 def classify_state(metrics: TrendMetrics) -> TrendState:
@@ -89,7 +89,7 @@ def compute_stability(history: list[dict]) -> float:
 
     variance = sum((v - mean) ** 2 for v in volumes) / len(volumes)
     # Normalise coefficient of variation (std/mean); cap at 1
-    cv = (variance ** 0.5) / mean
+    cv = (variance**0.5) / mean
     return round(max(0.0, 1.0 - min(cv, 1.0)), 3)
 
 
@@ -105,8 +105,8 @@ def update_metrics(
     if len(metrics.history) > max_history:
         metrics.history = metrics.history[-max_history:]
 
-    metrics.volume   = new_volume
+    metrics.volume = new_volume
     metrics.velocity = compute_velocity(new_volume, metrics.history)
     metrics.stability = compute_stability(metrics.history)
-    metrics.state    = classify_state(metrics)
+    metrics.state = classify_state(metrics)
     return metrics

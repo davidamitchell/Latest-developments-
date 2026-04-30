@@ -66,7 +66,7 @@ class ArxivConfig:
 
 @dataclass
 class HuggingFaceConfig:
-    enabled: bool = False   # opt-in; enable in sources.yaml when ready
+    enabled: bool = False  # opt-in; enable in sources.yaml when ready
     max_models: int = 50
     min_downloads: int = 100
 

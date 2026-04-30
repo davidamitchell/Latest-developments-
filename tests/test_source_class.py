@@ -284,4 +284,3 @@ def test_huggingface_source_class_is_primary():
     assert all(i.source_class == "primary" for i in items), (
         f"Expected all 'primary', got {[i.source_class for i in items]}"
     )
-

@@ -121,9 +121,7 @@ class HuggingFaceFetcher:
             last_modified = model.get("lastModified") or model.get("updatedAt")
             if last_modified:
                 with contextlib.suppress(ValueError):
-                    pub_date = datetime.fromisoformat(
-                        last_modified.replace("Z", "+00:00")
-                    )
+                    pub_date = datetime.fromisoformat(last_modified.replace("Z", "+00:00"))
 
             # Title: use model_id, prettified
             title = model_id.split("/")[-1].replace("-", " ").replace("_", " ").title()
@@ -131,16 +129,18 @@ class HuggingFaceFetcher:
                 org = model_id.split("/")[0]
                 title = f"{title} ({org})"
 
-            items.append(FetchedItem(
-                id=item_id,
-                title=title,
-                url=norm_url,
-                content=content,
-                source_name="Hugging Face",
-                source_type="HuggingFace",
-                source_class="primary",
-                published=pub_date,
-            ))
+            items.append(
+                FetchedItem(
+                    id=item_id,
+                    title=title,
+                    url=norm_url,
+                    content=content,
+                    source_name="Hugging Face",
+                    source_type="HuggingFace",
+                    source_class="primary",
+                    published=pub_date,
+                )
+            )
 
         logger.info("Hugging Face: %d relevant models fetched", len(items))
         return items

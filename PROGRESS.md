@@ -29,7 +29,32 @@ Last updated: 2026-04-29
 
 ## Work Log
 
-### 2026-04-29 — Session 15
+### 2026-04-30 — Session 16 (W-0014)
+
+**Branch:** `copilot/add-trafilatura-dependency`
+
+**Completed:**
+- **Slice 5.2** — HN article text via trafilatura: `_fetch_article_text()` helper added to `src/fetchers/hackernews.py`; best-effort fetch with fallback to HN metadata on any failure; 7 new tests added to `tests/test_fetchers_hackernews.py` (successful extraction, failed fetch, empty extraction, exception safety).
+- **Slice 7.3** — Workflow failure alert email: `main()` CLI entry point added to `src/emailer.py` (`--subject`/`--body`); `if: failure()` step added to `.github/workflows/daily-digest.yml`; 3 new tests added to `tests/test_emailer.py`.
+- **Slice 13.4** — Theme clustering tests: `TestBuildGraphEdges` class (9 tests) added to `tests/test_themes.py`; covers edge conversion, deduplication, self-loops, missing fields, defaults.
+- **Stale backlog fixes**: 11.5, 12.4, 14.5 marked `[x]` (were completed in W-0013 but not updated).
+- Pre-existing `ruff format` drift fixed across 12 files.
+
+**Test count:** 388 passing, 1 skipped (live YouTube API test).
+
+**Mini-Retro:**
+
+1. **Did the process work?** Yes. All four items completed cleanly in one session. No rework needed.
+
+2. **What slowed down or went wrong?** `ruff format --check` failed on 12 pre-existing files not touched in this session. These were pre-existing drift from a prior session that formatted inconsistently. Fixed by running `ruff format .` on the whole repo.
+
+3. **What single change would prevent this next time?** The CI workflow should run `ruff format --check .` and gate merges on it. Pre-existing drift accumulates silently. Consider adding a `make format-check` target and ensuring it passes on every PR.
+
+4. **Is this a pattern?** Yes — format drift has appeared before (Session 15 noted it too). The fix is enforcing format in CI, not relying on agents to clean up.
+
+---
+
+
 
 **Branch:** `claude/trend-detection-system-3StIE`
 

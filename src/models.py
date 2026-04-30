@@ -12,8 +12,16 @@ TrendState = Literal["emerging", "scaling", "mature", "declining", "unknown"]
 EvidenceType = Literal["experiment", "benchmark", "anecdote", "announcement", "analysis", "unknown"]
 
 Domain = Literal[
-    "multimodal", "agents", "infra", "reasoning", "safety",
-    "evals", "data", "hardware", "general", "unknown",
+    "multimodal",
+    "agents",
+    "infra",
+    "reasoning",
+    "safety",
+    "evals",
+    "data",
+    "hardware",
+    "general",
+    "unknown",
 ]
 
 ImpactVector = Literal["cost", "latency", "capability", "safety", "adoption", "unknown"]
@@ -46,14 +54,14 @@ class TrendMetrics:
     definition: str = ""
     state: TrendState = "unknown"
     confidence: float = 0.5
-    volume: float = 0.0          # credibility-weighted item count
-    velocity: float = 0.0        # week-over-week volume delta
-    diversity: int = 0           # number of distinct source classes
+    volume: float = 0.0  # credibility-weighted item count
+    velocity: float = 0.0  # week-over-week volume delta
+    diversity: int = 0  # number of distinct source classes
     adoption_proxy: float = 0.0  # 0–1: jobs, repo activity, pricing mentions
-    stability: float = 1.0       # inverse of rolling variance
-    hype_risk: float = 0.0       # 0–1
+    stability: float = 1.0  # inverse of rolling variance
+    hype_risk: float = 0.0  # 0–1
     item_count: int = 0
-    last_seen: str = ""          # ISO date of most recent item
+    last_seen: str = ""  # ISO date of most recent item
     source_classes: list[str] = field(default_factory=list)
     source_class_counts: dict[str, int] = field(default_factory=dict)
     history: list[dict] = field(default_factory=list)  # [{date, volume, state}, …]
@@ -82,5 +90,5 @@ class GraphEdge:
     target: str
     # Relationship type from the plan spec
     rel_type: Literal["causal", "competitive", "compositional", "contradictory"] = "causal"
-    weight: float = 1.0          # number of independent supporting paths
-    source_diversity: int = 1    # distinct source classes supporting this edge
+    weight: float = 1.0  # number of independent supporting paths
+    source_diversity: int = 1  # distinct source classes supporting this edge
