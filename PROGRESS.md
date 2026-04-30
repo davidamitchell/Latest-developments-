@@ -1,6 +1,6 @@
 # Progress
 
-Last updated: 2026-03-07
+Last updated: 2026-04-29
 
 ---
 
@@ -28,6 +28,43 @@ Last updated: 2026-03-07
 ---
 
 ## Work Log
+
+### 2026-04-29 — Session 15
+
+**Branch:** `claude/trend-detection-system-3StIE`
+
+**Completed:**
+- **GitHub Pages trend intelligence site** (`docs/index.html`, `docs/css/style.css`, `docs/js/app.js`, `docs/js/charts.js`): 4-tab dashboard (Trends / Themes / Sources / Insights); chart wrappers for trend phase chart, hype split panels, source-class heatmap; degrades gracefully when data is empty.
+- **`src/models.py`**: `CanonicalRecord`, `TrendMetrics`, `ThemeNode`, `GraphEdge` dataclasses.
+- **`src/credibility.py`**: 5-axis credibility scoring (proximity, incentive, reproducibility, adoption, time_decay); hype detection.
+- **`src/themes.py`**: synonym normalization map (~30 entries); `cluster_themes()` and `build_graph_edges()` — available for optional Gemini-powered enhancement later.
+- **`src/trend_state.py`**: `classify_state()` state machine (emerging/scaling/mature/declining); `compute_velocity()`, `compute_stability()`, `update_metrics()`.
+- **`src/trends.py`**: No-API-key trend pipeline. Parses `## Item Themes` (15 files), inline `Theme:` labels (45 files), and plain-link fallbacks (12 files) from `history/*.txt`. Computes per-week volume, velocity, diversity (by source name not source class), hype risk, and trend state. Writes `docs/data/*.json`. Runs in seconds from `python -m src.trends`.
+- **`src/fetchers/__init__.py`**: `source_class` field added to `FetchedItem` (default: `"practitioner"`).
+- **Fetchers updated**: YouTube/HN → `"practitioner"`, Substack → `"media"`, RSS → configurable via `config/sources.yaml`.
+- **`src/config.py`**: `source_class` field on `RSSFeed`.
+- **`.github/workflows/daily-digest.yml`**: Added "Run trend analysis" step; commit step now also stages `docs/data/`.
+- **`docs/adr/0016-github-pages-trend-intelligence-site.md`**: ADR documenting Pages architecture and data contract.
+- `BACKLOG.md` extended with Epics 10–17.
+- `CHANGELOG.md` updated.
+
+**Key design decisions:**
+- Trend pipeline reads existing history files rather than re-calling Gemini. All structured data (`## Item Themes`, `Theme:` labels) was already written by the summariser — no additional API cost or key requirement.
+- Diversity is measured by distinct source *names* (YouTube ≠ Hacker News) not source *classes* (both are "practitioner"). This gives a meaningful cross-source signal with the current source set.
+- Volume is per-week average over full history span, not a windowed count. Windowed count near-zeroed everything because recent Gemini failures left recent history files without theme sections.
+- Co-occurrence graph edges (themes sharing ≥3 dates) are computed without API; more expressive relationship types (causal, competitive) deferred to Epic 13 with optional Gemini enhancement.
+
+**Mini-Retro:**
+
+1. **Did the process work?** Planning was thorough. Implementation was fast once the no-API approach was clear. The site, Python modules, and data pipeline all work end-to-end.
+
+2. **What slowed down or went wrong?** The original `src/trends.py` called Gemini for record extraction and theme clustering — redundant, since the history files already contain AI-extracted themes, and blocked without a local API key. This was caught during execution, not design. Root cause: I designed for the ideal data model (canonical records) without checking what data already existed in the repo.
+
+3. **What single change would prevent this next time?** Before designing any pipeline step that reads existing data, inspect the data format first. A 5-minute `head history/*.txt` check would have made the no-API approach obvious from the start. Add to working methodology: "Check what data already exists before planning extraction."
+
+4. **Is this a pattern?** Yes — assuming external dependencies are available (API key) without checking the local environment. The repo instructions say credentials come from GitHub Secrets; locally they don't exist. This should have been the first constraint checked, not discovered at run time.
+
+---
 
 ### 2026-03-02 — Session 14
 
@@ -339,3 +376,84 @@ Standardisation pass: expanded `.github/copilot-instructions.md` from stub to fu
 2. **What slowed down or went wrong?** Nothing. All six changes were straightforward textual edits.
 3. **What change would prevent this next time?** Nothing to change — the problem statement was precise and the target locations were unambiguous.
 4. **Is this a pattern?** No — first alignment pass against personal Copilot instructions.
+
+## 2026-04-29 — CodeQL fixes + dark mode GitHub Pages site
+
+**Completed:**
+- Fixed all 8 CodeQL security alerts: removed unused imports from `src/credibility.py`, `src/fetchers/arxiv.py`, `src/models.py`, `src/trends.py`, `tests/test_fetchers_arxiv.py`; removed unused globals `_NS_ATOM`/`_ARXIV_NS` from `src/fetchers/arxiv.py`; replaced empty `except: pass` with `contextlib.suppress` + comment.
+- Extended ruff cleanup to 3 additional files not in CodeQL alerts but failing the linter: `src/fetchers/huggingface.py`, `tests/test_fetchers_huggingface.py`, `src/summariser.py`.
+- Converted GitHub Pages dashboard to dark mode: IBM Plex Mono font, `#0d0d0d` background, `#00C3A5` teal accent, `#E8A1A8` dusk accent, sharp corners, uppercase micro-labels. Inspired by davidamitchell.github.io/Research.
+- Updated Chart.js global defaults in `charts.js` for dark canvas rendering.
+- Created `learnings.md` to capture patterns and root causes.
+
+### Mini-Retro
+
+1. **Did the process work?** Yes — CodeQL fixes were straightforward once the pattern was identified. Dark mode CSS was a clean rewrite against known design tokens.
+2. **What slowed down or went wrong?** Playwright browser was locked; couldn't take a live screenshot. Verified CSS correctness by inspection only.
+3. **What change would prevent this next time?** Kill any leftover browser processes before attempting visual verification. Also: running `ruff check .` across the full project earlier would have caught all 6 lint errors in a single pass instead of iteratively.
+4. **Is this a pattern?** Unused imports from new feature branches: **yes, recurring**. Should add `ruff check --fix` as a pre-commit step or make it part of the slice completion checklist.
+
+## 2026-04-29 — Per-theme unique colour system (W-0017)
+
+**Completed:**
+- Added W-0017 to BACKLOG.md (done).
+- Implemented `THEME_PALETTE` (20 high-contrast hues) and `buildThemeColorMap()` in `docs/js/app.js`. Theme names are sorted alphabetically before palette assignment so the same theme always gets the same colour regardless of JSON ordering.
+- Threaded `colorMap` parameter through `renderTrendChart`, `renderHypeCharts`, `renderHeatmap` in `docs/js/charts.js`.
+- Trend table: coloured circle swatch before each theme name.
+- Theme cards: `border-left-color` and name text coloured per theme.
+- Hype bar charts: per-bar colours instead of single teal/yellow.
+- Heatmap: theme name column coloured.
+- Source table theme pills: coloured border from theme colour.
+- `learnings.md` updated.
+
+### Mini-Retro
+
+1. **Did the process work?** Yes — the architecture was clean: build colour map once from all theme names, share via module-level variable, pass as parameter to chart functions.
+2. **What slowed down or went wrong?** Playwright browser locked again — no screenshot possible. Verified correctness via Node.js tests of the colour logic.
+3. **What change would prevent this next time?** Take screenshots at the very start of the session before any tool opens the browser.
+4. **Is this a pattern?** Playwright lock is a recurring environment issue. Added note to learnings.
+
+
+## 2026-04-29 — Source catalogue spike (W-0018) + implementation backlog (W-0019)
+
+**Completed:**
+- W-0018 spike: investigated all 14 people and 23 institutions from the-deep-archive.netlify.app source catalogue for machine-readable feeds.
+- Produced feed availability table: 8 confirmed RSS, 13 feeds to verify, 6 no public feed.
+- Top 10 prioritised for implementation; items 1–8 all have confirmed RSS URLs.
+- W-0019 added (ready): wire the 9 confirmed feeds into `config/sources.yaml` as opt-in `enabled: false` entries.
+- Both W-0018 (done) and W-0019 (ready) recorded in BACKLOG.md.
+
+### Mini-Retro
+
+1. **Did the process work?** Yes — spike approach was correct: catalogue first, investigate, then create implementation backlog item.
+2. **What slowed down?** Nothing significant — no code changes, pure research task.
+3. **What change would prevent issues next time?** The "Deferred / Ideas" table header was accidentally dropped when inserting new entries; always verify the end-of-file structure after large BACKLOG.md edits.
+4. **Is this a pattern?** Minor markdown editing slip; not a systemic pattern.
+
+
+
+## 2026-04-30 — Backlog batch: W-0019, W-0013, W-0005/W-0014
+
+**Completed:**
+
+- **W-0019 (done):** Added 9 confirmed RSS feeds to `config/sources.yaml` as opt-in commented-out entries with correct `source_class`. Added in both `blogs.rss` section (email digest) and `trends.operator_rss` section (trend pipeline). Each entry has inline comment explaining signal type and priority.
+
+- **W-0013 (done):** Filled all 4 pending test gaps. 100 new tests added (369 total, up from 269):
+  - `tests/test_source_class.py` — 8 tests: asserts each fetcher (YouTube, HN, Substack, RSS ×3, arXiv, HuggingFace) emits the correct `source_class` on `FetchedItem`
+  - `tests/test_credibility.py` — 35 tests: 5-axis credibility scoring, time decay, hype detection; boundary checks on all source class + evidence type combinations
+  - `tests/test_themes.py` — 22 tests: synonym normalization idempotency, graceful API failure fallback, valid Gemini response parsing, markdown fence stripping, domain taxonomy completeness
+  - `tests/test_trend_state.py` — 35 tests: diversity gate (spike vs trend), declining/emerging/scaling/mature transitions, velocity edge cases, stability calculation, update_metrics rollover
+
+- **W-0005/W-0014 (done, combined):** `cluster_themes()` is now wired into `src/trends.py run()`. After metrics are computed, if `GEMINI_API_KEY` is set, Gemini assigns a canonical domain and one-sentence definition to each theme. Results are merged back into `TrendMetrics` before writing `trends.json`/`themes.json`. Gemini relationship edges extend `graph.json` beyond co-occurrence-only edges. Graceful fallback: if key absent, domain stays "unknown", definition stays empty — no runtime error.
+
+**ruff check:** clean. All 369 tests pass.
+
+### Mini-Retro
+
+1. **Did the process work?** Yes — working top-down through the "ready" backlog items by estimated value and effort worked well. Tests were written to the existing module behaviour, not an idealised interface.
+
+2. **What slowed down?** Two issues in test_source_class.py: (a) YouTube fetcher created before `os.environ.get` was patched so `_api_key` was already `""` by the time `fetch()` ran; (b) RSS/Substack tests used `httpx.get` patching when the fetchers use `_fetch_url` / `_fetch_json` internal helpers instead. Lesson: always look at how the existing tests for the same module mock things, not just how the module is imported.
+
+3. **What single change would prevent this next time?** Before writing any new mocking: run `grep "patch" tests/test_fetchers_<target>.py | head -5` to see the established mock target in the existing test file. The internal helper function pattern (`_fetch_url`, `_fetch_json`) is now documented in learnings.md.
+
+4. **Is this a pattern?** Yes — this is the second time the wrong mock target was used for an httpx-backed fetcher. Added a note to learnings.md: _"Fetchers with `_fetch_url`/`_fetch_json` wrappers must be patched at the wrapper, not at `httpx.get`."_

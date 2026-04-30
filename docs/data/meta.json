@@ -1,0 +1,19 @@
+{
+<<<<<<< HEAD
+  "last_run": "2026-04-29T18:04:35.035141+00:00",
+  "run_id": "2026-04-29",
+  "item_count": 178,
+  "theme_count": 11,
+=======
+  "last_run": "2026-04-29T18:00:08.033763+00:00",
+  "run_id": "2026-04-29",
+  "item_count": 329,
+  "theme_count": 17,
+>>>>>>> origin/claude/trend-detection-system-3StIE
+  "source_class_counts": {
+    "youtube": 155,
+    "blogs/rss": 0,
+    "hacker news": 250,
+    "arxiv": 150
+  }
+}

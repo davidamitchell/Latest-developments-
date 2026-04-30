@@ -18,6 +18,9 @@ class FetchedItem:
     source_name: str  # Display name shown in the digest
     published: datetime | None = None
     source_type: str = ""  # e.g. "YouTube", "Hacker News", "RSS", "Substack"
+    # Source class for credibility triangulation.
+    # Values: "primary" | "operator" | "practitioner" | "media" | "market"
+    source_class: str = "practitioner"
 
 
 @runtime_checkable

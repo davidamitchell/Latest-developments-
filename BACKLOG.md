@@ -194,6 +194,651 @@ Manage MCP server configs for all AI agent environments from a single manifest.
 
 ---
 
+---
+
+## Epic 10 — GitHub Pages Trend Intelligence Site
+
+Static site at `docs/` showing themes, trend states, hype vs substantiation, and source-class coverage. Auto-updated daily by the trend analysis pipeline.
+
+| # | Slice | Status | Notes |
+|---|---|---|---|
+| 10.1 | Create `docs/index.html` with tab navigation (Trends / Themes / Sources / Insights) | `[x]` | |
+| 10.2 | Create `docs/css/style.css` matching email palette | `[x]` | #4a7c59 green, mobile-first |
+| 10.3 | Create `docs/js/app.js` — data loading and rendering | `[x]` | Degrades gracefully when data empty |
+| 10.4 | Create `docs/js/charts.js` — Chart.js wrappers | `[x]` | Trend phase chart + hype split panels |
+| 10.5 | Create `docs/data/` placeholder JSON files | `[x]` | meta, trends, themes, items, graph, sources |
+| 10.6 | Add trend analysis step to `daily-digest.yml` | `[x]` | Runs `python -m src.trends`; commits `docs/data/` |
+| 10.7 | Write ADR-0016 | `[x]` | Documents Pages architecture and data contract |
+| 10.8 | Enable GitHub Pages in repo settings (docs folder) | `[ ]` | Manual step — requires repo owner access |
+
+**Acceptance:** `docs/index.html` loads in browser; trend data populates after first post-merge pipeline run.
+
+---
+
+## Epic 11 — Source Class Infrastructure
+
+Every item carries a `source_class` label for credibility triangulation.
+
+| # | Slice | Status | Notes |
+|---|---|---|---|
+| 11.1 | Add `source_class` field to `FetchedItem` | `[x]` | Default: `"practitioner"` |
+| 11.2 | Assign source class per fetcher | `[x]` | YouTube/HN=practitioner, Substack=media, RSS=configurable |
+| 11.3 | `src/models.py` — `CanonicalRecord`, `TrendMetrics`, `ThemeNode`, `GraphEdge` | `[x]` | |
+| 11.4 | `source_class` field on `RSSFeed` config | `[x]` | Set per-feed in `sources.yaml` |
+| 11.5 | Tests for source class assignment | `[ ]` | Confirm each fetcher outputs correct class |
+
+---
+
+## Epic 12 — Canonical Record Extraction & Credibility Scoring
+
+| # | Slice | Status | Notes |
+|---|---|---|---|
+| 12.1 | `src/credibility.py` — 5-axis credibility scoring | `[x]` | proximity, incentive, reproducibility, adoption, time_decay |
+| 12.2 | Hype detection | `[x]` | `detect_hype()` — evidence density × source incentive proxy |
+| 12.3 | `extract_records_from_digest()` in `src/trends.py` | `[x]` | Gemini JSON-lines extraction per history digest |
+| 12.4 | Tests for credibility scoring | `[ ]` | Unit tests for each axis and edge cases |
+
+---
+
+## Epic 13 — Theme Clustering & Relationship Graph
+
+| # | Slice | Status | Notes |
+|---|---|---|---|
+| 13.1 | `src/themes.py` — synonym normalization map | `[x]` | ~30 entries; collapses common rebrands |
+| 13.2 | `cluster_themes()` — Gemini-powered clustering | `[x]` | Domain taxonomy enforced; definitions extracted |
+| 13.3 | `build_graph_edges()` — relationship graph | `[x]` | causal/competitive/compositional/contradictory |
+| 13.4 | Tests for clustering | `[ ]` | Idempotency; synonym collapse; graceful API failure |
+
+---
+
+## Epic 14 — Trend State Machine
+
+| # | Slice | Status | Notes |
+|---|---|---|---|
+| 14.1 | `src/trend_state.py` — state classifier | `[x]` | emerging/scaling/mature/declining rules |
+| 14.2 | `compute_velocity()` and `compute_stability()` | `[x]` | Rolling week-over-week metrics |
+| 14.3 | Cross-class confirmation gate | `[x]` | diversity ≥ 2 required for non-declining state |
+| 14.4 | `update_metrics()` — rolling history append | `[x]` | Max 30 snapshots per theme |
+| 14.5 | Tests for state transitions | `[ ]` | Including spike vs trend, diversity gate |
+
+---
+
+## Epic 15 — Site Visualizations (Phase 1)
+
+| # | Slice | Status | Notes |
+|---|---|---|---|
+| 15.1 | Trend phase chart (Chart.js multi-line) | `[x]` | Phase band overlays; renders from trends.json |
+| 15.2 | Hype vs substantiation split panels | `[x]` | Evidence-weighted vs media-weighted side-by-side |
+| 15.3 | Theme cards with state badge and metrics | `[x]` | Item count, hype risk, source diversity |
+| 15.4 | Source-class coverage heatmap | `[x]` | CSS table; rows=themes, cols=classes |
+| 15.5 | Trend state table with confidence bars | `[x]` | Sortable; velocity and diversity columns |
+| 15.6 | Raw data drill-down | `[ ]` | Click theme → item-level provenance panel |
+
+---
+
+## Epic 16 — Site Visualizations (Phase 2)
+
+| # | Slice | Status | Notes |
+|---|---|---|---|
+| 16.1 | Theme graph — D3 force layout | `[ ]` | Node colour=state, size=volume |
+| 16.2 | Evidence ladder — stacked bars per insight | `[ ]` | paper / benchmark / production / pricing |
+| 16.3 | Weekly delta view — new/changed themes only | `[ ]` | Reduces noise; focuses on movement |
+| 16.4 | Novelty vs continuity quadrant plot | `[ ]` | Semantic similarity to corpus × current attention |
+| 16.5 | Influence flow Sankey diagram | `[ ]` | source class → themes → impact vectors |
+
+---
+
+## Epic 17 — Expanded Sources (Incremental)
+
+Add sources one at a time. Each is opt-in via `sources.yaml` (commented out by default).
+
+| # | Slice | Status | Notes |
+|---|---|---|---|
+| 17.1 | `src/fetchers/arxiv.py` — arXiv RSS | `[x]` | cs.AI, cs.LG, cs.CL, cs.CV, cs.RO; primary class; free. See W-0006. |
+| 17.2 | Hugging Face model releases | `[x]` | Public models JSON API; primary class; `enabled: false` by default. See W-0007. |
+| 17.3 | Papers with Code trending | `[ ]` | RSS; primary class; reproducibility proxy |
+| 17.4 | Operator changelogs | `[ ]` | OpenAI/Anthropic/Google release notes RSS; operator class |
+| 17.5 | Reddit r/MachineLearning | `[ ]` | PRAW or JSON API; practitioner class; deferred pending cost review |
+
+---
+
+---
+
+## W-0002
+
+status: done
+created: 2026-04-29
+updated: 2026-04-29
+
+### Outcome
+
+Gemini 5xx overload errors (503 UNAVAILABLE) are retried up to 4 times with 15 / 30 / 60 s exponential backoff before falling back to the link digest. 4xx errors (bad key, quota) fall back immediately.
+
+### Context
+
+Pipeline was falling back to plain link digest on any `APIError`, including transient Gemini overload spikes. History files show `[AI summarisation failed]` notices that would have succeeded on a second attempt.
+
+### Notes
+
+- Distinguishes `ServerError` (5xx, retry) from `ClientError` (4xx, no retry)
+- Implemented in `src/summariser.py`
+
+---
+
+## W-0003
+
+status: done
+created: 2026-04-29
+updated: 2026-04-29
+
+### Outcome
+
+The Sources page shows a full per-source table: source name, class badge, item count, active days, date range (first → last seen), and top 5 themes. Data is written to `docs/data/sources.json` by the trend pipeline.
+
+### Context
+
+Previously Sources tab only showed aggregate per-class cards with no breakdown of individual sources.
+
+### Notes
+
+- `src/trends.py` computes `per_source` dict from `all_entries` and writes `sources` list to `sources.json`
+- `docs/js/app.js` `renderSourcesTab()` renders scrollable table with colour-coded class badges and theme pills
+
+---
+
+## W-0004
+
+status: done
+created: 2026-04-29
+updated: 2026-04-29
+
+### Outcome
+
+Source-class heatmap on the Sources page renders correctly on mobile: columns are horizontally scrollable and headers use readable abbreviations (Pri / Ops / Prac / Med / Mkt with full name on hover).
+
+### Context
+
+`table-layout: fixed` distributed 6 columns equally across ~375 px, making "practitioner" unreadable on phones.
+
+### Notes
+
+- Added `.heatmap-scroll` wrapper with `overflow-x: auto`
+- Removed `table-layout: fixed`; added `min-width: 380px` so table scrolls rather than collapses
+- `<abbr title="full">abbr</abbr>` header cells in `charts.js`
+- Mobile breakpoint hides `.themes-cell` on source detail table to reduce crowding
+
+---
+
+## W-0005
+
+status: done
+created: 2026-04-29
+updated: 2026-04-30
+
+### Outcome
+
+`cluster_themes()` is now called from `src/trends.py run()` after metrics are computed (W-0005/W-0014 combined). When `GEMINI_API_KEY` is set, Gemini assigns canonical domains and writes one-sentence definitions for all themes before writing `trends.json` and `themes.json`. Gemini-derived relationship edges are also merged into `graph.json`. Graceful fallback: when key is absent, domain stays "unknown" and definition stays empty — no code change needed for local `--no-fetch` runs.
+
+### Context
+
+Synonym normalisation (W-0015) and acronym fixing are done. What remains is the Gemini-powered step: assigning canonical domain and writing a one-sentence definition per theme. `cluster_themes()` in `src/themes.py` does this but is not called from `src/trends.py`. GEMINI_API_KEY is present in GitHub Secrets but not available locally; the call must degrade gracefully when the key is absent.
+
+### Notes
+
+- Call `cluster_themes(theme_names, existing_themes)` in `src/trends.py` after metrics are computed
+- Merge returned domain + definition into each `TrendMetrics` object before writing JSON
+- Guard with `if os.environ.get("GEMINI_API_KEY"):` so local `--no-fetch` runs still work
+- Enforce domain taxonomy list from `src/themes.py DOMAIN_TAXONOMY`
+
+---
+
+## W-0006
+
+status: done
+created: 2026-04-29
+updated: 2026-04-29
+
+### Outcome
+
+The trend pipeline fetches papers from arXiv (categories cs.AI, cs.LG, cs.CL, cs.CV, cs.RO) daily and includes them in trend analysis as `source_class="primary"`. The email digest pipeline is unchanged.
+
+### Context
+
+arXiv RSS is free, no API key needed, and provides the highest-credibility primary signal (papers, benchmarks). Adding it enables cross-class confirmation: a theme seen in arXiv + HN crosses the diversity ≥ 2 gate and can be classified as "emerging" rather than "unknown".
+
+### Notes
+
+- Create `src/fetchers/arxiv.py` — `ArxivFetcher` class fetching RSS for each category
+- Add `trends.arxiv` config section to `config/sources.yaml` (commented out by default in email section, enabled in trends section)
+- Add `ArxivConfig` / `TrendsConfig` to `src/config.py`
+- Update `src/trends.py` to instantiate `ArxivFetcher`, fetch papers, and merge with history-parsed entries
+- NOT wired into `src/main.py` — trends pipeline only
+- Write tests in `tests/test_fetchers_arxiv.py`
+
+---
+
+## W-0007
+
+status: done
+created: 2026-04-29
+updated: 2026-04-29
+
+### Outcome
+
+The trend pipeline fetches recently-updated text-generation models from Hugging Face Hub as `source_class="primary"`, gated by `min_downloads` to filter noise.
+
+### Context
+
+Adds a second primary-class source alongside arXiv, improving cross-class confirmation for model-capability themes.
+
+### Notes
+
+- `src/fetchers/huggingface.py` — `HuggingFaceFetcher`; uses public models JSON API; no auth
+- Filters on `pipeline_tag` ∈ relevant LLM tasks and `downloads ≥ min_downloads` (default 100)
+- `config/sources.yaml` `trends.huggingface` section, `enabled: false` by default — set to `true` to activate
+- 9 tests in `tests/test_fetchers_huggingface.py`; 269 total passing
+
+---
+
+## W-0008
+
+status: ready
+created: 2026-04-29
+updated: 2026-04-29
+
+### Outcome
+
+The trend pipeline fetches trending papers from Papers with Code as `source_class="primary"`, adding reproducibility signal (code availability) to credibility scoring.
+
+### Context
+
+Papers with Code tracks papers with GitHub repos and benchmark results. A paper appearing here means code exists (reproducibility proxy score = 1.0 in the credibility formula). Feed available at `https://paperswithcode.com/latest` RSS.
+
+### Notes
+
+- Create `src/fetchers/paperswithcode.py`
+- Set `has_code=True` flag on fetched items to inform credibility scoring
+- Papers with Code also has a public JSON API: `https://paperswithcode.com/api/v1/papers/`
+- Implement after arXiv (W-0006)
+
+---
+
+## W-0009
+
+status: ready
+created: 2026-04-29
+updated: 2026-04-29
+
+### Outcome
+
+The trend pipeline ingests operator changelogs from OpenAI, Anthropic, and Google as `source_class="operator"`, enabling cross-class confirmation between primary papers and vendor releases.
+
+### Context
+
+Operator signals (changelogs, pricing changes, API updates) reveal what vendors are actually shipping. Combined with primary sources they confirm capability claims. All three have RSS or scrapeable pages: OpenAI changelog at `https://platform.openai.com/docs/changelog`, Anthropic news RSS, Google AI Blog RSS.
+
+### Notes
+
+- Create `src/fetchers/operator_changelog.py`
+- Source class: operator
+- Three initial targets: OpenAI platform changelog, Anthropic news, Google AI Blog
+- Add `trends.operator_sources` config section
+- Implement after arXiv (W-0006) and HuggingFace (W-0007)
+
+---
+
+## W-0010
+
+status: ready
+created: 2026-04-29
+updated: 2026-04-29
+
+### Outcome
+
+The trend pipeline fetches new and trending models from Replicate as `source_class="operator"`, surfacing what practitioners are actually deploying and running in production.
+
+### Context
+
+Replicate's trending models page reflects real deployment activity — a strong adoption proxy signal distinct from paper citations. Available via their public API: `https://api.replicate.com/v1/models` (no auth for public models).
+
+### Notes
+
+- Create `src/fetchers/replicate.py`
+- Source class: operator (vendor-hosted deployment)
+- Sort by run count (descending) to surface most-used models
+- Implement after operator changelogs (W-0009)
+
+---
+
+## W-0011
+
+status: ready
+created: 2026-04-29
+updated: 2026-04-29
+
+### Outcome
+
+OpenReview submissions and accepted papers are fetched as `source_class="primary"` for NeurIPS, ICML, ICLR venues, providing peer-review quality signal distinct from raw arXiv preprints.
+
+### Context
+
+OpenReview exposes a public API. Accepted papers at top venues represent the highest-quality primary signal — peer-reviewed, reproducible claims. This differentiates "paper posted on arXiv" from "paper accepted at ICLR".
+
+### Notes
+
+- Create `src/fetchers/openreview.py`
+- Use OpenReview public API: `https://api2.openreview.net/notes`
+- Filter: `venueid` in [NeurIPS 2025, ICLR 2025, ICML 2025] and invitation = acceptance decision
+- Source class: primary; set `evidence_type="experiment"` for accepted papers
+- Implement after W-0006 arXiv is stable
+
+---
+
+## W-0012
+
+status: ready
+created: 2026-04-29
+updated: 2026-04-29
+
+### Outcome
+
+The adoption proxy composite score (`adoption_proxy` field in `TrendMetrics`) is computed from real signals: GitHub repo star velocity for top theme-related repos, job posting count for role keywords, and pricing/tier changes from operator sources. Currently always `0.0`.
+
+### Context
+
+Adoption proxy was defined in the initial architecture but not implemented. It is needed for accurate state classification (Scaling requires rising adoption; Mature requires high adoption). Without it, no theme can ever reach Scaling or Mature state.
+
+### Notes
+
+- GitHub stars: use GH API (no auth needed for public repos, rate-limited)
+- Job postings: LinkedIn / Indeed scrape (complex, deferred); interim proxy = HN "Who's Hiring" posts
+- Pricing signal: detect price changes in operator changelog items
+- Start with GitHub stars only as a minimal viable adoption signal
+- Add `adoption_proxy` calculation to `src/trend_state.py`
+
+---
+
+## W-0013
+
+status: done
+created: 2026-04-29
+updated: 2026-04-30
+
+### Outcome
+
+All four pending test gaps filled. 100 new tests added across 4 files (369 total, up from 269).
+
+### Context
+
+These test slices were explicitly planned in Epics 11–14 but not yet written. They are needed before the trend pipeline is considered production-ready.
+
+### Notes
+
+- `tests/test_source_class.py` — assert each fetcher sets correct `source_class`
+- `tests/test_credibility.py` — unit test each of the 5 axes and the time decay function
+- `tests/test_themes.py` — idempotency of synonym normalisation; graceful API failure fallback
+- `tests/test_trend_state.py` — extend existing; add diversity gate cases, velocity edge cases
+
+---
+
+## W-0014
+
+status: done
+created: 2026-04-29
+updated: 2026-04-30
+
+### Outcome
+
+Completed as part of W-0005. Theme domain and definition fields are now populated by `cluster_themes()` in `src/trends.py` when `GEMINI_API_KEY` is present.
+
+---
+
+## W-0015
+
+status: done
+created: 2026-04-29
+updated: 2026-04-29
+
+### Outcome
+
+Semantic equivalence collapse prevents theme fragmentation from rebranding: "tool use", "function calling", and "tool calling" are merged into a single canonical theme. Theme names use correct acronym casing (AI, LLM, not Ai, Llm).
+
+### Context
+
+Without synonym collapse, each new marketing term for the same concept spawned a separate thin theme. Acronym breakage from `.title()` ("Ai Workforce Impact") made themes unreadable.
+
+### Notes
+
+- `normalize_theme_name()` in `src/themes.py` expanded to ~60 synonym entries covering workforce, infrastructure, capabilities, safety, coding, etc.
+- `_ACRONYM_FIXES` post-processes title-cased output to restore AI, LLM, RAG, API, GPU, etc.
+- `normalize_theme_name()` applied as catch-all in `src/trends.py run()` before themes enter `all_entries`
+
+---
+
+## W-0016
+
+status: done
+created: 2026-04-29
+updated: 2026-04-29
+
+### Outcome
+
+A `workflow_dispatch`-only `rebuild-site.yml` GitHub Actions workflow rebuilds `docs/data/` and commits it without running the email digest. Supports `no_fetch` boolean input to skip live sources.
+
+### Notes
+
+- `.github/workflows/rebuild-site.yml`
+- Runs `python -m src.trends [--no-fetch]` and commits `docs/data/` with `[skip ci]`
+
+---
+
+## W-0017
+
+status: done
+created: 2026-04-29
+updated: 2026-04-29
+
+### Outcome
+
+Every theme is assigned a unique, persistent hex colour from a 20-slot high-contrast palette. The same colour is used everywhere that theme appears: trend chart line, hype bar, trend table swatch, theme card border, heatmap row label.
+
+### Context
+
+Charts used state-based colouring (emerging=amber, scaling=teal, etc.) so themes in the same state were indistinguishable. Requested in PR comment: colours must be unique and maximally contrasting.
+
+### Notes
+
+- `THEME_PALETTE` in `app.js` — 20 hues spanning the full wheel at high saturation/lightness for dark background legibility
+- `buildThemeColorMap(allNames)` assigns palette slots by alphabetical sort so the mapping is stable across page loads
+- `themeColor(name)` helper used by every render function
+- `renderTrendChart`, `renderHypeCharts`, `renderHeatmap` each accept an optional `colorMap` parameter
+- Theme cards: `border-left-color` set to theme colour
+- Trend table: 8×8 px coloured swatch before theme name
+- Hype bar charts: per-bar `backgroundColor` array keyed to theme colour
+
+---
+
+## W-0018
+
+status: done
+created: 2026-04-29
+updated: 2026-04-29
+
+### Outcome
+
+Determine which of the 14 people and 23 institutions tracked by the-deep-archive project have RSS feeds, newsletters, or other machine-readable content endpoints that could be added to `config/sources.yaml`. Produce a prioritised shortlist with source type, URL, and recommended `source_class` for each candidate.
+
+### Context
+
+The site https://the-deep-archive.netlify.app/ tracks high-signal sources on AI + work. The source catalogue (below) covers academics, AI lab leaders, consultancies, analyst firms, and standards bodies — a richer set than the current HN + YouTube + arXiv pipeline. Many will be `media` or `operator` class, filling credibility gaps in cross-class confirmation.
+
+### Spike scope (time-box: 2 h)
+
+1. For each person entry: check if they publish a personal newsletter (Substack, Beehiiv, Revue, Ghost), blog (RSS), or LinkedIn newsletter with an RSS endpoint.
+2. For each institution entry: check for RSS news feeds, research publication feeds, or report release pages.
+3. Classify each candidate by feasibility: `✓ has RSS`, `~ newsletter (check)`, `✗ no feed`.
+4. Record recommended `source_class`: primary / operator / practitioner / media / market.
+5. Output a markdown table in the spike result section below.
+
+### Source catalogue
+
+#### People (from the-deep-archive.netlify.app)
+
+| ID | Name | Affiliation | Priority | Expertise |
+|---|---|---|---|---|
+| p1 | Prof. Majd Sakr | Carnegie Mellon University | High | Human+agent collaboration, skill atrophy, human-centred AI |
+| p2 | Ethan Mollick | Wharton School, UPenn | High | Jagged frontier of AI, augmentation models, practical AI adoption |
+| p3 | Connor Grennan | NYU Stern | High | People & change, AI adoption readiness |
+| p4 | Karim R. Lakhani | Harvard Business School | High | AI-driven business transformation, organisational redesign |
+| p5 | Thomas H. Davenport | Babson College / MIT IDE | High | AI strategy, analytics, enterprise AI adoption |
+| p6 | George Westerman | MIT Sloan | Medium | Digital transformation, executive leadership and technology |
+| p7 | Harang Ju | Johns Hopkins / MIT IDE | Medium | AI agents, human-AI collaboration |
+| p8 | Jared Spataro | Microsoft | High | Enterprise AI adoption, Copilot ecosystem, future of work with AI |
+| p9 | Satya Nadella | Microsoft | Medium | Enterprise AI strategy, platform transformation |
+| p10 | Dario Amodei | Anthropic | Medium | AI safety, agentic systems, responsible AI development |
+| p11 | Sam Altman | OpenAI | Medium | AI capabilities trajectory, AGI, enterprise AI |
+| p12 | Josh Bersin | Josh Bersin Company | High | HR technology, agentic HR, workforce transformation |
+| p13 | Jan-Emmanuel De Neve | University of Oxford (Saïd) | Medium | Wellbeing economics, employee perception of AI |
+| p14 | Peter McCrory | Anthropic | High | Labour-market effects of AI, productivity, displacement |
+
+#### Institutions (from the-deep-archive.netlify.app)
+
+| ID | Name | Type | Priority | Focus |
+|---|---|---|---|---|
+| i1 | Harvard Business Review (HBR) | Academic / Media | High | AI strategy, leadership, organisational change |
+| i2 | MIT (Sloan, CSAIL, Media Lab) | Academic | High | AI research, future of work, technology and society |
+| i3 | Carnegie Mellon University | Academic | High | HCI, AI systems, robotics |
+| i4 | Anthropic | AI Technology Company | High | AI safety, agentic systems, human-AI interaction |
+| i5 | OpenAI | AI Technology Company | High | Foundation models, agentic AI, enterprise AI adoption |
+| i6 | Microsoft | AI Technology Company | High | Enterprise AI integration, Copilot ecosystem, productivity AI |
+| i7 | Google / DeepMind | AI Technology Company | High | Foundation models, AI research, enterprise AI |
+| i8 | AWS | AI Technology Company | Medium | Cloud AI infrastructure, enterprise AI services |
+| i9 | McKinsey & Company | Consulting | Medium | AI economic impact, enterprise adoption, organisational change |
+| i10 | BCG | Consulting | Medium | AI strategy, workforce transformation |
+| i11 | Deloitte | Consulting | Medium | Enterprise AI, AI governance, tech trends |
+| i12 | Accenture | Consulting | Medium | AI at scale, technology strategy |
+| i13 | KPMG | Consulting | Medium | AI at scale, enterprise AI adoption, agent-driven reinvention |
+| i14 | IDC | Analyst Firm | Medium | Workforce transformation, human-AI collaboration |
+| i15 | Gartner | Analyst Firm | High | Strategic predictions, technology trends, enterprise AI |
+| i16 | Forrester | Analyst Firm | Medium | Enterprise software, business models, AI predictions |
+| i17 | Cognitive World | Media / Commentary | Medium | Cognitive science, AI impact on human capabilities |
+| i18 | Training Industry | Media / Professional | Low | L&D, workforce development, upskilling |
+| i19 | PwC | Consulting | Medium | AI business predictions, enterprise AI strategy |
+| i20 | Agentic AI Foundation (AAIF) | Standards Body | High | Open standards for agentic AI, MCP, interoperability |
+| i21 | Cloud Security Alliance (CSA) | Standards / Research | Medium | AI agent governance, agentic security, AI controls frameworks |
+| i22 | Grant Thornton | Consulting / Advisory | Medium | AI governance audits, AI ROI, enterprise adoption |
+| i23 | Stanford HAI | Academic / Research | High | Annual AI Index, AI policy and economics, capability benchmarks |
+
+### Spike result
+
+_Spike executed 2026-04-29. Feed availability determined from public sources and training knowledge. URLs marked `~ verify` should be spot-checked before adding to `sources.yaml`._
+
+#### People feeds
+
+| Source | Feed URL or base domain | source_class | Feasibility | Notes |
+|---|---|---|---|---|
+| Ethan Mollick (One Useful Thing) | `https://www.oneusefulthing.org/feed` | practitioner | ✓ confirmed RSS | Highest-traffic AI adoption newsletter; also at `oneusefulthing.substack.com/feed` |
+| Thomas H. Davenport | HBR / MIT SMR author pages | practitioner | ✗ no public feed | Publishes in HBR and MIT SMR; capture via those institutional feeds |
+| Karim R. Lakhani | HBR author page | primary | ✗ no public feed | Publishes in HBR and peer-reviewed journals; capture via HBR AI topic feed |
+| George Westerman | MIT SMR | practitioner | ✗ no public feed | MIT Sloan faculty; capture via MIT SMR feed |
+| Jared Spataro | Microsoft AI Blog | operator | ✗ no public feed | LinkedIn-primary; capture via Microsoft AI Blog feed |
+| Satya Nadella | Microsoft AI Blog | operator | ✗ no public feed | No personal blog; announcements appear on Microsoft AI Blog |
+| Dario Amodei | `https://darioamodei.com` | operator | ~ verify | Check `darioamodei.com/feed`; capture via Anthropic Blog RSS as reliable fallback |
+| Sam Altman | `https://blog.samaltman.com/feed` or `/posts.rss` | operator | ~ verify | Personal blog exists; Ghost/custom CMS may expose RSS; posts infrequently but high signal |
+| Josh Bersin | `https://joshbersin.com/feed/` | practitioner | ~ verify | Active WordPress blog; `/feed/` should resolve; HR+AI workforce lens |
+| Connor Grennan | `connorgrennan.substack.com/feed` | practitioner | ~ verify | NYU Stern AI literacy; check Substack; low certainty on URL |
+| Prof. Majd Sakr | CMU News RSS | primary | ✗ no public feed | CMU CS faculty; institutional CMU News RSS as fallback |
+| Harang Ju | `https://harangju.com/feed` | primary | ~ verify | Academic personal site; check `/feed` or `/atom.xml`; low post frequency expected |
+| Jan-Emmanuel De Neve | Oxford Saïd / CEPR | primary | ✗ no public feed | Oxford faculty; content via CEPR and IZA preprints (arXiv-adjacent) |
+| Peter McCrory | `https://anthropic.com/rss.xml` | operator | ✗ no public feed | No personal feed; research appears on Anthropic Blog |
+
+#### Institution feeds
+
+| Source | Feed URL | source_class | Feasibility | Notes |
+|---|---|---|---|---|
+| Anthropic Blog | `https://www.anthropic.com/rss.xml` | operator | ✓ confirmed RSS | **Priority 1** — direct operator signal; safety research + model announcements |
+| OpenAI Blog | `https://openai.com/blog/rss.xml` | operator | ✓ confirmed RSS | **Priority 2** — model releases, research, policy; lands before HN pickup |
+| Google AI Blog | `https://blog.google/technology/ai/rss/` | operator | ✓ confirmed RSS | **Priority 3** — third major frontier lab |
+| DeepMind Blog | `https://deepmind.google/blog/rss.xml` | operator | ✓ confirmed RSS | **Priority 3b** — high technical density; Gemini, AlphaFold, robotics |
+| AWS ML Blog | `https://aws.amazon.com/blogs/machine-learning/feed/` | operator | ✓ confirmed RSS | **Priority 4** — applied/builder-focused; SageMaker, Bedrock, enterprise use cases |
+| Microsoft AI Blog | `https://blogs.microsoft.com/ai/feed/` | operator | ✓ confirmed RSS | **Priority 7** — Copilot ecosystem, enterprise AI at scale |
+| Harvard Business Review (AI) | `https://hbr.org/topic/subject/ai-and-machine-learning/feed` | media | ✓ confirmed RSS | **Priority 6** — business/leadership lens; management research HN misses |
+| MIT Sloan Management Review | `https://sloanreview.mit.edu/feed/` | media | ✓ confirmed RSS | **Priority 8** — peer-reviewed management + practice; Davenport/Westerman/Lakhani publish here |
+| MIT News (research) | `https://news.mit.edu/rss/research` | primary | ✓ confirmed RSS | CSAIL, AI Lab, Media Lab breakthroughs |
+| CMU News | `https://www.cmu.edu/news/rss/` | primary | ✓ confirmed RSS | AI, robotics, HCI research coverage |
+| Stanford HAI | `https://hai.stanford.edu/news/feed` | primary | ~ verify | Annual AI Index, policy briefs, governance; Drupal CMS — `/news/feed` likely resolves |
+| McKinsey AI Insights | `https://www.mckinsey.com/capabilities/quantumblack/our-insights/rss` | media | ~ verify | QuantumBlack sub-path; also check `mckinsey.com/featured-insights/artificial-intelligence/rss` |
+| BCG AI Insights | `https://www.bcg.com/rss/insights.xml` | media | ~ verify | Henderson Institute AI content; verify exact path resolves |
+| Deloitte Insights | Deloitte Tech Trends feed | media | ~ verify | No reliably-documented RSS path; check `deloitte.com/insights/rss` |
+| Accenture Newsroom | `https://newsroom.accenture.com/rss/news.rss` | media | ~ verify | Newsroom RSS reliable; AI research blog sub-path uncertain |
+| Gartner Blog | `https://www.gartner.com/smarterwithgartner/feed/` | market | ~ verify | "Smarter with Gartner" editorial blog; primary research paywalled |
+| Forrester Blog | `https://www.forrester.com/blogs/feed/` | market | ~ verify | Free blog tier; paywalled reports excluded; enterprise AI vendor evaluation angle |
+| Cognitive World | `https://cognitiveworld.com/feed/` | media | ~ verify | WordPress site; `/feed/` should resolve; cognitive science + AI impact |
+| Training Industry | `https://trainingindustry.com/feed/` | media | ~ verify | L&D + AI upskilling; WordPress `/feed/` likely resolves |
+| Cloud Security Alliance | `https://cloudsecurityalliance.org/feed/` | media | ~ verify | AI governance, agentic security; WordPress `/feed/` likely |
+| KPMG | _(none)_ | media | ✗ no public feed | Insights are static/JS-rendered; no discoverable RSS |
+| IDC | `https://www.idc.com/about/about_idc/press_releases_rss` | market | ~ verify | Press releases only; primary research paywalled |
+| PwC | _(none)_ | media | ✗ no public feed | Insights are PDF reports with no RSS; newsletter signup only |
+| Agentic AI Foundation (AAIF) | `https://www.agenticaifoundation.org` | primary | ~ verify | New org (~2024); check base domain for blog/feed; low certainty |
+| Grant Thornton | _(none)_ | media | ✗ no public feed | Static/gated insights pages; no confirmed RSS |
+
+#### Top 10 recommended for immediate implementation
+
+Ranked by feed reliability, signal quality, and gap relative to existing pipeline (HN, YouTube, arXiv, HuggingFace):
+
+1. Anthropic Blog — `anthropic.com/rss.xml` (operator, confirmed)
+2. OpenAI Blog — `openai.com/blog/rss.xml` (operator, confirmed)
+3. Google AI / DeepMind — `blog.google/technology/ai/rss/` + `deepmind.google/blog/rss.xml` (operator, confirmed)
+4. AWS ML Blog — `aws.amazon.com/blogs/machine-learning/feed/` (operator, confirmed)
+5. Ethan Mollick — `oneusefulthing.org/feed` (practitioner, confirmed)
+6. HBR AI — `hbr.org/topic/subject/ai-and-machine-learning/feed` (media, confirmed)
+7. Microsoft AI Blog — `blogs.microsoft.com/ai/feed/` (operator, confirmed)
+8. MIT Sloan Management Review — `sloanreview.mit.edu/feed/` (media, confirmed)
+9. Stanford HAI — `hai.stanford.edu/news/feed` (primary, verify)
+10. Josh Bersin — `joshbersin.com/feed/` (practitioner, verify)
+
+Implementation path: items 1–8 (all confirmed RSS) can go directly into `config/sources.yaml` as opt-in sources. Items 9–10 need URL verification before adding.
+
+### Notes
+
+- Spike should be executed before implementing any new fetchers from this list
+- Cross-reference with existing `sources.yaml` — several institution blogs (OpenAI, Anthropic, Google AI) may already be partially covered under W-0009
+- People feeds (Substack newsletters) are likely `practitioner` class; institutional reports are `media` or `primary`
+
+---
+
+## W-0019
+
+status: done
+created: 2026-04-29
+updated: 2026-04-30
+
+### Outcome
+
+The 9 confirmed RSS feeds from W-0018 are added to `config/sources.yaml` as opt-in sources (commented out, ready to activate). Each entry has the correct `source_class` and a short inline comment. Added in both the `blogs.rss` section (for email digest use) and the `trends.operator_rss` section (for trend pipeline use).
+
+### Context
+
+W-0018 identified 8 feeds with confirmed RSS availability covering major AI labs, enterprise AI, and practitioner perspectives currently missing from the pipeline. Adding them as `enabled: false` entries means they are discoverable and ready to activate without any code changes.
+
+### Notes
+
+- Add under new `# AI Lab / Operator sources` and `# Media / Analysis sources` headings in `sources.yaml`
+- Feeds to add (confirmed, `enabled: false` by default):
+  1. `https://www.anthropic.com/rss.xml` — source_class: operator
+  2. `https://openai.com/blog/rss.xml` — source_class: operator
+  3. `https://blog.google/technology/ai/rss/` — source_class: operator
+  4. `https://deepmind.google/blog/rss.xml` — source_class: operator
+  5. `https://aws.amazon.com/blogs/machine-learning/feed/` — source_class: operator
+  6. `https://blogs.microsoft.com/ai/feed/` — source_class: operator
+  7. `https://www.oneusefulthing.org/feed` — source_class: practitioner
+  8. `https://hbr.org/topic/subject/ai-and-machine-learning/feed` — source_class: media
+  9. `https://sloanreview.mit.edu/feed/` — source_class: media
+- Items needing URL verification before adding (Stanford HAI, Josh Bersin) remain in W-0018 spike results
+- Do NOT activate by default — user should opt in per feed to control digest volume
+
+---
+
 ## Deferred / Ideas
 
 | Idea | Notes |
@@ -204,3 +849,5 @@ Manage MCP server configs for all AI agent environments from a single manifest.
 | Web UI for config editing | Out of scope for CLI-first approach |
 | Vector store for semantic dedup | Overkill vs. URL-based dedup for now |
 | Per-topic digest segmentation | Could be a future prompt template system |
+| Claim contradiction map | Bipartite graph: claims vs counter-claims; Epic 16 candidate |
+| Adoption proxy dashboard | Job postings + repo stars + pricing changes; Epic 16 candidate |

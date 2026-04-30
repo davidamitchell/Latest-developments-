@@ -1,0 +1,92 @@
+{
+<<<<<<< HEAD
+  "generated": "2026-04-29T18:04:35.035141+00:00",
+=======
+  "generated": "2026-04-29T18:00:08.033763+00:00",
+>>>>>>> origin/claude/trend-detection-system-3StIE
+  "classes": {
+    "primary": {
+      "count": 0,
+      "sources": []
+    },
+    "operator": {
+      "count": 0,
+      "sources": []
+    },
+    "practitioner": {
+      "count": 555,
+      "sources": [
+        "Arxiv",
+        "Blogs/Rss",
+        "Hacker News",
+        "Youtube"
+      ]
+    },
+    "media": {
+      "count": 0,
+      "sources": []
+    },
+    "market": {
+      "count": 0,
+      "sources": []
+    }
+  },
+  "sources": [
+    {
+      "name": "arXiv",
+      "source_class": "primary",
+      "item_count": 150,
+      "first_seen": "2026-04-29",
+      "last_seen": "2026-04-29",
+      "days_active": 1,
+      "top_themes": [
+        "Benchmarks & Evals",
+        "Multi-Agent Systems",
+        "Multimodal Models",
+        "Retrieval-Augmented Generation",
+        "Fine-Tuning & Adaptation"
+      ]
+    },
+    {
+      "name": "YouTube",
+      "source_class": "practitioner",
+      "item_count": 100,
+      "first_seen": "2026-03-03",
+      "last_seen": "2026-04-29",
+      "days_active": 46,
+      "top_themes": [
+        "Agentic Workflows",
+        "AI Business Strategy",
+        "AI Workforce & Jobs",
+        "AI Infrastructure",
+        "LLM Capabilities"
+      ]
+    },
+    {
+      "name": "Hacker News",
+      "source_class": "practitioner",
+      "item_count": 78,
+      "first_seen": "2026-03-07",
+      "last_seen": "2026-04-25",
+      "days_active": 27,
+      "top_themes": [
+        "Local LLM Applications",
+        "Local LLM Inference",
+        "AI Business Strategy",
+        "Supply Chain Security",
+        "Claude Quality Concerns"
+      ]
+    },
+    {
+      "name": "Other",
+      "source_class": "practitioner",
+      "item_count": 1,
+      "first_seen": "2026-03-31",
+      "last_seen": "2026-03-31",
+      "days_active": 1,
+      "top_themes": [
+        "Claude Code Learning"
+      ]
+    }
+  ]
+}

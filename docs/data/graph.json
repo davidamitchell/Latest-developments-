@@ -1,0 +1,145 @@
+{
+<<<<<<< HEAD
+  "generated": "2026-04-29T18:04:35.035141+00:00",
+  "nodes": [
+    {
+      "id": "Agentic Workflows",
+      "domain": "unknown",
+      "state": "declining",
+      "volume": 0.91
+    },
+    {
+      "id": "AI Business Strategy",
+      "domain": "unknown",
+      "state": "declining",
+      "volume": 0.78
+    },
+    {
+      "id": "AI Workforce & Jobs",
+      "domain": "unknown",
+      "state": "declining",
+      "volume": 0.65
+=======
+  "generated": "2026-04-29T18:00:08.033763+00:00",
+  "nodes": [
+    {
+      "id": "Benchmarks & Evals",
+      "domain": "unknown",
+      "state": "unknown",
+      "volume": 1.47
+>>>>>>> origin/claude/trend-detection-system-3StIE
+    },
+    {
+      "id": "AI Safety & Alignment",
+      "domain": "unknown",
+      "state": "unknown",
+      "volume": 0.74
+    },
+    {
+      "id": "Multi-Agent Systems",
+      "domain": "unknown",
+      "state": "emerging",
+      "volume": 0.61
+    },
+    {
+      "id": "Retrieval-Augmented Generation",
+      "domain": "unknown",
+      "state": "emerging",
+      "volume": 0.61
+    },
+    {
+      "id": "Multimodal Models",
+      "domain": "unknown",
+      "state": "emerging",
+      "volume": 0.61
+    },
+    {
+      "id": "AI Infrastructure",
+      "domain": "unknown",
+      "state": "declining",
+      "volume": 0.49
+    },
+    {
+      "id": "LLM Capabilities",
+      "domain": "unknown",
+      "state": "declining",
+      "volume": 0.37
+    },
+    {
+<<<<<<< HEAD
+      "id": "Local LLM Applications",
+      "domain": "unknown",
+      "state": "declining",
+      "volume": 0.39
+=======
+      "id": "Ai Business Strategy",
+      "domain": "unknown",
+      "state": "declining",
+      "volume": 0.25
+    },
+    {
+      "id": "Ai Infrastructure Strategy",
+      "domain": "unknown",
+      "state": "declining",
+      "volume": 0.25
+>>>>>>> origin/claude/trend-detection-system-3StIE
+    },
+    {
+      "id": "Local LLM Inference",
+      "domain": "unknown",
+      "state": "declining",
+<<<<<<< HEAD
+      "volume": 0.39
+=======
+      "volume": 0.25
+    },
+    {
+      "id": "Local Llm Applications",
+      "domain": "unknown",
+      "state": "declining",
+      "volume": 0.25
+>>>>>>> origin/claude/trend-detection-system-3StIE
+    },
+    {
+      "id": "Supply Chain Security",
+      "domain": "unknown",
+      "state": "declining",
+<<<<<<< HEAD
+      "volume": 0.39
+=======
+      "volume": 0.25
+>>>>>>> origin/claude/trend-detection-system-3StIE
+    },
+    {
+      "id": "AI Development Pace",
+      "domain": "unknown",
+      "state": "declining",
+      "volume": 0.25
+    },
+    {
+      "id": "Agent Reliability",
+      "domain": "unknown",
+      "state": "declining",
+      "volume": 0.25
+    },
+    {
+      "id": "Code Generation",
+      "domain": "unknown",
+      "state": "unknown",
+      "volume": 0.25
+    },
+    {
+      "id": "Fine-Tuning & Adaptation",
+      "domain": "unknown",
+      "state": "unknown",
+      "volume": 0.25
+    },
+    {
+      "id": "Long-Context Reasoning",
+      "domain": "unknown",
+      "state": "unknown",
+      "volume": 0.25
+    }
+  ],
+  "edges": []
+}

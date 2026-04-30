@@ -1,0 +1,170 @@
+{
+  "generated": "2026-04-29T18:04:35.035141+00:00",
+  "themes": [
+    {
+      "name": "Agentic Workflows",
+      "domain": "unknown",
+      "definition": "",
+      "state": "declining",
+      "item_count": 7,
+      "last_seen": "2026-04-19",
+      "source_classes": [
+        "practitioner"
+      ],
+      "source_class_counts": {
+        "practitioner": 7
+      },
+      "hype_risk": 0.0
+    },
+    {
+      "name": "AI Business Strategy",
+      "domain": "unknown",
+      "definition": "",
+      "state": "declining",
+      "item_count": 6,
+      "last_seen": "2026-04-15",
+      "source_classes": [
+        "practitioner"
+      ],
+      "source_class_counts": {
+        "practitioner": 6
+      },
+      "hype_risk": 0.0
+    },
+    {
+      "name": "AI Workforce & Jobs",
+      "domain": "unknown",
+      "definition": "",
+      "state": "declining",
+      "item_count": 5,
+      "last_seen": "2026-03-15",
+      "source_classes": [
+        "practitioner"
+      ],
+      "source_class_counts": {
+        "practitioner": 5
+      },
+      "hype_risk": 0.0
+    },
+    {
+      "name": "AI Safety & Alignment",
+      "domain": "unknown",
+      "definition": "",
+      "state": "declining",
+      "item_count": 4,
+      "last_seen": "2026-04-15",
+      "source_classes": [
+        "practitioner"
+      ],
+      "source_class_counts": {
+        "practitioner": 4
+      },
+      "hype_risk": 0.0
+    },
+    {
+      "name": "AI Infrastructure",
+      "domain": "unknown",
+      "definition": "",
+      "state": "declining",
+      "item_count": 4,
+      "last_seen": "2026-04-08",
+      "source_classes": [
+        "practitioner"
+      ],
+      "source_class_counts": {
+        "practitioner": 4
+      },
+      "hype_risk": 0.0
+    },
+    {
+      "name": "LLM Capabilities",
+      "domain": "unknown",
+      "definition": "",
+      "state": "declining",
+      "item_count": 3,
+      "last_seen": "2026-04-07",
+      "source_classes": [
+        "practitioner"
+      ],
+      "source_class_counts": {
+        "practitioner": 3
+      },
+      "hype_risk": 0.0
+    },
+    {
+      "name": "Local LLM Applications",
+      "domain": "unknown",
+      "definition": "",
+      "state": "declining",
+      "item_count": 3,
+      "last_seen": "2026-04-04",
+      "source_classes": [
+        "practitioner"
+      ],
+      "source_class_counts": {
+        "practitioner": 3
+      },
+      "hype_risk": 0.0
+    },
+    {
+      "name": "Local LLM Inference",
+      "domain": "unknown",
+      "definition": "",
+      "state": "declining",
+      "item_count": 3,
+      "last_seen": "2026-04-03",
+      "source_classes": [
+        "practitioner"
+      ],
+      "source_class_counts": {
+        "practitioner": 3
+      },
+      "hype_risk": 0.0
+    },
+    {
+      "name": "Supply Chain Security",
+      "domain": "unknown",
+      "definition": "",
+      "state": "declining",
+      "item_count": 3,
+      "last_seen": "2026-03-30",
+      "source_classes": [
+        "practitioner"
+      ],
+      "source_class_counts": {
+        "practitioner": 3
+      },
+      "hype_risk": 0.0
+    },
+    {
+      "name": "AI Development Pace",
+      "domain": "unknown",
+      "definition": "",
+      "state": "declining",
+      "item_count": 2,
+      "last_seen": "2026-03-24",
+      "source_classes": [
+        "practitioner"
+      ],
+      "source_class_counts": {
+        "practitioner": 2
+      },
+      "hype_risk": 0.0
+    },
+    {
+      "name": "Agent Reliability",
+      "domain": "unknown",
+      "definition": "",
+      "state": "declining",
+      "item_count": 2,
+      "last_seen": "2026-03-22",
+      "source_classes": [
+        "practitioner"
+      ],
+      "source_class_counts": {
+        "practitioner": 2
+      },
+      "hype_risk": 0.0
+    }
+  ]
+}

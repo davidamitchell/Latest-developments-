@@ -280,6 +280,7 @@ Questions that surface patterns:
 - Prefer reversible actions over irreversible ones, especially when uncertain.
 - When choosing between writing more code and gaining more understanding: gain understanding first.
 - Leave the codebase in a state where the next session can start immediately.
+- **Visual verification via Playwright:** The browser tool holds a persistent lock in this container environment. If you need to take a screenshot, do it as the **first** action in the session before anything else opens the browser. If the browser is already locked, verify UI correctness by code review and Node.js tests instead of screenshots.
 
 ---
 

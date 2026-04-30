@@ -28,6 +28,7 @@ class RSSFeed:
     name: str
     url: str
     fallback_url: str | None = None
+    source_class: str = "practitioner"  # primary | operator | practitioner | media | market
 
 
 @dataclass
@@ -54,6 +55,27 @@ class HackerNewsConfig:
     min_score: int = 100
     keywords: list[str] = field(default_factory=list)
     max_stories: int = 10
+
+
+@dataclass
+class ArxivConfig:
+    enabled: bool = True
+    categories: list[str] = field(default_factory=lambda: ["cs.AI", "cs.LG", "cs.CL"])
+    max_papers: int = 30
+
+
+@dataclass
+class HuggingFaceConfig:
+    enabled: bool = False   # opt-in; enable in sources.yaml when ready
+    max_models: int = 50
+    min_downloads: int = 100
+
+
+@dataclass
+class TrendsConfig:
+    enabled: bool = True
+    arxiv: ArxivConfig = field(default_factory=ArxivConfig)
+    huggingface: HuggingFaceConfig = field(default_factory=HuggingFaceConfig)
 
 
 @dataclass
@@ -94,6 +116,7 @@ class Config:
     history: HistoryConfig = field(default_factory=HistoryConfig)
     email: EmailConfig = field(default_factory=EmailConfig)
     logging: LoggingConfig = field(default_factory=LoggingConfig)
+    trends: TrendsConfig = field(default_factory=TrendsConfig)
 
 
 def _yaml_list(value: list | None) -> list:
@@ -140,7 +163,12 @@ def load_config(path: Path = Path("config/sources.yaml")) -> Config:
     blogs = BlogsConfig(
         enabled=bl.get("enabled", True),
         rss=[
-            RSSFeed(name=f["name"], url=f["url"], fallback_url=f.get("fallback_url"))
+            RSSFeed(
+                name=f["name"],
+                url=f["url"],
+                fallback_url=f.get("fallback_url"),
+                source_class=f.get("source_class", "practitioner"),
+            )
             for f in _yaml_list(bl.get("rss"))
         ],
     )
@@ -189,6 +217,23 @@ def load_config(path: Path = Path("config/sources.yaml")) -> Config:
         log_file=lg.get("log_file"),
     )
 
+    tr = raw.get("trends", {})
+    ax = tr.get("arxiv", {})
+    hf = tr.get("huggingface", {})
+    trends = TrendsConfig(
+        enabled=tr.get("enabled", True),
+        arxiv=ArxivConfig(
+            enabled=ax.get("enabled", True),
+            categories=_yaml_list(ax.get("categories")) or ["cs.AI", "cs.LG", "cs.CL"],
+            max_papers=ax.get("max_papers", 30),
+        ),
+        huggingface=HuggingFaceConfig(
+            enabled=hf.get("enabled", False),
+            max_models=hf.get("max_models", 50),
+            min_downloads=hf.get("min_downloads", 100),
+        ),
+    )
+
     return Config(
         youtube=youtube,
         blogs=blogs,
@@ -198,4 +243,5 @@ def load_config(path: Path = Path("config/sources.yaml")) -> Config:
         history=history,
         email=email,
         logging=logging_cfg,
+        trends=trends,
     )
