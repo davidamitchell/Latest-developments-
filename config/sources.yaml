@@ -380,6 +380,44 @@ trends:
     max_models: 50
     min_downloads: 100  # filter out low-activity models
 
+  # Papers with Code — primary class; has_code=True → reproducibility=1.0.
+  # Fetches trending papers with linked code repositories.
+  # API: https://paperswithcode.com/api/v1/papers/?ordering=-stars
+  paperswithcode:
+    enabled: false
+    page_size: 20
+    min_stars: 0        # minimum GitHub stars on linked repos
+
+  # Operator changelogs — operator class.
+  # RSS feeds from major AI lab / operator blogs.
+  operator_sources:
+    enabled: false
+    feeds:
+      - "https://www.anthropic.com/rss.xml"
+      - "https://openai.com/blog/rss.xml"
+      - "https://blog.google/technology/ai/rss/"
+      - "https://deepmind.google/blog/rss.xml"
+      - "https://aws.amazon.com/blogs/machine-learning/feed/"
+      - "https://blogs.microsoft.com/ai/feed/"
+
+  # Replicate public models — operator class.
+  # Reflects real deployment / run-count activity.
+  # API: https://api.replicate.com/v1/models?order=run_count (no auth)
+  replicate:
+    enabled: false
+    limit: 20
+
+  # OpenReview accepted papers — primary class; evidence_type=experiment.
+  # Peer-reviewed top-venue acceptance = highest-quality primary signal.
+  # API: https://api2.openreview.net/notes
+  openreview:
+    enabled: false
+    limit: 25
+    venues:
+      - "ICLR.cc/2025/Conference/-/Accepted"
+      - "NeurIPS.cc/2025/Conference/-/Accepted"
+      - "ICML.cc/2025/Conference/-/Accepted"
+
   # ── Operator / Media RSS feeds for trends pipeline (W-0019) ──
   # These feeds are fetched by the trend analysis pipeline (src/trends.py),
   # NOT the email digest. They add operator-class signal for cross-class

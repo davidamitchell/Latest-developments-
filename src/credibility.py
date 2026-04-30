@@ -74,6 +74,8 @@ def score_credibility(record: CanonicalRecord, reference_date: date | None = Non
     proximity = _PROXIMITY.get(cls, 0.5)
     incentive = _INCENTIVE.get(cls, 0.5)
     reproducibility = _REPRODUCIBILITY.get(etype, 0.3)
+    if record.has_code:
+        reproducibility = 1.0
     adoption = _ADOPTION.get(etype, 0.3)
     decay = time_decay(record.date, reference_date)
 

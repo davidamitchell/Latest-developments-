@@ -21,6 +21,11 @@ class FetchedItem:
     # Source class for credibility triangulation.
     # Values: "primary" | "operator" | "practitioner" | "media" | "market"
     source_class: str = "practitioner"
+    # has_code: True when the item is directly linked to a code repository.
+    # Used to set reproducibility=1.0 in credibility scoring.
+    has_code: bool = False
+    # evidence_type: type of evidence the item represents (from CanonicalRecord EvidenceType).
+    evidence_type: str = ""
 
 
 @runtime_checkable

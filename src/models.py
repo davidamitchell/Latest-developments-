@@ -36,6 +36,7 @@ class CanonicalRecord:
     source_class: SourceClass = "practitioner"
     claim: str = ""
     evidence_type: EvidenceType = "unknown"
+    has_code: bool = False
     domain: Domain = "unknown"
     technique: str = ""
     impact_vector: ImpactVector = "unknown"

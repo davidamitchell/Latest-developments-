@@ -25,6 +25,10 @@ from pathlib import Path
 from src.config import load_config
 from src.fetchers.arxiv import ArxivFetcher
 from src.fetchers.huggingface import HuggingFaceFetcher
+from src.fetchers.openreview import OpenReviewFetcher
+from src.fetchers.operator_changelog import OperatorChangelogFetcher
+from src.fetchers.paperswithcode import PapersWithCodeFetcher
+from src.fetchers.replicate import ReplicateFetcher
 from src.logger import setup_logging
 from src.models import CanonicalRecord, ThemeNode, TrendMetrics
 from src.themes import cluster_themes, normalize_theme_name
@@ -477,7 +481,94 @@ def _fetch_huggingface(
     return entries
 
 
-# ── Main pipeline ─────────────────────────────────────────────────────
+def _fetch_paperswithcode(
+    trends_cfg,
+    today_str: str,
+) -> list[tuple[str, str, str, str]]:
+    """Fetch Papers with Code papers and return theme-day entries."""
+    try:
+        fetcher = PapersWithCodeFetcher(
+            page_size=trends_cfg.paperswithcode.page_size,
+            min_stars=trends_cfg.paperswithcode.min_stars,
+        )
+        items = fetcher.fetch(already_processed=set())
+    except Exception as exc:
+        logger.warning("Papers with Code fetch failed — skipping: %s", exc)
+        return []
+
+    entries: list[tuple[str, str, str, str]] = []
+    for item in items:
+        raw_theme = item.title[:80]
+        theme = normalize_theme_name(raw_theme)
+        pub_date = item.published.strftime("%Y-%m-%d") if item.published else today_str
+        entries.append((pub_date, theme, "primary", "Papers with Code"))
+    return entries
+
+
+def _fetch_operator_sources(
+    trends_cfg,
+    today_str: str,
+) -> list[tuple[str, str, str, str]]:
+    """Fetch operator changelog feeds and return theme-day entries."""
+    try:
+        fetcher = OperatorChangelogFetcher(feeds=trends_cfg.operator_sources.feeds)
+        items = fetcher.fetch(already_processed=set())
+    except Exception as exc:
+        logger.warning("Operator changelog fetch failed — skipping: %s", exc)
+        return []
+
+    entries: list[tuple[str, str, str, str]] = []
+    for item in items:
+        raw_theme = item.title[:80]
+        theme = normalize_theme_name(raw_theme)
+        pub_date = item.published.strftime("%Y-%m-%d") if item.published else today_str
+        entries.append((pub_date, theme, "operator", item.source_name))
+    return entries
+
+
+def _fetch_replicate(
+    trends_cfg,
+    today_str: str,
+) -> list[tuple[str, str, str, str]]:
+    """Fetch Replicate popular models and return theme-day entries."""
+    try:
+        fetcher = ReplicateFetcher(limit=trends_cfg.replicate.limit)
+        items = fetcher.fetch(already_processed=set())
+    except Exception as exc:
+        logger.warning("Replicate fetch failed — skipping: %s", exc)
+        return []
+
+    entries: list[tuple[str, str, str, str]] = []
+    for item in items:
+        raw_theme = item.title[:80]
+        theme = normalize_theme_name(raw_theme)
+        pub_date = item.published.strftime("%Y-%m-%d") if item.published else today_str
+        entries.append((pub_date, theme, "operator", "Replicate"))
+    return entries
+
+
+def _fetch_openreview(
+    trends_cfg,
+    today_str: str,
+) -> list[tuple[str, str, str, str]]:
+    """Fetch OpenReview accepted papers and return theme-day entries."""
+    try:
+        fetcher = OpenReviewFetcher(
+            venues=trends_cfg.openreview.venues,
+            limit=trends_cfg.openreview.limit,
+        )
+        items = fetcher.fetch(already_processed=set())
+    except Exception as exc:
+        logger.warning("OpenReview fetch failed — skipping: %s", exc)
+        return []
+
+    entries: list[tuple[str, str, str, str]] = []
+    for item in items:
+        raw_theme = item.title[:80]
+        theme = normalize_theme_name(raw_theme)
+        pub_date = item.published.strftime("%Y-%m-%d") if item.published else today_str
+        entries.append((pub_date, theme, "primary", "OpenReview"))
+    return entries
 
 
 def run(
@@ -540,6 +631,26 @@ def run(
             all_entries.extend(hf_items)
             if hf_items:
                 all_source_counts["hugging face"] += len(hf_items)
+        if trends_cfg.paperswithcode.enabled:
+            pwc_items = _fetch_paperswithcode(trends_cfg, today_str)
+            all_entries.extend(pwc_items)
+            if pwc_items:
+                all_source_counts["papers with code"] += len(pwc_items)
+        if trends_cfg.operator_sources.enabled:
+            op_items = _fetch_operator_sources(trends_cfg, today_str)
+            all_entries.extend(op_items)
+            if op_items:
+                all_source_counts["operator changelogs"] += len(op_items)
+        if trends_cfg.replicate.enabled:
+            rep_items = _fetch_replicate(trends_cfg, today_str)
+            all_entries.extend(rep_items)
+            if rep_items:
+                all_source_counts["replicate"] += len(rep_items)
+        if trends_cfg.openreview.enabled:
+            orv_items = _fetch_openreview(trends_cfg, today_str)
+            all_entries.extend(orv_items)
+            if orv_items:
+                all_source_counts["openreview"] += len(orv_items)
     else:
         logger.info("Live fetching disabled — using history only")
 

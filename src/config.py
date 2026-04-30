@@ -72,10 +72,46 @@ class HuggingFaceConfig:
 
 
 @dataclass
+class PapersWithCodeConfig:
+    enabled: bool = False
+    page_size: int = 20
+    min_stars: int = 0
+
+
+@dataclass
+class OperatorChangelogConfig:
+    enabled: bool = False
+    feeds: list[str] = field(default_factory=list)
+
+
+@dataclass
+class ReplicateConfig:
+    enabled: bool = False
+    limit: int = 20
+
+
+@dataclass
+class OpenReviewConfig:
+    enabled: bool = False
+    venues: list[str] = field(
+        default_factory=lambda: [
+            "ICLR.cc/2025/Conference/-/Accepted",
+            "NeurIPS.cc/2025/Conference/-/Accepted",
+            "ICML.cc/2025/Conference/-/Accepted",
+        ]
+    )
+    limit: int = 25
+
+
+@dataclass
 class TrendsConfig:
     enabled: bool = True
     arxiv: ArxivConfig = field(default_factory=ArxivConfig)
     huggingface: HuggingFaceConfig = field(default_factory=HuggingFaceConfig)
+    paperswithcode: PapersWithCodeConfig = field(default_factory=PapersWithCodeConfig)
+    operator_sources: OperatorChangelogConfig = field(default_factory=OperatorChangelogConfig)
+    replicate: ReplicateConfig = field(default_factory=ReplicateConfig)
+    openreview: OpenReviewConfig = field(default_factory=OpenReviewConfig)
 
 
 @dataclass
@@ -220,6 +256,10 @@ def load_config(path: Path = Path("config/sources.yaml")) -> Config:
     tr = raw.get("trends", {})
     ax = tr.get("arxiv", {})
     hf = tr.get("huggingface", {})
+    pwc = tr.get("paperswithcode", {})
+    opc = tr.get("operator_sources", {})
+    rep = tr.get("replicate", {})
+    orv = tr.get("openreview", {})
     trends = TrendsConfig(
         enabled=tr.get("enabled", True),
         arxiv=ArxivConfig(
@@ -231,6 +271,29 @@ def load_config(path: Path = Path("config/sources.yaml")) -> Config:
             enabled=hf.get("enabled", False),
             max_models=hf.get("max_models", 50),
             min_downloads=hf.get("min_downloads", 100),
+        ),
+        paperswithcode=PapersWithCodeConfig(
+            enabled=pwc.get("enabled", False),
+            page_size=pwc.get("page_size", 20),
+            min_stars=pwc.get("min_stars", 0),
+        ),
+        operator_sources=OperatorChangelogConfig(
+            enabled=opc.get("enabled", False),
+            feeds=_yaml_list(opc.get("feeds")),
+        ),
+        replicate=ReplicateConfig(
+            enabled=rep.get("enabled", False),
+            limit=rep.get("limit", 20),
+        ),
+        openreview=OpenReviewConfig(
+            enabled=orv.get("enabled", False),
+            venues=_yaml_list(orv.get("venues"))
+            or [
+                "ICLR.cc/2025/Conference/-/Accepted",
+                "NeurIPS.cc/2025/Conference/-/Accepted",
+                "ICML.cc/2025/Conference/-/Accepted",
+            ],
+            limit=orv.get("limit", 25),
         ),
     )
 
