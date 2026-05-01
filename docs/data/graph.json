@@ -1,53 +1,59 @@
 {
-  "generated": "2026-04-30T09:59:55.470648+00:00",
+  "generated": "2026-05-01T08:53:03.292238+00:00",
   "nodes": [
     {
       "id": "AI Safety & Alignment",
       "domain": "unknown",
       "state": "emerging",
-      "volume": 1.45
+      "volume": 1.07
     },
     {
       "id": "Agentic Workflows",
       "domain": "unknown",
-      "state": "unknown",
-      "volume": 1.21
-    },
-    {
-      "id": "AI Business Strategy",
-      "domain": "unknown",
       "state": "declining",
-      "volume": 0.72
+      "volume": 0.95
     },
     {
       "id": "Multimodal Models",
       "domain": "unknown",
       "state": "emerging",
-      "volume": 0.6
-    },
-    {
-      "id": "AI Workforce & Jobs",
-      "domain": "unknown",
-      "state": "declining",
-      "volume": 0.6
+      "volume": 0.83
     },
     {
       "id": "Benchmarks & Evals",
       "domain": "unknown",
       "state": "unknown",
-      "volume": 0.6
+      "volume": 0.83
+    },
+    {
+      "id": "AI Business Strategy",
+      "domain": "unknown",
+      "state": "declining",
+      "volume": 0.71
+    },
+    {
+      "id": "Retrieval-Augmented Generation",
+      "domain": "unknown",
+      "state": "emerging",
+      "volume": 0.59
+    },
+    {
+      "id": "AI Workforce & Jobs",
+      "domain": "unknown",
+      "state": "declining",
+      "volume": 0.59
     },
     {
       "id": "Multi-Agent Systems",
       "domain": "unknown",
       "state": "emerging",
-      "volume": 0.48
+      "volume": 0.47
     },
     {
       "id": "AI Infrastructure",
       "domain": "unknown",
       "state": "declining",
-      "volume": 0.48
+      "volume": 0.47
     },
     {
       "id": "LLM Capabilities",
@@ -74,10 +80,16 @@
       "volume": 0.36
     },
     {
-      "id": "Retrieval-Augmented Generation",
+      "id": "Fine-Tuning & Adaptation",
       "domain": "unknown",
       "state": "unknown",
-      "volume": 0.24
+      "volume": 0.36
+    },
+    {
+      "id": "Model Distillation",
+      "domain": "unknown",
+      "state": "unknown",
+      "volume": 0.36
     },
     {
       "id": "AI Development Pace",
@@ -92,49 +104,7 @@
       "volume": 0.24
     },
     {
-      "id": "Analysing Lightweight Large Language Models For Biomedical Named Entity Recognit",
-      "domain": "unknown",
-      "state": "unknown",
-      "volume": 0.24
-    },
-    {
-      "id": "Consciousness With The Serial Numbers Filed Off: Measuring Trained Denial In 115",
-      "domain": "unknown",
-      "state": "unknown",
-      "volume": 0.24
-    },
-    {
-      "id": "Generative AI-Based Virtual Assistant Using Retrieval-Augmented Generation: An E",
-      "domain": "unknown",
-      "state": "unknown",
-      "volume": 0.24
-    },
-    {
-      "id": "A Randomized Pde Energy Driven Iterative Framework For Efficient And Stable Pde",
-      "domain": "unknown",
-      "state": "unknown",
-      "volume": 0.24
-    },
-    {
-      "id": "Rethinking Kv Cache Eviction Via A Unified Information-Theoretic Objective",
-      "domain": "unknown",
-      "state": "unknown",
-      "volume": 0.24
-    },
-    {
-      "id": "Fine-Tuning & Adaptation",
-      "domain": "unknown",
-      "state": "unknown",
-      "volume": 0.24
-    },
-    {
-      "id": "Fruitprom-V2: Robust Probabilistic Maturity Estimation And Detection Of Fruits A",
-      "domain": "unknown",
-      "state": "unknown",
-      "volume": 0.24
-    },
-    {
-      "id": "Why Domain Matters: A Preliminary Study Of Domain Effects In Underwater Object D",
+      "id": "Reconstruction By Generation: 3D Multi-Object Scene Reconstruction From Sparse O",
       "domain": "unknown",
       "state": "unknown",
       "volume": 0.24

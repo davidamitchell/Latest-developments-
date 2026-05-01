@@ -1,5 +1,5 @@
 {
-  "generated": "2026-04-30T09:59:55.470648+00:00",
+  "generated": "2026-05-01T08:53:03.292238+00:00",
   "classes": {
     "primary": {
       "count": 0,
@@ -10,7 +10,7 @@
       "sources": []
     },
     "practitioner": {
-      "count": 558,
+      "count": 566,
       "sources": [
         "Arxiv",
         "Blogs/Rss",
@@ -32,24 +32,24 @@
       "name": "arXiv",
       "source_class": "primary",
       "item_count": 150,
-      "first_seen": "2026-04-30",
-      "last_seen": "2026-04-30",
+      "first_seen": "2026-05-01",
+      "last_seen": "2026-05-01",
       "days_active": 1,
       "top_themes": [
-        "AI Safety & Alignment",
         "Benchmarks & Evals",
         "Multimodal Models",
-        "Multi-Agent Systems",
-        "Agentic Workflows"
+        "AI Safety & Alignment",
+        "Retrieval-Augmented Generation",
+        "Multi-Agent Systems"
       ]
     },
     {
       "name": "YouTube",
       "source_class": "practitioner",
-      "item_count": 100,
+      "item_count": 104,
       "first_seen": "2026-03-03",
-      "last_seen": "2026-04-29",
-      "days_active": 46,
+      "last_seen": "2026-05-01",
+      "days_active": 47,
       "top_themes": [
         "Agentic Workflows",
         "AI Business Strategy",
@@ -61,16 +61,16 @@
     {
       "name": "Hacker News",
       "source_class": "practitioner",
-      "item_count": 78,
+      "item_count": 79,
       "first_seen": "2026-03-07",
-      "last_seen": "2026-04-25",
-      "days_active": 27,
+      "last_seen": "2026-05-01",
+      "days_active": 28,
       "top_themes": [
         "Local LLM Applications",
         "Local LLM Inference",
         "AI Business Strategy",
         "Supply Chain Security",
-        "Claude Quality Concerns"
+        "LLM Service Outage"
       ]
     },
     {

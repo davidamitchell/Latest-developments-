@@ -1,27 +1,27 @@
 {
-  "generated": "2026-04-30T09:59:55.470648+00:00",
+  "generated": "2026-05-01T08:53:03.292238+00:00",
   "trends": [
     {
       "theme": "AI Safety & Alignment",
       "domain": "unknown",
       "definition": "",
       "state": "emerging",
-      "confidence": 0.742,
-      "volume": 1.45,
-      "velocity": 7.0,
+      "confidence": 0.678,
+      "volume": 1.07,
+      "velocity": 4.0,
       "diversity": 3,
       "adoption_proxy": 0.0,
-      "stability": 0.028,
+      "stability": 0.271,
       "hype_risk": 0.0,
-      "item_count": 12,
-      "last_seen": "2026-04-30",
+      "item_count": 9,
+      "last_seen": "2026-05-01",
       "source_classes": [
         "primary",
         "practitioner"
       ],
       "source_class_counts": {
         "practitioner": 4,
-        "primary": 8
+        "primary": 5
       },
       "history": [
         {
@@ -41,7 +41,7 @@
         },
         {
           "date": "2026-04-27",
-          "volume": 8,
+          "volume": 5,
           "state": "emerging"
         }
       ]
@@ -50,23 +50,21 @@
       "theme": "Agentic Workflows",
       "domain": "unknown",
       "definition": "",
-      "state": "unknown",
-      "confidence": 0.535,
-      "volume": 1.21,
-      "velocity": 0.0,
-      "diversity": 2,
+      "state": "declining",
+      "confidence": 0.325,
+      "volume": 0.95,
+      "velocity": -0.4,
+      "diversity": 1,
       "adoption_proxy": 0.0,
-      "stability": 0.8,
+      "stability": 0.646,
       "hype_risk": 0.0,
-      "item_count": 10,
-      "last_seen": "2026-04-30",
+      "item_count": 8,
+      "last_seen": "2026-04-29",
       "source_classes": [
-        "practitioner",
-        "primary"
+        "practitioner"
       ],
       "source_class_counts": {
-        "practitioner": 8,
-        "primary": 2
+        "practitioner": 8
       },
       "history": [
         {
@@ -86,7 +84,70 @@
         },
         {
           "date": "2026-04-27",
-          "volume": 3,
+          "volume": 1,
+          "state": "declining"
+        }
+      ]
+    },
+    {
+      "theme": "Multimodal Models",
+      "domain": "unknown",
+      "definition": "",
+      "state": "emerging",
+      "confidence": 0.472,
+      "volume": 0.83,
+      "velocity": 5.0,
+      "diversity": 2,
+      "adoption_proxy": 0.0,
+      "stability": 0.286,
+      "hype_risk": 0.0,
+      "item_count": 7,
+      "last_seen": "2026-05-01",
+      "source_classes": [
+        "primary",
+        "practitioner"
+      ],
+      "source_class_counts": {
+        "practitioner": 1,
+        "primary": 6
+      },
+      "history": [
+        {
+          "date": "2026-03-23",
+          "volume": 1,
+          "state": "unknown"
+        },
+        {
+          "date": "2026-04-27",
+          "volume": 6,
+          "state": "emerging"
+        }
+      ]
+    },
+    {
+      "theme": "Benchmarks & Evals",
+      "domain": "unknown",
+      "definition": "",
+      "state": "unknown",
+      "confidence": 0.305,
+      "volume": 0.83,
+      "velocity": 6.0,
+      "diversity": 1,
+      "adoption_proxy": 0.0,
+      "stability": 1.0,
+      "hype_risk": 0.0,
+      "item_count": 7,
+      "last_seen": "2026-05-01",
+      "source_classes": [
+        "primary"
+      ],
+      "source_class_counts": {
+        "primary": 7
+      },
+      "history": [
+        {
+          "date": "2026-04-27",
+          "volume": 7,
           "state": "unknown"
         }
       ]
@@ -96,8 +157,8 @@
       "domain": "unknown",
       "definition": "",
       "state": "declining",
-      "confidence": 0.453,
-      "volume": 0.72,
+      "confidence": 0.452,
+      "volume": 0.71,
       "velocity": -1.0,
       "diversity": 2,
       "adoption_proxy": 0.0,
@@ -135,19 +196,19 @@
       ]
     },
     {
-      "theme": "Multimodal Models",
+      "theme": "Retrieval-Augmented Generation",
       "domain": "unknown",
       "definition": "",
       "state": "emerging",
-      "confidence": 0.433,
-      "volume": 0.6,
+      "confidence": 0.432,
+      "volume": 0.59,
       "velocity": 3.0,
       "diversity": 2,
       "adoption_proxy": 0.0,
       "stability": 0.4,
       "hype_risk": 0.0,
       "item_count": 5,
-      "last_seen": "2026-04-30",
+      "last_seen": "2026-05-01",
       "source_classes": [
         "primary",
         "practitioner"
@@ -158,7 +219,7 @@
       },
       "history": [
         {
-          "date": "2026-03-23",
+          "date": "2026-03-30",
           "volume": 1,
           "state": "unknown"
         },
@@ -174,8 +235,8 @@
       "domain": "unknown",
       "definition": "",
       "state": "declining",
-      "confidence": 0.433,
-      "volume": 0.6,
+      "confidence": 0.432,
+      "volume": 0.59,
       "velocity": -1.0,
       "diversity": 2,
       "adoption_proxy": 0.0,
@@ -198,47 +259,19 @@
       ]
     },
     {
-      "theme": "Benchmarks & Evals",
-      "domain": "unknown",
-      "definition": "",
-      "state": "unknown",
-      "confidence": 0.267,
-      "volume": 0.6,
-      "velocity": 4.0,
-      "diversity": 1,
-      "adoption_proxy": 0.0,
-      "stability": 1.0,
-      "hype_risk": 0.0,
-      "item_count": 5,
-      "last_seen": "2026-04-30",
-      "source_classes": [
-        "primary"
-      ],
-      "source_class_counts": {
-        "primary": 5
-      },
-      "history": [
-        {
-          "date": "2026-04-27",
-          "volume": 5,
-          "state": "unknown"
-        }
-      ]
-    },
-    {
       "theme": "Multi-Agent Systems",
       "domain": "unknown",
       "definition": "",
       "state": "emerging",
-      "confidence": 0.413,
-      "volume": 0.48,
+      "confidence": 0.412,
+      "volume": 0.47,
       "velocity": 2.0,
       "diversity": 2,
       "adoption_proxy": 0.0,
       "stability": 0.5,
       "hype_risk": 0.0,
       "item_count": 4,
-      "last_seen": "2026-04-30",
+      "last_seen": "2026-05-01",
       "source_classes": [
         "primary",
         "practitioner"
@@ -265,8 +298,8 @@
       "domain": "unknown",
       "definition": "",
       "state": "declining",
-      "confidence": 0.413,
-      "volume": 0.48,
+      "confidence": 0.412,
+      "volume": 0.47,
       "velocity": -1.0,
       "diversity": 2,
       "adoption_proxy": 0.0,
@@ -446,36 +479,57 @@
       ]
     },
     {
-      "theme": "Retrieval-Augmented Generation",
+      "theme": "Fine-Tuning & Adaptation",
       "domain": "unknown",
       "definition": "",
       "state": "unknown",
-      "confidence": 0.373,
-      "volume": 0.24,
-      "velocity": 0.0,
-      "diversity": 2,
+      "confidence": 0.227,
+      "volume": 0.36,
+      "velocity": 2.0,
+      "diversity": 1,
       "adoption_proxy": 0.0,
       "stability": 1.0,
       "hype_risk": 0.0,
-      "item_count": 2,
-      "last_seen": "2026-04-30",
+      "item_count": 3,
+      "last_seen": "2026-05-01",
       "source_classes": [
-        "practitioner",
         "primary"
       ],
       "source_class_counts": {
-        "practitioner": 1,
-        "primary": 1
+        "primary": 3
       },
       "history": [
         {
-          "date": "2026-03-30",
-          "volume": 1,
+          "date": "2026-04-27",
+          "volume": 3,
           "state": "unknown"
-        },
+        }
+      ]
+    },
+    {
+      "theme": "Model Distillation",
+      "domain": "unknown",
+      "definition": "",
+      "state": "unknown",
+      "confidence": 0.227,
+      "volume": 0.36,
+      "velocity": 2.0,
+      "diversity": 1,
+      "adoption_proxy": 0.0,
+      "stability": 1.0,
+      "hype_risk": 0.0,
+      "item_count": 3,
+      "last_seen": "2026-05-01",
+      "source_classes": [
+        "primary"
+      ],
+      "source_class_counts": {
+        "primary": 3
+      },
+      "history": [
         {
           "date": "2026-04-27",
-          "volume": 1,
+          "volume": 3,
           "state": "unknown"
         }
       ]
@@ -547,7 +601,7 @@
       ]
     },
     {
-      "theme": "Analysing Lightweight Large Language Models For Biomedical Named Entity Recognit",
+      "theme": "Reconstruction By Generation: 3D Multi-Object Scene Reconstruction From Sparse O",
       "domain": "unknown",
       "definition": "",
       "state": "unknown",
@@ -559,203 +613,7 @@
       "stability": 1.0,
       "hype_risk": 0.0,
       "item_count": 2,
-      "last_seen": "2026-04-30",
-      "source_classes": [
-        "primary"
-      ],
-      "source_class_counts": {
-        "primary": 2
-      },
-      "history": [
-        {
-          "date": "2026-04-27",
-          "volume": 2,
-          "state": "unknown"
-        }
-      ]
-    },
-    {
-      "theme": "Consciousness With The Serial Numbers Filed Off: Measuring Trained Denial In 115",
-      "domain": "unknown",
-      "definition": "",
-      "state": "unknown",
-      "confidence": 0.207,
-      "volume": 0.24,
-      "velocity": 1.0,
-      "diversity": 1,
-      "adoption_proxy": 0.0,
-      "stability": 1.0,
-      "hype_risk": 0.0,
-      "item_count": 2,
-      "last_seen": "2026-04-30",
-      "source_classes": [
-        "primary"
-      ],
-      "source_class_counts": {
-        "primary": 2
-      },
-      "history": [
-        {
-          "date": "2026-04-27",
-          "volume": 2,
-          "state": "unknown"
-        }
-      ]
-    },
-    {
-      "theme": "Generative AI-Based Virtual Assistant Using Retrieval-Augmented Generation: An E",
-      "domain": "unknown",
-      "definition": "",
-      "state": "unknown",
-      "confidence": 0.207,
-      "volume": 0.24,
-      "velocity": 1.0,
-      "diversity": 1,
-      "adoption_proxy": 0.0,
-      "stability": 1.0,
-      "hype_risk": 0.0,
-      "item_count": 2,
-      "last_seen": "2026-04-30",
-      "source_classes": [
-        "primary"
-      ],
-      "source_class_counts": {
-        "primary": 2
-      },
-      "history": [
-        {
-          "date": "2026-04-27",
-          "volume": 2,
-          "state": "unknown"
-        }
-      ]
-    },
-    {
-      "theme": "A Randomized Pde Energy Driven Iterative Framework For Efficient And Stable Pde",
-      "domain": "unknown",
-      "definition": "",
-      "state": "unknown",
-      "confidence": 0.207,
-      "volume": 0.24,
-      "velocity": 1.0,
-      "diversity": 1,
-      "adoption_proxy": 0.0,
-      "stability": 1.0,
-      "hype_risk": 0.0,
-      "item_count": 2,
-      "last_seen": "2026-04-30",
-      "source_classes": [
-        "primary"
-      ],
-      "source_class_counts": {
-        "primary": 2
-      },
-      "history": [
-        {
-          "date": "2026-04-27",
-          "volume": 2,
-          "state": "unknown"
-        }
-      ]
-    },
-    {
-      "theme": "Rethinking Kv Cache Eviction Via A Unified Information-Theoretic Objective",
-      "domain": "unknown",
-      "definition": "",
-      "state": "unknown",
-      "confidence": 0.207,
-      "volume": 0.24,
-      "velocity": 1.0,
-      "diversity": 1,
-      "adoption_proxy": 0.0,
-      "stability": 1.0,
-      "hype_risk": 0.0,
-      "item_count": 2,
-      "last_seen": "2026-04-30",
-      "source_classes": [
-        "primary"
-      ],
-      "source_class_counts": {
-        "primary": 2
-      },
-      "history": [
-        {
-          "date": "2026-04-27",
-          "volume": 2,
-          "state": "unknown"
-        }
-      ]
-    },
-    {
-      "theme": "Fine-Tuning & Adaptation",
-      "domain": "unknown",
-      "definition": "",
-      "state": "unknown",
-      "confidence": 0.207,
-      "volume": 0.24,
-      "velocity": 1.0,
-      "diversity": 1,
-      "adoption_proxy": 0.0,
-      "stability": 1.0,
-      "hype_risk": 0.0,
-      "item_count": 2,
-      "last_seen": "2026-04-30",
-      "source_classes": [
-        "primary"
-      ],
-      "source_class_counts": {
-        "primary": 2
-      },
-      "history": [
-        {
-          "date": "2026-04-27",
-          "volume": 2,
-          "state": "unknown"
-        }
-      ]
-    },
-    {
-      "theme": "Fruitprom-V2: Robust Probabilistic Maturity Estimation And Detection Of Fruits A",
-      "domain": "unknown",
-      "definition": "",
-      "state": "unknown",
-      "confidence": 0.207,
-      "volume": 0.24,
-      "velocity": 1.0,
-      "diversity": 1,
-      "adoption_proxy": 0.0,
-      "stability": 1.0,
-      "hype_risk": 0.0,
-      "item_count": 2,
-      "last_seen": "2026-04-30",
-      "source_classes": [
-        "primary"
-      ],
-      "source_class_counts": {
-        "primary": 2
-      },
-      "history": [
-        {
-          "date": "2026-04-27",
-          "volume": 2,
-          "state": "unknown"
-        }
-      ]
-    },
-    {
-      "theme": "Why Domain Matters: A Preliminary Study Of Domain Effects In Underwater Object D",
-      "domain": "unknown",
-      "definition": "",
-      "state": "unknown",
-      "confidence": 0.207,
-      "volume": 0.24,
-      "velocity": 1.0,
-      "diversity": 1,
-      "adoption_proxy": 0.0,
-      "stability": 1.0,
-      "hype_risk": 0.0,
-      "item_count": 2,
-      "last_seen": "2026-04-30",
+      "last_seen": "2026-05-01",
       "source_classes": [
         "primary"
       ],

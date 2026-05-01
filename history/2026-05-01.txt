@@ -1,0 +1,49 @@
+Daily AI Digest — 01 May 2026
+========================================
+
+Here's a summary of the latest AI/ML developments:
+
+## Nate Jones
+
+### Microsoft Is Testing Claude Against Its Own Copilot. Here&#39;s Why.
+Theme: LLM Competition Strategy
+Summary: This video suggests Microsoft is evaluating Anthropic's Claude alongside its proprietary Copilot models to inform its AI strategy. This indicates a competitive landscape where major tech companies pragmatically assess leading LLMs, even from rivals, for performance and strategic integration, underscoring the importance of model efficacy over exclusive development.
+
+---
+
+## Wes Roth
+
+### US wants Claude all to itself... because it&#39;s &quot;TOO DANGEROUS&quot;
+Theme: AI Geopolitical Control
+Summary: This video suggests the US government desires exclusive access to Anthropic's Claude, potentially due to national security concerns regarding its advanced capabilities. This highlights accelerating governmental interest in controlling frontier AI models, framing advanced LLMs as critical strategic assets with potential dual-use implications requiring sovereign oversight.
+
+---
+
+## Hacker News
+
+### Claude Code refuses requests or charges extra if your commits mention "OpenClaw"
+Theme: LLM Filtering Bypass
+Summary: Users report Claude Code's API declines requests or incurs unexpected charges when commit messages include "OpenClaw," a term associated with red-teaming. This reveals a sensitive filtering mechanism, potentially intended to prevent IP bypass or misuse, which can lead to practical issues and cost implications for developers encountering such patterns.
+
+### Alignment whack-a-mole: Finetuning activates recall of copyrighted books in LLMs
+Theme: LLM Memorization Activation
+Summary: New research demonstrates that finetuning LLMs on copyrighted books can trigger verbatim recall of those texts, even if previously unmemorized. This highlights a significant challenge for model alignment and intellectual property compliance, showing how a standard practice like finetuning can inadvertently increase copyright risks. The paper provides open-source tools for evaluation and finetuning on various models.
+
+### Claude.ai and API unavailable [fixed]
+Theme: LLM Service Outage
+Summary: Anthropic's Claude.ai and API experienced a temporary outage, now resolved. This incident underscores the operational dependencies on third-party LLM providers and the critical need for developers to implement robust error handling, monitoring, and fallback strategies when integrating external AI services into production systems.
+
+## Suggested Sources
+**The Gradient:** This blog offers deep dives into AI research and practical ML engineering, covering topics like model alignment, ethical AI, and large language model safety.
+**Latent Space Podcast:** This podcast frequently features interviews with leading researchers and engineers on advanced ML topics,
+
+────────────────────────────────────────
+Run summary
+  UTC timestamp : 2026-05-01 08:52:46 UTC
+  Total new items: 8
+
+  Sources fetched:
+    YouTube: 4 new item(s)
+    Blogs/RSS: 0 new item(s)
+    Hacker News: 4 new item(s)
+────────────────────────────────────────
