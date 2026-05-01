@@ -841,9 +841,9 @@ W-0018 identified 8 feeds with confirmed RSS availability covering major AI labs
 
 ## W-0020
 
-status: ready
+status: done
 created: 2026-04-30
-updated: 2026-04-30
+updated: 2026-05-01
 
 ### Outcome
 
@@ -869,9 +869,9 @@ Token cost is a critical production decision factor and shifts frequently — of
 
 ## W-0021
 
-status: ready
+status: done
 created: 2026-04-30
-updated: 2026-04-30
+updated: 2026-05-01
 
 ### Outcome
 
@@ -899,9 +899,9 @@ The inference provider market is expanding rapidly beyond the three major labs (
 
 ## W-0022
 
-status: ready
+status: done
 created: 2026-04-30
-updated: 2026-04-30
+updated: 2026-05-01
 
 ### Outcome
 

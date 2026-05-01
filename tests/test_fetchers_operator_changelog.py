@@ -164,3 +164,66 @@ class TestOperatorChangelogFetcher:
 
         urls = [i.url for i in items]
         assert "https://www.anthropic.com/news/claude-3-5-sonnet" not in urls
+
+    def test_custom_source_class(self):
+        """source_class constructor parameter overrides the default 'operator'."""
+        feeds = ["https://github.com/ollama/ollama/releases.atom"]
+        fetcher = OperatorChangelogFetcher(feeds=feeds, source_class="practitioner")
+
+        rss = b"""<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <item>
+      <title>v0.3.6</title>
+      <link>https://github.com/ollama/ollama/releases/tag/v0.3.6</link>
+      <description>Ollama release notes.</description>
+    </item>
+  </channel>
+</rss>"""
+
+        with patch(
+            "src.fetchers.operator_changelog.httpx.get",
+            return_value=_mock_bytes_response(rss),
+        ):
+            items = fetcher.fetch(already_processed=set())
+
+        assert len(items) == 1
+        assert items[0].source_class == "practitioner"
+
+    def test_pricing_keyword_sets_evidence_type(self):
+        """Items mentioning pricing keywords should get evidence_type='pricing'."""
+        feeds = ["https://openai.com/blog/rss.xml"]
+        fetcher = OperatorChangelogFetcher(feeds=feeds)
+
+        pricing_rss = b"""<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <item>
+      <title>New pricing for GPT-4o: $5 per million tokens</title>
+      <link>https://openai.com/blog/new-pricing</link>
+      <description>We are updating our pricing structure for GPT-4o.</description>
+    </item>
+  </channel>
+</rss>"""
+
+        with patch(
+            "src.fetchers.operator_changelog.httpx.get",
+            return_value=_mock_bytes_response(pricing_rss),
+        ):
+            items = fetcher.fetch(already_processed=set())
+
+        assert len(items) == 1
+        assert items[0].evidence_type == "pricing"
+
+    def test_non_pricing_item_has_empty_evidence_type(self):
+        """Items without pricing keywords should have evidence_type=''."""
+        feeds = ["https://www.anthropic.com/rss.xml"]
+        fetcher = OperatorChangelogFetcher(feeds=feeds)
+
+        with patch(
+            "src.fetchers.operator_changelog.httpx.get",
+            return_value=_mock_bytes_response(_ANTHROPIC_RSS),
+        ):
+            items = fetcher.fetch(already_processed=set())
+
+        assert all(i.evidence_type == "" for i in items)

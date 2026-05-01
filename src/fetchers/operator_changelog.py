@@ -41,6 +41,32 @@ _HEADERS = {
     "Accept-Language": "en-US,en;q=0.5",
 }
 
+# Keywords that indicate a pricing / cost announcement.
+# When any of these appear in title or content the item is tagged
+# evidence_type="pricing" for downstream cost-trend analysis.
+_PRICING_KEYWORDS: frozenset[str] = frozenset(
+    {
+        "price",
+        "pricing",
+        "cost",
+        "$/",
+        "per million",
+        "per 1m token",
+        "tokens per dollar",
+        "token cost",
+        "rate limit",
+        "free tier",
+        "paid tier",
+        "subscription",
+    }
+)
+
+
+def _is_pricing_item(title: str, content: str) -> bool:
+    """Return True when the item discusses pricing or cost changes."""
+    text = (title + " " + content).lower()
+    return any(kw in text for kw in _PRICING_KEYWORDS)
+
 
 class _PermanentHTTPError(Exception):
     """4xx HTTP error that will not improve on retry."""
@@ -50,11 +76,13 @@ class OperatorChangelogFetcher:
     """Fetch operator changelog / blog feeds for the trend pipeline.
 
     Each feed URL is fetched, parsed (RSS 2.0 or Atom), and returned as a
-    FetchedItem with source_class="operator".
+    FetchedItem. ``source_class`` defaults to ``"operator"`` but can be
+    overridden (e.g. ``"practitioner"`` for community tool release feeds).
     """
 
-    def __init__(self, feeds: list[str]) -> None:
+    def __init__(self, feeds: list[str], source_class: str = "operator") -> None:
         self._feeds = feeds
+        self._source_class = source_class
 
     def fetch(self, already_processed: set[str]) -> list[FetchedItem]:
         if not self._feeds:
@@ -115,7 +143,10 @@ class OperatorChangelogFetcher:
                     source_name=_source_name_from_url(feed_url),
                     published=entry.get("published"),
                     source_type="RSS",
-                    source_class="operator",
+                    source_class=self._source_class,
+                    evidence_type="pricing"
+                    if _is_pricing_item(entry.get("title", ""), entry.get("content", "") or "")
+                    else "",
                 )
             )
 
@@ -220,12 +251,28 @@ def _parse_rfc2822_date(value: str | None) -> datetime | None:
 def _source_name_from_url(feed_url: str) -> str:
     """Derive a human-readable source name from a feed URL."""
     _known: dict[str, str] = {
+        # Major labs (W-0009)
         "anthropic.com": "Anthropic Blog",
         "openai.com": "OpenAI Blog",
         "blog.google": "Google AI Blog",
         "deepmind.google": "DeepMind Blog",
         "aws.amazon.com": "AWS ML Blog",
         "blogs.microsoft.com": "Microsoft AI Blog",
+        # New entrant inference providers (W-0021)
+        "groq.com": "Groq Blog",
+        "together.ai": "Together AI Blog",
+        "fireworks.ai": "Fireworks AI Blog",
+        "cerebras.ai": "Cerebras Blog",
+        "lambdalabs.com": "Lambda Labs Blog",
+        "blog.perplexity.ai": "Perplexity Blog",
+        "mistral.ai": "Mistral AI Blog",
+        # Local model tools (W-0022)
+        "ollama.com": "Ollama Releases",
+        "github.com/ollama": "Ollama Releases",
+        "github.com/ggerganov": "llama.cpp Releases",
+        "github.com/mudler": "LocalAI Releases",
+        "lmstudio.ai": "LM Studio",
+        "simonwillison.net": "Simon Willison's Weblog",
     }
     for domain, name in _known.items():
         if domain in feed_url:

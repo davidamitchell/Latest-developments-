@@ -193,6 +193,59 @@ blogs:
     #   source_class: "media"
     #   # Peer-reviewed management research meeting practice; AI + future of work.
 
+    # ── New entrant inference providers (W-0021) ──────────────────────
+    # Emerging providers beyond the frontier labs. URLs need verification
+    # (marked below). Ghost CMS blogs use /rss/; WordPress uses /feed/.
+    #
+    # - name: "Groq Blog"
+    #   url: "https://groq.com/blog/rss/"         # verify: Ghost /rss/ path
+    #   source_class: "operator"
+    #
+    # - name: "Together AI Blog"
+    #   url: "https://www.together.ai/blog/rss"   # verify
+    #   source_class: "operator"
+    #
+    # - name: "Fireworks AI Blog"
+    #   url: "https://fireworks.ai/blog/rss"      # verify
+    #   source_class: "operator"
+    #
+    # - name: "Cerebras Blog"
+    #   url: "https://cerebras.ai/blog/feed/"     # verify
+    #   source_class: "operator"
+    #
+    # - name: "Lambda Labs Blog"
+    #   url: "https://lambdalabs.com/blog/feed/"  # verify
+    #   source_class: "operator"
+    #
+    # - name: "Perplexity Blog"
+    #   url: "https://blog.perplexity.ai/rss"     # verify
+    #   source_class: "operator"
+    #
+    # - name: "Mistral AI News"
+    #   url: "https://mistral.ai/news/rss.xml"    # verify
+    #   source_class: "operator"
+
+    # ── Local model tools (W-0022) ────────────────────────────────────
+    # GitHub releases.atom feeds and practitioner blogs for local LLM tooling.
+    # GitHub releases feeds are confirmed reliable — no auth required.
+    #
+    # - name: "Ollama Releases"
+    #   url: "https://github.com/ollama/ollama/releases.atom"
+    #   source_class: "practitioner"
+    #
+    # - name: "llama.cpp Releases"
+    #   url: "https://github.com/ggerganov/llama.cpp/releases.atom"
+    #   source_class: "practitioner"
+    #
+    # - name: "LocalAI Releases"
+    #   url: "https://github.com/mudler/LocalAI/releases.atom"
+    #   source_class: "practitioner"
+    #
+    # - name: "Simon Willison's Weblog"
+    #   url: "https://simonwillison.net/atom/everything/"
+    #   source_class: "practitioner"
+    #   # Extensive coverage of local model running, AI tools, and practical LLM use.
+
 # ---------------------------------------------------------------------------
 # Hacker News
 # ---------------------------------------------------------------------------
@@ -418,38 +471,85 @@ trends:
       - "NeurIPS.cc/2025/Conference/-/Accepted"
       - "ICML.cc/2025/Conference/-/Accepted"
 
-  # ── Operator / Media RSS feeds for trends pipeline (W-0019) ──
-  # These feeds are fetched by the trend analysis pipeline (src/trends.py),
-  # NOT the email digest. They add operator-class signal for cross-class
-  # confirmation. All URLs are confirmed RSS. Enable individually.
-  #
-  # operator_rss:
-  #   enabled: false
-  #   feeds:
-  #     - name: "Anthropic Blog"
-  #       url: "https://www.anthropic.com/rss.xml"
-  #       source_class: "operator"
-  #     - name: "OpenAI Blog"
-  #       url: "https://openai.com/blog/rss.xml"
-  #       source_class: "operator"
-  #     - name: "Google AI Blog"
-  #       url: "https://blog.google/technology/ai/rss/"
-  #       source_class: "operator"
-  #     - name: "DeepMind Blog"
-  #       url: "https://deepmind.google/blog/rss.xml"
-  #       source_class: "operator"
-  #     - name: "AWS Machine Learning Blog"
-  #       url: "https://aws.amazon.com/blogs/machine-learning/feed/"
-  #       source_class: "operator"
-  #     - name: "Microsoft AI Blog"
-  #       url: "https://blogs.microsoft.com/ai/feed/"
-  #       source_class: "operator"
-  #     - name: "Ethan Mollick — One Useful Thing"
-  #       url: "https://www.oneusefulthing.org/feed"
-  #       source_class: "practitioner"
-  #     - name: "HBR — AI & Machine Learning"
-  #       url: "https://hbr.org/topic/subject/ai-and-machine-learning/feed"
-  #       source_class: "media"
-  #     - name: "MIT Sloan Management Review"
-  #       url: "https://sloanreview.mit.edu/feed/"
-  #       source_class: "media"
+    # ── Operator / Media RSS feeds for trends pipeline (W-0019) ──
+    # These feeds are fetched by the trend analysis pipeline (src/trends.py),
+    # NOT the email digest. They add operator-class signal for cross-class
+    # confirmation. All URLs are confirmed RSS. Enable individually.
+    #
+    # operator_rss:
+    #   enabled: false
+    #   feeds:
+    #     - name: "Anthropic Blog"
+    #       url: "https://www.anthropic.com/rss.xml"
+    #       source_class: "operator"
+    #     - name: "OpenAI Blog"
+    #       url: "https://openai.com/blog/rss.xml"
+    #       source_class: "operator"
+    #     - name: "Google AI Blog"
+    #       url: "https://blog.google/technology/ai/rss/"
+    #       source_class: "operator"
+    #     - name: "DeepMind Blog"
+    #       url: "https://deepmind.google/blog/rss.xml"
+    #       source_class: "operator"
+    #     - name: "AWS Machine Learning Blog"
+    #       url: "https://aws.amazon.com/blogs/machine-learning/feed/"
+    #       source_class: "operator"
+    #     - name: "Microsoft AI Blog"
+    #       url: "https://blogs.microsoft.com/ai/feed/"
+    #       source_class: "operator"
+    #     - name: "Ethan Mollick — One Useful Thing"
+    #       url: "https://www.oneusefulthing.org/feed"
+    #       source_class: "practitioner"
+    #     - name: "HBR — AI & Machine Learning"
+    #       url: "https://hbr.org/topic/subject/ai-and-machine-learning/feed"
+    #       source_class: "media"
+    #     - name: "MIT Sloan Management Review"
+    #       url: "https://sloanreview.mit.edu/feed/"
+    #       source_class: "media"
+
+  # ── OpenRouter model pricing snapshots (W-0020) ──────────────────────────
+  # Fetches the OpenRouter public model catalogue (no auth required).
+  # Each model becomes a market-class item with evidence_type="pricing",
+  # feeding the inference-cost trend signal.
+  openrouter:
+    enabled: false      # set to true to activate daily pricing snapshots
+    limit: 100          # max models to snapshot per run
+
+  # ── New entrant inference / token providers (W-0021) ─────────────────────
+  # RSS feeds from emerging providers beyond the frontier labs.
+  # All URLs marked "# verify:" need spot-checking before activating.
+  # Ghost CMS blogs typically expose /rss/ or /rss; WordPress exposes /feed/.
+  new_entrant_sources:
+    enabled: false
+    feeds:
+      # Groq — ultra-fast inference; Ghost CMS
+      - "https://groq.com/blog/rss/"          # verify: Ghost /rss/ path
+      # Together AI — open-model hosting
+      - "https://www.together.ai/blog/rss"    # verify: Ghost /rss path
+      # Fireworks AI — fine-tuned model serving
+      - "https://fireworks.ai/blog/rss"       # verify
+      # Cerebras — wafer-scale hardware; WordPress likely
+      - "https://cerebras.ai/blog/feed/"      # verify: WordPress /feed/
+      # Lambda Labs — GPU cloud
+      - "https://lambdalabs.com/blog/feed/"   # verify: WordPress /feed/
+      # Perplexity — AI search / inference
+      - "https://blog.perplexity.ai/rss"      # verify: Ghost /rss path
+      # Mistral AI — open-weight frontier models; confirmed RSS
+      - "https://mistral.ai/news/rss.xml"     # verify
+
+  # ── Local model / self-hosted tools (W-0022) ─────────────────────────────
+  # GitHub releases.atom feeds and practitioner blogs for local LLM tooling.
+  # All GitHub releases feeds are confirmed reliable — no auth required.
+  local_model_sources:
+    enabled: false
+    feeds:
+      # Ollama — the de-facto local model runner
+      - "https://github.com/ollama/ollama/releases.atom"
+      # llama.cpp — foundational quantised inference library
+      - "https://github.com/ggerganov/llama.cpp/releases.atom"
+      # LocalAI — OpenAI-compatible local inference server
+      - "https://github.com/mudler/LocalAI/releases.atom"
+      # LM Studio — desktop UI for local models; verify RSS availability
+      # - "https://lmstudio.ai/blog/rss"        # verify
+      # Simon Willison — extensive local model coverage; confirmed Atom feed
+      - "https://simonwillison.net/atom/everything/"

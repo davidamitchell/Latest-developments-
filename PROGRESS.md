@@ -29,7 +29,33 @@ Last updated: 2026-04-30
 
 ## Work Log
 
-### 2026-04-30 — Backlog additions (W-0020, W-0021, W-0022)
+### 2026-05-01 — W-0020, W-0021, W-0022 implementation
+
+**Branch:** `copilot/add-backlog-items-tracking`
+
+**Completed:**
+- **W-0020 — OpenRouter pricing fetcher**: `src/fetchers/openrouter.py` — fetches model pricing snapshots from the OpenRouter public API; `source_class="market"`, `evidence_type="pricing"`. 12 tests. `OpenRouterConfig` added to `src/config.py`. `_fetch_openrouter()` wired into `src/trends.py`. `trends.openrouter` section added to `config/sources.yaml`.
+- **W-0020 — Pricing keyword detection**: `OperatorChangelogFetcher` now auto-tags items containing pricing keywords with `evidence_type="pricing"`. 2 new tests for this behaviour.
+- **W-0021 — New entrant inference provider sources**: `trends.new_entrant_sources` YAML section with RSS feeds for Groq, Together AI, Fireworks AI, Cerebras, Lambda Labs, Perplexity, Mistral AI (all `enabled: false`, inline verification notes). `NewEntrantSourcesConfig` added to config. `_fetch_new_entrant_sources()` wired into trends. Feeds also mirrored in `blogs.rss` (commented) for email digest.
+- **W-0022 — Local model tool sources**: `trends.local_model_sources` YAML section with GitHub `releases.atom` for Ollama, llama.cpp, LocalAI + Simon Willison's Atom feed. `LocalModelSourcesConfig` added. `_fetch_local_model_sources()` wired into trends. `source_class` parameter added to `OperatorChangelogFetcher` for practitioner-class reuse. Local model and token-pricing theme aliases added to `src/themes.py`.
+- Domain tables in `trends.py` extended with all new providers.
+- `_source_name_from_url()` extended with all new domains.
+
+**Test count:** 436 passing, 1 skipped (up from 388).
+
+**Mini-Retro:**
+
+1. **Did the process work?** Yes. The code pattern (fetcher → config → trends wiring → YAML) is now well-established; each new source follows it mechanically.
+
+2. **What slowed down or went wrong?** W-0021 required a judgment call on RSS endpoint URLs (many not publicly verified). Added inline `# verify:` comments so the owner can spot-check before enabling.
+
+3. **What single change would prevent this next time?** A short verification CI step that HTTP-HEAD-checks all `enabled: true` feed URLs would catch broken endpoints before they silently fail in production.
+
+4. **Is this a pattern?** Yes — adding sources without verification is a recurring risk. The `# verify:` comment convention is a partial mitigation; a live-check workflow step would be more robust.
+
+---
+
+
 
 **Branch:** `copilot/add-backlog-items-tracking`
 
