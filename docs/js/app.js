@@ -40,6 +40,16 @@ const THEME_PALETTE = [
 // page reloads even if theme order in the JSON changes.
 let THEME_COLOR_MAP = {};
 
+// Tracks which theme is currently showing in the drill-down panel (module level
+// so both the card click handler and the close button share the same state).
+let _selectedTheme = null;
+
+// Hex colour validator — guards against unexpected values reaching inline styles.
+const _HEX_RE = /^#[0-9A-Fa-f]{3,8}$/;
+function safeColor(value, fallback) {
+  return _HEX_RE.test(value) ? value : fallback;
+}
+
 function buildThemeColorMap(allThemeNames) {
   const sorted = [...new Set(allThemeNames)].sort();
   THEME_COLOR_MAP = {};
@@ -82,11 +92,12 @@ function setupTabs() {
 }
 
 async function loadAll() {
-  const [meta, trendsData, themesData, sourcesData] = await Promise.all([
+  const [meta, trendsData, themesData, sourcesData, itemsData] = await Promise.all([
     fetchJson('meta.json'),
     fetchJson('trends.json'),
     fetchJson('themes.json'),
     fetchJson('sources.json'),
+    fetchJson('items.json'),
   ]);
 
   // Build colour map from all theme names across both data files before rendering.
@@ -96,10 +107,19 @@ async function loadAll() {
   ];
   buildThemeColorMap(allNames);
 
+  const items = itemsData?.items || [];
+
   renderMeta(meta);
   renderTrendsTab(trendsData);
-  renderThemesTab(themesData);
+  renderThemesTab(themesData, items);
   renderSourcesTab(sourcesData);
+
+  // Close button for the drill-down panel (set up once after render).
+  document.getElementById('drill-down-close')?.addEventListener('click', () => {
+    _selectedTheme = null;
+    document.querySelectorAll('#theme-grid .theme-card.selected').forEach(c => c.classList.remove('selected'));
+    renderItemDrillDown(null, items);
+  });
 }
 
 async function fetchJson(filename) {
@@ -194,7 +214,7 @@ function renderTrendTable(trends) {
 
 /* ── Themes tab ─────────────────────────────────────────────────────── */
 
-function renderThemesTab(data) {
+function renderThemesTab(data, items) {
   const themes = data?.themes;
 
   if (!themes || themes.length === 0) {
@@ -203,11 +223,11 @@ function renderThemesTab(data) {
     return;
   }
 
-  renderThemeCards(themes);
+  renderThemeCards(themes, items);
   renderHeatmap('heatmap-container', themes, SOURCE_CLASSES, THEME_COLOR_MAP);
 }
 
-function renderThemeCards(themes) {
+function renderThemeCards(themes, items) {
   const grid = document.getElementById('theme-grid');
   if (!grid) return;
 
@@ -220,10 +240,10 @@ function renderThemeCards(themes) {
     const lastSeen = t.last_seen
       ? new Date(t.last_seen).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
       : '—';
-    const color = themeColor(t.name);
+    const color = safeColor(themeColor(t.name), '#999');
 
     return `
-      <div class="theme-card" style="border-left-color:${color}">
+      <div class="theme-card" data-theme="${escHtml(t.name)}" style="border-left-color:${color}">
         <div class="theme-card-header">
           <span class="theme-name" style="color:${color}">${escHtml(t.name)}</span>
           <span class="state-badge state-${escHtml(state)}">${escHtml(state)}</span>
@@ -247,8 +267,90 @@ function renderThemeCards(themes) {
             <span class="metric-value" title="${escHtml(classesList)}">${(t.source_classes || []).length}</span>
           </span>
         </div>
+        <div class="theme-card-hint">view items ↓</div>
       </div>`;
   }).join('');
+
+  // Click delegation — selecting a card opens the drill-down panel.
+  // Uses module-level _selectedTheme so the close button can reset it correctly.
+  grid.addEventListener('click', e => {
+    const card = e.target.closest('.theme-card');
+    if (!card) return;
+    const themeName = card.dataset.theme;
+
+    if (_selectedTheme === themeName) {
+      // Toggle off: clicking the active card again closes the panel.
+      _selectedTheme = null;
+      card.classList.remove('selected');
+      renderItemDrillDown(null, items);
+      return;
+    }
+
+    grid.querySelectorAll('.theme-card.selected').forEach(c => c.classList.remove('selected'));
+    card.classList.add('selected');
+    _selectedTheme = themeName;
+    // Scroll panel into view after rendering.
+    renderItemDrillDown(themeName, items);
+    document.getElementById('drill-down-panel')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  });
+}
+
+/* ── Item drill-down provenance panel ──────────────────────────────── */
+
+function renderItemDrillDown(themeName, allItems) {
+  const panel = document.getElementById('drill-down-panel');
+  const title = document.getElementById('drill-down-title');
+  const body  = document.getElementById('drill-down-body');
+  if (!panel) return;
+
+  if (!themeName) {
+    panel.hidden = true;
+    return;
+  }
+
+  const items = allItems
+    .filter(i => i.theme === themeName)
+    .sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+
+  const color = themeColor(themeName);
+  panel.style.borderLeftColor = color;
+  panel.hidden = false;
+
+  if (title) {
+    title.textContent = `${themeName} — ${items.length} item${items.length !== 1 ? 's' : ''}`;
+    title.style.color = color;
+  }
+
+  if (!body) return;
+
+  if (items.length === 0) {
+    body.innerHTML = '<p style="color:var(--text-muted);font-size:0.75rem;margin:0">No items in current data window.</p>';
+    return;
+  }
+
+  const rows = items.map(item => {
+    const cls      = item.source_class || 'practitioner';
+    const clsColor = safeColor(CLASS_COLORS[cls] || '#555', '#555');
+    const badge    = `<span class="source-badge" style="background:${hexAlpha(clsColor, 0.12)};color:${clsColor};border:1px solid ${hexAlpha(clsColor, 0.25)}">${escHtml(cls)}</span>`;
+    return `
+      <tr>
+        <td class="date-cell">${escHtml(item.date || '—')}</td>
+        <td class="source-name-cell">${escHtml(item.source_name || '—')}</td>
+        <td>${badge}</td>
+      </tr>`;
+  }).join('');
+
+  body.innerHTML = `
+    <table class="provenance-table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Source</th>
+          <th>Class</th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>`;
 }
 
 /* ── Sources tab ────────────────────────────────────────────────────── */

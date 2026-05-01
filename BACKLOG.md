@@ -272,7 +272,7 @@ Every item carries a `source_class` label for credibility triangulation.
 | 15.3 | Theme cards with state badge and metrics | `[x]` | Item count, hype risk, source diversity |
 | 15.4 | Source-class coverage heatmap | `[x]` | CSS table; rows=themes, cols=classes |
 | 15.5 | Trend state table with confidence bars | `[x]` | Sortable; velocity and diversity columns |
-| 15.6 | Raw data drill-down | `[ ]` | Click theme → item-level provenance panel |
+| 15.6 | Raw data drill-down | `[x]` | Click theme card → provenance panel with items by date/source/class |
 
 ---
 

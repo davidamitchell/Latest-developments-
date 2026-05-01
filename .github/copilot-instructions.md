@@ -20,7 +20,13 @@ Key skill chains:
 
 The backlog is `BACKLOG.md` at the repo root. Use the `backlog-manager` skill from `.github/skills/backlog-manager/SKILL.md`. Read it at the start of every session.
 
-To **execute** backlog items, use the `backlog-worker` skill from `.github/skills/backlog-worker/SKILL.md`. It selects the next `ready` item, decomposes it, applies the appropriate sub-skills, reviews the output, and advances the item to `done`.
+**Two formats co-exist in `BACKLOG.md`:**
+- **W-XXXX items** — standalone work items with `status: ready | active | done | archived`. These are the target of `backlog-worker`.
+- **Epic slice tables** — rows using `[ ]` (not started), `[→]` (in progress), `[x]` (done). These group small, related slices within an Epic. Work them by updating the table notation directly.
+
+To **execute** W-XXXX items, use the `backlog-worker` skill from `.github/skills/backlog-worker/SKILL.md`. It selects the next `ready` item, decomposes it, applies the appropriate sub-skills, reviews the output, and advances the item to `done`.
+
+To work **Epic slices**, find the first `[ ]` row in the relevant epic, implement the slice, then update the status to `[x]` and note the date in the Notes column.
 
 ---
 
@@ -33,6 +39,12 @@ Every non-trivial architectural or design decision must be recorded as an ADR in
 ## PROGRESS.md Mandate
 
 Append a dated entry to `PROGRESS.md` after every meaningful session or PR. Never edit old entries — append only. Format: `## YYYY-MM-DD` then what changed and why. Append-only prevents merge conflicts.
+
+---
+
+## learnings.md Mandate
+
+`learnings.md` at the repo root records **patterns, root causes, and per-session technical discoveries** — things a future agent should know before touching related code. Read it at the start of any session involving pipeline code, tests, or the site. Append a new dated section when your session surfaces a new pattern or resolves a recurring friction point. The distinction from PROGRESS.md: `PROGRESS.md` records what was done; `learnings.md` records what was learned.
 
 ---
 
@@ -242,7 +254,7 @@ These instructions describe how to think and work, not what to build.
 
 ### Skill Composability — Use the Right Tool for Each Phase
 
-Every significant task maps to a skill chain. Apply skills in sequence rather than working from general reasoning alone.
+Every significant task maps to a skill chain. Apply skills in sequence rather than working from general reasoning alone. **These chains are guidance for non-trivial work — do not apply them to minor config changes, small fixes, or documentation updates where the overhead outweighs the value.**
 
 | Task type | Skill chain |
 |---|---|

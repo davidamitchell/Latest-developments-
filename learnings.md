@@ -120,3 +120,27 @@ with patch("src.fetchers.youtube.os.environ.get", return_value="fake-key"):
 ### W-0005: os import inside run() to avoid circular import risk
 
 The `import os as _os` inside `run()` avoids polluting the module namespace with a redundant `os` import when `os` is already imported at the top. A cleaner alternative is just to add `import os` to the top-level imports — but the inline import is acceptable for a small guard block.
+
+---
+
+## 2026-05-01 — Instructions must be validated by use, not just written
+
+### Pattern
+
+Instructions written in isolation reliably develop gaps that only appear when you try to follow them. The three gaps found this session (backlog format ambiguity, invisible learnings.md, over-prescriptive skill chain mandate) were all invisible until the first step of actual execution failed.
+
+### Rule
+
+**Write instructions → immediately simulate the first action they describe → if you can't proceed, fix the gap before committing.**
+
+Applied to agent instructions: after writing any new mandate section, ask "if I read only this section, what is the first concrete action I would take?" If the answer is "I don't know" or "I'd fail", the section has a gap.
+
+### Applied fix
+
+- Backlog Mandate: now documents both W-XXXX (status-based, for `backlog-worker`) and Epic slice tables (`[ ]`/`[x]`/`[→]`, worked directly).
+- `learnings.md` Mandate: new section added — this file was invisible to new sessions.
+- Skill chain table: added "guidance for non-trivial work" qualifier to prevent over-engineering minor tasks.
+
+### Is this a pattern?
+
+Yes — and it's not unique to this repo. Agent instructions written as prose mandates tend to overprescribe and underdocument. The fix is: write, simulate, fix gaps, commit.
