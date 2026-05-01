@@ -104,6 +104,28 @@ class OpenReviewConfig:
 
 
 @dataclass
+class OpenRouterConfig:
+    enabled: bool = False
+    limit: int = 100  # max models to fetch per run
+
+
+@dataclass
+class NewEntrantSourcesConfig:
+    """RSS feeds from emerging inference/token providers (W-0021)."""
+
+    enabled: bool = False
+    feeds: list[str] = field(default_factory=list)
+
+
+@dataclass
+class LocalModelSourcesConfig:
+    """RSS / Atom feeds for local model tools and self-hosting (W-0022)."""
+
+    enabled: bool = False
+    feeds: list[str] = field(default_factory=list)
+
+
+@dataclass
 class TrendsConfig:
     enabled: bool = True
     arxiv: ArxivConfig = field(default_factory=ArxivConfig)
@@ -112,6 +134,9 @@ class TrendsConfig:
     operator_sources: OperatorChangelogConfig = field(default_factory=OperatorChangelogConfig)
     replicate: ReplicateConfig = field(default_factory=ReplicateConfig)
     openreview: OpenReviewConfig = field(default_factory=OpenReviewConfig)
+    openrouter: OpenRouterConfig = field(default_factory=OpenRouterConfig)
+    new_entrant_sources: NewEntrantSourcesConfig = field(default_factory=NewEntrantSourcesConfig)
+    local_model_sources: LocalModelSourcesConfig = field(default_factory=LocalModelSourcesConfig)
 
 
 @dataclass
@@ -260,6 +285,9 @@ def load_config(path: Path = Path("config/sources.yaml")) -> Config:
     opc = tr.get("operator_sources", {})
     rep = tr.get("replicate", {})
     orv = tr.get("openreview", {})
+    ortr = tr.get("openrouter", {})
+    nes = tr.get("new_entrant_sources", {})
+    lms = tr.get("local_model_sources", {})
     trends = TrendsConfig(
         enabled=tr.get("enabled", True),
         arxiv=ArxivConfig(
@@ -294,6 +322,18 @@ def load_config(path: Path = Path("config/sources.yaml")) -> Config:
                 "ICML.cc/2025/Conference/-/Accepted",
             ],
             limit=orv.get("limit", 25),
+        ),
+        openrouter=OpenRouterConfig(
+            enabled=ortr.get("enabled", False),
+            limit=ortr.get("limit", 100),
+        ),
+        new_entrant_sources=NewEntrantSourcesConfig(
+            enabled=nes.get("enabled", False),
+            feeds=_yaml_list(nes.get("feeds")),
+        ),
+        local_model_sources=LocalModelSourcesConfig(
+            enabled=lms.get("enabled", False),
+            feeds=_yaml_list(lms.get("feeds")),
         ),
     )
 

@@ -7,7 +7,27 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Added
-- **W-0008 — Papers with Code fetcher** (`src/fetchers/paperswithcode.py`): fetches trending papers from the Papers with Code JSON API as `source_class="primary"` with `has_code=True`. 10 tests in `tests/test_fetchers_paperswithcode.py`.
+- **Source activation — multiple areas (2026-05-01)**: enabled sources across all pipeline areas in `config/sources.yaml`:
+  - *Trends pipeline*: HuggingFace model releases, Papers with Code trending papers, Replicate run-count models, OpenReview accepted papers (ICLR/NeurIPS/ICML 2025), operator changelog RSS feeds (Anthropic, OpenAI, Google AI, DeepMind, AWS ML, Microsoft AI), OpenRouter pricing snapshots, new entrant provider feeds (Together AI, Lambda, Groq, Cerebras, Mistral), local model releases (Ollama, llama.cpp, LocalAI, Simon Willison).
+  - *Email digest (blogs.rss)*: Anthropic Blog, OpenAI Blog, Google AI Blog, DeepMind Blog, Ethan Mollick — One Useful Thing, Simon Willison's Weblog, Together AI Blog, Lambda Blog, Groq/Cerebras/Mistral releases, Ollama/llama.cpp/LocalAI releases.
+  - *YouTube*: Matthew Berman (open-source AI, local model testing), The AI Daily Brief (daily briefings).
+
+- **W-0012 — Adoption proxy signal**: `adoption_proxy` (0–1) is now computed in `build_trend_metrics` from three available signals: market-class item density (pricing/commercial activity), practitioner item density (real-world usage), and cross-class breadth (research→deployment boundary crossing). Equal-weight formula, each component capped to keep the total in [0, 1]. 7 computation tests in `tests/test_adoption_proxy.py`.
+- **W-0012 — State machine upgrade**: `classify_state` now gates `scaling` on `adoption_proxy >= 0.10` and `mature` on `adoption_proxy >= 0.20`. Research-only themes can no longer reach Scaling or Mature without real practitioner or market activity. Two new constants: `_ADOPTION_SCALING_MIN`, `_ADOPTION_MATURE_MIN`. 8 new tests in `tests/test_trend_state.py`.
+- **W-0021 — Verified RSS feed URLs**: All W-0021 provider feed URLs live-checked (2026-05-01). Confirmed: Together AI (`rss.xml`), Lambda (`lambda.ai/blog/rss.xml`), Groq SDK, Cerebras SDK, Mistral Inference (all via GitHub releases.atom). Not accessible: Fireworks AI (no public RSS), Perplexity (403). Config updated with verified URLs; unverified/inaccessible entries removed.
+
+ (`src/fetchers/openrouter.py`): fetches the OpenRouter public model catalogue (`/api/v1/models`, no auth required). Each model becomes a `source_class="market"`, `evidence_type="pricing"` item with a human-readable pricing snapshot (price per million input/output tokens, context window). 12 tests in `tests/test_fetchers_openrouter.py`.
+- **W-0020 — Pricing keyword detection**: `OperatorChangelogFetcher` now automatically sets `evidence_type="pricing"` on any item whose title or content contains pricing-signal keywords (price, pricing, cost, per million, token cost, etc.). Backward-compatible — non-pricing items keep `evidence_type=""`.
+- **W-0021 — New entrant inference provider sources**: `trends.new_entrant_sources` config section in `sources.yaml` with RSS feeds for Groq, Together AI, Fireworks AI, Cerebras, Lambda Labs, Perplexity, and Mistral AI. All added as `enabled: false` with inline verification notes. Same feeds mirrored in `blogs.rss` for opt-in email digest use.
+- **W-0022 — Local model tool sources**: `trends.local_model_sources` config section with GitHub `releases.atom` feeds for Ollama, llama.cpp, and LocalAI, plus Simon Willison's blog. GitHub releases feeds are confirmed reliable (no auth). Simon Willison added to `blogs.rss` too.
+- **W-0022 — Local model theme aliases**: `src/themes.py` synonym map extended with "ollama", "llama.cpp", "localai", "on-device", "self-hosted", "local model", "local inference", "edge inference" → "Local LLM Applications". Also extended with "token cost", "token pricing", "cost per token" → "Inference Cost Reduction".
+- `OpenRouterConfig`, `NewEntrantSourcesConfig`, `LocalModelSourcesConfig` added to `src/config.py` and `TrendsConfig`.
+- `OperatorChangelogFetcher` now accepts a `source_class` constructor parameter (default: `"operator"`), enabling reuse for practitioner-class feeds (local model releases).
+- URL domain tables in `src/trends.py` extended with new entrant providers (Groq, Together AI, Fireworks AI, Cerebras, Lambda Labs, Perplexity, Mistral AI) and local model tools (Ollama, LM Studio, Simon Willison).
+- `_source_name_from_url()` in `src/fetchers/operator_changelog.py` extended with all new provider and local-model domains.
+- All three new fetchers (`openrouter`, `new_entrant_sources`, `local_model_sources`) wired into `src/trends.py run()`.
+
+ (`src/fetchers/paperswithcode.py`): fetches trending papers from the Papers with Code JSON API as `source_class="primary"` with `has_code=True`. 10 tests in `tests/test_fetchers_paperswithcode.py`.
 - **W-0009 — Operator changelog fetcher** (`src/fetchers/operator_changelog.py`): fetches 6 AI lab RSS feeds (Anthropic, OpenAI, Google AI, DeepMind, AWS ML, Microsoft AI) as `source_class="operator"`. 6 tests in `tests/test_fetchers_operator_changelog.py`.
 - **W-0010 — Replicate fetcher** (`src/fetchers/replicate.py`): fetches popular public models from the Replicate API ordered by run count as `source_class="operator"`. 8 tests in `tests/test_fetchers_replicate.py`.
 - **W-0011 — OpenReview fetcher** (`src/fetchers/openreview.py`): fetches accepted papers from ICLR/NeurIPS/ICML 2025 via the OpenReview API as `source_class="primary"`, `evidence_type="experiment"`. 9 tests in `tests/test_fetchers_openreview.py`.

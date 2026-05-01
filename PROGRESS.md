@@ -1,6 +1,6 @@
 # Progress
 
-Last updated: 2026-04-29
+Last updated: 2026-04-30
 
 ---
 
@@ -29,7 +29,100 @@ Last updated: 2026-04-29
 
 ## Work Log
 
-### 2026-04-30 — Session 16 (W-0014)
+### 2026-05-01 — Source activation across all pipeline areas
+
+**Branch:** `copilot/add-backlog-items-tracking`
+
+**Completed:**
+- Enabled all verified and no-auth-required sources in `config/sources.yaml`.
+- *Trends pipeline*: HuggingFace, Papers with Code, Replicate, OpenReview (ICLR/NeurIPS/ICML 2025), operator changelog feeds (Anthropic, OpenAI, Google AI, DeepMind, AWS ML, Microsoft AI), OpenRouter pricing snapshots, new entrant provider feeds, local model GitHub releases.
+- *Email digest (blogs.rss)*: Anthropic, OpenAI, Google AI, DeepMind, Ethan Mollick, Simon Willison, Together AI, Lambda, Groq/Cerebras/Mistral releases, Ollama/llama.cpp/LocalAI releases.
+- *YouTube*: Matthew Berman (open-source/local AI), The AI Daily Brief (daily news briefing).
+
+**Test count:** 456 passing, 1 skipped (unchanged).
+
+**Mini-Retro:**
+
+1. **Did the process work?** Yes — the activation was straightforward since all URLs were already verified. Config-only change with full YAML validation.
+
+2. **What slowed down or went wrong?** Nothing. Pattern of verifying before activating paid off here.
+
+3. **What single change would prevent friction next time?** Nothing to change — the verify-before-activate norm is now established.
+
+4. **Is this a pattern?** Positive pattern: staged rollout (verify → activate) is now the standard workflow.
+
+---
+
+### 2026-05-01 — W-0012 adoption proxy + W-0021 RSS URL verification
+
+**Branch:** `copilot/add-backlog-items-tracking`
+
+**Completed:**
+- **W-0021 RSS URL verification**: HTTP-checked all 7 provider feed URLs from previous session. Result: Together AI (`rss.xml`) and Lambda (`lambda.ai/blog/rss.xml`) have real RSS feeds. Groq, Cerebras, and Mistral use GitHub releases.atom (no blog RSS). Fireworks AI has no accessible feed. Perplexity returns 403. Config updated accordingly — no more `# verify:` flags on active URLs.
+- **W-0012 — Adoption proxy**: `adoption_proxy` computed in `build_trend_metrics` from market signal + practitioner signal + cross-class breadth. Three constants `_ADOPTION_SCALING_MIN=0.10`, `_ADOPTION_MATURE_MIN=0.20` added to `trend_state.py`. `classify_state` now gates Rule 4 (scaling) and Rule 5 (mature) on these thresholds. 7 computation tests (`test_adoption_proxy.py`) + 8 state machine tests added.
+
+**Test count:** 456 passing, 1 skipped (up from 436).
+
+**Mini-Retro:**
+
+1. **Did the process work?** Yes. The internet access retry revealed 5 of 7 guessed RSS URLs were wrong. Systematic fallback to GitHub releases.atom resolved most gaps.
+
+2. **What slowed down or went wrong?** Many AI provider blogs don't expose RSS. Ghost-based blogs sometimes use `/rss`, `/rss/`, or have no feed at all. The breadth of failures was higher than expected.
+
+3. **What single change would prevent this next time?** Before adding feed URLs to the backlog: verify them via HTTP HEAD in the same session rather than deferring to a future retry pass.
+
+4. **Is this a pattern?** Yes — this is the second time feed URL verification was deferred and then had to be retried. The fix is a norm: no feed URL enters config without a live HTTP check in the same session.
+
+---
+
+### 2026-05-01 — W-0020, W-0021, W-0022 implementation
+
+**Branch:** `copilot/add-backlog-items-tracking`
+
+**Completed:**
+- **W-0020 — OpenRouter pricing fetcher**: `src/fetchers/openrouter.py` — fetches model pricing snapshots from the OpenRouter public API; `source_class="market"`, `evidence_type="pricing"`. 12 tests. `OpenRouterConfig` added to `src/config.py`. `_fetch_openrouter()` wired into `src/trends.py`. `trends.openrouter` section added to `config/sources.yaml`.
+- **W-0020 — Pricing keyword detection**: `OperatorChangelogFetcher` now auto-tags items containing pricing keywords with `evidence_type="pricing"`. 2 new tests for this behaviour.
+- **W-0021 — New entrant inference provider sources**: `trends.new_entrant_sources` YAML section with RSS feeds for Groq, Together AI, Fireworks AI, Cerebras, Lambda Labs, Perplexity, Mistral AI (all `enabled: false`, inline verification notes). `NewEntrantSourcesConfig` added to config. `_fetch_new_entrant_sources()` wired into trends. Feeds also mirrored in `blogs.rss` (commented) for email digest.
+- **W-0022 — Local model tool sources**: `trends.local_model_sources` YAML section with GitHub `releases.atom` for Ollama, llama.cpp, LocalAI + Simon Willison's Atom feed. `LocalModelSourcesConfig` added. `_fetch_local_model_sources()` wired into trends. `source_class` parameter added to `OperatorChangelogFetcher` for practitioner-class reuse. Local model and token-pricing theme aliases added to `src/themes.py`.
+- Domain tables in `trends.py` extended with all new providers.
+- `_source_name_from_url()` extended with all new domains.
+
+**Test count:** 436 passing, 1 skipped (up from 388).
+
+**Mini-Retro:**
+
+1. **Did the process work?** Yes. The code pattern (fetcher → config → trends wiring → YAML) is now well-established; each new source follows it mechanically.
+
+2. **What slowed down or went wrong?** W-0021 required a judgment call on RSS endpoint URLs (many not publicly verified). Added inline `# verify:` comments so the owner can spot-check before enabling.
+
+3. **What single change would prevent this next time?** A short verification CI step that HTTP-HEAD-checks all `enabled: true` feed URLs would catch broken endpoints before they silently fail in production.
+
+4. **Is this a pattern?** Yes — adding sources without verification is a recurring risk. The `# verify:` comment convention is a partial mitigation; a live-check workflow step would be more robust.
+
+---
+
+
+
+**Branch:** `copilot/add-backlog-items-tracking`
+
+**Completed:**
+- **W-0020** — Token Cost & Provider Pricing Intelligence: tracks token pricing from major providers (price per million tokens, tier changes, model deprecations). Candidate sources: Artificial Analysis, OpenRouter models JSON API, operator changelog keyword extension. `source_class: market`.
+- **W-0021** — Token Provider Market Entrant Tracking: surfaces new and emerging inference providers (Groq, Together AI, Fireworks, Cerebras, Lambda Labs, Perplexity) alongside the major labs. Candidate sources: provider blogs checked for RSS endpoints; GitHub releases feeds as fallback. `source_class: operator`.
+- **W-0022** — Local Model Running / Hosting Sources: adds opt-in sources for the on-device/self-hosted segment — Ollama, llama.cpp, LocalAI GitHub releases, LM Studio, Simon Willison's blog. Notes r/LocalLLaMA as deferred (matches existing Reddit deferral in Epic 17.5). Also notes adding `local_model` theme alias to synonym map. `source_class: practitioner`.
+
+**Mini-Retro:**
+
+1. **Did the process work?** Yes. Issue was clearly scoped; three work items map cleanly to the three stated outcomes.
+
+2. **What slowed down or went wrong?** Nothing significant. The backlog-manager skill wasn't accessible (submodule not initialized in the agent environment), but the W-entry format was fully documented in the existing backlog, so the pattern was easy to replicate.
+
+3. **What single change would prevent this next time?** Consider adding a brief "how to add a W-entry" note in the README or BACKLOG.md preamble so the pattern is explicitly documented rather than inferred from examples.
+
+4. **Is this a pattern?** The submodule-not-initialised issue appears each session. Worth raising in backlog as an agent environment setup item (copilot-setup-steps).
+
+---
+
+
 
 **Branch:** `copilot/add-trafilatura-dependency`
 

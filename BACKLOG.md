@@ -536,9 +536,9 @@ OpenReview exposes a public API. Accepted papers at top venues represent the hig
 
 ## W-0012
 
-status: ready
+status: done
 created: 2026-04-29
-updated: 2026-04-29
+updated: 2026-05-01
 
 ### Outcome
 
@@ -836,6 +836,94 @@ W-0018 identified 8 feeds with confirmed RSS availability covering major AI labs
   9. `https://sloanreview.mit.edu/feed/` — source_class: media
 - Items needing URL verification before adding (Stanford HAI, Josh Bersin) remain in W-0018 spike results
 - Do NOT activate by default — user should opt in per feed to control digest volume
+
+---
+
+## W-0020
+
+status: done
+created: 2026-04-30
+updated: 2026-05-01
+
+### Outcome
+
+Token pricing from major providers is tracked as a dedicated signal: price per million input/output tokens, context window size, tier/plan changes, and model deprecations. The trend pipeline surfaces cost movement alongside capability movement so that cost trends are visible on the site.
+
+### Context
+
+Token cost is a critical production decision factor and shifts frequently — often without prominent announcements. The operator changelog fetcher (W-0009) surfaces general announcements but not structured pricing data. A pricing-specific source would populate the trend pipeline with a quantitative "cost" signal distinct from capability claims, enabling the site to show e.g. "GPT-4 equivalent tasks are 90% cheaper than 12 months ago".
+
+### Notes
+
+- Candidate sources (all public, no auth):
+  - Artificial Analysis pricing page: `https://artificialanalysis.ai` (no RSS; may need scrape or periodic snapshot)
+  - OpenRouter models JSON API: `https://openrouter.ai/api/v1/models` — includes pricing fields per model; polling-based
+  - `llm.extractum.io` pricing tracker (RSS/JSON if available)
+  - Operator changelog fetcher (W-0009) already covers vendor blogs — extend to detect pricing keywords and flag pricing-change items with `evidence_type="pricing"`
+- `source_class: market` — pricing data is market intelligence
+- Recommended approach: extend the operator changelog post-processor to label items containing price/pricing/cost keywords; add OpenRouter models JSON as a lightweight polling source in `src/fetchers/`
+- Track fields per model: `price_input` ($/M tokens), `price_output` ($/M tokens), `context_window`, `provider`
+- Write `docs/data/pricing.json` from the trends pipeline for site display
+
+---
+
+## W-0021
+
+status: done
+created: 2026-04-30
+updated: 2026-05-01
+
+### Outcome
+
+New and emerging inference/token providers are tracked alongside the major labs — Groq, Together AI, Fireworks AI, Cerebras, Lambda Labs, Perplexity, and others entering the market. The digest and trend pipeline surface when a new provider launches or an existing one changes pricing/capabilities significantly.
+
+### Context
+
+The inference provider market is expanding rapidly beyond the three major labs (OpenAI, Anthropic, Google). Practitioners are increasingly using Groq for speed, Together AI for open models, Fireworks for fine-tuned deployment, and new GPU-cloud entrants for cost. These are not captured by the current operator changelog sources (which focus on the frontier labs) or HN alone.
+
+### Notes
+
+- Candidate RSS / API sources (all `source_class: operator`):
+  - Groq blog: `https://groq.com/blog/` — check for RSS endpoint
+  - Together AI blog: `https://www.together.ai/blog` — check for RSS endpoint
+  - Fireworks AI blog: `https://fireworks.ai/blog` — check for RSS endpoint
+  - Cerebras blog: `https://cerebras.ai/blog/` — check for RSS endpoint
+  - Lambda Labs blog: `https://lambdalabs.com/blog/` — check for RSS endpoint
+  - Perplexity blog: `https://blog.perplexity.ai/` — check for RSS / Substack feed
+- Add a **research spike** (1 h) to verify which blogs expose RSS before committing to fetcher work
+- Extend `config/sources.yaml` `trends.operator_sources` section with confirmed feeds, `enabled: false`
+- Consider labelling items from these sources with a `new_entrant: true` flag to allow filtering in the site
+- GitHub releases RSS (`https://github.com/<org>/<repo>/releases.atom`) is a reliable fallback for open-source-first providers (e.g., Groq's open-source tooling)
+
+---
+
+## W-0022
+
+status: done
+created: 2026-04-30
+updated: 2026-05-01
+
+### Outcome
+
+Sources covering local LLM running and self-hosting are added to `config/sources.yaml` as opt-in entries: Ollama, llama.cpp, LM Studio, LocalAI, and community discussion (r/LocalLLaMA). The pipeline gains visibility into the on-device/self-hosted segment, which signals hardware capability breakthroughs and practitioner adoption independent of cloud API pricing.
+
+### Context
+
+Local/on-device AI is a significant and fast-growing segment currently not represented in the pipeline. Practitioners running models locally are a distinct audience from cloud API users; their tooling (Ollama, llama.cpp, quantisation advances) often signals a capability threshold crossing (e.g. "7B model now runs at acceptable speed on M2 MacBook") before vendor announcements catch up. This segment is also relevant to the "cost" tracking goal in W-0020 — local inference has an effective token cost of near-zero after hardware acquisition.
+
+### Notes
+
+- Candidate sources:
+  - Ollama GitHub releases: `https://github.com/ollama/ollama/releases.atom` — `source_class: practitioner`
+  - llama.cpp GitHub releases: `https://github.com/ggerganov/llama.cpp/releases.atom` — `source_class: practitioner`
+  - LocalAI GitHub releases: `https://github.com/mudler/LocalAI/releases.atom` — `source_class: practitioner`
+  - LM Studio changelog / blog — check for RSS; `source_class: practitioner`
+  - Simon Willison's blog (extensive local model coverage): `https://simonwillison.net/atom/everything/` — `source_class: practitioner`
+  - r/LocalLLaMA (Reddit JSON API): `https://www.reddit.com/r/LocalLLaMA.json` — `source_class: practitioner`; deferred pending Reddit API access decision (see Deferred / Ideas)
+- GitHub `releases.atom` feeds are reliable and require no auth — add directly to `config/sources.yaml` as `enabled: false`
+- Simon Willison's blog is already well-known for signal density; add with `enabled: false` under blogs section
+- r/LocalLLaMA: flag as deferred (matches existing Reddit deferral in Epic 17.5); note it separately
+- Add a `local_model` theme alias to `src/themes.py` synonym map so Ollama/llama.cpp items cluster correctly
 
 ---
 

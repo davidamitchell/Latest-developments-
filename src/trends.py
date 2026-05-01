@@ -26,6 +26,7 @@ from src.config import load_config
 from src.fetchers.arxiv import ArxivFetcher
 from src.fetchers.huggingface import HuggingFaceFetcher
 from src.fetchers.openreview import OpenReviewFetcher
+from src.fetchers.openrouter import OpenRouterFetcher
 from src.fetchers.operator_changelog import OperatorChangelogFetcher
 from src.fetchers.paperswithcode import PapersWithCodeFetcher
 from src.fetchers.replicate import ReplicateFetcher
@@ -60,6 +61,21 @@ _URL_SOURCE_CLASS: list[tuple[str, str]] = [
     ("blog.google", "operator"),
     ("azure.com", "operator"),
     ("aws.amazon.com", "operator"),
+    # New entrant inference providers (W-0021) — verified 2026-05-01
+    ("groq.com", "operator"),
+    ("together.ai", "operator"),
+    ("fireworks.ai", "operator"),
+    ("cerebras.ai", "operator"),
+    ("lambdalabs.com", "operator"),
+    ("lambda.ai", "operator"),
+    ("blog.perplexity.ai", "operator"),
+    ("mistral.ai", "operator"),
+    # OpenRouter pricing (W-0020)
+    ("openrouter.ai", "market"),
+    # Local model tools (W-0022)
+    ("ollama.com", "practitioner"),
+    ("lmstudio.ai", "practitioner"),
+    ("simonwillison.net", "practitioner"),
     ("techcrunch.com", "media"),
     ("technologyreview.mit", "media"),
     ("theinformation.com", "media"),
@@ -80,6 +96,21 @@ _URL_SOURCE_NAME: list[tuple[str, str]] = [
     ("github.com", "GitHub"),
     ("openai.com", "OpenAI"),
     ("anthropic.com", "Anthropic"),
+    # New entrant inference providers (W-0021) — verified 2026-05-01
+    ("groq.com", "Groq"),
+    ("together.ai", "Together AI"),
+    ("fireworks.ai", "Fireworks AI"),
+    ("cerebras.ai", "Cerebras"),
+    ("lambdalabs.com", "Lambda"),
+    ("lambda.ai", "Lambda"),
+    ("blog.perplexity.ai", "Perplexity"),
+    ("mistral.ai", "Mistral AI"),
+    # Pricing data (W-0020)
+    ("openrouter.ai", "OpenRouter"),
+    # Local model tools (W-0022)
+    ("ollama.com", "Ollama"),
+    ("lmstudio.ai", "LM Studio"),
+    ("simonwillison.net", "Simon Willison"),
 ]
 
 # Source type name → class (from run summary section).
@@ -347,6 +378,28 @@ def build_trend_metrics(
         media_count = sc_counter.get("media", 0)
         hype_risk = round(media_count / max(len(entries), 1), 3)
 
+        # Adoption proxy: composite 0–1 signal from available signals (W-0012).
+        # Three components, equal weight (each capped at 1/3 of total):
+        #
+        # 1. Market signal (0–0.4): market-class items represent real pricing
+        #    activity — providers are charging for this capability.
+        market_count = sc_counter.get("market", 0)
+        market_signal = min(0.4, (market_count / max(len(entries), 1)) * 2.0)
+        #
+        # 2. Practitioner signal (0–0.3): practitioners writing about or
+        #    deploying a theme signals real usage beyond research/media.
+        practitioner_count = sc_counter.get("practitioner", 0)
+        practitioner_signal = min(0.3, (practitioner_count / max(len(entries), 1)) * 0.9)
+        #
+        # 3. Cross-class breadth (0–0.3): themes discussed by both primary
+        #    (research) and practitioner/market classes have crossed the
+        #    research→deployment boundary.
+        classes_present = set(sc_counter.keys())
+        breadth_classes = classes_present & {"primary", "market", "practitioner", "operator"}
+        breadth_signal = min(0.3, (len(breadth_classes) - 1) * 0.1)
+        #
+        adoption_proxy = round(market_signal + practitioner_signal + breadth_signal, 3)
+
         # Confidence: diversity and volume relative to history span
         diversity_factor = min(1.0, diversity / 3)
         volume_factor = min(1.0, volume / 3)
@@ -370,7 +423,7 @@ def build_trend_metrics(
             volume=volume,
             velocity=velocity,
             diversity=diversity,
-            adoption_proxy=0.0,
+            adoption_proxy=adoption_proxy,
             stability=stability,
             hype_risk=hype_risk,
             item_count=len(entries),
@@ -571,6 +624,79 @@ def _fetch_openreview(
     return entries
 
 
+def _fetch_openrouter(
+    trends_cfg,
+    today_str: str,
+) -> list[tuple[str, str, str, str]]:
+    """Fetch OpenRouter model pricing snapshots and return theme-day entries."""
+    try:
+        fetcher = OpenRouterFetcher(limit=trends_cfg.openrouter.limit)
+        items = fetcher.fetch(already_processed=set())
+    except Exception as exc:
+        logger.warning("OpenRouter fetch failed — skipping: %s", exc)
+        return []
+
+    entries: list[tuple[str, str, str, str]] = []
+    for item in items:
+        # All OpenRouter items represent pricing snapshots, so force them into
+        # the "Inference Cost Reduction" theme cluster regardless of model name.
+        # This is intentional: model-name diversity would scatter items across
+        # hundreds of one-off themes, hiding the aggregate cost-trend signal.
+        theme = normalize_theme_name("token pricing")
+        pub_date = item.published.strftime("%Y-%m-%d") if item.published else today_str
+        entries.append((pub_date, theme, "market", "OpenRouter"))
+    return entries
+
+
+def _fetch_new_entrant_sources(
+    trends_cfg,
+    today_str: str,
+) -> list[tuple[str, str, str, str]]:
+    """Fetch new entrant inference provider feeds and return theme-day entries."""
+    try:
+        fetcher = OperatorChangelogFetcher(
+            feeds=trends_cfg.new_entrant_sources.feeds,
+            source_class="operator",
+        )
+        items = fetcher.fetch(already_processed=set())
+    except Exception as exc:
+        logger.warning("New entrant sources fetch failed — skipping: %s", exc)
+        return []
+
+    entries: list[tuple[str, str, str, str]] = []
+    for item in items:
+        raw_theme = item.title[:80]
+        theme = normalize_theme_name(raw_theme)
+        pub_date = item.published.strftime("%Y-%m-%d") if item.published else today_str
+        entries.append((pub_date, theme, "operator", item.source_name))
+    return entries
+
+
+def _fetch_local_model_sources(
+    trends_cfg,
+    today_str: str,
+) -> list[tuple[str, str, str, str]]:
+    """Fetch local model / self-hosting feeds and return theme-day entries."""
+    try:
+        fetcher = OperatorChangelogFetcher(
+            feeds=trends_cfg.local_model_sources.feeds,
+            source_class="practitioner",
+        )
+        items = fetcher.fetch(already_processed=set())
+    except Exception as exc:
+        logger.warning("Local model sources fetch failed — skipping: %s", exc)
+        return []
+
+    entries: list[tuple[str, str, str, str]] = []
+    for item in items:
+        raw_theme = item.title[:80]
+        # Default to "Local LLM Applications" so releases cluster correctly
+        theme = normalize_theme_name(raw_theme)
+        pub_date = item.published.strftime("%Y-%m-%d") if item.published else today_str
+        entries.append((pub_date, theme, "practitioner", item.source_name))
+    return entries
+
+
 def run(
     docs_data_dir: Path,
     history_dir: Path,
@@ -651,6 +777,21 @@ def run(
             all_entries.extend(orv_items)
             if orv_items:
                 all_source_counts["openreview"] += len(orv_items)
+        if trends_cfg.openrouter.enabled:
+            ortr_items = _fetch_openrouter(trends_cfg, today_str)
+            all_entries.extend(ortr_items)
+            if ortr_items:
+                all_source_counts["openrouter"] += len(ortr_items)
+        if trends_cfg.new_entrant_sources.enabled:
+            nes_items = _fetch_new_entrant_sources(trends_cfg, today_str)
+            all_entries.extend(nes_items)
+            if nes_items:
+                all_source_counts["new entrant sources"] += len(nes_items)
+        if trends_cfg.local_model_sources.enabled:
+            lms_items = _fetch_local_model_sources(trends_cfg, today_str)
+            all_entries.extend(lms_items)
+            if lms_items:
+                all_source_counts["local model sources"] += len(lms_items)
     else:
         logger.info("Live fetching disabled — using history only")
 
