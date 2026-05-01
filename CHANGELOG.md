@@ -7,6 +7,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Added
+- **Skills submodule updated + copilot-instructions.md enhanced (2026-05-01)**: `.github/skills` submodule advanced to `f8c5471` (latest). 10 new skills now available and referenced in instructions: `backlog-worker`, `swe`, `tdd`, `feedback`, `inline-citation`, `peer-reviewer`, `plain-language`, `research-question`, `research-reviewer`, `skill-author`. Agent Skills table in `copilot-instructions.md` now covers all 20 skills with when-to-use guidance. Skill composability chains documented. `backlog-worker` and `tdd` mandates wired in.
+
+### Added
 - **Source activation — multiple areas (2026-05-01)**: enabled sources across all pipeline areas in `config/sources.yaml`:
   - *Trends pipeline*: HuggingFace model releases, Papers with Code trending papers, Replicate run-count models, OpenReview accepted papers (ICLR/NeurIPS/ICML 2025), operator changelog RSS feeds (Anthropic, OpenAI, Google AI, DeepMind, AWS ML, Microsoft AI), OpenRouter pricing snapshots, new entrant provider feeds (Together AI, Lambda, Groq, Cerebras, Mistral), local model releases (Ollama, llama.cpp, LocalAI, Simon Willison).
   - *Email digest (blogs.rss)*: Anthropic Blog, OpenAI Blog, Google AI Blog, DeepMind Blog, Ethan Mollick — One Useful Thing, Simon Willison's Weblog, Together AI Blog, Lambda Blog, Groq/Cerebras/Mistral releases, Ollama/llama.cpp/LocalAI releases.

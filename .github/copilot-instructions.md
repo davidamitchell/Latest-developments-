@@ -6,15 +6,21 @@ For AI coding agents (GitHub Copilot, Copilot Workspace, Codex, etc.) working on
 
 ## Skills
 
-Skills are available at `.github/skills/`. Key skills: `backlog-manager`, `research`, `technical-writer`, `code-review`, `strategy-author`, `decisions`.
+Skills are available at `.github/skills/`. Load the relevant skill at the start of any task that matches its description — do not synthesise a substitute.
 
-Load the relevant skill at the start of any task that matches its description.
+Key skill chains:
+- **Research → Strategy → Delivery**: `research` → `strategy-author` → `backlog-manager` → `backlog-worker` → `swe` + `tdd` → `code-review`
+- **Backlog execution**: `backlog-manager` (refine to `ready`) → `backlog-worker` (execute to `done`)
+- **Implementation**: `swe` (design) → `tdd` (write test-first) → `code-review` (verify)
+- **Writing**: `technical-writer` → `feedback` → `remove-ai-slop`
 
 ---
 
 ## Backlog Mandate
 
 The backlog is `BACKLOG.md` at the repo root. Use the `backlog-manager` skill from `.github/skills/backlog-manager/SKILL.md`. Read it at the start of every session.
+
+To **execute** backlog items, use the `backlog-worker` skill from `.github/skills/backlog-worker/SKILL.md`. It selects the next `ready` item, decomposes it, applies the appropriate sub-skills, reviews the output, and advances the item to `done`.
 
 ---
 
@@ -76,6 +82,7 @@ Python 3.11+ daily digest pipeline. Fetches AI/ML content from YouTube, RSS feed
 
 ### Testing
 - Tests live in `tests/`; use `pytest`
+- Use the `tdd` skill from `.github/skills/tdd/SKILL.md` when writing new production code or fixing bugs — write the failing test first, then the minimal code to pass it
 - Mock all network calls and the Gemini API (`patch("src.summariser.genai.Client", ...)`)
 - **Apply the full testing pyramid:** unit tests on all business logic; integration/smoke tests in `tests/test_smoke.py` to exercise the full pipeline end-to-end; unit tests are necessary but not sufficient.
 - **Bug fixes must start with a failing test.** Write a test that reproduces the bug first, confirm it fails, then apply the fix and confirm the test passes. Never commit a bug fix without a companion regression test.
@@ -179,14 +186,24 @@ Skills live in `.github/skills/<name>/SKILL.md`. GitHub Copilot discovers them a
 | Skill | When to load it |
 |---|---|
 | `backlog-manager` | Managing `BACKLOG.md`, adding or refining work items |
+| `backlog-worker` | Executing ready backlog items — selects, decomposes, acts, reviews, marks done |
 | `citation-discipline` | Writing research or reports where every claim must be sourced |
 | `code-review` | Reviewing code changes for correctness, style, and security |
 | `decisions` | Writing ADRs using the MADR format |
+| `feedback` | Structured critique of written work, plans, arguments, or decisions |
+| `inline-citation` | Adding inline citations to prose as work is written |
+| `peer-reviewer` | Peer review of research or technical outputs |
+| `plain-language` | Rewriting complex text into clear, plain language |
 | `remove-ai-slop` | Removing hollow language from prose before committing |
 | `research` | Investigating a topic with recursive decomposition and verification |
+| `research-question` | Formulating precise, answerable research questions |
+| `research-reviewer` | Reviewing completed research for rigour and completeness |
+| `skill-author` | Writing new skills in the canonical SKILL.md format |
 | `speculation-control` | Producing factual writing that requires clear epistemic discipline |
 | `strategic-persuasion` | Building audience-targeted persuasive content |
 | `strategy-author` | Producing or reviewing strategy documents |
+| `swe` | Software design and implementation using SOLID, GoF patterns, and REST constraints |
+| `tdd` | Test-driven development — write failing test first, then minimal code to pass |
 | `technical-writer` | Writing or improving technical documentation |
 
 If no skill fits, note the gap in `BACKLOG.md` and proceed without synthesising a substitute.
@@ -222,6 +239,22 @@ Before marking a backlog slice as done:
 ## Working Methodology
 
 These instructions describe how to think and work, not what to build.
+
+### Skill Composability — Use the Right Tool for Each Phase
+
+Every significant task maps to a skill chain. Apply skills in sequence rather than working from general reasoning alone.
+
+| Task type | Skill chain |
+|---|---|
+| Research a topic before acting | `research` → findings → decide |
+| Turn research into a plan | `research` → `strategy-author` → `backlog-manager` |
+| Work the backlog | `backlog-manager` (refine to `ready`) → `backlog-worker` (execute to `done`) |
+| Implement a feature or fix a bug | `swe` (design) → `tdd` (test-first code) → `code-review` (verify) |
+| Write or improve documentation | `technical-writer` → `feedback` → `remove-ai-slop` |
+| Write an ADR | `decisions` |
+| Review research or writing | `research-reviewer` / `peer-reviewer` / `feedback` |
+
+When the task is ambiguous, apply `research` first to narrow it, then select the next skill from the chain above.
 
 ### Root cause before action
 
@@ -321,7 +354,10 @@ Ask: **what class of problem is this?**
 | A decision was unclear or had to be re-made | → Write an ADR |
 | A note or file was out of date | → Mark it `superseded_by`, don't delete it |
 | The same friction appears in two retros | → It's a pattern. Prioritise fixing the root cause |
-| Missing skill | Add to backlog; do not synthesise a substitute |
+| Missing skill | → Add to backlog using `backlog-manager`; do not synthesise a substitute |
+| Implementation produced bugs | → Apply `tdd` from the start next time; bug fixes need a failing test first |
+| Strategy unclear, backlog items poorly defined | → Apply `strategy-author` then `backlog-manager` to produce `ready` items before executing |
+| Research required before acting | → Apply `research` first; do not guess domain knowledge |
 
 ### Knowledge Graphing — Every Write Earns Its Place
 

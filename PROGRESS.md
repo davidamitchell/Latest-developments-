@@ -1,6 +1,6 @@
 # Progress
 
-Last updated: 2026-04-30
+Last updated: 2026-05-01
 
 ---
 
@@ -607,3 +607,29 @@ Standardisation pass: expanded `.github/copilot-instructions.md` from stub to fu
 3. **What single change would prevent this next time?** Always declare lookup dicts (`_KNOWN`, `_LABELS`, etc.) at module level if they're logically constant, even if only used in one function. This avoids N806 and marginally improves performance.
 
 4. **Is this a pattern?** Yes — the `_KNOWN` variable naming issue appeared in two separate fetchers in the same session. Adding a note to `learnings.md`: _"Module-level lookup dicts must be lowercase only if inside a function. Move to module level or use all-lowercase name."_
+
+
+---
+
+## 2026-05-01 — Skills submodule updated; copilot-instructions.md enhanced
+
+**Branch:** `copilot/update-skills-submodule`
+
+**Completed:**
+- `.github/skills` submodule advanced to latest commit (`f8c5471`) from `davidamitchell/Skills`. New skills now available: `backlog-worker`, `swe`, `tdd`, `feedback`, `inline-citation`, `peer-reviewer`, `plain-language`, `research-question`, `research-reviewer`, `skill-author`.
+- `.github/copilot-instructions.md` — Agent Skills table updated with all 20 skills now present in the submodule. Previously only 10 skills were listed.
+- `.github/copilot-instructions.md` — Skills section rewritten with explicit composability chains: research → strategy-author → backlog-manager → backlog-worker → swe + tdd → code-review.
+- `.github/copilot-instructions.md` — Backlog Mandate updated to reference `backlog-worker` for executing items (distinct from `backlog-manager` for managing them).
+- `.github/copilot-instructions.md` — Testing section updated to explicitly reference `tdd` skill.
+- `.github/copilot-instructions.md` — Working Methodology: new "Skill Composability" section with per-task-type skill chains.
+- `.github/copilot-instructions.md` — Improvement signal table extended with three new rows: implementation bugs → apply `tdd`; unclear strategy / poorly defined items → apply `strategy-author` + `backlog-manager`; domain knowledge unknown → apply `research` first.
+
+**Mini-Retro:**
+
+1. **Did the process work?** Yes. Submodule was already current; the main work was reading the new skills and updating the instructions to reflect the full composable skill set.
+
+2. **What slowed down or went wrong?** Nothing significant. The Skills submodule had grown from 7 to 20 skills; several key new skills (`backlog-worker`, `swe`, `tdd`) directly address gaps in how work was previously specified in the instructions.
+
+3. **What single change would prevent this next time?** The sync-skills.yml workflow should be verified to keep the submodule pointer current and the instructions table complete. Add a backlog item to audit skill coverage after each submodule sync.
+
+4. **Is this a pattern?** Yes — instructions lag behind new skills added to the Skills repo. The fix is: after each `sync-skills.yml` run, compare the skills table in copilot-instructions.md against the actual skill directories and update any missing rows.
