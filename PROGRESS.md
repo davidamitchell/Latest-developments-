@@ -29,6 +29,30 @@ Last updated: 2026-04-30
 
 ## Work Log
 
+### 2026-05-01 — Source activation across all pipeline areas
+
+**Branch:** `copilot/add-backlog-items-tracking`
+
+**Completed:**
+- Enabled all verified and no-auth-required sources in `config/sources.yaml`.
+- *Trends pipeline*: HuggingFace, Papers with Code, Replicate, OpenReview (ICLR/NeurIPS/ICML 2025), operator changelog feeds (Anthropic, OpenAI, Google AI, DeepMind, AWS ML, Microsoft AI), OpenRouter pricing snapshots, new entrant provider feeds, local model GitHub releases.
+- *Email digest (blogs.rss)*: Anthropic, OpenAI, Google AI, DeepMind, Ethan Mollick, Simon Willison, Together AI, Lambda, Groq/Cerebras/Mistral releases, Ollama/llama.cpp/LocalAI releases.
+- *YouTube*: Matthew Berman (open-source/local AI), The AI Daily Brief (daily news briefing).
+
+**Test count:** 456 passing, 1 skipped (unchanged).
+
+**Mini-Retro:**
+
+1. **Did the process work?** Yes — the activation was straightforward since all URLs were already verified. Config-only change with full YAML validation.
+
+2. **What slowed down or went wrong?** Nothing. Pattern of verifying before activating paid off here.
+
+3. **What single change would prevent friction next time?** Nothing to change — the verify-before-activate norm is now established.
+
+4. **Is this a pattern?** Positive pattern: staged rollout (verify → activate) is now the standard workflow.
+
+---
+
 ### 2026-05-01 — W-0012 adoption proxy + W-0021 RSS URL verification
 
 **Branch:** `copilot/add-backlog-items-tracking`

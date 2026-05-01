@@ -60,16 +60,16 @@ youtube:
     # Matthew Berman — go-to for open-source AI and live model testing.
     # Shows how to run bleeding-edge models on local hardware.
     # Channel: https://youtube.com/@matthew_berman
-    # - name: "Matthew Berman"
-    #   channel_id: "UCawZsQWqfGSbCI5yjkdVkTA"
-    #   max_videos: 3
+    - name: "Matthew Berman"
+      channel_id: "UCawZsQWqfGSbCI5yjkdVkTA"
+      max_videos: 3
 
     # The AI Daily Brief (Nathaniel Whittemore) — professional "briefing" style.
     # Daily podcast/video synthesising macro-trends, politics, and funding behind AI.
     # Channel: https://youtube.com/@AIDailyBrief
-    # - name: "The AI Daily Brief"
-    #   channel_id: "UCKelCK4ZaO6HeEI1KQjqzWA"
-    #   max_videos: 3
+    - name: "The AI Daily Brief"
+      channel_id: "UCKelCK4ZaO6HeEI1KQjqzWA"
+      max_videos: 3
 
     # --- Deep-Dive Analysts ---
 
@@ -151,22 +151,22 @@ blogs:
     # All have confirmed RSS feeds. Enable individually by uncommenting.
     # Each has source_class set — used by the trend credibility pipeline.
     #
-    # - name: "Anthropic Blog"
-    #   url: "https://www.anthropic.com/rss.xml"
-    #   source_class: "operator"
-    #
-    # - name: "OpenAI Blog"
-    #   url: "https://openai.com/blog/rss.xml"
-    #   source_class: "operator"
-    #
-    # - name: "Google AI Blog"
-    #   url: "https://blog.google/technology/ai/rss/"
-    #   source_class: "operator"
-    #
-    # - name: "DeepMind Blog"
-    #   url: "https://deepmind.google/blog/rss.xml"
-    #   source_class: "operator"
-    #
+    - name: "Anthropic Blog"
+      url: "https://www.anthropic.com/rss.xml"
+      source_class: "operator"
+
+    - name: "OpenAI Blog"
+      url: "https://openai.com/blog/rss.xml"
+      source_class: "operator"
+
+    - name: "Google AI Blog"
+      url: "https://blog.google/technology/ai/rss/"
+      source_class: "operator"
+
+    - name: "DeepMind Blog"
+      url: "https://deepmind.google/blog/rss.xml"
+      source_class: "operator"
+
     # - name: "AWS Machine Learning Blog"
     #   url: "https://aws.amazon.com/blogs/machine-learning/feed/"
     #   source_class: "operator"
@@ -176,12 +176,16 @@ blogs:
     #   source_class: "operator"
 
     # ── Practitioner / Media (W-0019) ──
-    # - name: "Ethan Mollick — One Useful Thing"
-    #   url: "https://www.oneusefulthing.org/feed"
-    #   source_class: "practitioner"
-    #   # High-signal newsletter on practical AI adoption (Wharton/UPenn).
-    #   # Covers the "jagged frontier" — where AI works and where it doesn't.
-    #
+    - name: "Ethan Mollick — One Useful Thing"
+      url: "https://www.oneusefulthing.org/feed"
+      source_class: "practitioner"
+      # High-signal newsletter on practical AI adoption (Wharton/UPenn).
+      # Covers the "jagged frontier" — where AI works and where it doesn't.
+
+    - name: "Simon Willison's Weblog"
+      url: "https://simonwillison.net/atom/everything/"
+      source_class: "practitioner"
+
     # - name: "HBR — AI & Machine Learning"
     #   url: "https://hbr.org/topic/subject/ai-and-machine-learning/feed"
     #   source_class: "media"
@@ -198,46 +202,41 @@ blogs:
     # GitHub releases.atom used for providers whose blogs block RSS.
     # Fireworks AI and Perplexity have no accessible feed — omitted.
     #
-    # - name: "Together AI Blog"
-    #   url: "https://www.together.ai/blog/rss.xml"   # verified 2026-05-01
-    #   source_class: "operator"
-    #
-    # - name: "Lambda Blog"
-    #   url: "https://lambda.ai/blog/rss.xml"         # verified 2026-05-01
-    #   source_class: "operator"
-    #
-    # - name: "Groq SDK Releases"
-    #   url: "https://github.com/groq/groq-python/releases.atom"
-    #   source_class: "operator"
-    #
-    # - name: "Cerebras SDK Releases"
-    #   url: "https://github.com/Cerebras/cerebras-cloud-sdk-python/releases.atom"
-    #   source_class: "operator"
-    #
-    # - name: "Mistral Inference Releases"
-    #   url: "https://github.com/mistralai/mistral-inference/releases.atom"
-    #   source_class: "operator"
+    - name: "Together AI Blog"
+      url: "https://www.together.ai/blog/rss.xml"   # verified 2026-05-01
+      source_class: "operator"
+
+    - name: "Lambda Blog"
+      url: "https://lambda.ai/blog/rss.xml"         # verified 2026-05-01
+      source_class: "operator"
+
+    - name: "Groq SDK Releases"
+      url: "https://github.com/groq/groq-python/releases.atom"
+      source_class: "operator"
+
+    - name: "Cerebras SDK Releases"
+      url: "https://github.com/Cerebras/cerebras-cloud-sdk-python/releases.atom"
+      source_class: "operator"
+
+    - name: "Mistral Inference Releases"
+      url: "https://github.com/mistralai/mistral-inference/releases.atom"
+      source_class: "operator"
 
     # ── Local model tools (W-0022) ────────────────────────────────────
     # GitHub releases.atom feeds and practitioner blogs for local LLM tooling.
     # GitHub releases feeds are confirmed reliable — no auth required.
     #
-    # - name: "Ollama Releases"
-    #   url: "https://github.com/ollama/ollama/releases.atom"
-    #   source_class: "practitioner"
-    #
-    # - name: "llama.cpp Releases"
-    #   url: "https://github.com/ggerganov/llama.cpp/releases.atom"
-    #   source_class: "practitioner"
-    #
-    # - name: "LocalAI Releases"
-    #   url: "https://github.com/mudler/LocalAI/releases.atom"
-    #   source_class: "practitioner"
-    #
-    # - name: "Simon Willison's Weblog"
-    #   url: "https://simonwillison.net/atom/everything/"
-    #   source_class: "practitioner"
-    #   # Extensive coverage of local model running, AI tools, and practical LLM use.
+    - name: "Ollama Releases"
+      url: "https://github.com/ollama/ollama/releases.atom"
+      source_class: "practitioner"
+
+    - name: "llama.cpp Releases"
+      url: "https://github.com/ggerganov/llama.cpp/releases.atom"
+      source_class: "practitioner"
+
+    - name: "LocalAI Releases"
+      url: "https://github.com/mudler/LocalAI/releases.atom"
+      source_class: "practitioner"
 
 # ---------------------------------------------------------------------------
 # Hacker News
@@ -422,7 +421,7 @@ trends:
   # Hugging Face model releases — primary class.
   # Enable once arXiv is confirmed stable.
   huggingface:
-    enabled: false      # set to true to activate
+    enabled: true       # activated 2026-05-01
     max_models: 50
     min_downloads: 100  # filter out low-activity models
 
@@ -430,14 +429,14 @@ trends:
   # Fetches trending papers with linked code repositories.
   # API: https://paperswithcode.com/api/v1/papers/?ordering=-stars
   paperswithcode:
-    enabled: false
+    enabled: true       # activated 2026-05-01
     page_size: 20
     min_stars: 0        # minimum GitHub stars on linked repos
 
   # Operator changelogs — operator class.
   # RSS feeds from major AI lab / operator blogs.
   operator_sources:
-    enabled: false
+    enabled: true       # activated 2026-05-01
     feeds:
       - "https://www.anthropic.com/rss.xml"
       - "https://openai.com/blog/rss.xml"
@@ -450,14 +449,14 @@ trends:
   # Reflects real deployment / run-count activity.
   # API: https://api.replicate.com/v1/models?order=run_count (no auth)
   replicate:
-    enabled: false
+    enabled: true       # activated 2026-05-01
     limit: 20
 
   # OpenReview accepted papers — primary class; evidence_type=experiment.
   # Peer-reviewed top-venue acceptance = highest-quality primary signal.
   # API: https://api2.openreview.net/notes
   openreview:
-    enabled: false
+    enabled: true       # activated 2026-05-01
     limit: 25
     venues:
       - "ICLR.cc/2025/Conference/-/Accepted"
@@ -505,7 +504,7 @@ trends:
   # Each model becomes a market-class item with evidence_type="pricing",
   # feeding the inference-cost trend signal.
   openrouter:
-    enabled: false      # set to true to activate daily pricing snapshots
+    enabled: true       # activated 2026-05-01
     limit: 100          # max models to snapshot per run
 
   # ── New entrant inference / token providers (W-0021) ─────────────────────
@@ -513,7 +512,7 @@ trends:
   # RSS blogs where available; GitHub releases.atom used as fallback for
   # providers whose blogs block scraping or don't expose RSS.
   new_entrant_sources:
-    enabled: false
+    enabled: true       # activated 2026-05-01; all feeds verified
     feeds:
       # Together AI — open-model hosting; confirmed RSS 2026-05-01
       - "https://www.together.ai/blog/rss.xml"
@@ -533,7 +532,7 @@ trends:
   # GitHub releases.atom feeds and practitioner blogs for local LLM tooling.
   # All GitHub releases feeds are confirmed reliable — no auth required.
   local_model_sources:
-    enabled: false
+    enabled: true       # activated 2026-05-01; all feeds verified
     feeds:
       # Ollama — the de-facto local model runner
       - "https://github.com/ollama/ollama/releases.atom"

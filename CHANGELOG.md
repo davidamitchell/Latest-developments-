@@ -7,6 +7,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Added
+- **Source activation — multiple areas (2026-05-01)**: enabled sources across all pipeline areas in `config/sources.yaml`:
+  - *Trends pipeline*: HuggingFace model releases, Papers with Code trending papers, Replicate run-count models, OpenReview accepted papers (ICLR/NeurIPS/ICML 2025), operator changelog RSS feeds (Anthropic, OpenAI, Google AI, DeepMind, AWS ML, Microsoft AI), OpenRouter pricing snapshots, new entrant provider feeds (Together AI, Lambda, Groq, Cerebras, Mistral), local model releases (Ollama, llama.cpp, LocalAI, Simon Willison).
+  - *Email digest (blogs.rss)*: Anthropic Blog, OpenAI Blog, Google AI Blog, DeepMind Blog, Ethan Mollick — One Useful Thing, Simon Willison's Weblog, Together AI Blog, Lambda Blog, Groq/Cerebras/Mistral releases, Ollama/llama.cpp/LocalAI releases.
+  - *YouTube*: Matthew Berman (open-source AI, local model testing), The AI Daily Brief (daily briefings).
+
 - **W-0012 — Adoption proxy signal**: `adoption_proxy` (0–1) is now computed in `build_trend_metrics` from three available signals: market-class item density (pricing/commercial activity), practitioner item density (real-world usage), and cross-class breadth (research→deployment boundary crossing). Equal-weight formula, each component capped to keep the total in [0, 1]. 7 computation tests in `tests/test_adoption_proxy.py`.
 - **W-0012 — State machine upgrade**: `classify_state` now gates `scaling` on `adoption_proxy >= 0.10` and `mature` on `adoption_proxy >= 0.20`. Research-only themes can no longer reach Scaling or Mature without real practitioner or market activity. Two new constants: `_ADOPTION_SCALING_MIN`, `_ADOPTION_MATURE_MIN`. 8 new tests in `tests/test_trend_state.py`.
 - **W-0021 — Verified RSS feed URLs**: All W-0021 provider feed URLs live-checked (2026-05-01). Confirmed: Together AI (`rss.xml`), Lambda (`lambda.ai/blog/rss.xml`), Groq SDK, Cerebras SDK, Mistral Inference (all via GitHub releases.atom). Not accessible: Fireworks AI (no public RSS), Perplexity (403). Config updated with verified URLs; unverified/inaccessible entries removed.
