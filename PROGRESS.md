@@ -29,6 +29,28 @@ Last updated: 2026-04-30
 
 ## Work Log
 
+### 2026-05-01 — W-0012 adoption proxy + W-0021 RSS URL verification
+
+**Branch:** `copilot/add-backlog-items-tracking`
+
+**Completed:**
+- **W-0021 RSS URL verification**: HTTP-checked all 7 provider feed URLs from previous session. Result: Together AI (`rss.xml`) and Lambda (`lambda.ai/blog/rss.xml`) have real RSS feeds. Groq, Cerebras, and Mistral use GitHub releases.atom (no blog RSS). Fireworks AI has no accessible feed. Perplexity returns 403. Config updated accordingly — no more `# verify:` flags on active URLs.
+- **W-0012 — Adoption proxy**: `adoption_proxy` computed in `build_trend_metrics` from market signal + practitioner signal + cross-class breadth. Three constants `_ADOPTION_SCALING_MIN=0.10`, `_ADOPTION_MATURE_MIN=0.20` added to `trend_state.py`. `classify_state` now gates Rule 4 (scaling) and Rule 5 (mature) on these thresholds. 7 computation tests (`test_adoption_proxy.py`) + 8 state machine tests added.
+
+**Test count:** 456 passing, 1 skipped (up from 436).
+
+**Mini-Retro:**
+
+1. **Did the process work?** Yes. The internet access retry revealed 5 of 7 guessed RSS URLs were wrong. Systematic fallback to GitHub releases.atom resolved most gaps.
+
+2. **What slowed down or went wrong?** Many AI provider blogs don't expose RSS. Ghost-based blogs sometimes use `/rss`, `/rss/`, or have no feed at all. The breadth of failures was higher than expected.
+
+3. **What single change would prevent this next time?** Before adding feed URLs to the backlog: verify them via HTTP HEAD in the same session rather than deferring to a future retry pass.
+
+4. **Is this a pattern?** Yes — this is the second time feed URL verification was deferred and then had to be retried. The fix is a norm: no feed URL enters config without a live HTTP check in the same session.
+
+---
+
 ### 2026-05-01 — W-0020, W-0021, W-0022 implementation
 
 **Branch:** `copilot/add-backlog-items-tracking`

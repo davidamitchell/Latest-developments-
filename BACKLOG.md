@@ -536,9 +536,9 @@ OpenReview exposes a public API. Accepted papers at top venues represent the hig
 
 ## W-0012
 
-status: ready
+status: done
 created: 2026-04-29
-updated: 2026-04-29
+updated: 2026-05-01
 
 ### Outcome
 

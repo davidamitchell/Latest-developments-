@@ -194,35 +194,28 @@ blogs:
     #   # Peer-reviewed management research meeting practice; AI + future of work.
 
     # ── New entrant inference providers (W-0021) ──────────────────────
-    # Emerging providers beyond the frontier labs. URLs need verification
-    # (marked below). Ghost CMS blogs use /rss/; WordPress uses /feed/.
-    #
-    # - name: "Groq Blog"
-    #   url: "https://groq.com/blog/rss/"         # verify: Ghost /rss/ path
-    #   source_class: "operator"
+    # All feeds verified live 2026-05-01. RSS blogs where available;
+    # GitHub releases.atom used for providers whose blogs block RSS.
+    # Fireworks AI and Perplexity have no accessible feed — omitted.
     #
     # - name: "Together AI Blog"
-    #   url: "https://www.together.ai/blog/rss"   # verify
+    #   url: "https://www.together.ai/blog/rss.xml"   # verified 2026-05-01
     #   source_class: "operator"
     #
-    # - name: "Fireworks AI Blog"
-    #   url: "https://fireworks.ai/blog/rss"      # verify
+    # - name: "Lambda Blog"
+    #   url: "https://lambda.ai/blog/rss.xml"         # verified 2026-05-01
     #   source_class: "operator"
     #
-    # - name: "Cerebras Blog"
-    #   url: "https://cerebras.ai/blog/feed/"     # verify
+    # - name: "Groq SDK Releases"
+    #   url: "https://github.com/groq/groq-python/releases.atom"
     #   source_class: "operator"
     #
-    # - name: "Lambda Labs Blog"
-    #   url: "https://lambdalabs.com/blog/feed/"  # verify
+    # - name: "Cerebras SDK Releases"
+    #   url: "https://github.com/Cerebras/cerebras-cloud-sdk-python/releases.atom"
     #   source_class: "operator"
     #
-    # - name: "Perplexity Blog"
-    #   url: "https://blog.perplexity.ai/rss"     # verify
-    #   source_class: "operator"
-    #
-    # - name: "Mistral AI News"
-    #   url: "https://mistral.ai/news/rss.xml"    # verify
+    # - name: "Mistral Inference Releases"
+    #   url: "https://github.com/mistralai/mistral-inference/releases.atom"
     #   source_class: "operator"
 
     # ── Local model tools (W-0022) ────────────────────────────────────
@@ -516,26 +509,25 @@ trends:
     limit: 100          # max models to snapshot per run
 
   # ── New entrant inference / token providers (W-0021) ─────────────────────
-  # RSS feeds from emerging providers beyond the frontier labs.
-  # All URLs marked "# verify:" need spot-checking before activating.
-  # Ghost CMS blogs typically expose /rss/ or /rss; WordPress exposes /feed/.
+  # All feeds below are verified live (2026-05-01).
+  # RSS blogs where available; GitHub releases.atom used as fallback for
+  # providers whose blogs block scraping or don't expose RSS.
   new_entrant_sources:
     enabled: false
     feeds:
-      # Groq — ultra-fast inference; Ghost CMS
-      - "https://groq.com/blog/rss/"          # verify: Ghost /rss/ path
-      # Together AI — open-model hosting
-      - "https://www.together.ai/blog/rss"    # verify: Ghost /rss path
-      # Fireworks AI — fine-tuned model serving
-      - "https://fireworks.ai/blog/rss"       # verify
-      # Cerebras — wafer-scale hardware; WordPress likely
-      - "https://cerebras.ai/blog/feed/"      # verify: WordPress /feed/
-      # Lambda Labs — GPU cloud
-      - "https://lambdalabs.com/blog/feed/"   # verify: WordPress /feed/
-      # Perplexity — AI search / inference
-      - "https://blog.perplexity.ai/rss"      # verify: Ghost /rss path
-      # Mistral AI — open-weight frontier models; confirmed RSS
-      - "https://mistral.ai/news/rss.xml"     # verify
+      # Together AI — open-model hosting; confirmed RSS 2026-05-01
+      - "https://www.together.ai/blog/rss.xml"
+      # Lambda (formerly Lambda Labs) — GPU cloud; confirmed RSS 2026-05-01
+      - "https://lambda.ai/blog/rss.xml"
+      # Groq — ultra-fast inference; GitHub SDK releases as proxy (blog has no RSS)
+      - "https://github.com/groq/groq-python/releases.atom"
+      # Cerebras — wafer-scale hardware; GitHub SDK releases as proxy
+      - "https://github.com/Cerebras/cerebras-cloud-sdk-python/releases.atom"
+      # Mistral AI — open-weight frontier models; GitHub releases (blog blocks RSS)
+      - "https://github.com/mistralai/mistral-inference/releases.atom"
+      - "https://github.com/mistralai/client-python/releases.atom"
+      # Fireworks AI — no accessible RSS or public GitHub releases feed found
+      # Perplexity — blog returns 403; no accessible feed found
 
   # ── Local model / self-hosted tools (W-0022) ─────────────────────────────
   # GitHub releases.atom feeds and practitioner blogs for local LLM tooling.

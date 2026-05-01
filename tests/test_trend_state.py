@@ -6,6 +6,8 @@ import pytest
 
 from src.models import TrendMetrics
 from src.trend_state import (
+    _ADOPTION_MATURE_MIN,
+    _ADOPTION_SCALING_MIN,
     _MIN_DIVERSITY_FOR_TREND,
     _VEL_DECLINING_MAX,
     _VEL_EMERGING_MIN,
@@ -131,6 +133,7 @@ class TestScalingState:
             velocity=_VEL_SCALING_MIN + 0.1,
             volume=_VOL_SCALING_MIN + 1.0,
             diversity=_MIN_DIVERSITY_FOR_TREND,
+            adoption_proxy=_ADOPTION_SCALING_MIN + 0.05,
         )
         assert classify_state(m) == "scaling"
 
@@ -140,6 +143,7 @@ class TestScalingState:
             velocity=_VEL_SCALING_MIN + 0.5,
             volume=_VOL_SCALING_MIN - 0.1,
             diversity=_MIN_DIVERSITY_FOR_TREND,
+            adoption_proxy=_ADOPTION_SCALING_MIN + 0.05,
         )
         assert classify_state(m) != "scaling"
 
@@ -148,8 +152,29 @@ class TestScalingState:
             velocity=_VEL_SCALING_MIN + 0.1,
             volume=_VOL_SCALING_MIN + 1.0,
             diversity=1,
+            adoption_proxy=_ADOPTION_SCALING_MIN + 0.05,
         )
         assert classify_state(m) != "scaling"
+
+    def test_scaling_requires_adoption_proxy(self):
+        """All other conditions met but zero adoption → not scaling."""
+        m = _metrics(
+            velocity=_VEL_SCALING_MIN + 0.1,
+            volume=_VOL_SCALING_MIN + 1.0,
+            diversity=_MIN_DIVERSITY_FOR_TREND,
+            adoption_proxy=0.0,  # below threshold
+        )
+        assert classify_state(m) != "scaling"
+
+    def test_scaling_at_adoption_threshold(self):
+        """Exactly at adoption threshold should qualify for scaling."""
+        m = _metrics(
+            velocity=_VEL_SCALING_MIN + 0.1,
+            volume=_VOL_SCALING_MIN + 1.0,
+            diversity=_MIN_DIVERSITY_FOR_TREND,
+            adoption_proxy=_ADOPTION_SCALING_MIN,
+        )
+        assert classify_state(m) == "scaling"
 
 
 # ---------------------------------------------------------------------------
@@ -163,6 +188,7 @@ class TestMatureState:
             velocity=0.0,  # near-zero = abs(_VEL_MATURE_MAX)
             volume=_VOL_MATURE_MIN + 1.0,
             diversity=_MIN_DIVERSITY_FOR_TREND,
+            adoption_proxy=_ADOPTION_MATURE_MIN + 0.05,
         )
         assert classify_state(m) == "mature"
 
@@ -171,6 +197,7 @@ class TestMatureState:
             velocity=0.0,
             volume=_VOL_MATURE_MIN - 0.5,
             diversity=_MIN_DIVERSITY_FOR_TREND,
+            adoption_proxy=_ADOPTION_MATURE_MIN + 0.05,
         )
         assert classify_state(m) != "mature"
 
@@ -179,6 +206,7 @@ class TestMatureState:
             velocity=0.0,
             volume=_VOL_MATURE_MIN + 1.0,
             diversity=1,
+            adoption_proxy=_ADOPTION_MATURE_MIN + 0.05,
         )
         assert classify_state(m) != "mature"
 
@@ -188,8 +216,37 @@ class TestMatureState:
             velocity=_VEL_MATURE_MAX + 0.5,
             volume=_VOL_MATURE_MIN + 2.0,
             diversity=_MIN_DIVERSITY_FOR_TREND,
+            adoption_proxy=_ADOPTION_MATURE_MIN + 0.05,
         )
         assert classify_state(m) != "mature"
+
+    def test_mature_requires_adoption_proxy(self):
+        """All other conditions met but zero adoption → not mature."""
+        m = _metrics(
+            velocity=0.0,
+            volume=_VOL_MATURE_MIN + 1.0,
+            diversity=_MIN_DIVERSITY_FOR_TREND,
+            adoption_proxy=0.0,
+        )
+        assert classify_state(m) != "mature"
+
+    def test_mature_below_adoption_threshold(self):
+        m = _metrics(
+            velocity=0.0,
+            volume=_VOL_MATURE_MIN + 1.0,
+            diversity=_MIN_DIVERSITY_FOR_TREND,
+            adoption_proxy=_ADOPTION_MATURE_MIN - 0.05,
+        )
+        assert classify_state(m) != "mature"
+
+    def test_mature_at_adoption_threshold(self):
+        m = _metrics(
+            velocity=0.0,
+            volume=_VOL_MATURE_MIN + 1.0,
+            diversity=_MIN_DIVERSITY_FOR_TREND,
+            adoption_proxy=_ADOPTION_MATURE_MIN,
+        )
+        assert classify_state(m) == "mature"
 
 
 # ---------------------------------------------------------------------------
@@ -314,3 +371,86 @@ class TestUpdateMetrics:
         updated = update_metrics(m, new_volume=5.0, today_str="2026-01-08")
         # State should be recomputed
         assert updated.state in ("emerging", "scaling", "mature", "declining", "unknown")
+
+
+# ---------------------------------------------------------------------------
+# Adoption proxy gates (W-0012)
+# ---------------------------------------------------------------------------
+
+
+class TestAdoptionProxyGates:
+    """Verify that scaling and mature states require non-zero adoption_proxy."""
+
+    def test_research_only_theme_cannot_scale(self):
+        """High velocity, good volume, but only research sources → not scaling."""
+        m = _metrics(
+            velocity=_VEL_SCALING_MIN + 0.2,
+            volume=_VOL_SCALING_MIN + 2.0,
+            diversity=_MIN_DIVERSITY_FOR_TREND,
+            adoption_proxy=0.0,
+        )
+        assert classify_state(m) != "scaling"
+
+    def test_research_only_theme_cannot_mature(self):
+        """High volume, stable, but zero adoption → not mature."""
+        m = _metrics(
+            velocity=0.0,
+            volume=_VOL_MATURE_MIN + 2.0,
+            diversity=_MIN_DIVERSITY_FOR_TREND,
+            adoption_proxy=0.0,
+        )
+        assert classify_state(m) != "mature"
+
+    def test_scaling_gate_below_threshold_is_unknown(self):
+        m = _metrics(
+            velocity=_VEL_SCALING_MIN + 0.2,
+            volume=_VOL_SCALING_MIN + 2.0,
+            diversity=_MIN_DIVERSITY_FOR_TREND,
+            adoption_proxy=_ADOPTION_SCALING_MIN - 0.01,
+        )
+        assert classify_state(m) in ("unknown", "emerging")
+
+    def test_mature_gate_below_threshold_is_not_mature(self):
+        m = _metrics(
+            velocity=0.0,
+            volume=_VOL_MATURE_MIN + 2.0,
+            diversity=_MIN_DIVERSITY_FOR_TREND,
+            adoption_proxy=_ADOPTION_MATURE_MIN - 0.01,
+        )
+        assert classify_state(m) != "mature"
+
+    def test_strong_adoption_enables_scaling(self):
+        m = _metrics(
+            velocity=_VEL_SCALING_MIN + 0.2,
+            volume=_VOL_SCALING_MIN + 2.0,
+            diversity=_MIN_DIVERSITY_FOR_TREND,
+            adoption_proxy=_ADOPTION_SCALING_MIN + 0.1,
+        )
+        assert classify_state(m) == "scaling"
+
+    def test_strong_adoption_enables_mature(self):
+        m = _metrics(
+            velocity=0.0,
+            volume=_VOL_MATURE_MIN + 2.0,
+            diversity=_MIN_DIVERSITY_FOR_TREND,
+            adoption_proxy=_ADOPTION_MATURE_MIN + 0.1,
+        )
+        assert classify_state(m) == "mature"
+
+    def test_emerging_does_not_require_adoption_proxy(self):
+        """Emerging is the entry state — adoption proxy not yet required."""
+        m = _metrics(
+            velocity=_VEL_EMERGING_MIN + 0.05,
+            volume=_VOL_SCALING_MIN - 0.1,
+            diversity=_MIN_DIVERSITY_FOR_TREND,
+            adoption_proxy=0.0,
+        )
+        assert classify_state(m) == "emerging"
+
+    def test_declining_does_not_require_adoption_proxy(self):
+        """Declining ignores adoption_proxy — decline is signal enough."""
+        m = _metrics(
+            velocity=_VEL_DECLINING_MAX - 0.05,
+            adoption_proxy=0.0,
+        )
+        assert classify_state(m) == "declining"

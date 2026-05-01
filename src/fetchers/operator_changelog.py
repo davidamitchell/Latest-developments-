@@ -258,14 +258,19 @@ def _source_name_from_url(feed_url: str) -> str:
         "deepmind.google": "DeepMind Blog",
         "aws.amazon.com": "AWS ML Blog",
         "blogs.microsoft.com": "Microsoft AI Blog",
-        # New entrant inference providers (W-0021)
+        # New entrant inference providers (W-0021) — verified 2026-05-01
         "groq.com": "Groq Blog",
+        "groq/groq-python": "Groq SDK Releases",
         "together.ai": "Together AI Blog",
         "fireworks.ai": "Fireworks AI Blog",
         "cerebras.ai": "Cerebras Blog",
-        "lambdalabs.com": "Lambda Labs Blog",
+        "Cerebras/cerebras-cloud-sdk": "Cerebras SDK Releases",
+        "lambdalabs.com": "Lambda Blog",
+        "lambda.ai": "Lambda Blog",
         "blog.perplexity.ai": "Perplexity Blog",
         "mistral.ai": "Mistral AI Blog",
+        "mistralai/mistral-inference": "Mistral Inference Releases",
+        "mistralai/client-python": "Mistral Python SDK Releases",
         # Local model tools (W-0022)
         "ollama.com": "Ollama Releases",
         "github.com/ollama": "Ollama Releases",

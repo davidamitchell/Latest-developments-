@@ -61,12 +61,13 @@ _URL_SOURCE_CLASS: list[tuple[str, str]] = [
     ("blog.google", "operator"),
     ("azure.com", "operator"),
     ("aws.amazon.com", "operator"),
-    # New entrant inference providers (W-0021)
+    # New entrant inference providers (W-0021) — verified 2026-05-01
     ("groq.com", "operator"),
     ("together.ai", "operator"),
     ("fireworks.ai", "operator"),
     ("cerebras.ai", "operator"),
     ("lambdalabs.com", "operator"),
+    ("lambda.ai", "operator"),
     ("blog.perplexity.ai", "operator"),
     ("mistral.ai", "operator"),
     # OpenRouter pricing (W-0020)
@@ -95,12 +96,13 @@ _URL_SOURCE_NAME: list[tuple[str, str]] = [
     ("github.com", "GitHub"),
     ("openai.com", "OpenAI"),
     ("anthropic.com", "Anthropic"),
-    # New entrant providers (W-0021)
+    # New entrant inference providers (W-0021) — verified 2026-05-01
     ("groq.com", "Groq"),
     ("together.ai", "Together AI"),
     ("fireworks.ai", "Fireworks AI"),
     ("cerebras.ai", "Cerebras"),
-    ("lambdalabs.com", "Lambda Labs"),
+    ("lambdalabs.com", "Lambda"),
+    ("lambda.ai", "Lambda"),
     ("blog.perplexity.ai", "Perplexity"),
     ("mistral.ai", "Mistral AI"),
     # Pricing data (W-0020)
@@ -376,6 +378,28 @@ def build_trend_metrics(
         media_count = sc_counter.get("media", 0)
         hype_risk = round(media_count / max(len(entries), 1), 3)
 
+        # Adoption proxy: composite 0–1 signal from available signals (W-0012).
+        # Three components, equal weight (each capped at 1/3 of total):
+        #
+        # 1. Market signal (0–0.4): market-class items represent real pricing
+        #    activity — providers are charging for this capability.
+        market_count = sc_counter.get("market", 0)
+        market_signal = min(0.4, (market_count / max(len(entries), 1)) * 2.0)
+        #
+        # 2. Practitioner signal (0–0.3): practitioners writing about or
+        #    deploying a theme signals real usage beyond research/media.
+        practitioner_count = sc_counter.get("practitioner", 0)
+        practitioner_signal = min(0.3, (practitioner_count / max(len(entries), 1)) * 0.9)
+        #
+        # 3. Cross-class breadth (0–0.3): themes discussed by both primary
+        #    (research) and practitioner/market classes have crossed the
+        #    research→deployment boundary.
+        classes_present = set(sc_counter.keys())
+        breadth_classes = classes_present & {"primary", "market", "practitioner", "operator"}
+        breadth_signal = min(0.3, (len(breadth_classes) - 1) * 0.1)
+        #
+        adoption_proxy = round(market_signal + practitioner_signal + breadth_signal, 3)
+
         # Confidence: diversity and volume relative to history span
         diversity_factor = min(1.0, diversity / 3)
         volume_factor = min(1.0, volume / 3)
@@ -399,7 +423,7 @@ def build_trend_metrics(
             volume=volume,
             velocity=velocity,
             diversity=diversity,
-            adoption_proxy=0.0,
+            adoption_proxy=adoption_proxy,
             stability=stability,
             hype_risk=hype_risk,
             item_count=len(entries),

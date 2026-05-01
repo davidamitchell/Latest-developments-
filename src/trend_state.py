@@ -17,6 +17,11 @@ _VEL_DECLINING_MAX = -0.05
 _VOL_SCALING_MIN = 2.0
 _VOL_MATURE_MIN = 4.0
 
+# Adoption proxy thresholds (W-0012)
+# Without real adoption signals no theme should reach Scaling or Mature.
+_ADOPTION_SCALING_MIN = 0.1  # any market or practitioner signal present
+_ADOPTION_MATURE_MIN = 0.2  # meaningful practitioner + market breadth
+
 
 def classify_state(metrics: TrendMetrics) -> TrendState:
     """Classify a theme's trend state from its metrics.
@@ -25,13 +30,14 @@ def classify_state(metrics: TrendMetrics) -> TrendState:
     1. Insufficient diversity → unknown (insufficient cross-source support)
     2. Declining velocity with falling volume → declining
     3. High velocity, moderate volume, low adoption → emerging
-    4. High velocity, meaningful volume → scaling
-    5. Low velocity, high volume, stable → mature
+    4. High velocity, meaningful volume, adoption present → scaling
+    5. Low velocity, high volume, stable, strong adoption → mature
     6. Default → unknown
     """
     v = metrics.velocity
     vol = metrics.volume
     div = metrics.diversity
+    ap = metrics.adoption_proxy
 
     # Rule 1: need cross-class confirmation to be anything but declining/unknown
     if div < _MIN_DIVERSITY_FOR_TREND and v >= 0:
@@ -45,12 +51,22 @@ def classify_state(metrics: TrendMetrics) -> TrendState:
     if v >= _VEL_EMERGING_MIN and vol < _VOL_SCALING_MIN and div >= _MIN_DIVERSITY_FOR_TREND:
         return "emerging"
 
-    # Rule 4: scaling — growing meaningfully across sources
-    if v >= _VEL_SCALING_MIN and vol >= _VOL_SCALING_MIN and div >= _MIN_DIVERSITY_FOR_TREND:
+    # Rule 4: scaling — growing meaningfully across sources with adoption signal
+    if (
+        v >= _VEL_SCALING_MIN
+        and vol >= _VOL_SCALING_MIN
+        and div >= _MIN_DIVERSITY_FOR_TREND
+        and ap >= _ADOPTION_SCALING_MIN
+    ):
         return "scaling"
 
-    # Rule 5: mature — stable high-volume theme
-    if abs(v) < _VEL_MATURE_MAX and vol >= _VOL_MATURE_MIN and div >= _MIN_DIVERSITY_FOR_TREND:
+    # Rule 5: mature — stable high-volume theme with strong adoption
+    if (
+        abs(v) < _VEL_MATURE_MAX
+        and vol >= _VOL_MATURE_MIN
+        and div >= _MIN_DIVERSITY_FOR_TREND
+        and ap >= _ADOPTION_MATURE_MIN
+    ):
         return "mature"
 
     return "unknown"
