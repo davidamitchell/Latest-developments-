@@ -45,7 +45,8 @@ let THEME_COLOR_MAP = {};
 let _selectedTheme = null;
 
 // Hex colour validator — guards against unexpected values reaching inline styles.
-const _HEX_RE = /^#[0-9A-Fa-f]{3,8}$/;
+// Accepts valid CSS hex formats: #RGB, #RGBA, #RRGGBB, #RRGGBBAA (3, 4, 6, or 8 digits).
+const _HEX_RE = /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{4}|[0-9A-Fa-f]{6}|[0-9A-Fa-f]{8})$/;
 function safeColor(value, fallback) {
   return _HEX_RE.test(value) ? value : fallback;
 }
@@ -312,7 +313,7 @@ function renderItemDrillDown(themeName, allItems) {
     .filter(i => i.theme === themeName)
     .sort((a, b) => (b.date || '').localeCompare(a.date || ''));
 
-  const color = themeColor(themeName);
+  const color = safeColor(themeColor(themeName), '#999');
   panel.style.borderLeftColor = color;
   panel.hidden = false;
 
@@ -330,7 +331,7 @@ function renderItemDrillDown(themeName, allItems) {
 
   const rows = items.map(item => {
     const cls      = item.source_class || 'practitioner';
-    const clsColor = safeColor(CLASS_COLORS[cls] || '#555', '#555');
+    const clsColor = safeColor(CLASS_COLORS[cls], '#555');
     const badge    = `<span class="source-badge" style="background:${hexAlpha(clsColor, 0.12)};color:${clsColor};border:1px solid ${hexAlpha(clsColor, 0.25)}">${escHtml(cls)}</span>`;
     return `
       <tr>
