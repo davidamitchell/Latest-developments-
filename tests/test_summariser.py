@@ -28,6 +28,7 @@ def _make_item(
     source: str = "Test Source",
     content: str = "Some content here",
     source_type: str = "",
+    source_class: str = "practitioner",
 ) -> FetchedItem:
     return FetchedItem(
         id=id,
@@ -36,6 +37,7 @@ def _make_item(
         content=content,
         source_name=source,
         source_type=source_type,
+        source_class=source_class,
     )
 
 
@@ -63,14 +65,16 @@ class TestSummarise:
 
     def test_calls_gemini_with_correct_model(self) -> None:
         mock_cls = _mock_client()
-        with patch("src.summariser.genai.Client", mock_cls):
+        with patch("src.summariser.genai.Client", mock_cls), \
+             patch.dict("os.environ", {"GEMINI_API_KEY": "test-key"}):
             summarise([_make_item()], _make_config(model="gemini-1.5-pro"))
 
         call_kwargs = mock_cls.return_value.models.generate_content.call_args.kwargs
         assert call_kwargs["model"] == "gemini-1.5-pro"
 
     def test_returns_digest_with_date_header(self) -> None:
-        with patch("src.summariser.genai.Client", _mock_client("Gemini output")):
+        with patch("src.summariser.genai.Client", _mock_client("Gemini output")), \
+             patch.dict("os.environ", {"GEMINI_API_KEY": "test-key"}):
             result = summarise([_make_item()], _make_config(), today=date(2026, 2, 21))
 
         assert "21 Feb 2026" in result
@@ -78,7 +82,8 @@ class TestSummarise:
 
     def test_uses_default_prompt_when_config_prompt_empty(self) -> None:
         mock_cls = _mock_client()
-        with patch("src.summariser.genai.Client", mock_cls):
+        with patch("src.summariser.genai.Client", mock_cls), \
+             patch.dict("os.environ", {"GEMINI_API_KEY": "test-key"}):
             summarise([_make_item()], _make_config(prompt=""))
 
         call_kwargs = mock_cls.return_value.models.generate_content.call_args.kwargs
@@ -90,7 +95,8 @@ class TestSummarise:
         dates in content (e.g. '27 Feb' → 27 February 2026, not February 2027) and treat
         all fetched content as real, current events rather than fictional future scenarios."""
         mock_cls = _mock_client()
-        with patch("src.summariser.genai.Client", mock_cls):
+        with patch("src.summariser.genai.Client", mock_cls), \
+             patch.dict("os.environ", {"GEMINI_API_KEY": "test-key"}):
             summarise([_make_item()], _make_config(), today=date(2026, 2, 27))
 
         call_kwargs = mock_cls.return_value.models.generate_content.call_args.kwargs
@@ -103,7 +109,8 @@ class TestSummarise:
             _make_item("b", source="Blogs", content="blog content"),
         ]
         mock_cls = _mock_client()
-        with patch("src.summariser.genai.Client", mock_cls):
+        with patch("src.summariser.genai.Client", mock_cls), \
+             patch.dict("os.environ", {"GEMINI_API_KEY": "test-key"}):
             summarise(items, _make_config())
 
         call_kwargs = mock_cls.return_value.models.generate_content.call_args.kwargs
@@ -116,7 +123,8 @@ class TestSummarise:
     def test_respects_max_items_per_source(self) -> None:
         items = [_make_item(str(i), source="S", content=f"content {i}") for i in range(5)]
         mock_cls = _mock_client()
-        with patch("src.summariser.genai.Client", mock_cls):
+        with patch("src.summariser.genai.Client", mock_cls), \
+             patch.dict("os.environ", {"GEMINI_API_KEY": "test-key"}):
             summarise(items, _make_config(max_items_per_source=2))
 
         call_kwargs = mock_cls.return_value.models.generate_content.call_args.kwargs
@@ -147,7 +155,8 @@ class TestSummarise:
         mock_cls.return_value.models.generate_content.side_effect = genai_errors.ClientError(
             429, {"error": {"message": "quota exceeded"}}, MagicMock()
         )
-        with patch("src.summariser.genai.Client", mock_cls):
+        with patch("src.summariser.genai.Client", mock_cls), \
+             patch.dict("os.environ", {"GEMINI_API_KEY": "test-key"}):
             result = summarise([_make_item()], _make_config(), today=date(2026, 2, 22))
 
         # Must surface the failure — reader must know AI did not process this
@@ -283,8 +292,9 @@ class TestRenderHtmlDigest:
             url="https://example.com/x",
             content="content",
             source_name="RSS",
-            published=datetime(2026, 2, 15),
             source_type="RSS",
+            source_class="practitioner",
+            published=datetime(2026, 2, 15),
         )
         result = render_html_digest([item], "Summary", today=date(2026, 2, 27))
         assert "15 Feb 2026" in result
@@ -631,7 +641,8 @@ class TestRenderHtmlDigestTrends:
 class TestSummariseWithHistory:
     def test_history_included_in_system_prompt(self) -> None:
         mock_cls = _mock_client()
-        with patch("src.summariser.genai.Client", mock_cls):
+        with patch("src.summariser.genai.Client", mock_cls), \
+             patch.dict("os.environ", {"GEMINI_API_KEY": "test-key"}):
             summarise(
                 [_make_item()],
                 _make_config(),
@@ -647,7 +658,8 @@ class TestSummariseWithHistory:
 
     def test_no_history_uses_normal_prompt(self) -> None:
         mock_cls = _mock_client()
-        with patch("src.summariser.genai.Client", mock_cls):
+        with patch("src.summariser.genai.Client", mock_cls), \
+             patch.dict("os.environ", {"GEMINI_API_KEY": "test-key"}):
             summarise(
                 [_make_item()],
                 _make_config(),
@@ -661,7 +673,8 @@ class TestSummariseWithHistory:
 
     def test_empty_history_list_uses_normal_prompt(self) -> None:
         mock_cls = _mock_client()
-        with patch("src.summariser.genai.Client", mock_cls):
+        with patch("src.summariser.genai.Client", mock_cls), \
+             patch.dict("os.environ", {"GEMINI_API_KEY": "test-key"}):
             summarise(
                 [_make_item()],
                 _make_config(),
@@ -676,7 +689,8 @@ class TestSummariseWithHistory:
     def test_history_truncated_to_3000_chars(self) -> None:
         long_digest = "x" * 5000
         mock_cls = _mock_client()
-        with patch("src.summariser.genai.Client", mock_cls):
+        with patch("src.summariser.genai.Client", mock_cls), \
+             patch.dict("os.environ", {"GEMINI_API_KEY": "test-key"}):
             summarise(
                 [_make_item()],
                 _make_config(),
