@@ -75,18 +75,10 @@ jobs:
           fi
           python -m src.main $ARGS
 
-      - name: Run trend analysis
-        # Analyses history/*.txt to produce structured JSON for the GitHub Pages site.
-        # Runs even if the digest had no new items; skipped on dry-run.
-        if: inputs.dry_run != 'true'
-        env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-        run: python -m src.trends --docs docs/data --history history
-
-      - name: Commit updated state, history, and trend data
-        # Only runs on non-dry-run executions; state file is only written after a
-        # successful email send so it may not exist on first run or when all
-        # items were skipped.
+      - name: Commit updated state and history
+        # Commits state/processed.json and history/YYYY-MM-DD.txt after a successful send.
+        # Does NOT commit docs/data/ — that is the site build workflow's responsibility.
+        # Skipped on dry-run runs.
         if: inputs.dry_run != 'true'
         run: |
           git config user.name "github-actions[bot]"
@@ -95,23 +87,17 @@ jobs:
             echo "No state or history to commit (nothing was processed)"
             exit 0
           fi
-          # Stage state file if it exists
           if [ -f state/processed.json ]; then
             git add state/processed.json
           fi
-          # Stage history directory if it has any txt files
           if [ -d history ] && find history -maxdepth 1 -name "*.txt" -type f | grep -q .; then
             git add history/
           fi
-          # Stage trend data for GitHub Pages site
-          if [ -d docs/data ]; then
-            git add docs/data/
-          fi
           TODAY=$(date -u +%Y-%m-%d)
           if git diff --cached --quiet; then
-            echo "State, history, and trend data unchanged — nothing to commit"
+            echo "State and history unchanged — nothing to commit"
           else
-            git commit -m "chore: update state, history, and trend data ${TODAY} [skip ci]"
+            git commit -m "chore: update state and history ${TODAY} [skip ci]"
             git push origin ${{ github.ref_name }}
           fi
 

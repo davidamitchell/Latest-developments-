@@ -1,23 +1,42 @@
 name: Rebuild Site
 
-# Manual trigger only — rebuilds docs/data/ without running the email digest.
-# Use this to refresh trend analysis and the GitHub Pages site on demand.
+# Triggered automatically after the Daily Digest workflow succeeds on main,
+# or dispatched manually (e.g. to force a site refresh without a new digest).
+#
+# Responsibility: read history/ from the repo, run trend analysis to produce
+# docs/data/*.json, commit that data, and let GitHub Pages publish docs/.
+# This is the ONLY workflow that writes docs/data/.
+
 on:
+  workflow_run:
+    workflows: ["Daily Digest"]
+    types: [completed]
+    branches: [main]
+
   workflow_dispatch:
     inputs:
       no_fetch:
-        description: "Skip live source fetching (history only)"
+        description: "Skip live source fetching — use history only"
         type: boolean
         default: false
 
 jobs:
   rebuild:
+    name: Build site data and deploy
     runs-on: ubuntu-latest
+
+    # workflow_run events fire even when the triggering workflow fails.
+    # Only proceed when the digest succeeded (or when manually dispatched).
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'workflow_run' &&
+       github.event.workflow_run.conclusion == 'success')
+
     permissions:
       contents: write
 
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -31,7 +50,7 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Run trend analysis
+      - name: Generate site data
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
@@ -41,15 +60,15 @@ jobs:
             python -m src.trends --docs docs/data --history history
           fi
 
-      - name: Commit updated trend data
+      - name: Commit updated site data
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add docs/data/
           TODAY=$(date -u +%Y-%m-%d)
           if git diff --cached --quiet; then
-            echo "Trend data unchanged — nothing to commit"
+            echo "Site data unchanged — nothing to commit"
           else
             git commit -m "chore: rebuild site data ${TODAY} [skip ci]"
-            git push origin ${{ github.ref_name }}
+            git push origin main
           fi

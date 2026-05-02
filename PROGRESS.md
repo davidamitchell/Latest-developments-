@@ -663,3 +663,30 @@ Three gaps identified by working the backlog:
 3. **What single change would prevent this next time?** When writing new instructions, immediately attempt to follow them on a real task before committing. If you can't execute the first step, the instructions have a gap.
 
 4. **Is this a pattern?** Instructions written in isolation often have gaps that only appear in use. Validate instructions by simulating the first action they describe before committing.
+
+---
+
+## 2026-05-02 — Architecture redesign: decouple digest from site build
+
+**Branch:** `claude/redesign-architecture-mxW2b`
+
+**Completed:**
+
+- **Architecture diagnosis**: Identified four coherence problems with the existing system — GH Pages site data committed by the digest workflow, trend analysis tangled into the digest run, duplicate source configuration across email and trends sections, and no discrete pipeline stages.
+- **ADR-0017** — Canonical pipeline architecture: documents the three-pipeline model (digest / site build / CI), the fetcher boundary as the core design principle, `docs/data/` as a build artefact, and the target processing stages (W-0024).
+- **`daily-digest.yml` fixed**: removed "Run trend analysis" step and `docs/data/` from the commit. The digest workflow now commits only `state/processed.json` and `history/`. Single responsibility.
+- **`rebuild-site.yml` redesigned**: added `workflow_run` trigger (fires after Daily Digest succeeds on `main`). Also supports manual `workflow_dispatch`. Clear header comment explains its sole responsibility. No longer requires manual dispatch after every digest run.
+- **`copilot-instructions.md` updated**: Project Overview rewritten to describe all three pipelines and the fetcher contract. Repository Layout updated to show the full source tree including `docs/data/` annotated as generated. GitHub Actions section replaced with a clear three-workflow table and per-workflow responsibility notes. Chain-of-thought step 8 added: pipeline boundary check before any code change.
+- **W-0023** (workflow separation) — added as `done` (implemented in this session).
+- **W-0024** (discrete pipeline stages) — added as `ready`.
+- **W-0025** (unified source configuration) — added as `ready`.
+
+**Mini-Retro:**
+
+1. **Did the process work?** Yes. The user's critique was precise: four named concerns, each addressable. Reading the full repo before redesigning revealed that the workflow coupling was the most impactful fix (immediate, low-risk, high clarity). The architecture doc and backlog items address the longer-term structural work.
+
+2. **What slowed down or went wrong?** The `[skip ci]` vs `workflow_run` interaction needed careful thought: daily-digest commits with `[skip ci]` which suppresses all workflow triggers, but `workflow_run` reacts to the *workflow completion event*, not the push event — so the trigger works correctly even with `[skip ci]` commits.
+
+3. **What single change would prevent this next time?** The architecture confusion accumulated because concerns were added incrementally without stopping to ask "does this belong here?". ADR-0017's pipeline boundary rule (step 8 in chain-of-thought) is the standing fix: before adding any step to a workflow, confirm it belongs to that workflow's responsibility.
+
+4. **Is this a pattern?** Yes — workflow sprawl from incremental addition is a common pattern. The antidote is always the same: explicit responsibility ownership per workflow, documented in the instructions, enforced by a chain-of-thought checkpoint.

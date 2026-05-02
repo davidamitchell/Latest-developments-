@@ -927,6 +927,107 @@ Local/on-device AI is a significant and fast-growing segment currently not repre
 
 ---
 
+## W-0023
+
+status: done
+created: 2026-05-02
+updated: 2026-05-02
+
+### Outcome
+
+The trend analysis step is removed from `daily-digest.yml`. The `rebuild-site.yml` workflow is the sole owner of trend analysis and `docs/data/` writes. It triggers automatically after `daily-digest` succeeds on `main` (via `workflow_run`), or can be dispatched manually. `daily-digest.yml` commits only `state/processed.json` and `history/`.
+
+### Context
+
+ADR-0017 identified that the digest and site build were tangled in one workflow. A trend-analysis failure could block the email send. `docs/data/` was being committed by the digest workflow, obscuring that it is a build artefact derived from `history/`. The rebuild-site workflow existed but had no automatic trigger — users had to remember to run it manually.
+
+### Notes
+
+- Removed "Run trend analysis" step from `daily-digest.yml`
+- Removed `docs/data/` staging from the digest commit step
+- Added `workflow_run` trigger to `rebuild-site.yml`: fires after Daily Digest succeeds on `main`
+- `rebuild-site.yml` continues to support `workflow_dispatch` with `no_fetch` option
+- Both workflows now have clear, non-overlapping responsibilities
+
+---
+
+## W-0024
+
+status: ready
+created: 2026-05-02
+updated: 2026-05-02
+
+### Outcome
+
+A discrete, composable data processing pipeline replaces the current in-line processing scattered across `summariser.py`, `credibility.py`, `themes.py`, and `trends.py`. Items pass through explicit stages after fetching and before digest or trend analysis consumes them.
+
+### Context
+
+ADR-0017 defines the target pipeline stages. Currently processing is interleaved: summarisation, theme extraction, and hype detection all happen inside Gemini prompts or ad-hoc functions with no clear stage boundaries. This makes it hard to test stages independently, add new stages, or change one stage without touching others.
+
+### Pipeline stages
+
+1. **Ingest** — validate `FetchedItem` fields; reject malformed items; assign defaults for missing metadata
+2. **Clean** — strip HTML/markdown, normalise whitespace, truncate to token budget per item
+3. **Enrich** — AI extraction per item: concept labels, theme classification, one-sentence summary
+4. **Score** — hype risk (`detect_hype()`) and credibility (`score_credibility()`) per item
+
+### Notes
+
+- Create `src/pipeline/` package with one module per stage: `ingest.py`, `clean.py`, `enrich.py`, `score.py`
+- Each stage: `def run(items: list[FetchedItem]) -> list[FetchedItem]` — pure transform, no side effects
+- `src/pipeline/__init__.py`: `run_pipeline(items, config) -> list[FetchedItem]` calling stages in order
+- `src/main.py` and `src/trends.py` call `run_pipeline()` after fetching, before summarisation or trend analysis
+- Write tests for each stage in `tests/test_pipeline_*.py`
+- The existing `summariser.py` continues to handle digest formatting; enrichment stage feeds it pre-processed items
+- Write an ADR if the stage boundaries differ materially from this spec
+
+---
+
+## W-0025
+
+status: ready
+created: 2026-05-02
+updated: 2026-05-02
+
+### Outcome
+
+Source configuration is redesigned so each source is defined once in `config/sources.yaml`, tagged for which pipelines it feeds (`digest`, `trends`, or both), with no duplication. The email digest and trend analysis pipelines select their sources by tag.
+
+### Context
+
+Currently `sources.yaml` has two parallel source sections: email digest sources (`youtube`, `blogs`, `substack`, `hacker_news`) and trend analysis sources (`trends.*`). Several operator blogs appear in both `blogs.rss` and `trends.operator_sources`, requiring manual synchronisation when a source is added, removed, or reconfigured. This is a maintenance burden and a source of confusion about which sources feed which pipeline.
+
+### Target schema (sketch)
+
+```yaml
+sources:
+  - name: "Anthropic Blog"
+    url: "https://www.anthropic.com/rss.xml"
+    type: rss
+    source_class: operator
+    feeds: [digest, trends]
+    enabled: true
+
+  - name: "arXiv cs.AI"
+    type: arxiv
+    category: cs.AI
+    source_class: primary
+    feeds: [trends]
+    enabled: true
+```
+
+### Notes
+
+- Write ADR-0018 before implementing: document the problem, the options (tag-based vs separate configs), and the chosen approach
+- Update `src/config.py` to load the new schema and present typed config objects to each pipeline
+- Update `src/main.py` to select `feeds: [digest]` or `feeds: [digest, trends]` sources
+- Update `src/trends.py` to select `feeds: [trends]` or `feeds: [digest, trends]` sources
+- Backward compatibility: the old schema should be migrated, not supported alongside the new one
+- Write tests for the new config loader
+
+---
+
 ## Deferred / Ideas
 
 | Idea | Notes |
