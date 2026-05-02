@@ -28,7 +28,7 @@ except ImportError:
 
 from src.fetchers import FetchedItem
 from src.logger import setup_logging
-from src.models import ProcessedItem
+from src.models import ProcessedItem, read_processed_jsonl, write_processed_jsonl
 from src.pipeline.fetch import read_raw_jsonl
 from src.pipeline.stages.clean import clean
 from src.pipeline.stages.concept_extraction import extract_concepts
@@ -97,33 +97,6 @@ def process(
 
     logger.info("Processed %d item(s)", len(results))
     return results
-
-
-def write_processed_jsonl(items: list[ProcessedItem], path: Path) -> None:
-    """Write items to path as JSONL (one JSON line per ProcessedItem)."""
-    path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open("w", encoding="utf-8") as f:
-        for item in items:
-            f.write(json.dumps(item.to_dict(), ensure_ascii=False) + "\n")
-    logger.info("Wrote %d processed item(s) to %s", len(items), path)
-
-
-def read_processed_jsonl(path: Path) -> list[ProcessedItem]:
-    """Read JSONL file produced by write_processed_jsonl; return [] if file missing."""
-    if not path.exists():
-        logger.debug("Processed file not found: %s", path)
-        return []
-    items: list[ProcessedItem] = []
-    with path.open(encoding="utf-8") as f:
-        for lineno, line in enumerate(f, 1):
-            line = line.strip()
-            if not line:
-                continue
-            try:
-                items.append(ProcessedItem.from_dict(json.loads(line)))
-            except Exception as exc:
-                logger.warning("Skipping malformed line %d in %s: %s", lineno, path, exc)
-    return items
 
 
 def _parse_args() -> argparse.Namespace:

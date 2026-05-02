@@ -15,9 +15,14 @@ Two schema contracts define the pipeline boundaries:
 
 from __future__ import annotations
 
+import json
+import logging
 from dataclasses import dataclass, field
 from datetime import datetime
+from pathlib import Path
 from typing import Any, Literal
+
+_log = logging.getLogger(__name__)
 
 SourceClass = Literal["primary", "operator", "practitioner", "media", "market"]
 
@@ -221,3 +226,34 @@ class GraphEdge:
     rel_type: Literal["causal", "competitive", "compositional", "contradictory"] = "causal"
     weight: float = 1.0  # number of independent supporting paths
     source_diversity: int = 1  # distinct source classes supporting this edge
+
+
+# ── ProcessedItem JSONL I/O ──────────────────────────────────────────────────
+# Kept here (with the model) so consumers can read ProcessedItem records
+# without importing src.pipeline.run and its transitive stage dependencies.
+
+def write_processed_jsonl(items: list[ProcessedItem], path: Path) -> None:
+    """Write ProcessedItem list to path as JSONL."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("w", encoding="utf-8") as f:
+        for item in items:
+            f.write(json.dumps(item.to_dict(), ensure_ascii=False) + "\n")
+    _log.info("Wrote %d processed item(s) to %s", len(items), path)
+
+
+def read_processed_jsonl(path: Path) -> list[ProcessedItem]:
+    """Read ProcessedItem JSONL file; return [] if file is missing."""
+    if not path.exists():
+        _log.debug("Processed file not found: %s", path)
+        return []
+    items: list[ProcessedItem] = []
+    with path.open(encoding="utf-8") as f:
+        for lineno, line in enumerate(f, 1):
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                items.append(ProcessedItem.from_dict(json.loads(line)))
+            except Exception as exc:
+                _log.warning("Skipping malformed line %d in %s: %s", lineno, path, exc)
+    return items

@@ -30,8 +30,7 @@ from src.emailer import send_digest
 from src.fetchers import FetchedItem
 from src.history import archive_digest, load_recent_digests
 from src.logger import setup_logging
-from src.models import ProcessedItem
-from src.pipeline.run import read_processed_jsonl
+from src.models import ProcessedItem, read_processed_jsonl
 from src.state import load_state, save_state
 from src.summariser import render_html_digest, summarise
 

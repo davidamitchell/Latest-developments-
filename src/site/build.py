@@ -31,8 +31,7 @@ except ImportError:
 
 from src.config import load_config
 from src.logger import setup_logging
-from src.models import CanonicalRecord, ProcessedItem, ThemeNode, TrendMetrics
-from src.pipeline.run import read_processed_jsonl
+from src.models import CanonicalRecord, ProcessedItem, ThemeNode, TrendMetrics, read_processed_jsonl
 from src.themes import cluster_themes, normalize_theme_name
 from src.trend_state import classify_state, compute_stability
 from src.trends import (
