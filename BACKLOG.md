@@ -1077,7 +1077,7 @@ Each stage: `def run(items: list[ProcessedItem], config: Config) -> list[Process
 
 ## W-0027
 
-status: ready
+status: done
 created: 2026-05-02
 updated: 2026-05-02
 
