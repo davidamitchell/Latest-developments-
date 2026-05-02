@@ -1,0 +1,23 @@
+Daily AI Digest — 02 May 2026
+========================================
+
+## Nate Jones
+
+### RTX 5090, Mac Studio, or DGX Spark? I tried all three.
+Theme: GPU Hardware Comparison
+Summary: This video offers a practical comparison of RTX 5090, Mac Studio, and DGX Spark for AI/ML workloads. It aims to guide engineers in making informed infrastructure decisions based on cost-performance trade-offs for local or small-scale model training and inference. The key takeaway is understanding which hardware configuration best suits specific budget and performance requirements.
+
+## Matthew Berman
+
+### Reacting to &quot
+
+────────────────────────────────────────
+Run summary
+  UTC timestamp : 2026-05-02 00:15:04 UTC
+  Total new items: 199
+
+  Sources fetched:
+    YouTube: 7 new item(s)
+    Blogs/RSS: 187 new item(s)
+    Hacker News: 5 new item(s)
+────────────────────────────────────────

@@ -1,12 +1,17 @@
 {
-  "last_run": "2026-05-01T08:53:03.292238+00:00",
-  "run_id": "2026-05-01",
-  "item_count": 334,
-  "theme_count": 18,
+  "last_run": "2026-05-02T00:15:23.933227+00:00",
+  "run_id": "2026-05-02",
+  "item_count": 1725,
+  "theme_count": 27,
   "source_class_counts": {
-    "youtube": 160,
-    "blogs/rss": 0,
-    "hacker news": 256,
-    "arxiv": 150
+    "youtube": 167,
+    "blogs/rss": 187,
+    "hacker news": 261,
+    "arxiv": 150,
+    "hugging face": 14,
+    "operator changelogs": 1079,
+    "openrouter": 100,
+    "new entrant sources": 137,
+    "local model sources": 60
   }
 }
