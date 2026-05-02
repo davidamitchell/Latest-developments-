@@ -1,9 +1,23 @@
-"""Shared data models for the trend analysis pipeline."""
+"""Shared data models.
+
+Two schema contracts define the pipeline boundaries:
+
+  Schema Contract A — FetchedItem (src/fetchers/__init__.py)
+    Output of every fetcher; input to the processing pipeline.
+    Represents raw, deduplicated content from a single source item.
+
+  Schema Contract B — ProcessedItem (this module)
+    Output of the full processing pipeline; input to both consumers.
+    Carries FetchedItem fields plus all pipeline-stage enrichments.
+    Both the email digest and the site build read only ProcessedItem.
+    Neither consumer may call a fetcher or a pipeline stage directly.
+"""
 
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Literal
+from datetime import datetime
+from typing import Any, Literal
 
 SourceClass = Literal["primary", "operator", "practitioner", "media", "market"]
 
@@ -25,6 +39,120 @@ Domain = Literal[
 ]
 
 ImpactVector = Literal["cost", "latency", "capability", "safety", "adoption", "unknown"]
+
+
+@dataclass
+class ProcessedItem:
+    """Schema Contract B: output of the processing pipeline.
+
+    Consumed by the email digest and site build. Neither consumer may access
+    fetchers or pipeline internals — they depend only on this type.
+
+    Populated in stages by the pipeline (src/pipeline/). Fields that are not
+    yet computed by a stage keep their default values; pipeline stages must not
+    leave required fields as defaults without explicit reason.
+    """
+
+    # ── Carried from FetchedItem (source metadata — immutable after fetch) ──
+    id: str
+    title: str
+    url: str
+    source_name: str
+    source_type: str
+    source_class: SourceClass
+    author: str
+    published: datetime | None
+    has_code: bool
+    evidence_type: EvidenceType
+
+    # ── Stage 1: Ingest / Validate ──
+    fetch_date: str = ""        # ISO date of fetch run, e.g. "2026-05-02"
+
+    # ── Stage 2: Clean ──
+    cleaned_content: str = ""  # Normalised text, HTML stripped, whitespace collapsed
+
+    # ── Stage 3: Concept Extraction ──
+    concepts: list[str] = field(default_factory=list)   # Key entities and techniques
+    actors: list[str] = field(default_factory=list)     # Organisations and people named
+    impact_vector: ImpactVector = "unknown"             # Primary impact area
+
+    # ── Stage 4: Theme Classification ──
+    theme: str = ""             # 1–3 word label, e.g. "agentic RAG"
+    domain: Domain = "unknown"  # Canonical domain from taxonomy
+
+    # ── Stage 5: Summary Extraction ──
+    summary: str = ""           # 2–3 sentence item summary
+
+    # ── Stage 6: Media / Marketing Identification ──
+    is_marketing: bool = False
+    marketing_confidence: float = 0.0   # 0–1; 1 = near-certain marketing
+
+    # ── Stage 7: Hype Scoring ──
+    hype_risk: float = 0.0      # 0–1; derived from marketing flag + source incentive
+
+    # ── Stage 8: Credibility Scoring ──
+    credibility_score: float = 0.5  # 0–1; 5-axis composite
+
+    def to_dict(self) -> dict[str, Any]:
+        """Serialise to a JSON-serialisable dict for processed data persistence."""
+        return {
+            "id": self.id,
+            "title": self.title,
+            "url": self.url,
+            "source_name": self.source_name,
+            "source_type": self.source_type,
+            "source_class": self.source_class,
+            "author": self.author,
+            "published": self.published.isoformat() if self.published else None,
+            "has_code": self.has_code,
+            "evidence_type": self.evidence_type,
+            "fetch_date": self.fetch_date,
+            "cleaned_content": self.cleaned_content,
+            "concepts": self.concepts,
+            "actors": self.actors,
+            "impact_vector": self.impact_vector,
+            "theme": self.theme,
+            "domain": self.domain,
+            "summary": self.summary,
+            "is_marketing": self.is_marketing,
+            "marketing_confidence": self.marketing_confidence,
+            "hype_risk": self.hype_risk,
+            "credibility_score": self.credibility_score,
+        }
+
+    @classmethod
+    def from_dict(cls, d: dict[str, Any]) -> ProcessedItem:
+        """Deserialise from a dict produced by to_dict()."""
+        published = None
+        if d.get("published"):
+            try:
+                published = datetime.fromisoformat(d["published"])
+            except ValueError:
+                pass
+        return cls(
+            id=d["id"],
+            title=d["title"],
+            url=d["url"],
+            source_name=d["source_name"],
+            source_type=d.get("source_type", ""),
+            source_class=d.get("source_class", "practitioner"),
+            author=d.get("author", ""),
+            published=published,
+            has_code=d.get("has_code", False),
+            evidence_type=d.get("evidence_type", "unknown"),
+            fetch_date=d.get("fetch_date", ""),
+            cleaned_content=d.get("cleaned_content", ""),
+            concepts=d.get("concepts", []),
+            actors=d.get("actors", []),
+            impact_vector=d.get("impact_vector", "unknown"),
+            theme=d.get("theme", ""),
+            domain=d.get("domain", "unknown"),
+            summary=d.get("summary", ""),
+            is_marketing=d.get("is_marketing", False),
+            marketing_confidence=d.get("marketing_confidence", 0.0),
+            hype_risk=d.get("hype_risk", 0.0),
+            credibility_score=d.get("credibility_score", 0.5),
+        )
 
 
 @dataclass

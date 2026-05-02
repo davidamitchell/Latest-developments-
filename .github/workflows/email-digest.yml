@@ -1,0 +1,107 @@
+name: Email Digest
+
+# Concern: read ProcessedItem records, select by digest config, send email,
+# write history archive, commit state and history.
+#
+# This workflow is a consumer of Schema Contract B (data/processed/).
+# It has zero knowledge of fetchers, pipeline stages, or the site build.
+# It does NOT run trend analysis and does NOT write docs/data/.
+#
+# Triggers:
+#   - After Fetch and Process succeeds on main (automatic)
+#   - workflow_dispatch (manual, with dry-run support)
+
+on:
+  workflow_run:
+    workflows: ["Fetch and Process"]
+    types: [completed]
+    branches: [main]
+
+  workflow_dispatch:
+    inputs:
+      debug:
+        description: "Enable debug logging"
+        required: false
+        default: "false"
+        type: boolean
+      dry_run:
+        description: "Dry run — skip sending email"
+        required: false
+        default: "false"
+        type: boolean
+
+jobs:
+  send:
+    name: Send email digest
+    runs-on: ubuntu-latest
+
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'workflow_run' &&
+       github.event.workflow_run.conclusion == 'success')
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          ref: main
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Send digest
+        # Reads data/processed/YYYY-MM-DD.jsonl (ProcessedItem records).
+        # Selects items according to digest config in config/sources.yaml.
+        # Sends email. Writes history/YYYY-MM-DD.txt (plaintext archive).
+        # Updates state/processed.json (marks items as processed for dedup).
+        # Implementation: src/digest/send.py (W-0027)
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          EMAIL_SENDER: ${{ secrets.EMAIL_SENDER }}
+          EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+          EMAIL_RECIPIENT: ${{ secrets.EMAIL_RECIPIENT }}
+          EMAIL_PROVIDER: ${{ secrets.EMAIL_PROVIDER }}
+        run: |
+          ARGS=""
+          if [ "${{ inputs.debug }}" = "true" ]; then ARGS="$ARGS --debug"; fi
+          if [ "${{ inputs.dry_run }}" = "true" ]; then ARGS="$ARGS --dry-run"; fi
+          python -m src.digest.send $ARGS
+
+      - name: Commit state and history
+        if: inputs.dry_run != 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add state/processed.json
+          if [ -d history ]; then git add history/; fi
+          TODAY=$(date -u +%Y-%m-%d)
+          if git diff --cached --quiet; then
+            echo "State and history unchanged — nothing to commit"
+          else
+            git commit -m "chore: update state and history ${TODAY} [skip ci]"
+            git push origin main
+          fi
+
+      - name: Send failure alert
+        if: failure()
+        env:
+          EMAIL_PROVIDER: ${{ secrets.EMAIL_PROVIDER }}
+          EMAIL_SENDER: ${{ secrets.EMAIL_SENDER }}
+          EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          EMAIL_RECIPIENT: ${{ secrets.EMAIL_RECIPIENT }}
+        run: |
+          python -m src.emailer \
+            --subject "Email digest FAILED $(date -u +%Y-%m-%d)" \
+            --body "Workflow failed. Check: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"

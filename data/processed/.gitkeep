@@ -1,0 +1,8 @@
+# Processed pipeline output — Schema Contract B
+#
+# Each file: data/processed/YYYY-MM-DD.jsonl
+# Format: one ProcessedItem JSON object per line
+# Written by: processing pipeline after all stages complete
+# Read by: email digest consumer, site build consumer
+# Committed to: git (shared source of truth for all consumers)
+# Neither consumer may bypass this file and call fetchers or pipeline stages directly.

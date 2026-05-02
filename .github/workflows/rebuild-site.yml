@@ -1,22 +1,30 @@
 name: Rebuild Site
 
-# Triggered automatically after the Daily Digest workflow succeeds on main,
-# or dispatched manually (e.g. to force a site refresh without a new digest).
+# Concern: read ProcessedItem records, compute trend analysis, write site data,
+# deploy GitHub Pages.
 #
-# Responsibility: read history/ from the repo, run trend analysis to produce
-# docs/data/*.json, commit that data, and let GitHub Pages publish docs/.
-# This is the ONLY workflow that writes docs/data/.
+# This workflow is a consumer of Schema Contract B (data/processed/).
+# It has zero knowledge of fetchers, pipeline stages, or the email digest.
+# It does NOT send email and does NOT read history/ for input.
+# (history/ is the email digest's concern — this workflow reads data/processed/ directly.)
+#
+# Triggers:
+#   - After Fetch and Process succeeds on main (automatic, parallel with email-digest)
+#   - workflow_dispatch (manual, with no_fetch option for debugging)
+#
+# Both this workflow and email-digest trigger from the same event.
+# They are parallel consumers with zero dependency on each other.
 
 on:
   workflow_run:
-    workflows: ["Daily Digest"]
+    workflows: ["Fetch and Process"]
     types: [completed]
     branches: [main]
 
   workflow_dispatch:
     inputs:
       no_fetch:
-        description: "Skip live source fetching — use history only"
+        description: "Skip live source fetching — use committed data only"
         type: boolean
         default: false
 
@@ -25,8 +33,6 @@ jobs:
     name: Build site data and deploy
     runs-on: ubuntu-latest
 
-    # workflow_run events fire even when the triggering workflow fails.
-    # Only proceed when the digest succeeded (or when manually dispatched).
     if: >
       github.event_name == 'workflow_dispatch' ||
       (github.event_name == 'workflow_run' &&
@@ -40,6 +46,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          ref: main
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -51,18 +58,22 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Generate site data
+        # Reads data/processed/*.jsonl (ProcessedItem records).
+        # Computes trend state, credibility aggregates, theme graph.
+        # Writes docs/data/*.json for the GitHub Pages site.
+        # Implementation: src/site/build.py (W-0028)
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
           if [ "${{ inputs.no_fetch }}" = "true" ]; then
-            python -m src.trends --docs docs/data --history history --no-fetch
+            python -m src.site.build --no-fetch
           else
-            python -m src.trends --docs docs/data --history history
+            python -m src.site.build
           fi
 
       - name: Commit updated site data
         run: |
-          git config user.name  "github-actions[bot]"
+          git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add docs/data/
           TODAY=$(date -u +%Y-%m-%d)

@@ -1,0 +1,141 @@
+name: Fetch and Process
+
+# Concern: fetch all configured sources, deduplicate, run the processing
+# pipeline, and commit the two schema contracts.
+#
+# Schema Contract A: data/raw/YYYY-MM-DD.jsonl   — FetchedItem records
+# Schema Contract B: data/processed/YYYY-MM-DD.jsonl — ProcessedItem records
+#
+# After this workflow succeeds on main, both consumers trigger independently:
+#   - email-digest.yml  (reads ProcessedItem, sends email, writes history)
+#   - rebuild-site.yml  (reads ProcessedItem, builds GH Pages)
+#
+# The two consumers have zero dependency on each other.
+
+on:
+  schedule:
+    - cron: "0 7 * * *"
+
+  workflow_dispatch:
+    inputs:
+      debug:
+        description: "Enable debug logging"
+        required: false
+        default: "false"
+        type: boolean
+      max_videos:
+        description: "Max videos per channel (overrides config)"
+        required: false
+        default: ""
+        type: string
+
+concurrency:
+  group: fetch-and-process
+  cancel-in-progress: false
+
+jobs:
+  fetch:
+    name: Fetch raw content
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          submodules: true
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Fetch all sources
+        # Runs all configured fetchers, deduplicates against state/processed.json,
+        # writes raw FetchedItem records to data/raw/YYYY-MM-DD.jsonl.
+        # Implementation: src/pipeline/fetch.py (W-0026)
+        env:
+          YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
+        run: |
+          ARGS=""
+          if [ "${{ inputs.debug }}" = "true" ]; then ARGS="$ARGS --debug"; fi
+          if [ -n "${{ inputs.max_videos }}" ]; then ARGS="$ARGS --max-videos ${{ inputs.max_videos }}"; fi
+          python -m src.pipeline.fetch $ARGS
+
+      - name: Commit raw data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          TODAY=$(date -u +%Y-%m-%d)
+          git add data/raw/
+          if git diff --cached --quiet; then
+            echo "No new raw data — nothing to commit"
+          else
+            git commit -m "chore: raw fetch data ${TODAY} [skip ci]"
+            git push origin main
+          fi
+
+  process:
+    name: Run processing pipeline
+    runs-on: ubuntu-latest
+    needs: fetch
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          ref: main
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run processing pipeline
+        # Reads data/raw/YYYY-MM-DD.jsonl, runs all pipeline stages
+        # (clean, concept extraction, theme classification, summary extraction,
+        # media/marketing identification, hype scoring, credibility scoring),
+        # writes ProcessedItem records to data/processed/YYYY-MM-DD.jsonl.
+        # Implementation: src/pipeline/run.py (W-0026)
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: python -m src.pipeline.run
+
+      - name: Commit processed data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          TODAY=$(date -u +%Y-%m-%d)
+          git add data/processed/
+          if git diff --cached --quiet; then
+            echo "No new processed data — nothing to commit"
+          else
+            git commit -m "chore: processed pipeline data ${TODAY} [skip ci]"
+            git push origin main
+          fi
+
+      - name: Send failure alert
+        if: failure()
+        env:
+          EMAIL_PROVIDER: ${{ secrets.EMAIL_PROVIDER }}
+          EMAIL_SENDER: ${{ secrets.EMAIL_SENDER }}
+          EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          EMAIL_RECIPIENT: ${{ secrets.EMAIL_RECIPIENT }}
+        run: |
+          python -m src.emailer \
+            --subject "Fetch and process FAILED $(date -u +%Y-%m-%d)" \
+            --body "Workflow failed. Check: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
