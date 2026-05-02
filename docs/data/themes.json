@@ -1,5 +1,5 @@
 {
-  "generated": "2026-05-02T00:15:23.933227+00:00",
+  "generated": "2026-05-02T08:15:37.605284+00:00",
   "themes": [
     {
       "name": "Inference Cost Reduction",
@@ -22,17 +22,17 @@
       "name": "AI Safety & Alignment",
       "domain": "unknown",
       "definition": "",
-      "state": "emerging",
-      "item_count": 50,
-      "last_seen": "2026-05-01",
+      "state": "unknown",
+      "item_count": 47,
+      "last_seen": "2026-05-02",
       "source_classes": [
         "operator",
-        "primary",
-        "practitioner"
+        "practitioner",
+        "primary"
       ],
       "source_class_counts": {
-        "practitioner": 4,
-        "primary": 5,
+        "practitioner": 5,
+        "primary": 1,
         "operator": 41
       },
       "hype_risk": 0.0
@@ -59,14 +59,14 @@
       "domain": "unknown",
       "definition": "",
       "state": "declining",
-      "item_count": 24,
-      "last_seen": "2026-05-01",
+      "item_count": 22,
+      "last_seen": "2026-05-02",
       "source_classes": [
         "operator",
         "primary"
       ],
       "source_class_counts": {
-        "primary": 3,
+        "primary": 1,
         "operator": 21
       },
       "hype_risk": 0.0
@@ -76,38 +76,38 @@
       "domain": "unknown",
       "definition": "",
       "state": "declining",
-      "item_count": 18,
-      "last_seen": "2026-05-01",
+      "item_count": 12,
+      "last_seen": "2026-05-02",
       "source_classes": [
         "operator",
         "primary",
         "practitioner"
       ],
       "source_class_counts": {
-        "primary": 7,
+        "primary": 1,
         "operator": 10,
         "practitioner": 1
       },
       "hype_risk": 0.0
     },
     {
-      "name": "Multimodal Models",
+      "name": "Local LLM Applications",
       "domain": "unknown",
       "definition": "",
-      "state": "emerging",
-      "item_count": 12,
+      "state": "unknown",
+      "item_count": 5,
       "last_seen": "2026-05-02",
       "source_classes": [
-        "primary",
-        "operator",
-        "practitioner"
+        "practitioner",
+        "media",
+        "operator"
       ],
       "source_class_counts": {
-        "practitioner": 1,
-        "primary": 7,
-        "operator": 4
+        "media": 1,
+        "practitioner": 3,
+        "operator": 1
       },
-      "hype_risk": 0.0
+      "hype_risk": 0.2
     },
     {
       "name": "AI Business Strategy",
@@ -130,7 +130,7 @@
       "definition": "",
       "state": "emerging",
       "item_count": 7,
-      "last_seen": "2026-05-01",
+      "last_seen": "2026-05-02",
       "source_classes": [
         "primary",
         "operator",
@@ -178,39 +178,18 @@
       "hype_risk": 0.0
     },
     {
-      "name": "Local LLM Applications",
-      "domain": "unknown",
-      "definition": "",
-      "state": "unknown",
-      "item_count": 5,
-      "last_seen": "2026-05-01",
-      "source_classes": [
-        "practitioner",
-        "primary",
-        "operator"
-      ],
-      "source_class_counts": {
-        "practitioner": 3,
-        "primary": 1,
-        "operator": 1
-      },
-      "hype_risk": 0.0
-    },
-    {
       "name": "Retrieval-Augmented Generation",
       "domain": "unknown",
       "definition": "",
-      "state": "emerging",
-      "item_count": 8,
-      "last_seen": "2026-05-01",
+      "state": "declining",
+      "item_count": 4,
+      "last_seen": "2026-04-09",
       "source_classes": [
-        "primary",
         "operator",
         "practitioner"
       ],
       "source_class_counts": {
         "practitioner": 1,
-        "primary": 4,
         "operator": 3
       },
       "hype_risk": 0.0
@@ -244,6 +223,25 @@
       "source_class_counts": {
         "practitioner": 3,
         "operator": 1
+      },
+      "hype_risk": 0.0
+    },
+    {
+      "name": "Multimodal Models",
+      "domain": "unknown",
+      "definition": "",
+      "state": "declining",
+      "item_count": 7,
+      "last_seen": "2026-05-02",
+      "source_classes": [
+        "operator",
+        "primary",
+        "practitioner"
+      ],
+      "source_class_counts": {
+        "practitioner": 1,
+        "primary": 2,
+        "operator": 4
       },
       "hype_risk": 0.0
     },
@@ -299,23 +297,6 @@
       "hype_risk": 0.0
     },
     {
-      "name": "Model Distillation",
-      "domain": "unknown",
-      "definition": "",
-      "state": "emerging",
-      "item_count": 4,
-      "last_seen": "2026-05-01",
-      "source_classes": [
-        "primary",
-        "operator"
-      ],
-      "source_class_counts": {
-        "primary": 3,
-        "operator": 1
-      },
-      "hype_risk": 0.0
-    },
-    {
       "name": "Long-Context Reasoning",
       "domain": "unknown",
       "definition": "",
@@ -361,6 +342,21 @@
       "hype_risk": 0.0
     },
     {
+      "name": "AI Economic Impact",
+      "domain": "unknown",
+      "definition": "",
+      "state": "unknown",
+      "item_count": 2,
+      "last_seen": "2026-05-02",
+      "source_classes": [
+        "practitioner"
+      ],
+      "source_class_counts": {
+        "practitioner": 2
+      },
+      "hype_risk": 0.0
+    },
+    {
       "name": "Agent Reliability",
       "domain": "unknown",
       "definition": "",
@@ -372,38 +368,6 @@
       ],
       "source_class_counts": {
         "practitioner": 2
-      },
-      "hype_risk": 0.0
-    },
-    {
-      "name": "Reconstruction By Generation: 3D Multi-Object Scene Reconstruction From Sparse O",
-      "domain": "unknown",
-      "definition": "",
-      "state": "unknown",
-      "item_count": 2,
-      "last_seen": "2026-05-01",
-      "source_classes": [
-        "primary"
-      ],
-      "source_class_counts": {
-        "primary": 2
-      },
-      "hype_risk": 0.0
-    },
-    {
-      "name": "RLHF & Alignment",
-      "domain": "unknown",
-      "definition": "",
-      "state": "unknown",
-      "item_count": 2,
-      "last_seen": "2026-05-01",
-      "source_classes": [
-        "primary",
-        "operator"
-      ],
-      "source_class_counts": {
-        "primary": 1,
-        "operator": 1
       },
       "hype_risk": 0.0
     },

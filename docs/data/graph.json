@@ -1,5 +1,5 @@
 {
-  "generated": "2026-05-02T00:15:23.933227+00:00",
+  "generated": "2026-05-02T08:15:37.605284+00:00",
   "nodes": [
     {
       "id": "Inference Cost Reduction",
@@ -10,7 +10,7 @@
     {
       "id": "AI Safety & Alignment",
       "domain": "unknown",
-      "state": "emerging",
+      "state": "unknown",
       "volume": 0.09
     },
     {
@@ -29,13 +29,13 @@
       "id": "Benchmarks & Evals",
       "domain": "unknown",
       "state": "declining",
-      "volume": 0.03
+      "volume": 0.02
     },
     {
-      "id": "Multimodal Models",
+      "id": "Local LLM Applications",
       "domain": "unknown",
-      "state": "emerging",
-      "volume": 0.02
+      "state": "unknown",
+      "volume": 0.01
     },
     {
       "id": "AI Business Strategy",
@@ -62,15 +62,9 @@
       "volume": 0.01
     },
     {
-      "id": "Local LLM Applications",
-      "domain": "unknown",
-      "state": "unknown",
-      "volume": 0.01
-    },
-    {
       "id": "Retrieval-Augmented Generation",
       "domain": "unknown",
-      "state": "emerging",
+      "state": "declining",
       "volume": 0.01
     },
     {
@@ -81,6 +75,12 @@
     },
     {
       "id": "Supply Chain Security",
+      "domain": "unknown",
+      "state": "declining",
+      "volume": 0.01
+    },
+    {
+      "id": "Multimodal Models",
       "domain": "unknown",
       "state": "declining",
       "volume": 0.01
@@ -104,12 +104,6 @@
       "volume": 0.01
     },
     {
-      "id": "Model Distillation",
-      "domain": "unknown",
-      "state": "emerging",
-      "volume": 0.01
-    },
-    {
       "id": "Long-Context Reasoning",
       "domain": "unknown",
       "state": "declining",
@@ -128,21 +122,15 @@
       "volume": 0.01
     },
     {
+      "id": "AI Economic Impact",
+      "domain": "unknown",
+      "state": "unknown",
+      "volume": 0.0
+    },
+    {
       "id": "Agent Reliability",
       "domain": "unknown",
       "state": "declining",
-      "volume": 0.0
-    },
-    {
-      "id": "Reconstruction By Generation: 3D Multi-Object Scene Reconstruction From Sparse O",
-      "domain": "unknown",
-      "state": "unknown",
-      "volume": 0.0
-    },
-    {
-      "id": "RLHF & Alignment",
-      "domain": "unknown",
-      "state": "unknown",
       "volume": 0.0
     },
     {

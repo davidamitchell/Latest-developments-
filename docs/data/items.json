@@ -1,11 +1,23 @@
 {
-  "generated": "2026-05-02T00:15:23.933227+00:00",
+  "generated": "2026-05-02T08:15:37.605284+00:00",
   "items": [
     {
       "date": "2026-05-02",
-      "theme": "GPU Hardware Comparison",
+      "theme": "AI Safety & Alignment",
       "source_class": "practitioner",
       "source_name": "YouTube"
+    },
+    {
+      "date": "2026-05-02",
+      "theme": "AI Economic Impact",
+      "source_class": "practitioner",
+      "source_name": "YouTube"
+    },
+    {
+      "date": "2026-05-02",
+      "theme": "Local LLM Applications",
+      "source_class": "media",
+      "source_name": "Substack"
     },
     {
       "date": "2026-05-01",
@@ -1112,986 +1124,230 @@
       "source_name": "YouTube"
     },
     {
-      "date": "2026-05-01",
+      "date": "2026-05-02",
       "theme": "Compositional Meta-Learning For Mitigating Task Heterogeneity In Physics-Informe",
       "source_class": "primary",
       "source_name": "arXiv"
     },
     {
-      "date": "2026-05-01",
+      "date": "2026-05-02",
       "theme": "Binary Spiking Neural Networks As Causal Models",
       "source_class": "primary",
       "source_name": "arXiv"
     },
     {
-      "date": "2026-05-01",
+      "date": "2026-05-02",
       "theme": "When Your LLM Reaches End-Of-Life: A Framework For Confident Model Migration In",
       "source_class": "primary",
       "source_name": "arXiv"
     },
     {
-      "date": "2026-05-01",
+      "date": "2026-05-02",
       "theme": "End-To-End Autonomous Scientific Discovery On A Real Optical Platform",
       "source_class": "primary",
       "source_name": "arXiv"
     },
     {
-      "date": "2026-05-01",
+      "date": "2026-05-02",
       "theme": "Multi-Agent Systems",
       "source_class": "primary",
       "source_name": "arXiv"
     },
     {
-      "date": "2026-05-01",
+      "date": "2026-05-02",
       "theme": "Unsupervised Electrofacies Classification And Porosity Characterization In The O",
       "source_class": "primary",
       "source_name": "arXiv"
     },
     {
-      "date": "2026-05-01",
+      "date": "2026-05-02",
       "theme": "Trust: A Framework For Decentralized AI Service V.0.1",
       "source_class": "primary",
       "source_name": "arXiv"
     },
     {
-      "date": "2026-05-01",
+      "date": "2026-05-02",
       "theme": "Unpacking Vibe Coding: Help-Seeking Processes In Student-AI Interactions While P",
       "source_class": "primary",
       "source_name": "arXiv"
     },
     {
-      "date": "2026-05-01",
+      "date": "2026-05-02",
       "theme": "Optimal Stop-Loss And Take-Profit Parameterization For Autonomous Trading Agent",
       "source_class": "primary",
       "source_name": "arXiv"
     },
     {
-      "date": "2026-05-01",
+      "date": "2026-05-02",
       "theme": "Step-Level Optimization For Efficient Computer-Use Agents",
       "source_class": "primary",
       "source_name": "arXiv"
     },
     {
-      "date": "2026-05-01",
+      "date": "2026-05-02",
       "theme": "Interval Orders, Biorders And Credibility-Limited Belief Revision",
       "source_class": "primary",
       "source_name": "arXiv"
     },
     {
-      "date": "2026-05-01",
+      "date": "2026-05-02",
       "theme": "Evaluating Tabpfn For Mild Cognitive Impairment To Alzheimer'S Disease Conversio",
       "source_class": "primary",
       "source_name": "arXiv"
     },
     {
-      "date": "2026-05-01",
+      "date": "2026-05-02",
       "theme": "Multimodal Models",
       "source_class": "primary",
       "source_name": "arXiv"
     },
     {
-      "date": "2026-05-01",
+      "date": "2026-05-02",
       "theme": "Multi-Agent Systems",
       "source_class": "primary",
       "source_name": "arXiv"
     },
     {
-      "date": "2026-05-01",
+      "date": "2026-05-02",
       "theme": "When Roles Fail: Epistemic Constraints On Advocate Role Fidelity In LLM-Based Po",
       "source_class": "primary",
       "source_name": "arXiv"
     },
     {
-      "date": "2026-05-01",
+      "date": "2026-05-02",
       "theme": "Reinforced Agent: Inference-Time Feedback For Tool-Calling Agents",
       "source_class": "primary",
       "source_name": "arXiv"
     },
     {
-      "date": "2026-05-01",
+      "date": "2026-05-02",
       "theme": "Autosurfer -- Teaching Web Agents Through Comprehensive Surfing, Learning, And M",
       "source_class": "primary",
       "source_name": "arXiv"
     },
     {
-      "date": "2026-05-01",
+      "date": "2026-05-02",
       "theme": "Multimodal Models",
       "source_class": "primary",
       "source_name": "arXiv"
     },
     {
-      "date": "2026-05-01",
+      "date": "2026-05-02",
       "theme": "The Inverse-Wisdom Law: Architectural Tribalism And The Consensus Paradox In Age",
       "source_class": "primary",
       "source_name": "arXiv"
     },
     {
-      "date": "2026-05-01",
+      "date": "2026-05-02",
       "theme": "Mechanized Foundations Of Structural Governance: Machine-Checked Proofs For Gove",
       "source_class": "primary",
       "source_name": "arXiv"
     },
     {
-      "date": "2026-05-01",
+      "date": "2026-05-02",
       "theme": "The Two Boundaries: Why Behavioral AI Governance Fails Structurally",
       "source_class": "primary",
       "source_name": "arXiv"
     },
     {
-      "date": "2026-05-01",
+      "date": "2026-05-02",
       "theme": "Learning Rate Engineering: From Coarse Single Parameter To Layered Evolution",
       "source_class": "primary",
       "source_name": "arXiv"
     },
     {
-      "date": "2026-05-01",
+      "date": "2026-05-02",
       "theme": "Machine Collective Intelligence For Explainable Scientific Discovery",
       "source_class": "primary",
       "source_name": "arXiv"
     },
     {
-      "date": "2026-05-01",
+      "date": "2026-05-02",
       "theme": "Multi-Agent Systems",
       "source_class": "primary",
       "source_name": "arXiv"
     },
     {
-      "date": "2026-05-01",
+      "date": "2026-05-02",
       "theme": "Benchmarks & Evals",
       "source_class": "primary",
       "source_name": "arXiv"
     },
     {
-      "date": "2026-05-01",
+      "date": "2026-05-02",
       "theme": "Investigating More Explainable And Partition-Free Compositionality Estimation Fo",
       "source_class": "primary",
       "source_name": "arXiv"
     },
     {
-      "date": "2026-05-01",
+      "date": "2026-05-02",
       "theme": "Heterogeneous Scientific Foundation Model Collaboration",
       "source_class": "primary",
       "source_name": "arXiv"
     },
     {
-      "date": "2026-05-01",
+      "date": "2026-05-02",
       "theme": "Coax: Cognitive-Oriented Attribution Explanation User Model Of Human Understandi",
       "source_class": "primary",
       "source_name": "arXiv"
     },
     {
-      "date": "2026-05-01",
+      "date": "2026-05-02",
       "theme": "AI Safety & Alignment",
       "source_class": "primary",
       "source_name": "arXiv"
     },
     {
-      "date": "2026-05-01",
+      "date": "2026-05-02",
       "theme": "Tio-Shacl: Comprehensive Shacl Validation For Tmf Intent Ontologies",
       "source_class": "primary",
       "source_name": "arXiv"
     },
     {
-      "date": "2026-05-01",
-      "theme": "Monitoring Neural Training With Topology: A Footprint-Predictable Collapse Index",
+      "date": "2026-05-02",
+      "theme": "Opus Mt En Ro Finetuned En To Ro (Maxpaxsnax)",
       "source_class": "primary",
-      "source_name": "arXiv"
+      "source_name": "Hugging Face"
     },
     {
-      "date": "2026-05-01",
-      "theme": "Simple Self-Conditioning Adaptation For Masked Diffusion Models",
+      "date": "2026-05-02",
+      "theme": "Tur After Indomain 10 500 (Fpadovani)",
       "source_class": "primary",
-      "source_name": "arXiv"
+      "source_name": "Hugging Face"
     },
     {
-      "date": "2026-05-01",
-      "theme": "People-Centred Medical Image Analysis",
+      "date": "2026-05-02",
+      "theme": "Tur 10Mb Baseline Seed10 (Fpadovani)",
       "source_class": "primary",
-      "source_name": "arXiv"
+      "source_name": "Hugging Face"
     },
     {
-      "date": "2026-05-01",
-      "theme": "When Continual Learning Moves To Memory: A Study Of Experience Reuse In LLM Agen",
+      "date": "2026-05-02",
+      "theme": "Wav2Vec2 Large Xls R 300M Dm32 Preaugmented V1 (Sucharithas)",
       "source_class": "primary",
-      "source_name": "arXiv"
+      "source_name": "Hugging Face"
     },
     {
-      "date": "2026-05-01",
-      "theme": "Automatic Causal Fairness Analysis With LLM-Generated Reporting",
+      "date": "2026-05-02",
+      "theme": "Asena Esp32 (Pthinc)",
       "source_class": "primary",
-      "source_name": "arXiv"
+      "source_name": "Hugging Face"
     },
     {
-      "date": "2026-05-01",
-      "theme": "Benchmarks & Evals",
+      "date": "2026-05-02",
+      "theme": "Tur 10Mb Baseline Seed3407 (Fpadovani)",
       "source_class": "primary",
-      "source_name": "arXiv"
+      "source_name": "Hugging Face"
     },
     {
-      "date": "2026-05-01",
+      "date": "2026-05-02",
+      "theme": "Cognica Poe V1.0 3B Base (Cognica)",
+      "source_class": "primary",
+      "source_name": "Hugging Face"
+    },
+    {
+      "date": "2026-05-02",
       "theme": "Fine-Tuning & Adaptation",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Noracl: Neurogenesis For Oracle-Free Resource-Adaptive Continual Learning",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Cross-Subject Generalization For Eeg Decoding: A Survey Of Deep Learning Methods",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Detecting Clinical Discrepancies In Health Coaching Agents: A Dual-Stream Memory",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Learning To Forget: Continual Learning With Adaptive Weight Decay",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Learning Rate Transfer In Normalized Transformers",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Model Distillation",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Autosp: Unlocking Long-Context LLM Training Via Compiler-Based Sequence Parallel",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Anomaly Detection In Soil Heavy Metal Contamination Using Unsupervised Learning",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Better Models, Faster Training: Sigmoid Attention For Single-Cell Foundation Mod",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "AI Safety & Alignment",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Conformadecompose: Explaining Uncertainty Via Calibration Localization",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Retrieval-Augmented Generation",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "AI Safety & Alignment",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Context-Aware Graph Attention For Unsupervised Telco Anomaly Detection",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Preserving Temporal Dynamics In Time Series Generation",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Remaining Useful Life Estimation For Turbofan Engines: A Comparative Study Of Cl",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Analytical Correction For Subsampling Bias In Drifting Models",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Autorec: A Software Platform For Developing Reinforcement Learning Agents For Eq",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Braindino: A Brain Mri Foundation Model For Generalizable Clinical Representatio",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Predicting Covariate-Driven Spatial Deformation For Nonstationary Gaussian Proce",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Fine-Tuning & Adaptation",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Pinn-Cast: Exploring The Role Of Continuous-Depth Node In Transformers And Physi",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "A Short Note On Batch-Efficient Divide-And-Conquer Algorithm For Eigendecomposit",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Batterypass-12K: The First Dataset For The Novel Digital Battery Passport Confor",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Length Value Model: Scalable Value Pretraining For Token-Level Length Modeling",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Cl-Bench Life: Can Language Models Learn From Real-Life Context?",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Benchmarks & Evals",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Exploring The Limits Of Pruning: Task-Specific Neurons, Model Collapse, And Reco",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Cross-Lingual Response Consistency In Large Language Models: An Ilr-Informed Eva",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Semantic Structure Of Feature Space In Large Language Models",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Path-Lock Expert: Separating Reasoning Mode In Hybrid Thinking Via Architecture-",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Selective Augmentation: Improving Universal Automatic Phonetic Transcription Via",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Targeted Linguistic Analysis Of Sign Language Models With Minimal Translation Pa",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Benchmarks & Evals",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Compliance Versus Sensibility: On The Reasoning Controllability In Large Languag",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Decoupling The Benefits Of Subword Tokenization For Language Model Training Via",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "When 2D Tasks Meet 1D Serialization: On Serialization Friction In Structured Tas",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Learning When To Remember: Risk-Sensitive Contextual Bandits For Abstention-Awar",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "LLMs Capture Emotion Labels, Not Emotion Uncertainty: Distributional Analysis An",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Emotion-Aware Clickbait Attack In Social Media",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Proactive Dialogue Model With Intent Prediction",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Minicpm-O 4.5: Towards Real-Time Full-Duplex Omni-Modal Interaction",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Why Mean Pooling Works: Quantifying Second-Order Collapse In Text Embeddings",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Perturbation Probing: A Two-Pass-Per-Prompt Diagnostic For Ffn Behavioral Circui",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Benchmarks & Evals",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Sentiment Analysis Of AI Adoption In Indonesian Higher Education Using Machine L",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Benchmarks & Evals",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Exploring Applications Of Transfer-State Large Language Models: Cognitive Profil",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Syntactically-Guided Information Maintenance In Sentence Comprehension",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Healthbench Professional: Evaluating Large Language Models On Real Clinician Cha",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Skills-Coach: A Self-Evolving Skill Optimizer Via Training-Free Grpo",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Debiasing Reward Models Via Causally Motivated Inference-Time Intervention",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Benchmarks & Evals",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Automated Detection Of Mutual Gaze And Joint Attention In Dual-Camera Settings V",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Reconstruction By Generation: 3D Multi-Object Scene Reconstruction From Sparse O",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Interpartability: Text-Guided Part Matching For Interpretable Person Re-Identifi",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Model Distillation",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Model Distillation",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Hq-Unet: A Hybrid Quantum-Classical U-Net With A Quantum Bottleneck For Remote S",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Attribe: Quantifying Attribute Expressivity In Body Embeddings For Recognition A",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Towards Generalizable Mapping Of Hedges And Linear Woody Features From Earth Obs",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Multimodal Models",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Student Classroom Behavior Recognition Based On Improved Yolov8S",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Yose: You Only Select Essential Tokens For Efficient Dit-Based Video Object Remo",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Iterative Definition Refinement For Zero-Shot Classification Via LLM-Based Seman",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Multimodal Models",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Gait Recognition Via Deep Residual Networks And Multi-Branch Feature Fusion",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Caslayout: Cascaded 3D Layout Diffusion For Indoor Scene Synthesis With Implicit",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Hyperspectral Image Classification Via Efficient Global Spectral Supertoken Clus",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Multimodal Models",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Veraretouch: A Lightweight Fully Differentiable Framework For Multi-Task Reasoni",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "AI Safety & Alignment",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Understanding Adversarial Transferability In Vision-Language Models For Autonomo",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Sparse-View 3D Gaussian Splatting In The Wild",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Softmax-Gs: Generalized Gaussians Learning When To Blend Or Bound",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Context As Prior: Bayesian-Inspired Intent Inference For Non-Speaking Agents Wit",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "La-Pose: Latent Action Pretraining Meets Pose Estimation",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Local LLM Applications",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Uni-Hoi:A Unified Framework For Learning The Joint Distribution Of Text And Huma",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Towards All-Day Perception For Off-Road Driving: A Large-Scale Multispectral Dat",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Revive 3D: Refinement Via Encoded Voluminous Inflated Prior For Volume Enhanceme",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Retrieval-Augmented Generation",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Adjoint Inversion Reveals Holographic Superposition And Destructive Interference",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Robot Planning And Situation Handling With Active Perception",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Interaction Forces And Internal Loads In Parallel Manipulators With Actuation Re",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Palcas: A Priority-Aware Intelligent Lane Change Advisory System For Autonomous",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "The Field Of Safe Motion: Operationalizing Affordances In The Field Of Safe Trav",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Global Sampling-Based Trajectory Optimization For Contact-Rich Manipulation Via",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "AI Safety & Alignment",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Learning Tactile-Aware Quadrupedal Loco-Manipulation Policies",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Dot-Sim: Differentiable Optical Tactile Simulation With Precise Real-To-Sim Phys",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "An Experimental Modular Instrument With A Haptic Feedback Framework For Robotic",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Ray-Told: Ray-Based Latent Dynamics For Dense Dynamic Obstacle Avoidance With Td",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Retrieval-Augmented Generation",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Function-Based Parametric Co-Design Optimization Of Dexterous Hands",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Robot Learning From Human Videos: A Survey",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Fine-Tuning & Adaptation",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Exoactor: Exocentric Video Generation As Generalizable Interactive Humanoid Cont",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Connected Dependability Cage: Run-Time Function And Anomaly Monitoring For The D",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Motubrain: An Advanced World Action Model For Robot Control",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Retrieval-Augmented Generation",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Flying By Inference: Active Inference World Models For Adaptive Uav Swarms",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Dreaming Across Towns: Semantic Rollout And Town-Adversarial Regularization For",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Framework For Collaborative Operation Of Autonomous Delivery Vehicles Within A M",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Gsdrive: Reinforcing Driving Policies By Multi-Mode Trajectory Probing With 3D G",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Freeocc: Training-Free Embodied Open-Vocabulary Occupancy Prediction",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Design And Characteristics Of A Thin-Film Thermomesh For The Efficient Embedded",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Flexitac: A Low-Cost, Open-Source, Scalable Tactile Sensing Solution For Robotic",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Ropedreamer: A Kinematic Recurrent State Space Model For Dynamics Of Flexible De",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Multimodal Models",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Omnirobothome: A Multi-Camera Platform For Real-Time Multiadic Human-Robot Inter",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Reconstruction By Generation: 3D Multi-Object Scene Reconstruction From Sparse O",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "From Prompt To Physical Actuation: Holistic Threat Modeling Of LLM-Enabled Robot",
-      "source_class": "primary",
-      "source_name": "arXiv"
-    },
-    {
-      "date": "2026-05-02",
-      "theme": "Chattla 20B (Ericspencer00)",
-      "source_class": "primary",
-      "source_name": "Hugging Face"
-    },
-    {
-      "date": "2026-05-02",
-      "theme": "Evolai Tfm 1P5B Alt (Mihai-777)",
-      "source_class": "primary",
-      "source_name": "Hugging Face"
-    },
-    {
-      "date": "2026-05-02",
-      "theme": "Evolai Mamba2 0P47B V3 (Mihai-777)",
-      "source_class": "primary",
-      "source_name": "Hugging Face"
-    },
-    {
-      "date": "2026-05-02",
-      "theme": "Mistral Medium 3.5 128B Gguf (Unsloth)",
-      "source_class": "primary",
-      "source_name": "Hugging Face"
-    },
-    {
-      "date": "2026-05-02",
-      "theme": "Civitai Archive (Chroma111)",
-      "source_class": "primary",
-      "source_name": "Hugging Face"
-    },
-    {
-      "date": "2026-05-02",
-      "theme": "Evolai B (Andrebarrosilva1123)",
-      "source_class": "primary",
-      "source_name": "Hugging Face"
-    },
-    {
-      "date": "2026-05-02",
-      "theme": "Phase15 Deepseek Fft (Baya1116)",
-      "source_class": "primary",
-      "source_name": "Hugging Face"
-    },
-    {
-      "date": "2026-05-02",
-      "theme": "Evolai Tfm 1P5B (Mihai-777)",
-      "source_class": "primary",
-      "source_name": "Hugging Face"
-    },
-    {
-      "date": "2026-05-02",
-      "theme": "Multimodal Models",
-      "source_class": "primary",
-      "source_name": "Hugging Face"
-    },
-    {
-      "date": "2026-05-02",
-      "theme": "Evolai 0.4B (Andrebarrosilva1123)",
-      "source_class": "primary",
-      "source_name": "Hugging Face"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "List 3.0 Ultra Coder Brain (List-Cloud)",
-      "source_class": "primary",
-      "source_name": "Hugging Face"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Evolai Mamba2 1P6B Alt (Mihai-777)",
-      "source_class": "primary",
-      "source_name": "Hugging Face"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "RLHF & Alignment",
-      "source_class": "primary",
-      "source_name": "Hugging Face"
-    },
-    {
-      "date": "2026-05-01",
-      "theme": "Distilbart News Summarizer (Sachin21112004)",
       "source_class": "primary",
       "source_name": "Hugging Face"
     },
@@ -2163,19 +1419,13 @@
     },
     {
       "date": "2026-04-23",
-      "theme": "Gpt-5.5 System Card",
-      "source_class": "operator",
-      "source_name": "OpenAI Blog"
-    },
-    {
-      "date": "2026-04-23",
       "theme": "Introducing Gpt-5.5",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
     {
       "date": "2026-04-23",
-      "theme": "Automations",
+      "theme": "Gpt-5.5 System Card",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
@@ -2193,13 +1443,7 @@
     },
     {
       "date": "2026-04-23",
-      "theme": "Top 10 Uses For Codex At Work",
-      "source_class": "operator",
-      "source_name": "OpenAI Blog"
-    },
-    {
-      "date": "2026-04-23",
-      "theme": "Plugins And Skills",
+      "theme": "Codex Settings",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
@@ -2211,7 +1455,19 @@
     },
     {
       "date": "2026-04-23",
-      "theme": "Codex Settings",
+      "theme": "Plugins And Skills",
+      "source_class": "operator",
+      "source_name": "OpenAI Blog"
+    },
+    {
+      "date": "2026-04-23",
+      "theme": "Top 10 Uses For Codex At Work",
+      "source_class": "operator",
+      "source_name": "OpenAI Blog"
+    },
+    {
+      "date": "2026-04-23",
+      "theme": "Automations",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
@@ -2307,7 +1563,43 @@
     },
     {
       "date": "2026-04-10",
-      "theme": "Creating Images With Chatgpt",
+      "theme": "Chatgpt For Customer Success Teams",
+      "source_class": "operator",
+      "source_name": "OpenAI Blog"
+    },
+    {
+      "date": "2026-04-10",
+      "theme": "Using Skills",
+      "source_class": "operator",
+      "source_name": "OpenAI Blog"
+    },
+    {
+      "date": "2026-04-10",
+      "theme": "Healthcare",
+      "source_class": "operator",
+      "source_name": "OpenAI Blog"
+    },
+    {
+      "date": "2026-04-10",
+      "theme": "Our Response To The Axios Developer Tool Compromise",
+      "source_class": "operator",
+      "source_name": "OpenAI Blog"
+    },
+    {
+      "date": "2026-04-10",
+      "theme": "Using Projects In Chatgpt",
+      "source_class": "operator",
+      "source_name": "OpenAI Blog"
+    },
+    {
+      "date": "2026-04-10",
+      "theme": "Chatgpt For Research",
+      "source_class": "operator",
+      "source_name": "OpenAI Blog"
+    },
+    {
+      "date": "2026-04-10",
+      "theme": "Personalizing Chatgpt",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
@@ -2331,19 +1623,31 @@
     },
     {
       "date": "2026-04-10",
-      "theme": "Chatgpt For Customer Success Teams",
-      "source_class": "operator",
-      "source_name": "OpenAI Blog"
-    },
-    {
-      "date": "2026-04-10",
       "theme": "Research With Chatgpt",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
     {
       "date": "2026-04-10",
-      "theme": "Chatgpt For Research",
+      "theme": "Getting Started With Chatgpt",
+      "source_class": "operator",
+      "source_name": "OpenAI Blog"
+    },
+    {
+      "date": "2026-04-10",
+      "theme": "Creating Images With Chatgpt",
+      "source_class": "operator",
+      "source_name": "OpenAI Blog"
+    },
+    {
+      "date": "2026-04-10",
+      "theme": "Chatgpt For Operations Teams",
+      "source_class": "operator",
+      "source_name": "OpenAI Blog"
+    },
+    {
+      "date": "2026-04-10",
+      "theme": "Analyzing Data With Chatgpt",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
@@ -2361,7 +1665,19 @@
     },
     {
       "date": "2026-04-10",
+      "theme": "AI Fundamentals",
+      "source_class": "operator",
+      "source_name": "OpenAI Blog"
+    },
+    {
+      "date": "2026-04-10",
       "theme": "Applications Of AI At Openai",
+      "source_class": "operator",
+      "source_name": "OpenAI Blog"
+    },
+    {
+      "date": "2026-04-10",
+      "theme": "Prompting Fundamentals",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
@@ -2379,37 +1695,7 @@
     },
     {
       "date": "2026-04-10",
-      "theme": "Using Projects In Chatgpt",
-      "source_class": "operator",
-      "source_name": "OpenAI Blog"
-    },
-    {
-      "date": "2026-04-10",
-      "theme": "Using Skills",
-      "source_class": "operator",
-      "source_name": "OpenAI Blog"
-    },
-    {
-      "date": "2026-04-10",
-      "theme": "Our Response To The Axios Developer Tool Compromise",
-      "source_class": "operator",
-      "source_name": "OpenAI Blog"
-    },
-    {
-      "date": "2026-04-10",
-      "theme": "Healthcare",
-      "source_class": "operator",
-      "source_name": "OpenAI Blog"
-    },
-    {
-      "date": "2026-04-10",
-      "theme": "Personalizing Chatgpt",
-      "source_class": "operator",
-      "source_name": "OpenAI Blog"
-    },
-    {
-      "date": "2026-04-10",
-      "theme": "Using Custom Gpts",
+      "theme": "Chatgpt For Marketing Teams",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
@@ -2421,37 +1707,7 @@
     },
     {
       "date": "2026-04-10",
-      "theme": "Chatgpt For Marketing Teams",
-      "source_class": "operator",
-      "source_name": "OpenAI Blog"
-    },
-    {
-      "date": "2026-04-10",
-      "theme": "AI Fundamentals",
-      "source_class": "operator",
-      "source_name": "OpenAI Blog"
-    },
-    {
-      "date": "2026-04-10",
-      "theme": "Prompting Fundamentals",
-      "source_class": "operator",
-      "source_name": "OpenAI Blog"
-    },
-    {
-      "date": "2026-04-10",
-      "theme": "Analyzing Data With Chatgpt",
-      "source_class": "operator",
-      "source_name": "OpenAI Blog"
-    },
-    {
-      "date": "2026-04-10",
-      "theme": "Chatgpt For Operations Teams",
-      "source_class": "operator",
-      "source_name": "OpenAI Blog"
-    },
-    {
-      "date": "2026-04-10",
-      "theme": "Getting Started With Chatgpt",
+      "theme": "Using Custom Gpts",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
@@ -2613,13 +1869,13 @@
     },
     {
       "date": "2026-03-11",
-      "theme": "Rakuten Fixes Issues Twice As Fast With Codex",
+      "theme": "Wayfair Boosts Catalog Accuracy And Support Speed With Openai",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
     {
       "date": "2026-03-11",
-      "theme": "Wayfair Boosts Catalog Accuracy And Support Speed With Openai",
+      "theme": "Rakuten Fixes Issues Twice As Fast With Codex",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
@@ -2649,25 +1905,13 @@
     },
     {
       "date": "2026-03-06",
-      "theme": "How Balyasny Asset Management Built An AI Research Engine",
-      "source_class": "operator",
-      "source_name": "OpenAI Blog"
-    },
-    {
-      "date": "2026-03-06",
       "theme": "How Descript Engineers Multilingual Video Dubbing At Scale",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
     {
-      "date": "2026-03-05",
-      "theme": "Gpt-5.4 Thinking System Card",
-      "source_class": "operator",
-      "source_name": "OpenAI Blog"
-    },
-    {
-      "date": "2026-03-05",
-      "theme": "Long-Context Reasoning",
+      "date": "2026-03-06",
+      "theme": "How Balyasny Asset Management Built An AI Research Engine",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
@@ -2679,13 +1923,25 @@
     },
     {
       "date": "2026-03-05",
+      "theme": "Long-Context Reasoning",
+      "source_class": "operator",
+      "source_name": "OpenAI Blog"
+    },
+    {
+      "date": "2026-03-05",
+      "theme": "Gpt-5.4 Thinking System Card",
+      "source_class": "operator",
+      "source_name": "OpenAI Blog"
+    },
+    {
+      "date": "2026-03-05",
       "theme": "Ensuring AI Use In Education Leads To Opportunity",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
     {
       "date": "2026-03-05",
-      "theme": "Vfl Wolfsburg Turns Chatgpt Into A Club-Wide Capability",
+      "theme": "Introducing The Adoption News Channel",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
@@ -2703,7 +1959,7 @@
     },
     {
       "date": "2026-03-05",
-      "theme": "Introducing The Adoption News Channel",
+      "theme": "Vfl Wolfsburg Turns Chatgpt Into A Club-Wide Capability",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
@@ -2715,25 +1971,25 @@
     },
     {
       "date": "2026-03-04",
-      "theme": "How Axios Uses AI To Help Deliver High-Impact Local Journalism",
-      "source_class": "operator",
-      "source_name": "OpenAI Blog"
-    },
-    {
-      "date": "2026-03-04",
       "theme": "Understanding AI And Learning Outcomes",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
     {
-      "date": "2026-03-03",
-      "theme": "Gpt-5.3 Instant: Smoother, More Useful Everyday Conversations",
+      "date": "2026-03-04",
+      "theme": "How Axios Uses AI To Help Deliver High-Impact Local Journalism",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
     {
       "date": "2026-03-03",
       "theme": "Gpt-5.3 Instant System Card",
+      "source_class": "operator",
+      "source_name": "OpenAI Blog"
+    },
+    {
+      "date": "2026-03-03",
+      "theme": "Gpt-5.3 Instant: Smoother, More Useful Everyday Conversations",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
@@ -2745,25 +2001,25 @@
     },
     {
       "date": "2026-02-27",
-      "theme": "Joint Statement From Openai And Microsoft",
-      "source_class": "operator",
-      "source_name": "OpenAI Blog"
-    },
-    {
-      "date": "2026-02-27",
       "theme": "Scaling AI For Everyone",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
     {
       "date": "2026-02-27",
-      "theme": "Introducing The Stateful Runtime Environment For Agents In Amazon Bedrock",
+      "theme": "Openai And Amazon Announce Strategic Partnership",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
     {
       "date": "2026-02-27",
-      "theme": "Openai And Amazon Announce Strategic Partnership",
+      "theme": "Joint Statement From Openai And Microsoft",
+      "source_class": "operator",
+      "source_name": "OpenAI Blog"
+    },
+    {
+      "date": "2026-02-27",
+      "theme": "Introducing The Stateful Runtime Environment For Agents In Amazon Bedrock",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
@@ -2847,13 +2103,13 @@
     },
     {
       "date": "2026-02-13",
-      "theme": "Scaling Social Science Research",
+      "theme": "Beyond Rate Limits: Scaling Access To Codex And Sora",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
     {
       "date": "2026-02-13",
-      "theme": "Beyond Rate Limits: Scaling Access To Codex And Sora",
+      "theme": "Scaling Social Science Research",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
@@ -2871,13 +2127,13 @@
     },
     {
       "date": "2026-02-09",
-      "theme": "Bringing Chatgpt To Genai.Mil",
+      "theme": "Testing Ads In Chatgpt",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
     {
       "date": "2026-02-09",
-      "theme": "Testing Ads In Chatgpt",
+      "theme": "Bringing Chatgpt To Genai.Mil",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
@@ -2907,13 +2163,13 @@
     },
     {
       "date": "2026-02-05",
-      "theme": "Gpt-5.3-Codex System Card",
+      "theme": "Introducing Gpt-5.3-Codex",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
     {
       "date": "2026-02-05",
-      "theme": "Introducing Gpt-5.3-Codex",
+      "theme": "Gpt-5.3-Codex System Card",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
@@ -2949,13 +2205,13 @@
     },
     {
       "date": "2026-01-29",
-      "theme": "Retiring Gpt-4O, Gpt-4.1, Gpt-4.1 Mini, And Openai O4-Mini In Chatgpt",
+      "theme": "Taisei Corporation Shapes The Next Generation Of Talent With AI",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
     {
       "date": "2026-01-29",
-      "theme": "Taisei Corporation Shapes The Next Generation Of Talent With AI",
+      "theme": "Retiring Gpt-4O, Gpt-4.1, Gpt-4.1 Mini, And Openai O4-Mini In Chatgpt",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
@@ -2985,13 +2241,13 @@
     },
     {
       "date": "2026-01-27",
-      "theme": "Introducing Prism",
+      "theme": "Trustbank Uses AI Agents To Personalize Furusato Nozei Gifts",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
     {
       "date": "2026-01-27",
-      "theme": "Trustbank Uses AI Agents To Personalize Furusato Nozei Gifts",
+      "theme": "Introducing Prism",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
@@ -3015,13 +2271,13 @@
     },
     {
       "date": "2026-01-22",
-      "theme": "Inside Gpt-5 For Work: How Businesses Use Gpt-5",
+      "theme": "Inside Praktika'S Conversational Approach To Language Learning",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
     {
       "date": "2026-01-22",
-      "theme": "Inside Praktika'S Conversational Approach To Language Learning",
+      "theme": "Inside Gpt-5 For Work: How Businesses Use Gpt-5",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
@@ -3081,13 +2337,13 @@
     },
     {
       "date": "2026-01-16",
-      "theme": "Our Approach To Advertising And Expanding Access To Chatgpt",
+      "theme": "Introducing Chatgpt Go, Now Available Worldwide",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
     {
       "date": "2026-01-16",
-      "theme": "Introducing Chatgpt Go, Now Available Worldwide",
+      "theme": "Our Approach To Advertising And Expanding Access To Chatgpt",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
@@ -3177,13 +2433,13 @@
     },
     {
       "date": "2025-12-18",
-      "theme": "Deepening Our Collaboration With The U.S. Department Of Energy",
+      "theme": "Updating Our Model Spec With Teen Protections",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
     {
       "date": "2025-12-18",
-      "theme": "Updating Our Model Spec With Teen Protections",
+      "theme": "Deepening Our Collaboration With The U.S. Department Of Energy",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
@@ -3249,12 +2505,6 @@
     },
     {
       "date": "2025-12-12",
-      "theme": "Bny Builds \u201cAI For Everyone, Everywhere\u201d With Openai",
-      "source_class": "operator",
-      "source_name": "OpenAI Blog"
-    },
-    {
-      "date": "2025-12-12",
       "theme": "How We Used Codex To Ship Sora For Android In 28 Days",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
@@ -3266,14 +2516,14 @@
       "source_name": "OpenAI Blog"
     },
     {
-      "date": "2025-12-11",
-      "theme": "Advancing Science And Math With Gpt-5.2",
+      "date": "2025-12-12",
+      "theme": "Bny Builds \u201cAI For Everyone, Everywhere\u201d With Openai",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
     {
       "date": "2025-12-11",
-      "theme": "The Walt Disney Company And Openai Reach Landmark Agreement To Bring Beloved Cha",
+      "theme": "Advancing Science And Math With Gpt-5.2",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
@@ -3292,6 +2542,12 @@
     {
       "date": "2025-12-11",
       "theme": "Ten Years",
+      "source_class": "operator",
+      "source_name": "OpenAI Blog"
+    },
+    {
+      "date": "2025-12-11",
+      "theme": "The Walt Disney Company And Openai Reach Landmark Agreement To Bring Beloved Cha",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
@@ -3327,7 +2583,7 @@
     },
     {
       "date": "2025-12-09",
-      "theme": "Bringing Powerful AI To Millions Across Europe With Deutsche Telekom",
+      "theme": "Openai Appoints Denise Dresser As Chief Revenue Officer",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
@@ -3339,7 +2595,7 @@
     },
     {
       "date": "2025-12-09",
-      "theme": "Openai Appoints Denise Dresser As Chief Revenue Officer",
+      "theme": "Bringing Powerful AI To Millions Across Europe With Deutsche Telekom",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
@@ -3369,13 +2625,13 @@
     },
     {
       "date": "2025-12-03",
-      "theme": "How Confessions Can Keep Language Models Honest",
+      "theme": "Openai To Acquire Neptune",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
     {
       "date": "2025-12-03",
-      "theme": "Openai To Acquire Neptune",
+      "theme": "How Confessions Can Keep Language Models Honest",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
@@ -3405,13 +2661,13 @@
     },
     {
       "date": "2025-12-01",
-      "theme": "Openai Takes An Ownership Stake In Thrive Holdings To Accelerate Enterprise AI A",
+      "theme": "Accenture And Openai Accelerate Enterprise AI Success",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
     {
       "date": "2025-12-01",
-      "theme": "Accenture And Openai Accelerate Enterprise AI Success",
+      "theme": "Openai Takes An Ownership Stake In Thrive Holdings To Accelerate Enterprise AI A",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
@@ -3495,13 +2751,13 @@
     },
     {
       "date": "2025-11-19",
-      "theme": "Building More With Gpt-5.1-Codex-Max",
+      "theme": "AI Workforce & Jobs",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
     {
       "date": "2025-11-19",
-      "theme": "AI Workforce & Jobs",
+      "theme": "Building More With Gpt-5.1-Codex-Max",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
@@ -3543,13 +2799,13 @@
     },
     {
       "date": "2025-11-13",
-      "theme": "Introducing Group Chats In Chatgpt",
+      "theme": "How Philips Is Scaling AI Literacy Across 70,000 Employees",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
     {
       "date": "2025-11-13",
-      "theme": "How Philips Is Scaling AI Literacy Across 70,000 Employees",
+      "theme": "Introducing Group Chats In Chatgpt",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
@@ -3597,13 +2853,13 @@
     },
     {
       "date": "2025-11-06",
-      "theme": "AI Progress And Recommendations",
+      "theme": "AI Safety & Alignment",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
     {
       "date": "2025-11-06",
-      "theme": "AI Safety & Alignment",
+      "theme": "AI Progress And Recommendations",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
@@ -3657,13 +2913,13 @@
     },
     {
       "date": "2025-10-29",
-      "theme": "Introducing Gpt-Oss-Safeguard",
+      "theme": "Gpt-Oss-Safeguard Technical Report",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
     {
       "date": "2025-10-29",
-      "theme": "Gpt-Oss-Safeguard Technical Report",
+      "theme": "Introducing Gpt-Oss-Safeguard",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
@@ -3729,13 +2985,13 @@
     },
     {
       "date": "2025-10-23",
-      "theme": "AI In South Korea\u2014Openai\u2019S Economic Blueprint",
+      "theme": "Work Smarter With Your Company Knowledge In Chatgpt",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
     {
       "date": "2025-10-23",
-      "theme": "Work Smarter With Your Company Knowledge In Chatgpt",
+      "theme": "AI In South Korea\u2014Openai\u2019S Economic Blueprint",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
@@ -3861,12 +3117,6 @@
     },
     {
       "date": "2025-09-30",
-      "theme": "Sora 2 Is Here",
-      "source_class": "operator",
-      "source_name": "OpenAI Blog"
-    },
-    {
-      "date": "2025-09-30",
       "theme": "Sora 2 System Card",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
@@ -3878,26 +3128,14 @@
       "source_name": "OpenAI Blog"
     },
     {
+      "date": "2025-09-30",
+      "theme": "Sora 2 Is Here",
+      "source_class": "operator",
+      "source_name": "OpenAI Blog"
+    },
+    {
       "date": "2025-09-29",
       "theme": "Empowering Teams To Unlock Insights Faster At Openai",
-      "source_class": "operator",
-      "source_name": "OpenAI Blog"
-    },
-    {
-      "date": "2025-09-29",
-      "theme": "Turning Contracts Into Searchable Data At Openai",
-      "source_class": "operator",
-      "source_name": "OpenAI Blog"
-    },
-    {
-      "date": "2025-09-29",
-      "theme": "Improving Support With Every Interaction At Openai",
-      "source_class": "operator",
-      "source_name": "OpenAI Blog"
-    },
-    {
-      "date": "2025-09-29",
-      "theme": "Driving Sales Productivity And Customer Success At Openai",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
@@ -3910,6 +3148,24 @@
     {
       "date": "2025-09-29",
       "theme": "Building Openai With Openai",
+      "source_class": "operator",
+      "source_name": "OpenAI Blog"
+    },
+    {
+      "date": "2025-09-29",
+      "theme": "Driving Sales Productivity And Customer Success At Openai",
+      "source_class": "operator",
+      "source_name": "OpenAI Blog"
+    },
+    {
+      "date": "2025-09-29",
+      "theme": "Turning Contracts Into Searchable Data At Openai",
+      "source_class": "operator",
+      "source_name": "OpenAI Blog"
+    },
+    {
+      "date": "2025-09-29",
+      "theme": "Improving Support With Every Interaction At Openai",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
@@ -4011,13 +3267,13 @@
     },
     {
       "date": "2025-09-16",
-      "theme": "AI Safety & Alignment",
+      "theme": "Building Towards Age Prediction",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
     {
       "date": "2025-09-16",
-      "theme": "Building Towards Age Prediction",
+      "theme": "AI Safety & Alignment",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
@@ -4047,13 +3303,13 @@
     },
     {
       "date": "2025-09-11",
-      "theme": "Statement On Openai\u2019S Nonprofit And Pbc",
+      "theme": "A Joint Statement From Openai And Microsoft",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
     {
       "date": "2025-09-11",
-      "theme": "A Joint Statement From Openai And Microsoft",
+      "theme": "Statement On Openai\u2019S Nonprofit And Pbc",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
@@ -4161,25 +3417,25 @@
     },
     {
       "date": "2025-08-12",
-      "theme": "Openai\u2019S Letter To Governor Newsom On Harmonized Regulation",
-      "source_class": "operator",
-      "source_name": "OpenAI Blog"
-    },
-    {
-      "date": "2025-08-12",
       "theme": "Scaling Accounting Capacity With Openai",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
     {
-      "date": "2025-08-07",
-      "theme": "Introducing Gpt-5 For Developers",
+      "date": "2025-08-12",
+      "theme": "Openai\u2019S Letter To Governor Newsom On Harmonized Regulation",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
     {
       "date": "2025-08-07",
       "theme": "Gpt-5 And The New Era Of Work",
+      "source_class": "operator",
+      "source_name": "OpenAI Blog"
+    },
+    {
+      "date": "2025-08-07",
+      "theme": "Introducing Gpt-5 For Developers",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
@@ -4209,7 +3465,13 @@
     },
     {
       "date": "2025-08-07",
-      "theme": "How Cursor Uses Gpt-5",
+      "theme": "Introducing Gpt-5",
+      "source_class": "operator",
+      "source_name": "OpenAI Blog"
+    },
+    {
+      "date": "2025-08-07",
+      "theme": "Gpt-5 System Card",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
@@ -4227,13 +3489,7 @@
     },
     {
       "date": "2025-08-07",
-      "theme": "Gpt-5 System Card",
-      "source_class": "operator",
-      "source_name": "OpenAI Blog"
-    },
-    {
-      "date": "2025-08-07",
-      "theme": "Introducing Gpt-5",
+      "theme": "How Cursor Uses Gpt-5",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
@@ -4251,13 +3507,13 @@
     },
     {
       "date": "2025-08-05",
-      "theme": "Gpt-Oss-120B & Gpt-Oss-20B Model Card",
+      "theme": "Open-Source Models",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
     {
       "date": "2025-08-05",
-      "theme": "Open-Source Models",
+      "theme": "Gpt-Oss-120B & Gpt-Oss-20B Model Card",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
@@ -4305,13 +3561,13 @@
     },
     {
       "date": "2025-07-23",
-      "theme": "Model ML Is Helping Financial Firms Rebuild With AI From The Ground Up",
+      "theme": "Announcing Openai Devday 2025",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
     {
       "date": "2025-07-23",
-      "theme": "Announcing Openai Devday 2025",
+      "theme": "Model ML Is Helping Financial Firms Rebuild With AI From The Ground Up",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
@@ -4365,7 +3621,7 @@
     },
     {
       "date": "2025-07-17",
-      "theme": "Openai Nonprofit Jam",
+      "theme": "Invideo AI Uses Openai Models To Create Videos 10X Faster",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
@@ -4377,7 +3633,7 @@
     },
     {
       "date": "2025-07-17",
-      "theme": "Invideo AI Uses Openai Models To Create Videos 10X Faster",
+      "theme": "Openai Nonprofit Jam",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
@@ -4623,6 +3879,12 @@
     },
     {
       "date": "2025-04-16",
+      "theme": "Thinking With Images",
+      "source_class": "operator",
+      "source_name": "OpenAI Blog"
+    },
+    {
+      "date": "2025-04-16",
       "theme": "Introducing Openai O3 And O4-Mini",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
@@ -4630,12 +3892,6 @@
     {
       "date": "2025-04-16",
       "theme": "Openai O3 And O4-Mini System Card",
-      "source_class": "operator",
-      "source_name": "OpenAI Blog"
-    },
-    {
-      "date": "2025-04-16",
-      "theme": "Thinking With Images",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
@@ -4941,13 +4197,13 @@
     },
     {
       "date": "2025-02-04",
-      "theme": "Catching Halibut With Chatgpt",
+      "theme": "Building A Custom Math Tutor Powered By Chatgpt",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
     {
       "date": "2025-02-04",
-      "theme": "Building A Custom Math Tutor Powered By Chatgpt",
+      "theme": "Catching Halibut With Chatgpt",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
@@ -4983,13 +4239,13 @@
     },
     {
       "date": "2025-01-23",
-      "theme": "Operator System Card",
+      "theme": "Introducing Operator",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
     {
       "date": "2025-01-23",
-      "theme": "Introducing Operator",
+      "theme": "Operator System Card",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
@@ -5073,7 +4329,7 @@
     },
     {
       "date": "2024-12-09",
-      "theme": "Animator Lyndon Barrois Creates New Worlds With Sora",
+      "theme": "Sora System Card",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
@@ -5085,13 +4341,13 @@
     },
     {
       "date": "2024-12-09",
-      "theme": "Sora System Card",
+      "theme": "Minne Atairu & Sora",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
     {
       "date": "2024-12-09",
-      "theme": "Minne Atairu & Sora",
+      "theme": "Animator Lyndon Barrois Creates New Worlds With Sora",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
@@ -5379,13 +4635,13 @@
     },
     {
       "date": "2024-08-20",
-      "theme": "Fine-Tuning & Adaptation",
+      "theme": "Putting AI To Work At Upwork",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
     {
       "date": "2024-08-20",
-      "theme": "Putting AI To Work At Upwork",
+      "theme": "Fine-Tuning & Adaptation",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
@@ -5667,13 +4923,13 @@
     },
     {
       "date": "2024-05-13",
-      "theme": "Introducing Gpt-4O And More Tools To Chatgpt Free Users",
+      "theme": "Spring Update",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
     {
       "date": "2024-05-13",
-      "theme": "Spring Update",
+      "theme": "Introducing Gpt-4O And More Tools To Chatgpt Free Users",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
@@ -5685,13 +4941,13 @@
     },
     {
       "date": "2024-05-07",
-      "theme": "Understanding The Source Of What We See And Hear Online",
+      "theme": "Our Approach To Data And AI",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
     {
       "date": "2024-05-07",
-      "theme": "Our Approach To Data And AI",
+      "theme": "Understanding The Source Of What We See And Hear Online",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
@@ -5805,6 +5061,12 @@
     },
     {
       "date": "2024-03-18",
+      "theme": "AI Safety & Alignment",
+      "source_class": "operator",
+      "source_name": "OpenAI Blog"
+    },
+    {
+      "date": "2024-03-18",
       "theme": "Reimagining The Email Experience With AI",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
@@ -5812,12 +5074,6 @@
     {
       "date": "2024-03-18",
       "theme": "Building A Data-Driven, Efficient Culture With AI",
-      "source_class": "operator",
-      "source_name": "OpenAI Blog"
-    },
-    {
-      "date": "2024-03-18",
-      "theme": "AI Safety & Alignment",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
@@ -5835,19 +5091,19 @@
     },
     {
       "date": "2024-03-08",
-      "theme": "Review Completed & Altman, Brockman To Continue To Lead Openai",
-      "source_class": "operator",
-      "source_name": "OpenAI Blog"
-    },
-    {
-      "date": "2024-03-08",
       "theme": "Openai Announces New Members To Board Of Directors",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
     {
+      "date": "2024-03-08",
+      "theme": "Review Completed & Altman, Brockman To Continue To Lead Openai",
+      "source_class": "operator",
+      "source_name": "OpenAI Blog"
+    },
+    {
       "date": "2024-03-06",
-      "theme": "Using AI To Improve Patient Access To Clinical Trials",
+      "theme": "Improving Health Literacy And Patient Well-Being",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
@@ -5859,7 +5115,7 @@
     },
     {
       "date": "2024-03-06",
-      "theme": "Improving Health Literacy And Patient Well-Being",
+      "theme": "Using AI To Improve Patient Access To Clinical Trials",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
@@ -5919,13 +5175,13 @@
     },
     {
       "date": "2024-01-10",
-      "theme": "Introducing Chatgpt Team",
+      "theme": "Introducing The Gpt Store",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
     {
       "date": "2024-01-10",
-      "theme": "Introducing The Gpt Store",
+      "theme": "Introducing Chatgpt Team",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
@@ -6027,13 +5283,13 @@
     },
     {
       "date": "2023-10-11",
-      "theme": "Evolving Online Forms Into Dynamic Data",
+      "theme": "Simplifying Contract Reviews With AI",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
     {
       "date": "2023-10-11",
-      "theme": "Simplifying Contract Reviews With AI",
+      "theme": "Evolving Online Forms Into Dynamic Data",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
@@ -6249,6 +5505,18 @@
     },
     {
       "date": "2023-03-14",
+      "theme": "Filling Crucial Language Learning Gaps",
+      "source_class": "operator",
+      "source_name": "OpenAI Blog"
+    },
+    {
+      "date": "2023-03-14",
+      "theme": "Stripe",
+      "source_class": "operator",
+      "source_name": "OpenAI Blog"
+    },
+    {
+      "date": "2023-03-14",
       "theme": "Powering Virtual Education For The Classroom",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
@@ -6261,19 +5529,7 @@
     },
     {
       "date": "2023-03-14",
-      "theme": "Filling Crucial Language Learning Gaps",
-      "source_class": "operator",
-      "source_name": "OpenAI Blog"
-    },
-    {
-      "date": "2023-03-14",
       "theme": "Gpt-4",
-      "source_class": "operator",
-      "source_name": "OpenAI Blog"
-    },
-    {
-      "date": "2023-03-14",
-      "theme": "Stripe",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
@@ -6591,13 +5847,13 @@
     },
     {
       "date": "2021-09-08",
-      "theme": "Helen Toner Joins Openai\u2019S Board Of Directors",
+      "theme": "Truthfulqa: Measuring How Models Mimic Human Falsehoods",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
     {
       "date": "2021-09-08",
-      "theme": "Truthfulqa: Measuring How Models Mimic Human Falsehoods",
+      "theme": "Helen Toner Joins Openai\u2019S Board Of Directors",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
@@ -6783,13 +6039,13 @@
     },
     {
       "date": "2019-11-21",
-      "theme": "AI Safety & Alignment",
+      "theme": "Fine-Tuning & Adaptation",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
     {
       "date": "2019-11-21",
-      "theme": "Fine-Tuning & Adaptation",
+      "theme": "AI Safety & Alignment",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
@@ -7161,13 +6417,13 @@
     },
     {
       "date": "2018-03-15",
-      "theme": "Improving Gans Using Optimal Transport",
+      "theme": "Report From The Openai Hackathon",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
     {
       "date": "2018-03-15",
-      "theme": "Report From The Openai Hackathon",
+      "theme": "Improving Gans Using Optimal Transport",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
@@ -7215,13 +6471,13 @@
     },
     {
       "date": "2018-02-20",
-      "theme": "Preparing For Malicious Uses Of AI",
+      "theme": "Openai Supporters",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
     {
       "date": "2018-02-20",
-      "theme": "Openai Supporters",
+      "theme": "Preparing For Malicious Uses Of AI",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
@@ -7281,13 +6537,13 @@
     },
     {
       "date": "2017-10-18",
-      "theme": "Asymmetric Actor Critic For Image-Based Robot Learning",
+      "theme": "Sim-To-Real Transfer Of Robotic Control With Dynamics Randomization",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
     {
       "date": "2017-10-18",
-      "theme": "Sim-To-Real Transfer Of Robotic Control With Dynamics Randomization",
+      "theme": "Asymmetric Actor Critic For Image-Based Robot Learning",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
@@ -7299,13 +6555,13 @@
     },
     {
       "date": "2017-10-11",
-      "theme": "Competitive Self-Play",
+      "theme": "Meta-Learning For Wrestling",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
     {
       "date": "2017-10-11",
-      "theme": "Meta-Learning For Wrestling",
+      "theme": "Competitive Self-Play",
       "source_class": "operator",
       "source_name": "OpenAI Blog"
     },
@@ -10052,6 +9308,18 @@
       "source_name": "Ollama Releases"
     },
     {
+      "date": "2026-05-02",
+      "theme": "B9002",
+      "source_class": "practitioner",
+      "source_name": "llama.cpp Releases"
+    },
+    {
+      "date": "2026-05-02",
+      "theme": "B9000",
+      "source_class": "practitioner",
+      "source_name": "llama.cpp Releases"
+    },
+    {
       "date": "2026-05-01",
       "theme": "B8999",
       "source_class": "practitioner",
@@ -10096,18 +9364,6 @@
     {
       "date": "2026-04-30",
       "theme": "B8990",
-      "source_class": "practitioner",
-      "source_name": "llama.cpp Releases"
-    },
-    {
-      "date": "2026-04-30",
-      "theme": "B8989",
-      "source_class": "practitioner",
-      "source_name": "llama.cpp Releases"
-    },
-    {
-      "date": "2026-04-30",
-      "theme": "B8987",
       "source_class": "practitioner",
       "source_name": "llama.cpp Releases"
     },

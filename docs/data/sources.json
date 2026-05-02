@@ -1,5 +1,5 @@
 {
-  "generated": "2026-05-02T00:15:23.933227+00:00",
+  "generated": "2026-05-02T08:15:37.605284+00:00",
   "classes": {
     "primary": {
       "count": 0,
@@ -10,7 +10,7 @@
       "sources": []
     },
     "practitioner": {
-      "count": 2155,
+      "count": 1834,
       "sources": [
         "Arxiv",
         "Blogs/Rss",
@@ -49,33 +49,18 @@
       ]
     },
     {
-      "name": "arXiv",
-      "source_class": "primary",
-      "item_count": 150,
-      "first_seen": "2026-05-01",
-      "last_seen": "2026-05-01",
-      "days_active": 1,
-      "top_themes": [
-        "Benchmarks & Evals",
-        "Multimodal Models",
-        "AI Safety & Alignment",
-        "Retrieval-Augmented Generation",
-        "Multi-Agent Systems"
-      ]
-    },
-    {
       "name": "YouTube",
       "source_class": "practitioner",
-      "item_count": 105,
+      "item_count": 106,
       "first_seen": "2026-03-03",
       "last_seen": "2026-05-02",
       "days_active": 48,
       "top_themes": [
         "Agentic Workflows",
+        "AI Safety & Alignment",
         "AI Business Strategy",
         "AI Workforce & Jobs",
-        "AI Infrastructure",
-        "LLM Capabilities"
+        "AI Infrastructure"
       ]
     },
     {
@@ -135,6 +120,21 @@
       ]
     },
     {
+      "name": "arXiv",
+      "source_class": "primary",
+      "item_count": 30,
+      "first_seen": "2026-05-02",
+      "last_seen": "2026-05-02",
+      "days_active": 1,
+      "top_themes": [
+        "Multi-Agent Systems",
+        "Multimodal Models",
+        "Compositional Meta-Learning For Mitigating Task Heterogeneity In Physics-Informe",
+        "Binary Spiking Neural Networks As Causal Models",
+        "When Your LLM Reaches End-Of-Life: A Framework For Confident Model Migration In"
+      ]
+    },
+    {
       "name": "Simon Willison's Weblog",
       "source_class": "practitioner",
       "item_count": 30,
@@ -177,21 +177,6 @@
         "Aws Generative AI Model Agility Solution: A Comprehensive Guide To Migrating LLM",
         "Sun Finance Automates Id Extraction And Fraud Detection With Generative AI On Aw",
         "Agentic Workflows"
-      ]
-    },
-    {
-      "name": "Hugging Face",
-      "source_class": "primary",
-      "item_count": 14,
-      "first_seen": "2026-05-01",
-      "last_seen": "2026-05-02",
-      "days_active": 2,
-      "top_themes": [
-        "Chattla 20B (Ericspencer00)",
-        "Evolai Tfm 1P5B Alt (Mihai-777)",
-        "Evolai Mamba2 0P47B V3 (Mihai-777)",
-        "Mistral Medium 3.5 128B Gguf (Unsloth)",
-        "Civitai Archive (Chroma111)"
       ]
     },
     {
@@ -274,14 +259,14 @@
       "source_class": "practitioner",
       "item_count": 10,
       "first_seen": "2026-04-30",
-      "last_seen": "2026-05-01",
-      "days_active": 2,
+      "last_seen": "2026-05-02",
+      "days_active": 3,
       "top_themes": [
+        "B9002",
+        "B9000",
         "B8999",
         "B8998",
-        "B8996",
-        "B8995",
-        "B8994"
+        "B8996"
       ]
     },
     {
@@ -300,6 +285,21 @@
       ]
     },
     {
+      "name": "Hugging Face",
+      "source_class": "primary",
+      "item_count": 8,
+      "first_seen": "2026-05-02",
+      "last_seen": "2026-05-02",
+      "days_active": 1,
+      "top_themes": [
+        "Opus Mt En Ro Finetuned En To Ro (Maxpaxsnax)",
+        "Tur After Indomain 10 500 (Fpadovani)",
+        "Tur 10Mb Baseline Seed10 (Fpadovani)",
+        "Wav2Vec2 Large Xls R 300M Dm32 Preaugmented V1 (Sucharithas)",
+        "Asena Esp32 (Pthinc)"
+      ]
+    },
+    {
       "name": "Mistral Inference Releases",
       "source_class": "operator",
       "item_count": 7,
@@ -312,6 +312,17 @@
         "V1.4.0: Pixtral \ud83d\udc40",
         "V1.3.0 Mistral-Nemo",
         "V1.2.0 Add Mamba"
+      ]
+    },
+    {
+      "name": "Substack",
+      "source_class": "media",
+      "item_count": 1,
+      "first_seen": "2026-05-02",
+      "last_seen": "2026-05-02",
+      "days_active": 1,
+      "top_themes": [
+        "Local LLM Applications"
       ]
     },
     {

@@ -1,6 +1,6 @@
 {
-  "updated": "2026-05-02T00:15:22.914187+00:00",
-  "count": 685,
+  "updated": "2026-05-02T08:15:36.603004+00:00",
+  "count": 689,
   "processed": [
     "-0i2ERMGoq4",
     "-FhtPUkXKO4",
@@ -346,6 +346,7 @@
     "AWqjodHJ3es",
     "AZ-ACn6dOIY",
     "AckkntfOvz8",
+    "AyZGx1nWzis",
     "BE4RclIGDmY",
     "BhXNtvZvziY",
     "BiqG3it0gY0",
@@ -373,6 +374,7 @@
     "JvCtGjrn_N0",
     "KbNRNxBawIg",
     "KlPxWaY91rE",
+    "LMJb-_uL6lQ",
     "LO0Ws-l6brg",
     "LvU1CACAPq8",
     "MRLt90GMvOg",
@@ -574,6 +576,8 @@
     "https://github.com/ggml-org/llama.cpp/releases/tag/b8996",
     "https://github.com/ggml-org/llama.cpp/releases/tag/b8998",
     "https://github.com/ggml-org/llama.cpp/releases/tag/b8999",
+    "https://github.com/ggml-org/llama.cpp/releases/tag/b9000",
+    "https://github.com/ggml-org/llama.cpp/releases/tag/b9002",
     "https://github.com/groq/groq-python/releases/tag/v0.34.1",
     "https://github.com/groq/groq-python/releases/tag/v0.35.0",
     "https://github.com/groq/groq-python/releases/tag/v0.36.0",

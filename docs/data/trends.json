@@ -1,5 +1,5 @@
 {
-  "generated": "2026-05-02T00:15:23.933227+00:00",
+  "generated": "2026-05-02T08:15:37.605284+00:00",
   "trends": [
     {
       "theme": "Inference Cost Reduction",
@@ -40,24 +40,24 @@
       "theme": "AI Safety & Alignment",
       "domain": "unknown",
       "definition": "",
-      "state": "emerging",
+      "state": "unknown",
       "confidence": 0.515,
       "volume": 0.09,
-      "velocity": 1.0,
+      "velocity": 0.0,
       "diversity": 6,
-      "adoption_proxy": 0.272,
-      "stability": 0.267,
+      "adoption_proxy": 0.296,
+      "stability": 0.547,
       "hype_risk": 0.0,
-      "item_count": 50,
-      "last_seen": "2026-05-01",
+      "item_count": 47,
+      "last_seen": "2026-05-02",
       "source_classes": [
         "operator",
-        "primary",
-        "practitioner"
+        "practitioner",
+        "primary"
       ],
       "source_class_counts": {
-        "practitioner": 4,
-        "primary": 5,
+        "practitioner": 5,
+        "primary": 1,
         "operator": 41
       },
       "history": [
@@ -208,8 +208,8 @@
         },
         {
           "date": "2026-04-27",
-          "volume": 6,
-          "state": "emerging"
+          "volume": 3,
+          "state": "unknown"
         }
       ]
     },
@@ -310,19 +310,19 @@
       "state": "declining",
       "confidence": 0.507,
       "volume": 0.04,
-      "velocity": -0.8,
+      "velocity": -0.9,
       "diversity": 5,
       "adoption_proxy": 0.1,
-      "stability": 0.435,
+      "stability": 0.685,
       "hype_risk": 0.0,
-      "item_count": 24,
-      "last_seen": "2026-05-01",
+      "item_count": 22,
+      "last_seen": "2026-05-02",
       "source_classes": [
         "operator",
         "primary"
       ],
       "source_class_counts": {
-        "primary": 3,
+        "primary": 1,
         "operator": 21
       },
       "history": [
@@ -418,7 +418,7 @@
         },
         {
           "date": "2026-04-27",
-          "volume": 4,
+          "volume": 2,
           "state": "declining"
         }
       ]
@@ -428,22 +428,22 @@
       "domain": "unknown",
       "definition": "",
       "state": "declining",
-      "confidence": 0.505,
-      "volume": 0.03,
-      "velocity": -0.2,
+      "confidence": 0.503,
+      "volume": 0.02,
+      "velocity": -0.8,
       "diversity": 5,
-      "adoption_proxy": 0.25,
-      "stability": 0.0,
+      "adoption_proxy": 0.275,
+      "stability": 0.736,
       "hype_risk": 0.0,
-      "item_count": 18,
-      "last_seen": "2026-05-01",
+      "item_count": 12,
+      "last_seen": "2026-05-02",
       "source_classes": [
         "operator",
         "primary",
         "practitioner"
       ],
       "source_class_counts": {
-        "primary": 7,
+        "primary": 1,
         "operator": 10,
         "practitioner": 1
       },
@@ -500,48 +500,43 @@
         },
         {
           "date": "2026-04-27",
-          "volume": 8,
+          "volume": 2,
           "state": "declining"
         }
       ]
     },
     {
-      "theme": "Multimodal Models",
+      "theme": "Local LLM Applications",
       "domain": "unknown",
       "definition": "",
-      "state": "emerging",
-      "confidence": 0.503,
-      "volume": 0.02,
-      "velocity": 1.0,
-      "diversity": 6,
-      "adoption_proxy": 0.275,
-      "stability": 0.0,
-      "hype_risk": 0.0,
-      "item_count": 12,
+      "state": "unknown",
+      "confidence": 0.502,
+      "volume": 0.01,
+      "velocity": 0.0,
+      "diversity": 3,
+      "adoption_proxy": 0.4,
+      "stability": 1.0,
+      "hype_risk": 0.2,
+      "item_count": 5,
       "last_seen": "2026-05-02",
       "source_classes": [
-        "primary",
-        "operator",
-        "practitioner"
+        "practitioner",
+        "media",
+        "operator"
       ],
       "source_class_counts": {
-        "practitioner": 1,
-        "primary": 7,
-        "operator": 4
+        "media": 1,
+        "practitioner": 3,
+        "operator": 1
       },
       "history": [
         {
-          "date": "2021-03-01",
+          "date": "2025-06-23",
           "volume": 1,
           "state": "unknown"
         },
         {
-          "date": "2024-09-23",
-          "volume": 1,
-          "state": "unknown"
-        },
-        {
-          "date": "2025-03-31",
+          "date": "2026-03-16",
           "volume": 1,
           "state": "unknown"
         },
@@ -551,14 +546,14 @@
           "state": "unknown"
         },
         {
-          "date": "2026-04-20",
+          "date": "2026-03-30",
           "volume": 1,
           "state": "unknown"
         },
         {
           "date": "2026-04-27",
-          "volume": 7,
-          "state": "emerging"
+          "volume": 1,
+          "state": "unknown"
         }
       ]
     },
@@ -618,7 +613,7 @@
       "stability": 0.429,
       "hype_risk": 0.0,
       "item_count": 7,
-      "last_seen": "2026-05-01",
+      "last_seen": "2026-05-02",
       "source_classes": [
         "primary",
         "operator",
@@ -763,79 +758,25 @@
       ]
     },
     {
-      "theme": "Local LLM Applications",
-      "domain": "unknown",
-      "definition": "",
-      "state": "unknown",
-      "confidence": 0.502,
-      "volume": 0.01,
-      "velocity": 0.0,
-      "diversity": 3,
-      "adoption_proxy": 0.5,
-      "stability": 1.0,
-      "hype_risk": 0.0,
-      "item_count": 5,
-      "last_seen": "2026-05-01",
-      "source_classes": [
-        "practitioner",
-        "primary",
-        "operator"
-      ],
-      "source_class_counts": {
-        "practitioner": 3,
-        "primary": 1,
-        "operator": 1
-      },
-      "history": [
-        {
-          "date": "2025-06-23",
-          "volume": 1,
-          "state": "unknown"
-        },
-        {
-          "date": "2026-03-16",
-          "volume": 1,
-          "state": "unknown"
-        },
-        {
-          "date": "2026-03-23",
-          "volume": 1,
-          "state": "unknown"
-        },
-        {
-          "date": "2026-03-30",
-          "volume": 1,
-          "state": "unknown"
-        },
-        {
-          "date": "2026-04-27",
-          "volume": 1,
-          "state": "unknown"
-        }
-      ]
-    },
-    {
       "theme": "Retrieval-Augmented Generation",
       "domain": "unknown",
       "definition": "",
-      "state": "emerging",
-      "confidence": 0.502,
+      "state": "declining",
+      "confidence": 0.335,
       "volume": 0.01,
-      "velocity": 1.0,
-      "diversity": 3,
-      "adoption_proxy": 0.312,
-      "stability": 0.25,
+      "velocity": -1.0,
+      "diversity": 2,
+      "adoption_proxy": 0.325,
+      "stability": 1.0,
       "hype_risk": 0.0,
-      "item_count": 8,
-      "last_seen": "2026-05-01",
+      "item_count": 4,
+      "last_seen": "2026-04-09",
       "source_classes": [
-        "primary",
         "operator",
         "practitioner"
       ],
       "source_class_counts": {
         "practitioner": 1,
-        "primary": 4,
         "operator": 3
       },
       "history": [
@@ -857,12 +798,7 @@
         {
           "date": "2026-04-06",
           "volume": 1,
-          "state": "unknown"
-        },
-        {
-          "date": "2026-04-27",
-          "volume": 4,
-          "state": "emerging"
+          "state": "declining"
         }
       ]
     },
@@ -935,6 +871,63 @@
         {
           "date": "2026-03-30",
           "volume": 1,
+          "state": "declining"
+        }
+      ]
+    },
+    {
+      "theme": "Multimodal Models",
+      "domain": "unknown",
+      "definition": "",
+      "state": "declining",
+      "confidence": 0.502,
+      "volume": 0.01,
+      "velocity": -0.25,
+      "diversity": 5,
+      "adoption_proxy": 0.329,
+      "stability": 0.681,
+      "hype_risk": 0.0,
+      "item_count": 7,
+      "last_seen": "2026-05-02",
+      "source_classes": [
+        "operator",
+        "primary",
+        "practitioner"
+      ],
+      "source_class_counts": {
+        "practitioner": 1,
+        "primary": 2,
+        "operator": 4
+      },
+      "history": [
+        {
+          "date": "2021-03-01",
+          "volume": 1,
+          "state": "unknown"
+        },
+        {
+          "date": "2024-09-23",
+          "volume": 1,
+          "state": "unknown"
+        },
+        {
+          "date": "2025-03-31",
+          "volume": 1,
+          "state": "unknown"
+        },
+        {
+          "date": "2026-03-23",
+          "volume": 1,
+          "state": "unknown"
+        },
+        {
+          "date": "2026-04-20",
+          "volume": 1,
+          "state": "unknown"
+        },
+        {
+          "date": "2026-04-27",
+          "volume": 2,
           "state": "declining"
         }
       ]
@@ -1070,41 +1063,6 @@
       ]
     },
     {
-      "theme": "Model Distillation",
-      "domain": "unknown",
-      "definition": "",
-      "state": "emerging",
-      "confidence": 0.335,
-      "volume": 0.01,
-      "velocity": 2.0,
-      "diversity": 2,
-      "adoption_proxy": 0.1,
-      "stability": 0.5,
-      "hype_risk": 0.0,
-      "item_count": 4,
-      "last_seen": "2026-05-01",
-      "source_classes": [
-        "primary",
-        "operator"
-      ],
-      "source_class_counts": {
-        "primary": 3,
-        "operator": 1
-      },
-      "history": [
-        {
-          "date": "2024-09-30",
-          "volume": 1,
-          "state": "unknown"
-        },
-        {
-          "date": "2026-04-27",
-          "volume": 3,
-          "state": "emerging"
-        }
-      ]
-    },
-    {
       "theme": "Long-Context Reasoning",
       "domain": "unknown",
       "definition": "",
@@ -1224,6 +1182,39 @@
       ]
     },
     {
+      "theme": "AI Economic Impact",
+      "domain": "unknown",
+      "definition": "",
+      "state": "unknown",
+      "confidence": 0.167,
+      "volume": 0.0,
+      "velocity": 0.0,
+      "diversity": 1,
+      "adoption_proxy": 0.3,
+      "stability": 1.0,
+      "hype_risk": 0.0,
+      "item_count": 2,
+      "last_seen": "2026-05-02",
+      "source_classes": [
+        "practitioner"
+      ],
+      "source_class_counts": {
+        "practitioner": 2
+      },
+      "history": [
+        {
+          "date": "2026-04-06",
+          "volume": 1,
+          "state": "unknown"
+        },
+        {
+          "date": "2026-04-27",
+          "volume": 1,
+          "state": "unknown"
+        }
+      ]
+    },
+    {
       "theme": "Agent Reliability",
       "domain": "unknown",
       "definition": "",
@@ -1253,69 +1244,6 @@
           "date": "2026-03-16",
           "volume": 1,
           "state": "declining"
-        }
-      ]
-    },
-    {
-      "theme": "Reconstruction By Generation: 3D Multi-Object Scene Reconstruction From Sparse O",
-      "domain": "unknown",
-      "definition": "",
-      "state": "unknown",
-      "confidence": 0.167,
-      "volume": 0.0,
-      "velocity": 1.0,
-      "diversity": 1,
-      "adoption_proxy": 0.0,
-      "stability": 1.0,
-      "hype_risk": 0.0,
-      "item_count": 2,
-      "last_seen": "2026-05-01",
-      "source_classes": [
-        "primary"
-      ],
-      "source_class_counts": {
-        "primary": 2
-      },
-      "history": [
-        {
-          "date": "2026-04-27",
-          "volume": 2,
-          "state": "unknown"
-        }
-      ]
-    },
-    {
-      "theme": "RLHF & Alignment",
-      "domain": "unknown",
-      "definition": "",
-      "state": "unknown",
-      "confidence": 0.333,
-      "volume": 0.0,
-      "velocity": 0.0,
-      "diversity": 2,
-      "adoption_proxy": 0.1,
-      "stability": 1.0,
-      "hype_risk": 0.0,
-      "item_count": 2,
-      "last_seen": "2026-05-01",
-      "source_classes": [
-        "primary",
-        "operator"
-      ],
-      "source_class_counts": {
-        "primary": 1,
-        "operator": 1
-      },
-      "history": [
-        {
-          "date": "2025-05-05",
-          "volume": 1,
-          "state": "unknown"
-        },
-        {
-          "date": "2026-04-27",
-          "volume": 1,
-          "state": "unknown"
         }
       ]
     },
