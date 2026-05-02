@@ -961,7 +961,7 @@ ADR-0017 requires two explicit schema contracts between the three pipeline conce
 
 ## W-0025
 
-status: ready
+status: done
 created: 2026-05-02
 updated: 2026-05-02
 
