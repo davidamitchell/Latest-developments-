@@ -36,51 +36,24 @@ def _make_item(id_: str = "item-1", source_type: str = "rss") -> FetchedItem:
 class TestFetchAll:
     """fetch_all(cfg, already_processed) → list[FetchedItem]"""
 
-    def test_returns_list(self, tmp_path):
+    def test_returns_list(self):
         """fetch_all returns a list (possibly empty) of FetchedItem."""
         from src.config import Config
         from src.pipeline.fetch import fetch_all
 
-        cfg = Config()
-        cfg.youtube.enabled = False
-        cfg.blogs.enabled = False
-        cfg.substack.enabled = False
-        cfg.hacker_news.enabled = False
-        cfg.trends.arxiv.enabled = False
-        cfg.trends.huggingface.enabled = False
-        cfg.trends.paperswithcode.enabled = False
-        cfg.trends.operator_sources.enabled = False
-        cfg.trends.replicate.enabled = False
-        cfg.trends.openreview.enabled = False
-        cfg.trends.openrouter.enabled = False
-        cfg.trends.new_entrant_sources.enabled = False
-        cfg.trends.local_model_sources.enabled = False
-
+        cfg = Config()  # empty sources list → no fetchers
         result = fetch_all(cfg, already_processed=set())
         assert isinstance(result, list)
 
-    def test_deduplication_excludes_known_ids(self, tmp_path):
+    def test_deduplication_excludes_known_ids(self):
         """Items whose id is in already_processed are excluded."""
         from src.config import Config
         from src.pipeline.fetch import fetch_all
 
         item = _make_item("known-id")
-        cfg = Config()
-        cfg.youtube.enabled = False
-        cfg.blogs.enabled = False
-        cfg.substack.enabled = False
-        cfg.hacker_news.enabled = False
-        cfg.trends.arxiv.enabled = False
-        cfg.trends.huggingface.enabled = False
-        cfg.trends.paperswithcode.enabled = False
-        cfg.trends.operator_sources.enabled = False
-        cfg.trends.replicate.enabled = False
-        cfg.trends.openreview.enabled = False
-        cfg.trends.openrouter.enabled = False
-        cfg.trends.new_entrant_sources.enabled = False
-        cfg.trends.local_model_sources.enabled = False
+        cfg = Config()  # empty sources list
 
-        # Patch one fetcher to return an item; it should be excluded
+        # Patch _safe_fetch to return an item; it should still be excluded
         with patch("src.pipeline.fetch._safe_fetch") as mock_fetch:
             mock_fetch.return_value = [item]
             result = fetch_all(cfg, already_processed={"known-id"})
@@ -93,21 +66,7 @@ class TestFetchAll:
         from src.config import Config
         from src.pipeline.fetch import fetch_all
 
-        cfg = Config()
-        cfg.youtube.enabled = False
-        cfg.blogs.enabled = False
-        cfg.substack.enabled = False
-        cfg.hacker_news.enabled = False
-        cfg.trends.arxiv.enabled = False
-        cfg.trends.huggingface.enabled = False
-        cfg.trends.paperswithcode.enabled = False
-        cfg.trends.operator_sources.enabled = False
-        cfg.trends.replicate.enabled = False
-        cfg.trends.openreview.enabled = False
-        cfg.trends.openrouter.enabled = False
-        cfg.trends.new_entrant_sources.enabled = False
-        cfg.trends.local_model_sources.enabled = False
-
+        cfg = Config()  # empty sources list → no fetchers
         result = fetch_all(cfg, already_processed=set())
         assert all(isinstance(i, FetchedItem) for i in result)
 

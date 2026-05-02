@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import date, datetime
 from unittest.mock import MagicMock, patch
 
-from src.config import SummaryConfig
+from src.config import DigestConfig
 from src.fetchers import FetchedItem
 from src.summariser import (
     _extract_item_summaries,
@@ -39,7 +39,7 @@ def _make_item(
     )
 
 
-def _make_config(**kwargs: object) -> SummaryConfig:
+def _make_config(**kwargs: object) -> DigestConfig:
     defaults: dict = {
         "model": "gemini-2.0-flash",
         "max_tokens": 500,
@@ -47,7 +47,7 @@ def _make_config(**kwargs: object) -> SummaryConfig:
         "prompt": "Summarise this.",
     }
     defaults.update(kwargs)
-    return SummaryConfig(**defaults)  # type: ignore[arg-type]
+    return DigestConfig(**defaults)  # type: ignore[arg-type]
 
 
 def _mock_client(text: str = "summary") -> MagicMock:
@@ -125,17 +125,19 @@ class TestSummarise:
         assert "content 1" in contents
         assert "content 4" not in contents
 
-    def test_enabled_false_skips_gemini(self) -> None:
+    def test_no_api_key_skips_gemini(self) -> None:
         mock_cls = _mock_client()
-        with patch("src.summariser.genai.Client", mock_cls):
-            result = summarise([_make_item()], _make_config(enabled=False))
+        with patch("src.summariser.genai.Client", mock_cls), \
+             patch("src.summariser.os.environ.get", return_value=None):
+            result = summarise([_make_item()], _make_config())
             mock_cls.assert_not_called()
 
         assert "Test Article" in result
         assert "https://example.com/id1" in result
 
-    def test_enabled_false_empty_returns_empty(self) -> None:
-        result = summarise([], _make_config(enabled=False))
+    def test_no_api_key_empty_returns_empty(self) -> None:
+        with patch("src.summariser.os.environ.get", return_value=None):
+            result = summarise([], _make_config())
         assert result == ""
 
     def test_falls_back_to_link_digest_on_api_error(self) -> None:

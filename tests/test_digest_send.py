@@ -143,7 +143,7 @@ class TestBuildDigest:
         return patch("src.digest.send.render_html_digest", return_value=return_value)
 
     def test_returns_tuple_of_two_strings(self):
-        from src.config import Config, SummaryConfig
+        from src.config import Config
         from src.digest.send import build_digest
 
         cfg = Config()
@@ -372,7 +372,7 @@ class TestRun:
         from src.digest.send import run
 
         cfg = Config()
-        cfg.email.send_if_empty = False
+        cfg.digest.send_if_empty = False
         items = [_make_processed("x")]
 
         with patch("src.digest.send.send_digest") as mock_send:

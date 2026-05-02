@@ -84,7 +84,7 @@ Concerns 3A and 3B are **parallel consumers**. They trigger from the same event 
 - **Never commit secrets.** API keys, passwords, and email addresses live in GitHub Secrets / environment variables. The `.env` file is gitignored.
 - **Never re-introduce processed items.** All dedup state lives in `state/processed.json`. Do not delete or reset this file.
 - **Respect the schema contracts.** `FetchedItem` is the only output of fetchers. `ProcessedItem` is the only input to consumers. Consumers must not call fetchers or pipeline stages directly.
-- **No breaking changes to the config schema** without updating `config/sources.yaml`, the relevant ADR, and the README.
+- **Config schema (ADR-0018):** `sources.yaml` has two independent sections: `sources` (flat list with type discriminator) and `digest` (references only ProcessedItem fields — never source names or types). Any config change must update both the YAML and the relevant ADR.
 - **Every slice must be end-to-end runnable** before being marked complete in `BACKLOG.md`.
 - **Keep PROGRESS.md updated** after every meaningful commit.
 
@@ -165,15 +165,12 @@ src/
 ├── history.py          # Write/read history/YYYY-MM-DD.txt (email digest concern only)
 └── logger.py           # Logging setup
 │
-│  ── TRANSITIONAL (to be retired after W-0026/W-0027/W-0028) ──
-├── main.py             # Old email pipeline entry point — retired by W-0027
-└── trends.py           # Old site build entry point — retired by W-0028
 ├── history.py          # Archive digest to history/; load recent digests for context
 ├── config.py           # Load and validate config/sources.yaml
 └── logger.py           # Logging setup
 
 config/
-└── sources.yaml        # All configuration: sources, AI settings, email, digest prompt
+└── sources.yaml        # Two independent sections: sources (flat list) + digest (ProcessedItem filters only)
 
 state/
 └── processed.json      # Deduplication state — committed by daily-digest workflow after each run

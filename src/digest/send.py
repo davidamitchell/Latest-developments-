@@ -88,7 +88,7 @@ def build_digest(
         return "", ""
 
     fetched = items_to_fetched(items)
-    plain = summarise(fetched, cfg.summary, today, history=history or None)
+    plain = summarise(fetched, cfg.digest, today, history=history or None)
     html = render_html_digest(fetched, plain, today)
     return plain, html
 
@@ -109,7 +109,7 @@ def run(
     new_items = select_items(items, already_sent)
     logger.info("%d new item(s) selected for digest (total: %d)", len(new_items), len(items))
 
-    if not new_items and not cfg.email.send_if_empty:
+    if not new_items and not cfg.digest.send_if_empty:
         logger.info("No new items and send_if_empty is false — skipping digest")
         return 0
 
@@ -121,11 +121,11 @@ def run(
 
     plain, html = build_digest(new_items, cfg, today, history)
 
-    if not plain and not cfg.email.send_if_empty:
+    if not plain and not cfg.digest.send_if_empty:
         logger.info("Empty digest and send_if_empty is false — skipping send")
         return 0
 
-    subject = cfg.email.subject.format(date=today.strftime("%d %b %Y"))
+    subject = cfg.digest.subject.format(date=today.strftime("%d %b %Y"))
 
     if dry_run:
         logger.info("[dry-run] Subject: %s", subject)
@@ -170,7 +170,7 @@ def main() -> int:
     items = read_processed_jsonl(processed_path)
     if not items:
         logger.info("No processed items for %s", today_str)
-        if not cfg.email.send_if_empty:
+        if not cfg.digest.send_if_empty:
             return 0
 
     already_sent = load_state(_STATE_FILE)

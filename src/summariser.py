@@ -15,7 +15,7 @@ from google import genai
 from google.genai import errors as genai_errors
 from google.genai import types
 
-from src.config import SummaryConfig
+from src.config import DigestConfig
 from src.fetchers import FetchedItem
 
 logger = logging.getLogger(__name__)
@@ -541,7 +541,7 @@ def _build_history_context(history: list[str]) -> str:
 
 
 def format_link_digest(
-    items: list[FetchedItem], config: SummaryConfig, today: date | None = None
+    items: list[FetchedItem], config: DigestConfig, today: date | None = None
 ) -> str:
     """Plain link-list digest — no AI required."""
     if not items:
@@ -568,7 +568,7 @@ def format_link_digest(
 
 def summarise(
     items: list[FetchedItem],
-    config: SummaryConfig,
+    config: DigestConfig,
     today: date | None = None,
     history: list[str] | None = None,
 ) -> str:
@@ -585,8 +585,8 @@ def summarise(
     if not items:
         return ""
 
-    if not config.enabled:
-        logger.info("AI summarisation disabled — producing link digest")
+    if not os.environ.get("GEMINI_API_KEY"):
+        logger.info("GEMINI_API_KEY not set — producing link digest")
         return format_link_digest(items, config, today)
 
     if today is None:
