@@ -10,6 +10,10 @@
 # Runtime state (processed.json is committed by CI; local copies ignored if needed)
 # state/processed.json  <- intentionally NOT ignored; CI commits this file
 
+# Pipeline runtime data — .gitkeep files are tracked; actual data files are not
+data/raw/*.jsonl
+data/processed/*.jsonl
+
 # Logs (file logging is optional and local)
 logs/
 *.log
