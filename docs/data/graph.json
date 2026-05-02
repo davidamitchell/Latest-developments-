@@ -1,187 +1,78 @@
 {
-  "generated": "2026-05-02T00:15:23.933227+00:00",
+  "generated": "2026-05-02T22:19:42.736375+00:00",
   "nodes": [
-    {
-      "id": "Inference Cost Reduction",
-      "domain": "unknown",
-      "state": "emerging",
-      "volume": 0.19
-    },
-    {
-      "id": "AI Safety & Alignment",
-      "domain": "unknown",
-      "state": "emerging",
-      "volume": 0.09
-    },
     {
       "id": "Agentic Workflows",
       "domain": "unknown",
-      "state": "emerging",
-      "volume": 0.04
-    },
-    {
-      "id": "Fine-Tuning & Adaptation",
-      "domain": "unknown",
       "state": "declining",
-      "volume": 0.04
-    },
-    {
-      "id": "Benchmarks & Evals",
-      "domain": "unknown",
-      "state": "declining",
-      "volume": 0.03
-    },
-    {
-      "id": "Multimodal Models",
-      "domain": "unknown",
-      "state": "emerging",
-      "volume": 0.02
-    },
-    {
-      "id": "AI Business Strategy",
-      "domain": "unknown",
-      "state": "declining",
-      "volume": 0.01
-    },
-    {
-      "id": "Multi-Agent Systems",
-      "domain": "unknown",
-      "state": "emerging",
-      "volume": 0.01
-    },
-    {
-      "id": "AI Infrastructure",
-      "domain": "unknown",
-      "state": "declining",
-      "volume": 0.01
-    },
-    {
-      "id": "LLM Capabilities",
-      "domain": "unknown",
-      "state": "declining",
-      "volume": 0.01
-    },
-    {
-      "id": "Local LLM Applications",
-      "domain": "unknown",
-      "state": "unknown",
-      "volume": 0.01
-    },
-    {
-      "id": "Retrieval-Augmented Generation",
-      "domain": "unknown",
-      "state": "emerging",
-      "volume": 0.01
-    },
-    {
-      "id": "Local LLM Inference",
-      "domain": "unknown",
-      "state": "declining",
-      "volume": 0.01
-    },
-    {
-      "id": "Supply Chain Security",
-      "domain": "unknown",
-      "state": "declining",
-      "volume": 0.01
-    },
-    {
-      "id": "AI Development Pace",
-      "domain": "unknown",
-      "state": "declining",
-      "volume": 0.01
+      "volume": 0.93
     },
     {
       "id": "AI Workforce & Jobs",
       "domain": "unknown",
       "state": "declining",
-      "volume": 0.01
+      "volume": 0.58
     },
     {
-      "id": "Code Generation",
+      "id": "AI Business Strategy",
       "domain": "unknown",
       "state": "declining",
-      "volume": 0.01
+      "volume": 0.58
     },
     {
-      "id": "Model Distillation",
-      "domain": "unknown",
-      "state": "emerging",
-      "volume": 0.01
-    },
-    {
-      "id": "Long-Context Reasoning",
+      "id": "AI Infrastructure",
       "domain": "unknown",
       "state": "declining",
-      "volume": 0.01
+      "volume": 0.47
     },
     {
-      "id": "Agent Tool Use",
+      "id": "AI Safety & Alignment",
       "domain": "unknown",
       "state": "declining",
-      "volume": 0.01
+      "volume": 0.35
     },
     {
-      "id": "Team Update",
+      "id": "Local LLM Applications",
       "domain": "unknown",
       "state": "declining",
-      "volume": 0.01
+      "volume": 0.35
+    },
+    {
+      "id": "Supply Chain Security",
+      "domain": "unknown",
+      "state": "declining",
+      "volume": 0.35
+    },
+    {
+      "id": "Local LLM Inference",
+      "domain": "unknown",
+      "state": "declining",
+      "volume": 0.35
+    },
+    {
+      "id": "LLM Capabilities",
+      "domain": "unknown",
+      "state": "declining",
+      "volume": 0.35
     },
     {
       "id": "Agent Reliability",
       "domain": "unknown",
       "state": "declining",
-      "volume": 0.0
+      "volume": 0.23
     },
     {
-      "id": "Reconstruction By Generation: 3D Multi-Object Scene Reconstruction From Sparse O",
-      "domain": "unknown",
-      "state": "unknown",
-      "volume": 0.0
-    },
-    {
-      "id": "RLHF & Alignment",
-      "domain": "unknown",
-      "state": "unknown",
-      "volume": 0.0
-    },
-    {
-      "id": "The State Of Enterprise AI",
+      "id": "Open-Source AI Agents",
       "domain": "unknown",
       "state": "declining",
-      "volume": 0.0
+      "volume": 0.23
     },
     {
-      "id": "Open-Source Models",
+      "id": "AI Development Pace",
       "domain": "unknown",
       "state": "declining",
-      "volume": 0.0
-    },
-    {
-      "id": "Gemini 3.1 Flash Tts: The Next Generation Of Expressive AI Speech",
-      "domain": "unknown",
-      "state": "declining",
-      "volume": 0.0
+      "volume": 0.23
     }
   ],
-  "edges": [
-    {
-      "source": "AI Safety & Alignment",
-      "target": "Agentic Workflows",
-      "rel_type": "compositional",
-      "weight": 3
-    },
-    {
-      "source": "AI Safety & Alignment",
-      "target": "AI Business Strategy",
-      "rel_type": "compositional",
-      "weight": 3
-    },
-    {
-      "source": "Fine-Tuning & Adaptation",
-      "target": "Benchmarks & Evals",
-      "rel_type": "compositional",
-      "weight": 3
-    }
-  ]
+  "edges": []
 }

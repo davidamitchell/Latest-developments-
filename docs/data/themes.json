@@ -1,111 +1,33 @@
 {
-  "generated": "2026-05-02T00:15:23.933227+00:00",
+  "generated": "2026-05-02T22:19:42.736375+00:00",
   "themes": [
-    {
-      "name": "Inference Cost Reduction",
-      "domain": "unknown",
-      "definition": "",
-      "state": "emerging",
-      "item_count": 101,
-      "last_seen": "2026-05-02",
-      "source_classes": [
-        "market",
-        "practitioner"
-      ],
-      "source_class_counts": {
-        "practitioner": 1,
-        "market": 100
-      },
-      "hype_risk": 0.0
-    },
-    {
-      "name": "AI Safety & Alignment",
-      "domain": "unknown",
-      "definition": "",
-      "state": "emerging",
-      "item_count": 50,
-      "last_seen": "2026-05-01",
-      "source_classes": [
-        "operator",
-        "primary",
-        "practitioner"
-      ],
-      "source_class_counts": {
-        "practitioner": 4,
-        "primary": 5,
-        "operator": 41
-      },
-      "hype_risk": 0.0
-    },
     {
       "name": "Agentic Workflows",
       "domain": "unknown",
       "definition": "",
-      "state": "emerging",
-      "item_count": 20,
-      "last_seen": "2026-04-30",
+      "state": "declining",
+      "item_count": 8,
+      "last_seen": "2026-04-29",
       "source_classes": [
-        "operator",
         "practitioner"
       ],
       "source_class_counts": {
-        "practitioner": 8,
-        "operator": 12
+        "practitioner": 8
       },
       "hype_risk": 0.0
     },
     {
-      "name": "Fine-Tuning & Adaptation",
+      "name": "AI Workforce & Jobs",
       "domain": "unknown",
       "definition": "",
       "state": "declining",
-      "item_count": 24,
-      "last_seen": "2026-05-01",
+      "item_count": 5,
+      "last_seen": "2026-03-15",
       "source_classes": [
-        "operator",
-        "primary"
-      ],
-      "source_class_counts": {
-        "primary": 3,
-        "operator": 21
-      },
-      "hype_risk": 0.0
-    },
-    {
-      "name": "Benchmarks & Evals",
-      "domain": "unknown",
-      "definition": "",
-      "state": "declining",
-      "item_count": 18,
-      "last_seen": "2026-05-01",
-      "source_classes": [
-        "operator",
-        "primary",
         "practitioner"
       ],
       "source_class_counts": {
-        "primary": 7,
-        "operator": 10,
-        "practitioner": 1
-      },
-      "hype_risk": 0.0
-    },
-    {
-      "name": "Multimodal Models",
-      "domain": "unknown",
-      "definition": "",
-      "state": "emerging",
-      "item_count": 12,
-      "last_seen": "2026-05-02",
-      "source_classes": [
-        "primary",
-        "operator",
-        "practitioner"
-      ],
-      "source_class_counts": {
-        "practitioner": 1,
-        "primary": 7,
-        "operator": 4
+        "practitioner": 5
       },
       "hype_risk": 0.0
     },
@@ -114,32 +36,13 @@
       "domain": "unknown",
       "definition": "",
       "state": "declining",
-      "item_count": 6,
-      "last_seen": "2026-04-15",
+      "item_count": 5,
+      "last_seen": "2026-04-12",
       "source_classes": [
         "practitioner"
       ],
       "source_class_counts": {
-        "practitioner": 6
-      },
-      "hype_risk": 0.0
-    },
-    {
-      "name": "Multi-Agent Systems",
-      "domain": "unknown",
-      "definition": "",
-      "state": "emerging",
-      "item_count": 7,
-      "last_seen": "2026-05-01",
-      "source_classes": [
-        "primary",
-        "operator",
-        "practitioner"
-      ],
-      "source_class_counts": {
-        "practitioner": 1,
-        "primary": 3,
-        "operator": 3
+        "practitioner": 5
       },
       "hype_risk": 0.0
     },
@@ -148,32 +51,28 @@
       "domain": "unknown",
       "definition": "",
       "state": "declining",
-      "item_count": 6,
+      "item_count": 4,
       "last_seen": "2026-04-08",
       "source_classes": [
-        "practitioner",
-        "operator"
+        "practitioner"
       ],
       "source_class_counts": {
-        "practitioner": 4,
-        "operator": 2
+        "practitioner": 4
       },
       "hype_risk": 0.0
     },
     {
-      "name": "LLM Capabilities",
+      "name": "AI Safety & Alignment",
       "domain": "unknown",
       "definition": "",
       "state": "declining",
-      "item_count": 5,
-      "last_seen": "2026-04-07",
+      "item_count": 3,
+      "last_seen": "2026-03-19",
       "source_classes": [
-        "practitioner",
-        "operator"
+        "practitioner"
       ],
       "source_class_counts": {
-        "practitioner": 3,
-        "operator": 2
+        "practitioner": 3
       },
       "hype_risk": 0.0
     },
@@ -181,37 +80,29 @@
       "name": "Local LLM Applications",
       "domain": "unknown",
       "definition": "",
-      "state": "unknown",
-      "item_count": 5,
-      "last_seen": "2026-05-01",
+      "state": "declining",
+      "item_count": 3,
+      "last_seen": "2026-04-04",
       "source_classes": [
-        "practitioner",
-        "primary",
-        "operator"
+        "practitioner"
       ],
       "source_class_counts": {
-        "practitioner": 3,
-        "primary": 1,
-        "operator": 1
+        "practitioner": 3
       },
       "hype_risk": 0.0
     },
     {
-      "name": "Retrieval-Augmented Generation",
+      "name": "Supply Chain Security",
       "domain": "unknown",
       "definition": "",
-      "state": "emerging",
-      "item_count": 8,
-      "last_seen": "2026-05-01",
+      "state": "declining",
+      "item_count": 3,
+      "last_seen": "2026-03-30",
       "source_classes": [
-        "primary",
-        "operator",
         "practitioner"
       ],
       "source_class_counts": {
-        "practitioner": 1,
-        "primary": 4,
-        "operator": 3
+        "practitioner": 3
       },
       "hype_risk": 0.0
     },
@@ -231,132 +122,17 @@
       "hype_risk": 0.0
     },
     {
-      "name": "Supply Chain Security",
-      "domain": "unknown",
-      "definition": "",
-      "state": "declining",
-      "item_count": 4,
-      "last_seen": "2026-03-30",
-      "source_classes": [
-        "practitioner",
-        "operator"
-      ],
-      "source_class_counts": {
-        "practitioner": 3,
-        "operator": 1
-      },
-      "hype_risk": 0.0
-    },
-    {
-      "name": "AI Development Pace",
-      "domain": "unknown",
-      "definition": "",
-      "state": "declining",
-      "item_count": 4,
-      "last_seen": "2026-03-24",
-      "source_classes": [
-        "practitioner",
-        "operator"
-      ],
-      "source_class_counts": {
-        "practitioner": 2,
-        "operator": 2
-      },
-      "hype_risk": 0.0
-    },
-    {
-      "name": "AI Workforce & Jobs",
-      "domain": "unknown",
-      "definition": "",
-      "state": "declining",
-      "item_count": 8,
-      "last_seen": "2026-04-24",
-      "source_classes": [
-        "practitioner",
-        "operator"
-      ],
-      "source_class_counts": {
-        "practitioner": 5,
-        "operator": 3
-      },
-      "hype_risk": 0.0
-    },
-    {
-      "name": "Code Generation",
+      "name": "LLM Capabilities",
       "domain": "unknown",
       "definition": "",
       "state": "declining",
       "item_count": 3,
-      "last_seen": "2026-03-07",
+      "last_seen": "2026-04-07",
       "source_classes": [
-        "operator",
         "practitioner"
       ],
       "source_class_counts": {
-        "practitioner": 1,
-        "operator": 2
-      },
-      "hype_risk": 0.0
-    },
-    {
-      "name": "Model Distillation",
-      "domain": "unknown",
-      "definition": "",
-      "state": "emerging",
-      "item_count": 4,
-      "last_seen": "2026-05-01",
-      "source_classes": [
-        "primary",
-        "operator"
-      ],
-      "source_class_counts": {
-        "primary": 3,
-        "operator": 1
-      },
-      "hype_risk": 0.0
-    },
-    {
-      "name": "Long-Context Reasoning",
-      "domain": "unknown",
-      "definition": "",
-      "state": "declining",
-      "item_count": 4,
-      "last_seen": "2026-03-26",
-      "source_classes": [
-        "operator"
-      ],
-      "source_class_counts": {
-        "operator": 4
-      },
-      "hype_risk": 0.0
-    },
-    {
-      "name": "Agent Tool Use",
-      "domain": "unknown",
-      "definition": "",
-      "state": "declining",
-      "item_count": 3,
-      "last_seen": "2026-03-18",
-      "source_classes": [
-        "operator"
-      ],
-      "source_class_counts": {
-        "operator": 3
-      },
-      "hype_risk": 0.0
-    },
-    {
-      "name": "Team Update",
-      "domain": "unknown",
-      "definition": "",
-      "state": "declining",
-      "item_count": 3,
-      "last_seen": "2017-01-30",
-      "source_classes": [
-        "operator"
-      ],
-      "source_class_counts": {
-        "operator": 3
+        "practitioner": 3
       },
       "hype_risk": 0.0
     },
@@ -376,79 +152,32 @@
       "hype_risk": 0.0
     },
     {
-      "name": "Reconstruction By Generation: 3D Multi-Object Scene Reconstruction From Sparse O",
-      "domain": "unknown",
-      "definition": "",
-      "state": "unknown",
-      "item_count": 2,
-      "last_seen": "2026-05-01",
-      "source_classes": [
-        "primary"
-      ],
-      "source_class_counts": {
-        "primary": 2
-      },
-      "hype_risk": 0.0
-    },
-    {
-      "name": "RLHF & Alignment",
-      "domain": "unknown",
-      "definition": "",
-      "state": "unknown",
-      "item_count": 2,
-      "last_seen": "2026-05-01",
-      "source_classes": [
-        "primary",
-        "operator"
-      ],
-      "source_class_counts": {
-        "primary": 1,
-        "operator": 1
-      },
-      "hype_risk": 0.0
-    },
-    {
-      "name": "The State Of Enterprise AI",
+      "name": "Open-Source AI Agents",
       "domain": "unknown",
       "definition": "",
       "state": "declining",
       "item_count": 2,
-      "last_seen": "2025-12-17",
+      "last_seen": "2026-03-15",
       "source_classes": [
-        "operator"
+        "practitioner"
       ],
       "source_class_counts": {
-        "operator": 2
+        "practitioner": 2
       },
       "hype_risk": 0.0
     },
     {
-      "name": "Open-Source Models",
+      "name": "AI Development Pace",
       "domain": "unknown",
       "definition": "",
       "state": "declining",
       "item_count": 2,
-      "last_seen": "2025-08-05",
+      "last_seen": "2026-03-24",
       "source_classes": [
-        "operator"
+        "practitioner"
       ],
       "source_class_counts": {
-        "operator": 2
-      },
-      "hype_risk": 0.0
-    },
-    {
-      "name": "Gemini 3.1 Flash Tts: The Next Generation Of Expressive AI Speech",
-      "domain": "unknown",
-      "definition": "",
-      "state": "declining",
-      "item_count": 2,
-      "last_seen": "2026-04-15",
-      "source_classes": [
-        "operator"
-      ],
-      "source_class_counts": {
-        "operator": 2
+        "practitioner": 2
       },
       "hype_risk": 0.0
     }
