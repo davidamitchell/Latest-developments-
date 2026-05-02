@@ -98,6 +98,15 @@
       </div>
     </div>
 
+    <!-- Item-level provenance panel — populated when a theme card is clicked -->
+    <div id="drill-down-panel" class="drill-down-panel" hidden>
+      <div class="drill-down-header">
+        <span id="drill-down-title" class="drill-down-title"></span>
+        <button id="drill-down-close" class="drill-down-close" aria-label="Close panel">✕</button>
+      </div>
+      <div id="drill-down-body"></div>
+    </div>
+
     <h2 class="section-heading">Source-Class Coverage Heatmap</h2>
     <p style="font-size:0.75rem;color:var(--text-muted);margin:-10px 0 12px;letter-spacing:0.04em">
       Rows = themes. Columns = source classes. High media, low primary = hype risk.

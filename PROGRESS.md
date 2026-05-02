@@ -1,6 +1,6 @@
 # Progress
 
-Last updated: 2026-04-30
+Last updated: 2026-05-01
 
 ---
 
@@ -607,3 +607,59 @@ Standardisation pass: expanded `.github/copilot-instructions.md` from stub to fu
 3. **What single change would prevent this next time?** Always declare lookup dicts (`_KNOWN`, `_LABELS`, etc.) at module level if they're logically constant, even if only used in one function. This avoids N806 and marginally improves performance.
 
 4. **Is this a pattern?** Yes — the `_KNOWN` variable naming issue appeared in two separate fetchers in the same session. Adding a note to `learnings.md`: _"Module-level lookup dicts must be lowercase only if inside a function. Move to module level or use all-lowercase name."_
+
+
+---
+
+## 2026-05-01 — Skills submodule updated; copilot-instructions.md enhanced
+
+**Branch:** `copilot/update-skills-submodule`
+
+**Completed:**
+- `.github/skills` submodule advanced to latest commit (`f8c5471`) from `davidamitchell/Skills`. New skills now available: `backlog-worker`, `swe`, `tdd`, `feedback`, `inline-citation`, `peer-reviewer`, `plain-language`, `research-question`, `research-reviewer`, `skill-author`.
+- `.github/copilot-instructions.md` — Agent Skills table updated with all 20 skills now present in the submodule. Previously only 10 skills were listed.
+- `.github/copilot-instructions.md` — Skills section rewritten with explicit composability chains: research → strategy-author → backlog-manager → backlog-worker → swe + tdd → code-review.
+- `.github/copilot-instructions.md` — Backlog Mandate updated to reference `backlog-worker` for executing items (distinct from `backlog-manager` for managing them).
+- `.github/copilot-instructions.md` — Testing section updated to explicitly reference `tdd` skill.
+- `.github/copilot-instructions.md` — Working Methodology: new "Skill Composability" section with per-task-type skill chains.
+- `.github/copilot-instructions.md` — Improvement signal table extended with three new rows: implementation bugs → apply `tdd`; unclear strategy / poorly defined items → apply `strategy-author` + `backlog-manager`; domain knowledge unknown → apply `research` first.
+
+**Mini-Retro:**
+
+1. **Did the process work?** Yes. Submodule was already current; the main work was reading the new skills and updating the instructions to reflect the full composable skill set.
+
+2. **What slowed down or went wrong?** Nothing significant. The Skills submodule had grown from 7 to 20 skills; several key new skills (`backlog-worker`, `swe`, `tdd`) directly address gaps in how work was previously specified in the instructions.
+
+3. **What single change would prevent this next time?** The sync-skills.yml workflow should be verified to keep the submodule pointer current and the instructions table complete. Add a backlog item to audit skill coverage after each submodule sync.
+
+4. **Is this a pattern?** Yes — instructions lag behind new skills added to the Skills repo. The fix is: after each `sync-skills.yml` run, compare the skills table in copilot-instructions.md against the actual skill directories and update any missing rows.
+
+---
+
+## 2026-05-01 — Slice 15.6 (raw data drill-down) + instruction gap fixes
+
+**Branch:** `copilot/update-skills-submodule`
+
+**Critical assessment of previous instructions update:**
+
+Three gaps identified by working the backlog:
+
+1. **Backlog format ambiguity**: `backlog-worker` targets W-XXXX items but most open work is in Epic slice tables (`[ ]`/`[x]`). Instructions didn't distinguish these — an agent would loop trying to find a `ready` item and not find any.
+2. **`learnings.md` invisible**: The file exists, is actively maintained, and contains critical patterns (mock targets, Playwright lock, ruff N806 rule). It was never referenced in the instructions, so new sessions wouldn't know to read it.
+3. **Skill chains read as mandates**: The table said "every significant task maps to a skill chain" without any qualifier. This could lead to applying `technical-writer → feedback → remove-ai-slop` to a two-line README change — process waste with no signal value.
+
+**Completed:**
+- **Slice 15.6 — Raw data drill-down**: Theme cards are now clickable. Clicking a card opens a provenance panel showing all items for that theme, grouped by date (newest first), with source name and source class badge. Panel closes on second click or via ✕ button. CSS: `cursor: pointer`, `.selected` highlight, `.theme-card-hint` tooltip, `.drill-down-panel`, `.provenance-table`.
+- **Instruction gap 1**: Backlog Mandate now documents both W-XXXX and Epic slice formats with clear instructions for working each.
+- **Instruction gap 2**: New `learnings.md` Mandate section referencing `learnings.md` and distinguishing it from PROGRESS.md.
+- **Instruction gap 3**: Skill Composability section now has an explicit qualifier: chains are guidance for non-trivial work, not a mandate for every task.
+
+**Mini-Retro:**
+
+1. **Did the process work?** The new instructions were immediately tested by working from them. The gaps appeared within the first step (reading the backlog to find a `ready` item). That's the right feedback loop.
+
+2. **What slowed down or went wrong?** Nothing slowed down — the gaps were obvious and fixable inline.
+
+3. **What single change would prevent this next time?** When writing new instructions, immediately attempt to follow them on a real task before committing. If you can't execute the first step, the instructions have a gap.
+
+4. **Is this a pattern?** Instructions written in isolation often have gaps that only appear in use. Validate instructions by simulating the first action they describe before committing.
