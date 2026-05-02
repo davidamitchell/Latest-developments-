@@ -1109,7 +1109,7 @@ Currently `src/main.py` does its own fetching + processing. In the target archit
 
 ## W-0028
 
-status: ready
+status: done
 created: 2026-05-02
 updated: 2026-05-02
 
