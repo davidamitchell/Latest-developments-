@@ -1024,7 +1024,7 @@ sources:
 
 ## W-0026
 
-status: ready
+status: done
 created: 2026-05-02
 updated: 2026-05-02
 
