@@ -142,7 +142,7 @@ class TestRunMain:
         with (
             patch("src.config.load_config") as mock_cfg,
             patch("src.pipeline.run.read_raw_jsonl", return_value=[]),
-            patch("src.models.write_processed_jsonl"),
+            patch("src.pipeline.run.write_processed_jsonl"),
             patch("sys.argv", ["run", "--date", "2026-05-02"]),
         ):
             mock_cfg.return_value.logging.log_file = None
@@ -157,7 +157,7 @@ class TestRunMain:
             patch("src.config.load_config") as mock_cfg,
             patch("src.pipeline.run.read_raw_jsonl", return_value=[item]),
             patch("src.pipeline.run.process", return_value=[_make_processed()]),
-            patch("src.models.write_processed_jsonl"),
+            patch("src.pipeline.run.write_processed_jsonl"),
             patch("sys.argv", ["run", "--date", "2026-05-02"]),
             patch.dict("os.environ", {k: v for k, v in __import__("os").environ.items()
                                       if k != "GEMINI_API_KEY"}),
@@ -173,7 +173,7 @@ class TestRunMain:
             patch("src.config.load_config") as mock_cfg,
             patch("src.pipeline.run.read_raw_jsonl", return_value=[item]),
             patch("src.pipeline.run.process", return_value=[]) as mock_process,
-            patch("src.models.write_processed_jsonl"),
+            patch("src.pipeline.run.write_processed_jsonl"),
             patch("sys.argv", ["run", "--date", "2026-05-02"]),
         ):
             mock_cfg.return_value.logging.log_file = None
