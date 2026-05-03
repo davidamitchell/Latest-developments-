@@ -54,17 +54,41 @@ Record every user-facing change in `CHANGELOG.md`. Follow Keep-a-Changelog 1.0.0
 
 ---
 
-## Project Overview
+## Project Overview — Architecture (read this first)
 
-Python 3.11+ daily digest pipeline. Fetches AI/ML content from YouTube, RSS feeds, and Hacker News; summarises with Gemini; emails the result. GitHub Actions runs it on a schedule. Deduplication state persists as a JSON file committed back to the repo after each run.
+Python 3.11+ AI content intelligence system built on strict SOLID separation of concerns.
+
+```
+LAYER 1 — FETCHING      Sources → Fetchers → FetchedItem[]
+                         Persisted: data/raw/YYYY-MM-DD.jsonl  ← committed to git
+
+LAYER 2 — PROCESSING    FetchedItem[] → Pipeline stages → ProcessedItem[]
+                         Persisted: data/processed/YYYY-MM-DD.jsonl  ← committed to git
+
+LAYER 3A — EMAIL        ProcessedItem[] → format → send → history/YYYY-MM-DD.txt
+LAYER 3B — SITE BUILD   ProcessedItem[] → trend analysis → docs/data/*.json
+```
+
+**Each layer persists its own output.** `data/raw/` and `data/processed/` are the durable data stores — both committed to git. Do NOT gitignore them without an explicit ADR.
+
+**`docs/` is entirely ephemeral.** It is a build artefact produced by the site build consumer. It can be deleted and rebuilt from `data/processed/` at any time without affecting email delivery, state, or history. Nothing outside `docs/` depends on it.
+
+**Layers 3A and 3B are parallel consumers.** Both trigger from the same event (new `data/processed/` committed) and have zero dependency on each other. Neither consumer calls a fetcher or pipeline stage — both depend only on `ProcessedItem` from `data/processed/`.
+
+**Schema Contract A — `FetchedItem`** (`src/fetchers/__init__.py`): the only output of fetchers; the only input to the processing pipeline. Fields: `id`, `title`, `url`, `content`, `source_name`, `source_type`, `source_class`, `author`, `published`, `has_code`, `evidence_type`. All fetchers must populate every field.
+
+**Schema Contract B — `ProcessedItem`** (`src/models.py`): the only output of the processing pipeline; the only input to consumers. Carries all `FetchedItem` fields plus stage enrichments: `fetch_date`, `cleaned_content`, `concepts`, `actors`, `impact_vector`, `theme`, `domain`, `summary`, `is_marketing`, `marketing_confidence`, `hype_risk`, `credibility_score`.
+
+**Deduplication** happens at the fetch boundary: `state/processed.json` holds previously processed item IDs. Items already in this set are not fetched again. State is updated by the email digest consumer after a successful send.
 
 ---
 
 ## Non-Negotiable Constraints
 
 - **Never commit secrets.** API keys, passwords, and email addresses live in GitHub Secrets / environment variables. The `.env` file is gitignored.
-- **Never re-introduce processed items.** All state lives in `state/processed.json`. Do not delete or reset this file.
-- **No breaking changes to the config schema** without updating `config/sources.yaml`, the relevant ADR, and the README.
+- **Never re-introduce processed items.** All dedup state lives in `state/processed.json`. Do not delete or reset this file.
+- **Respect the schema contracts.** `FetchedItem` is the only output of fetchers. `ProcessedItem` is the only input to consumers. Consumers must not call fetchers or pipeline stages directly.
+- **Config schema (ADR-0018):** `sources.yaml` has two independent sections: `sources` (flat list with type discriminator) and `digest` (references only ProcessedItem fields — never source names or types). Any config change must update both the YAML and the relevant ADR.
 - **Every slice must be end-to-end runnable** before being marked complete in `BACKLOG.md`.
 - **Keep PROGRESS.md updated** after every meaningful commit.
 
@@ -105,28 +129,72 @@ Python 3.11+ daily digest pipeline. Fetches AI/ML content from YouTube, RSS feed
 
 ```
 src/
-├── main.py             # CLI entry point; orchestrates the pipeline
 ├── fetchers/
-│   ├── __init__.py     # Fetcher protocol and FetchedItem dataclass
-│   ├── youtube.py      # YouTube fetcher (RSS feed + transcript API)
-│   ├── rss.py          # RSS/blog fetcher
-│   └── hackernews.py   # Hacker News Algolia API fetcher
-├── summariser.py       # Gemini summarisation (google-genai SDK)
-├── emailer.py          # Email delivery (Gmail / SendGrid)
-├── state.py            # Deduplication: read/write processed.json
-├── config.py           # Load and validate sources.yaml
+│   ├── __init__.py     # Schema Contract A: FetchedItem + Fetcher protocol
+│   ├── youtube.py      # YouTube fetcher (YouTube Data API v3)
+│   ├── rss.py          # RSS/Atom fetcher
+│   ├── substack.py     # Substack JSON API fetcher
+│   ├── hackernews.py   # Hacker News Algolia API fetcher
+│   ├── arxiv.py        # arXiv RSS fetcher
+│   ├── huggingface.py  # HuggingFace model releases
+│   └── ...             # All fetchers return FetchedItem — the only coupling is the contract
+│
+├── pipeline/           # Concern 2: processing pipeline (W-0026)
+│   ├── fetch.py        # CLI: fetch all sources → data/raw/YYYY-MM-DD.jsonl
+│   ├── run.py          # CLI: process raw data → data/processed/YYYY-MM-DD.jsonl
+│   └── stages/
+│       ├── ingest.py             # Validate FetchedItem → ProcessedItem
+│       ├── clean.py              # Strip markup, normalise whitespace
+│       ├── concept_extraction.py # AI: entities, techniques, impact vector
+│       ├── theme_classification.py # AI: theme label, domain
+│       ├── summary_extraction.py # AI: 2–3 sentence summary
+│       ├── media_id.py           # AI+heuristic: marketing vs substantive
+│       ├── hype_scoring.py       # Composite hype risk
+│       └── credibility_scoring.py # 5-axis credibility score
+│
+├── digest/             # Concern 3A: email consumer (W-0027)
+│   └── send.py         # Read ProcessedItem[] → select → format → send → write history/
+│
+├── site/               # Concern 3B: site build consumer (W-0028)
+│   └── build.py        # Read ProcessedItem[] → trend analysis → docs/data/*.json
+│
+├── models.py           # Schema Contract B: ProcessedItem + TrendMetrics, ThemeNode, GraphEdge
+├── summariser.py       # Gemini digest rendering (used by digest/send.py)
+├── emailer.py          # Email delivery (Gmail / SendGrid / Resend)
+├── state.py            # Deduplication: read/write state/processed.json
+├── credibility.py      # Credibility scoring (used by pipeline stages)
+├── themes.py           # Theme normalisation and Gemini clustering
+├── trend_state.py      # Trend state machine (used by site/build.py)
+├── config.py           # Load and validate config/sources.yaml
+├── history.py          # Write/read history/YYYY-MM-DD.txt (email digest concern only)
+└── logger.py           # Logging setup
+│
+├── history.py          # Archive digest to history/; load recent digests for context
+├── config.py           # Load and validate config/sources.yaml
 └── logger.py           # Logging setup
 
 config/
-└── sources.yaml        # User-facing configuration (sources + prompt)
+└── sources.yaml        # Two independent sections: sources (flat list) + digest (ProcessedItem filters only)
 
 state/
-└── processed.json      # Runtime state — committed by CI after each run
+└── processed.json      # Deduplication state — committed by daily-digest workflow after each run
 
 history/
-└── YYYY-MM-DD.txt      # Archived daily digests
+└── YYYY-MM-DD.txt      # Digest archives — committed by daily-digest; read by site build
 
 docs/
+├── index.html          # GitHub Pages site (source file — committed)
+├── css/style.css       # Site styles (source file — committed)
+├── js/                 # Site JavaScript (source files — committed)
+├── data/               # EPHEMERAL — generated by rebuild-site.yml from data/processed/
+│   │                   # Can be deleted and rebuilt at any time without side effects.
+│   │                   # Nothing outside docs/ depends on these files.
+│   ├── meta.json       # Run metadata
+│   ├── trends.json     # Per-theme trend state and metrics
+│   ├── themes.json     # Theme cluster definitions
+│   ├── items.json      # Item-level records
+│   ├── graph.json      # Theme relationship graph
+│   └── sources.json    # Per-source coverage stats
 └── adr/                # Architecture Decision Records
     ├── README.md        # ADR index
     └── NNNN-title.md
@@ -135,7 +203,9 @@ docs/
 ├── copilot-instructions.md  # Agent instructions (this file)
 ├── skills/                  # Agent skills submodule (davidamitchell/Skills)
 └── workflows/
-    └── daily-digest.yml
+    ├── daily-digest.yml     # Schedule: fetch → email → commit state+history
+    ├── rebuild-site.yml     # Triggered after digest or manual: trends → docs/data → GH Pages
+    └── ci.yml               # Lint + test on every push/PR
 
 BACKLOG.md              # Planned and completed work items
 PROGRESS.md             # Append-only session history
@@ -149,7 +219,7 @@ tests/
 
 1. Create `src/fetchers/<source>.py` implementing the `Fetcher` protocol (see `src/fetchers/__init__.py`)
 2. Add config schema to `config/sources.yaml` with inline comments
-3. Register the fetcher in `src/main.py`
+3. Register the fetcher in `src/pipeline/fetch.py` → `_build_fetchers()`
 4. Write unit tests in `tests/test_fetchers_<source>.py`
 5. Write an ADR in `docs/adr/` if the approach involves a significant design decision
 6. Update `BACKLOG.md` (mark slice done) and `PROGRESS.md`
@@ -226,10 +296,43 @@ If no skill fits, note the gap in `BACKLOG.md` and proceed without synthesising 
 
 ## GitHub Actions / Codespaces
 
-- Workflow: `.github/workflows/daily-digest.yml`
-- Secrets are injected as environment variables — see README for the full list
-- `state/processed.json` is committed back to the repo after each run; this persists deduplication state across days and Codespaces sessions
-- The workflow supports `workflow_dispatch` with optional `--debug` and `--dry-run` flags
+Four workflows, each with one responsibility. Two data contracts passed between them.
+
+| Workflow | Trigger | Commits | Responsibility |
+|---|---|---|---|
+| `pipeline.yml` | Schedule (07:00 UTC) + `workflow_dispatch` | — | **Orchestrator** — calls the three below in order |
+| `fetch-and-process.yml` | `workflow_call` + `workflow_dispatch` | `data/raw/`, `data/processed/` | Fetch all sources; run pipeline |
+| `email-digest.yml` | `workflow_call` + `workflow_dispatch` | `state/processed.json`, `history/` | Send digest; archive |
+| `rebuild-site.yml` | `workflow_call` + `workflow_dispatch` | `docs/data/` | Build site from processed data |
+| `ci.yml` | Every push + PR | — | Lint and test |
+
+`pipeline.yml` is the only workflow with a schedule. It calls `fetch-and-process`, then triggers `email-digest` and `rebuild-site` in **parallel**. Each individual workflow also supports `workflow_dispatch` for standalone manual runs.
+
+**Workflow validation checklist — required before committing any workflow YAML change:**
+1. Every `python -m <module>` entrypoint: verify `src/<path>.py` exists with `main()` / `__main__` block
+2. Every `--flag` the workflow passes: verify it appears in the module's `_parse_args()` — argparse silently drops unknown args
+3. Every `${{ secrets.KEY }}` env var: verify the module reads it with `os.environ.get("KEY")` or equivalent
+4. If using `workflow_call` in an orchestrator: the orchestrator must declare `permissions: contents: write` if any called workflow commits to the repo
+
+**fetch-and-process.yml** (primary pipeline):
+- Job 1 `fetch`: instantiates all enabled fetchers, deduplicates, writes `data/raw/YYYY-MM-DD.jsonl`, commits
+- Job 2 `process`: reads raw JSONL, runs all pipeline stages, writes `data/processed/YYYY-MM-DD.jsonl`, commits
+- Supports `workflow_dispatch` with `--debug` and `--max-videos` flags
+
+**email-digest.yml** (consumer A — parallel):
+- Reads `data/processed/YYYY-MM-DD.jsonl` only
+- Filters items by digest config, formats, sends email
+- Writes `history/YYYY-MM-DD.txt` — this is part of the email flow, not the pipeline
+- Updates `state/processed.json` after successful send
+- Supports `workflow_dispatch` with `--dry-run`
+- Does **not** run trend analysis; does **not** write `docs/data/`
+
+**rebuild-site.yml** (consumer B — parallel):
+- Reads `data/processed/*.jsonl` only
+- Computes trend aggregates, writes `docs/data/*.json`, deploys GH Pages
+- Does **not** send email; does **not** read `history/`
+- `docs/data/` is a build artefact — only this workflow writes it
+
 
 ---
 
@@ -242,6 +345,7 @@ Before marking a backlog slice as done:
 - [ ] `make test` passes (with mocked network)
 - [ ] Full testing pyramid applied: unit tests for business logic + smoke/integration tests where applicable
 - [ ] `make dry-run` works end-to-end
+- [ ] If workflow YAML changed: all four validation rules above applied
 - [ ] `PROGRESS.md` updated
 - [ ] Any new ADRs written and indexed
 - [ ] README updated if user-facing behaviour changed
@@ -417,3 +521,5 @@ Before acting on any task in this repo, reason explicitly through these steps:
 6. **Deduplication integrity** — Any change that touches `state/processed.json` or the deduplication logic must be scrutinised. Ask: "Could this cause items to be re-sent, or cause new items to be silently skipped?"
 
 7. **Improvement implication** — Does this session reveal a class of pipeline fragility, a missing test pattern, or a configuration gap? Raise it in the Mini-Retro.
+
+8. **Concern boundary** — Before changing any code, identify which concern it belongs to: fetching, processing pipeline, email digest consumer, or site build consumer. A consumer must not call a fetcher. A pipeline stage must not call an emailer. Changes that cross concern boundaries without a schema contract change are architectural violations.

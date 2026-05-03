@@ -1,5 +1,5 @@
 {
-  "generated": "2026-05-02T08:15:37.605284+00:00",
+  "generated": "2026-05-03T03:51:03.079773+00:00",
   "classes": {
     "primary": {
       "count": 0,
@@ -10,17 +10,11 @@
       "sources": []
     },
     "practitioner": {
-      "count": 1834,
+      "count": 177,
       "sources": [
-        "Arxiv",
-        "Blogs/Rss",
         "Hacker News",
-        "Hugging Face",
-        "Local Model Sources",
-        "New Entrant Sources",
-        "Openrouter",
-        "Operator Changelogs",
-        "Youtube"
+        "Nate Jones",
+        "Wes Roth"
       ]
     },
     "media": {
@@ -34,306 +28,48 @@
   },
   "sources": [
     {
-      "name": "OpenAI Blog",
-      "source_class": "operator",
-      "item_count": 929,
-      "first_seen": "2015-12-11",
-      "last_seen": "2026-04-30",
-      "days_active": 584,
-      "top_themes": [
-        "AI Safety & Alignment",
-        "Fine-Tuning & Adaptation",
-        "Agentic Workflows",
-        "Benchmarks & Evals",
-        "Retrieval-Augmented Generation"
-      ]
-    },
-    {
-      "name": "YouTube",
-      "source_class": "practitioner",
-      "item_count": 106,
-      "first_seen": "2026-03-03",
-      "last_seen": "2026-05-02",
-      "days_active": 48,
-      "top_themes": [
-        "Agentic Workflows",
-        "AI Safety & Alignment",
-        "AI Business Strategy",
-        "AI Workforce & Jobs",
-        "AI Infrastructure"
-      ]
-    },
-    {
-      "name": "DeepMind Blog",
-      "source_class": "operator",
-      "item_count": 100,
-      "first_seen": "2025-02-04",
-      "last_seen": "2026-04-30",
-      "days_active": 60,
-      "top_themes": [
-        "AI Safety & Alignment",
-        "Enabling A New Model For Healthcare With AI Co-Clinician",
-        "Announcing Our Partnership With The Republic Of Korea",
-        "Decoupled Diloco: A New Frontier For Resilient, Distributed AI Training",
-        "Partnering With Industry Leaders To Accelerate AI Transformation"
-      ]
-    },
-    {
-      "name": "OpenRouter",
-      "source_class": "market",
-      "item_count": 100,
-      "first_seen": "2026-05-02",
-      "last_seen": "2026-05-02",
-      "days_active": 1,
-      "top_themes": [
-        "Inference Cost Reduction"
-      ]
-    },
-    {
-      "name": "Together AI Blog",
-      "source_class": "operator",
-      "item_count": 100,
-      "first_seen": "2025-03-18",
-      "last_seen": "2026-04-30",
-      "days_active": 86,
-      "top_themes": [
-        "Fine-Tuning & Adaptation",
-        "Benchmarks & Evals",
-        "Long-Context Reasoning",
-        "AI Development Pace",
-        "AI Safety & Alignment"
-      ]
-    },
-    {
       "name": "Hacker News",
       "source_class": "practitioner",
-      "item_count": 79,
-      "first_seen": "2026-03-07",
+      "item_count": 80,
+      "first_seen": "2026-03-03",
       "last_seen": "2026-05-01",
       "days_active": 28,
       "top_themes": [
         "Local LLM Applications",
         "Local LLM Inference",
+        "Open-Source AI Agents",
         "AI Business Strategy",
-        "Supply Chain Security",
-        "LLM Service Outage"
+        "Supply Chain Security"
       ]
     },
     {
-      "name": "arXiv",
-      "source_class": "primary",
-      "item_count": 30,
-      "first_seen": "2026-05-02",
-      "last_seen": "2026-05-02",
-      "days_active": 1,
-      "top_themes": [
-        "Multi-Agent Systems",
-        "Multimodal Models",
-        "Compositional Meta-Learning For Mitigating Task Heterogeneity In Physics-Informe",
-        "Binary Spiking Neural Networks As Causal Models",
-        "When Your LLM Reaches End-Of-Life: A Framework For Confident Model Migration In"
-      ]
-    },
-    {
-      "name": "Simon Willison's Weblog",
+      "name": "Nate Jones",
       "source_class": "practitioner",
-      "item_count": 30,
-      "first_seen": "2026-04-23",
+      "item_count": 75,
+      "first_seen": "2026-03-03",
+      "last_seen": "2026-05-02",
+      "days_active": 46,
+      "top_themes": [
+        "Agentic Workflows",
+        "AI Workforce & Jobs",
+        "AI Safety & Alignment",
+        "AI Infrastructure",
+        "AI Business Strategy"
+      ]
+    },
+    {
+      "name": "Wes Roth",
+      "source_class": "practitioner",
+      "item_count": 22,
+      "first_seen": "2026-03-03",
       "last_seen": "2026-05-01",
-      "days_active": 8,
+      "days_active": 21,
       "top_themes": [
-        "Inaturalist Sightings",
-        "Codex Cli 0.128.0 Adds /Goal",
-        "Benchmarks & Evals",
-        "Quoting Andrew Kelley",
-        "We Need Rss For Sharing Abundant Vibe-Coded Apps"
-      ]
-    },
-    {
-      "name": "Google AI Blog",
-      "source_class": "operator",
-      "item_count": 20,
-      "first_seen": "2026-03-26",
-      "last_seen": "2026-04-28",
-      "days_active": 14,
-      "top_themes": [
-        "Celebrating 20 Years Of Google Translate: Fun Facts, Tips And New Features To Tr",
-        "Join The New AI Agents Vibe Coding Course From Google And Kaggle",
-        "8 Gemini Tips For Organizing Your Space (And Life)",
-        "Here\u2019S How Our Tpus Power Increasingly Demanding AI Workloads.",
-        "Elevating Austria: Google Invests In Its First Data Center In The Alps."
-      ]
-    },
-    {
-      "name": "AWS ML Blog",
-      "source_class": "operator",
-      "item_count": 20,
-      "first_seen": "2026-04-22",
-      "last_seen": "2026-05-01",
-      "days_active": 8,
-      "top_themes": [
-        "Aws Transform Now Automates Bi Migration To Amazon Quick In Days",
-        "Fine-Tuning & Adaptation",
-        "Aws Generative AI Model Agility Solution: A Comprehensive Guide To Migrating LLM",
-        "Sun Finance Automates Id Extraction And Fraud Detection With Generative AI On Aw",
-        "Agentic Workflows"
-      ]
-    },
-    {
-      "name": "Microsoft AI Blog",
-      "source_class": "operator",
-      "item_count": 10,
-      "first_seen": "2022-05-31",
-      "last_seen": "2022-12-06",
-      "days_active": 10,
-      "top_themes": [
-        "A Conversation With Kevin Scott: What\u2019S Next In AI",
-        "From Hot Wheels To Handling Content: How Brands Are Using Microsoft AI To Be Mor",
-        "Microsoft Open Sources Its \u2018Farm Of The Future\u2019 Toolkit",
-        "How Data And AI Will Transform Contact Centres For Financial Services",
-        "AI-Equipped Drones Study Dolphins On The Edge Of Extinction"
-      ]
-    },
-    {
-      "name": "Lambda Blog",
-      "source_class": "operator",
-      "item_count": 10,
-      "first_seen": "2026-02-19",
-      "last_seen": "2026-04-30",
-      "days_active": 10,
-      "top_themes": [
-        "Creating Highly Efficient Agents: 450M Tool-Calling Tokens Distilled For Post-Tr",
-        "Flashattention-4 Gives The Nvidia Blackwell Platform Its Most Optimized Attentio",
-        "Iclr 2026: 12 Papers On Making AI Systems Reliable, Efficient, And Secure",
-        "Lambda'S MLperf Inference V6.0: Hardware Leap, Software Maturity, Research Break",
-        "Lambda At Nvidia Gtc 2026: Our Thoughts"
-      ]
-    },
-    {
-      "name": "Groq SDK Releases",
-      "source_class": "operator",
-      "item_count": 10,
-      "first_seen": "2025-11-14",
-      "last_seen": "2026-04-18",
-      "days_active": 10,
-      "top_themes": [
-        "V1.2.0",
-        "V1.1.2",
-        "V1.1.1",
-        "V1.1.0",
-        "V1.0.0"
-      ]
-    },
-    {
-      "name": "Mistral Python SDK Releases",
-      "source_class": "operator",
-      "item_count": 10,
-      "first_seen": "2026-04-03",
-      "last_seen": "2026-04-30",
-      "days_active": 9,
-      "top_themes": [
-        "Python - V2.4.4 - 2026-04-30 12:05:40",
-        "Python - V2.4.3 - 2026-04-27 12:54:54",
-        "Python - V2.4.2 - 2026-04-23 15:10:04",
-        "Python - V2.4.1 - 2026-04-21 13:44:04",
-        "Python - V2.4.0 - 2026-04-16 12:02:46"
-      ]
-    },
-    {
-      "name": "Ollama Releases",
-      "source_class": "practitioner",
-      "item_count": 10,
-      "first_seen": "2026-04-22",
-      "last_seen": "2026-04-30",
-      "days_active": 5,
-      "top_themes": [
-        "V0.22.1",
-        "V0.22.1-Rc1",
-        "V0.22.1-Rc0: New Models (#15861)",
-        "V0.22.0",
-        "V0.22.0-Rc1"
-      ]
-    },
-    {
-      "name": "llama.cpp Releases",
-      "source_class": "practitioner",
-      "item_count": 10,
-      "first_seen": "2026-04-30",
-      "last_seen": "2026-05-02",
-      "days_active": 3,
-      "top_themes": [
-        "B9002",
-        "B9000",
-        "B8999",
-        "B8998",
-        "B8996"
-      ]
-    },
-    {
-      "name": "LocalAI Releases",
-      "source_class": "practitioner",
-      "item_count": 10,
-      "first_seen": "2026-01-18",
-      "last_seen": "2026-04-07",
-      "days_active": 10,
-      "top_themes": [
-        "V4.1.3",
-        "V4.1.2",
-        "V4.1.1",
-        "V4.1.0",
-        "V4.0.0"
-      ]
-    },
-    {
-      "name": "Hugging Face",
-      "source_class": "primary",
-      "item_count": 8,
-      "first_seen": "2026-05-02",
-      "last_seen": "2026-05-02",
-      "days_active": 1,
-      "top_themes": [
-        "Opus Mt En Ro Finetuned En To Ro (Maxpaxsnax)",
-        "Tur After Indomain 10 500 (Fpadovani)",
-        "Tur 10Mb Baseline Seed10 (Fpadovani)",
-        "Wav2Vec2 Large Xls R 300M Dm32 Preaugmented V1 (Sucharithas)",
-        "Asena Esp32 (Pthinc)"
-      ]
-    },
-    {
-      "name": "Mistral Inference Releases",
-      "source_class": "operator",
-      "item_count": 7,
-      "first_seen": "2024-05-24",
-      "last_seen": "2025-03-20",
-      "days_active": 6,
-      "top_themes": [
-        "V1.6.0: Mistrall Goes Small 3.1 With Vision",
-        "V1.5.0",
-        "V1.4.0: Pixtral \ud83d\udc40",
-        "V1.3.0 Mistral-Nemo",
-        "V1.2.0 Add Mamba"
-      ]
-    },
-    {
-      "name": "Substack",
-      "source_class": "media",
-      "item_count": 1,
-      "first_seen": "2026-05-02",
-      "last_seen": "2026-05-02",
-      "days_active": 1,
-      "top_themes": [
-        "Local LLM Applications"
-      ]
-    },
-    {
-      "name": "Other",
-      "source_class": "practitioner",
-      "item_count": 1,
-      "first_seen": "2026-03-31",
-      "last_seen": "2026-03-31",
-      "days_active": 1,
-      "top_themes": [
-        "Claude Code Learning"
+        "LLM Capabilities",
+        "LLM Misuse",
+        "AI Commentary",
+        "Agi Speculation",
+        "Agi Philosophy"
       ]
     }
   ]

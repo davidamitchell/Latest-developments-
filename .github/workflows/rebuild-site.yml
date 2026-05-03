@@ -1,26 +1,43 @@
 name: Rebuild Site
 
-# Manual trigger only — rebuilds docs/data/ without running the email digest.
-# Use this to refresh trend analysis and the GitHub Pages site on demand.
+# Concern: read ProcessedItem records, compute trend analysis, write site data,
+# deploy GitHub Pages.
+#
+# This workflow is a consumer of Schema Contract B (data/processed/).
+# It has zero knowledge of fetchers, pipeline stages, or the email digest.
+# It does NOT send email and does NOT read history/ for input.
+# (history/ is the email digest's concern — this workflow reads data/processed/ directly.)
+#
+# Triggers:
+#   - Called by pipeline.yml orchestrator (parallel with email-digest, after fetch-and-process)
+#   - workflow_dispatch (standalone manual run)
+
 on:
+  # Called by pipeline.yml (orchestrator).
+  workflow_call:
+
+  # Standalone manual run.
   workflow_dispatch:
     inputs:
       no_fetch:
-        description: "Skip live source fetching (history only)"
+        description: "No-op — kept for backward compatibility"
         type: boolean
         default: false
 
 jobs:
   rebuild:
+    name: Build site data and deploy
     runs-on: ubuntu-latest
+
     permissions:
       contents: write
 
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          ref: main
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -31,25 +48,29 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Run trend analysis
+      - name: Generate site data
+        # Reads data/processed/*.jsonl (ProcessedItem records).
+        # Computes trend state, credibility aggregates, theme graph.
+        # Writes docs/data/*.json for the GitHub Pages site.
+        # Implementation: src/site/build.py (W-0028)
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
           if [ "${{ inputs.no_fetch }}" = "true" ]; then
-            python -m src.trends --docs docs/data --history history --no-fetch
+            python -m src.site.build --no-fetch
           else
-            python -m src.trends --docs docs/data --history history
+            python -m src.site.build
           fi
 
-      - name: Commit updated trend data
+      - name: Commit updated site data
         run: |
-          git config user.name  "github-actions[bot]"
+          git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add docs/data/
           TODAY=$(date -u +%Y-%m-%d)
           if git diff --cached --quiet; then
-            echo "Trend data unchanged — nothing to commit"
+            echo "Site data unchanged — nothing to commit"
           else
             git commit -m "chore: rebuild site data ${TODAY} [skip ci]"
-            git push origin ${{ github.ref_name }}
+            git push origin main
           fi

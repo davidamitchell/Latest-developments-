@@ -28,6 +28,7 @@ Format: [MADR (Markdown Architectural Decision Records)](https://adr.github.io/m
 | [0014](0014-history-archiving-and-trend-analysis.md) | Digest history archiving and trend analysis | Accepted | 2026-03-02 |
 | [0015](0015-standardise-agent-instructions.md) | Standardise agent instruction files | Accepted | 2026-03-07 |
 | [0016](0016-github-pages-trend-intelligence-site.md) | GitHub Pages trend intelligence site | Accepted | 2026-04-29 |
+| [0017](0017-canonical-pipeline-architecture.md) | Canonical pipeline architecture | Accepted | 2026-05-02 |
 
 ---
 

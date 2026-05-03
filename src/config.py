@@ -1,12 +1,97 @@
-"""Load and validate sources.yaml."""
+"""Load and validate config/sources.yaml (ADR-0018).
+
+Public API:
+  SourceEntry   — one entry in the flat sources list; type discriminator + options dict
+  DigestConfig  — email digest settings; references only ProcessedItem fields
+  HistoryConfig — shared digest-archive settings
+  LoggingConfig — shared logging settings
+  Config        — top-level container: sources + digest + history + logging
+  load_config() — parse sources.yaml → Config
+
+Internal helpers kept for fetcher adapters (not part of the Config public API):
+  BlogsConfig, RSSFeed, YouTubeConfig, YouTubeChannel,
+  SubstackConfig, SubstackPublication, HackerNewsConfig
+"""
 
 from __future__ import annotations
 
 import os
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Any
 
 import yaml
+
+
+# ── Public Config dataclasses ─────────────────────────────────────────────────
+
+@dataclass
+class SourceEntry:
+    """One entry in the flat sources list."""
+    type: str                        # rss | youtube | substack | hackernews | arxiv | ...
+    name: str
+    source_class: str                # primary | operator | practitioner | media | market
+    enabled: bool = True
+    options: dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass
+class DigestConfig:
+    """Email digest settings.
+
+    Completely independent of the sources list. All filter predicates
+    reference ProcessedItem field names only — not source names or types.
+    """
+    subject: str = "Daily AI Digest — {date}"
+    send_if_empty: bool = False
+    # ProcessedItem-field predicates
+    min_credibility: float = 0.0
+    max_hype_risk: float = 1.0
+    exclude_marketing: bool = False
+    # Gemini generation settings
+    model: str = "gemini-2.5-flash"
+    max_tokens: int = 2000
+    max_items_per_source: int = 5
+    prompt: str = ""
+
+
+@dataclass
+class HistoryConfig:
+    enabled: bool = True
+    history_days: int = 7
+    history_dir: str = "history"
+
+
+@dataclass
+class LoggingConfig:
+    level: str = "INFO"
+    log_file: str | None = None
+
+
+@dataclass
+class Config:
+    sources: list[SourceEntry] = field(default_factory=list)
+    digest: DigestConfig = field(default_factory=DigestConfig)
+    history: HistoryConfig = field(default_factory=HistoryConfig)
+    logging: LoggingConfig = field(default_factory=LoggingConfig)
+
+
+# ── Internal fetcher-adapter helpers ─────────────────────────────────────────
+# Used exclusively by src/pipeline/fetch.py to construct fetcher instances
+# from SourceEntry objects. NOT part of the Config public API.
+
+@dataclass
+class RSSFeed:
+    name: str
+    url: str
+    fallback_url: str | None = None
+    source_class: str = "practitioner"
+
+
+@dataclass
+class BlogsConfig:
+    enabled: bool = True
+    rss: list[RSSFeed] = field(default_factory=list)
 
 
 @dataclass
@@ -24,23 +109,9 @@ class YouTubeConfig:
 
 
 @dataclass
-class RSSFeed:
-    name: str
-    url: str
-    fallback_url: str | None = None
-    source_class: str = "practitioner"  # primary | operator | practitioner | media | market
-
-
-@dataclass
-class BlogsConfig:
-    enabled: bool = True
-    rss: list[RSSFeed] = field(default_factory=list)
-
-
-@dataclass
 class SubstackPublication:
     name: str
-    slug: str  # e.g. "natesnewsletter" for natesnewsletter.substack.com
+    slug: str
 
 
 @dataclass
@@ -57,145 +128,18 @@ class HackerNewsConfig:
     max_stories: int = 10
 
 
-@dataclass
-class ArxivConfig:
-    enabled: bool = True
-    categories: list[str] = field(default_factory=lambda: ["cs.AI", "cs.LG", "cs.CL"])
-    max_papers: int = 30
+# ── Loader ────────────────────────────────────────────────────────────────────
+
+_COMMON_KEYS = {"type", "name", "source_class", "enabled"}
 
 
-@dataclass
-class HuggingFaceConfig:
-    enabled: bool = False  # opt-in; enable in sources.yaml when ready
-    max_models: int = 50
-    min_downloads: int = 100
-
-
-@dataclass
-class PapersWithCodeConfig:
-    enabled: bool = False
-    page_size: int = 20
-    min_stars: int = 0
-
-
-@dataclass
-class OperatorChangelogConfig:
-    enabled: bool = False
-    feeds: list[str] = field(default_factory=list)
-
-
-@dataclass
-class ReplicateConfig:
-    enabled: bool = False
-    limit: int = 20
-
-
-@dataclass
-class OpenReviewConfig:
-    enabled: bool = False
-    venues: list[str] = field(
-        default_factory=lambda: [
-            "ICLR.cc/2025/Conference/-/Accepted",
-            "NeurIPS.cc/2025/Conference/-/Accepted",
-            "ICML.cc/2025/Conference/-/Accepted",
-        ]
-    )
-    limit: int = 25
-
-
-@dataclass
-class OpenRouterConfig:
-    enabled: bool = False
-    limit: int = 100  # max models to fetch per run
-
-
-@dataclass
-class NewEntrantSourcesConfig:
-    """RSS feeds from emerging inference/token providers (W-0021)."""
-
-    enabled: bool = False
-    feeds: list[str] = field(default_factory=list)
-
-
-@dataclass
-class LocalModelSourcesConfig:
-    """RSS / Atom feeds for local model tools and self-hosting (W-0022)."""
-
-    enabled: bool = False
-    feeds: list[str] = field(default_factory=list)
-
-
-@dataclass
-class TrendsConfig:
-    enabled: bool = True
-    arxiv: ArxivConfig = field(default_factory=ArxivConfig)
-    huggingface: HuggingFaceConfig = field(default_factory=HuggingFaceConfig)
-    paperswithcode: PapersWithCodeConfig = field(default_factory=PapersWithCodeConfig)
-    operator_sources: OperatorChangelogConfig = field(default_factory=OperatorChangelogConfig)
-    replicate: ReplicateConfig = field(default_factory=ReplicateConfig)
-    openreview: OpenReviewConfig = field(default_factory=OpenReviewConfig)
-    openrouter: OpenRouterConfig = field(default_factory=OpenRouterConfig)
-    new_entrant_sources: NewEntrantSourcesConfig = field(default_factory=NewEntrantSourcesConfig)
-    local_model_sources: LocalModelSourcesConfig = field(default_factory=LocalModelSourcesConfig)
-
-
-@dataclass
-class SummaryConfig:
-    enabled: bool = True  # False → skip AI; produce a plain link-list digest instead
-    model: str = "gemini-2.5-flash"
-    max_tokens: int = 2000
-    max_items_per_source: int = 5
-    prompt: str = ""
-
-
-@dataclass
-class HistoryConfig:
-    enabled: bool = True
-    history_days: int = 7  # number of past digests to pass as context to Gemini
-    history_dir: str = "history"  # directory relative to project root
-
-
-@dataclass
-class EmailConfig:
-    subject: str = "Daily AI Digest — {date}"
-    send_if_empty: bool = False
-
-
-@dataclass
-class LoggingConfig:
-    level: str = "INFO"
-    log_file: str | None = None
-
-
-@dataclass
-class Config:
-    youtube: YouTubeConfig = field(default_factory=YouTubeConfig)
-    blogs: BlogsConfig = field(default_factory=BlogsConfig)
-    substack: SubstackConfig = field(default_factory=SubstackConfig)
-    hacker_news: HackerNewsConfig = field(default_factory=HackerNewsConfig)
-    summary: SummaryConfig = field(default_factory=SummaryConfig)
-    history: HistoryConfig = field(default_factory=HistoryConfig)
-    email: EmailConfig = field(default_factory=EmailConfig)
-    logging: LoggingConfig = field(default_factory=LoggingConfig)
-    trends: TrendsConfig = field(default_factory=TrendsConfig)
+def _entry_options(raw: dict) -> dict[str, Any]:
+    """Extract type-specific options by stripping the common SourceEntry keys."""
+    return {k: v for k, v in raw.items() if k not in _COMMON_KEYS}
 
 
 def _yaml_list(value: list | None) -> list:
-    """Return *value* unchanged if it is a list, or ``[]`` when YAML parsed the key as null.
-
-    A YAML key whose items are all commented out is parsed as ``null`` (``None``),
-    not as an empty list.  ``dict.get(key, [])`` only substitutes the default for
-    *absent* keys, so the ``None`` passes through and causes ``TypeError`` on
-    iteration.  This helper normalises both cases to an empty list.
-    """
     return value if isinstance(value, list) else []
-
-
-def require_env(key: str) -> str:
-    value = os.environ.get(key)
-    if not value:
-        raise RuntimeError(f"Required environment variable {key!r} is not set")
-    return value
 
 
 def load_config(path: Path = Path("config/sources.yaml")) -> Config:
@@ -205,146 +149,52 @@ def load_config(path: Path = Path("config/sources.yaml")) -> Config:
     with path.open() as f:
         raw: dict = yaml.safe_load(f) or {}
 
-    yt = raw.get("youtube", {})
-    default_max = yt.get("max_videos_per_channel", 5)
-    youtube = YouTubeConfig(
-        enabled=yt.get("enabled", True),
-        max_videos_per_channel=default_max,
-        channels=[
-            YouTubeChannel(
-                name=ch["name"],
-                channel_id=ch["channel_id"],
-                max_videos=ch.get("max_videos", default_max),
+    # sources — flat list
+    sources: list[SourceEntry] = []
+    for entry_raw in _yaml_list(raw.get("sources")):
+        sources.append(
+            SourceEntry(
+                type=entry_raw["type"],
+                name=entry_raw["name"],
+                source_class=entry_raw.get("source_class", "practitioner"),
+                enabled=entry_raw.get("enabled", True),
+                options=_entry_options(entry_raw),
             )
-            for ch in _yaml_list(yt.get("channels"))
-        ],
+        )
+
+    # digest — independent section
+    d = raw.get("digest", {}) or {}
+    digest = DigestConfig(
+        subject=d.get("subject", "Daily AI Digest — {date}"),
+        send_if_empty=d.get("send_if_empty", False),
+        min_credibility=d.get("min_credibility", 0.0),
+        max_hype_risk=d.get("max_hype_risk", 1.0),
+        exclude_marketing=d.get("exclude_marketing", False),
+        model=d.get("model", "gemini-2.5-flash"),
+        max_tokens=d.get("max_tokens", 2000),
+        max_items_per_source=d.get("max_items_per_source", 5),
+        prompt=d.get("prompt", ""),
     )
 
-    bl = raw.get("blogs", {})
-    blogs = BlogsConfig(
-        enabled=bl.get("enabled", True),
-        rss=[
-            RSSFeed(
-                name=f["name"],
-                url=f["url"],
-                fallback_url=f.get("fallback_url"),
-                source_class=f.get("source_class", "practitioner"),
-            )
-            for f in _yaml_list(bl.get("rss"))
-        ],
-    )
-
-    ss = raw.get("substack", {})
-    substack = SubstackConfig(
-        enabled=ss.get("enabled", True),
-        publications=[
-            SubstackPublication(name=p["name"], slug=p["slug"])
-            for p in _yaml_list(ss.get("publications"))
-        ],
-    )
-
-    hn = raw.get("hacker_news", {})
-    hacker_news = HackerNewsConfig(
-        enabled=hn.get("enabled", True),
-        min_score=hn.get("min_score", 100),
-        keywords=_yaml_list(hn.get("keywords")),
-        max_stories=hn.get("max_stories", 10),
-    )
-
-    sm = raw.get("summary", {})
-    summary = SummaryConfig(
-        model=sm.get("model", "gemini-2.0-flash"),
-        max_tokens=sm.get("max_tokens", 2000),
-        max_items_per_source=sm.get("max_items_per_source", 5),
-        prompt=sm.get("prompt", ""),
-    )
-
-    hi = raw.get("history", {})
+    # history + logging — shared global sections
+    hi = raw.get("history", {}) or {}
     history = HistoryConfig(
         enabled=hi.get("enabled", True),
         history_days=hi.get("history_days", 7),
         history_dir=hi.get("history_dir", "history"),
     )
 
-    em = raw.get("email", {})
-    email = EmailConfig(
-        subject=em.get("subject", "Daily AI Digest — {date}"),
-        send_if_empty=em.get("send_if_empty", False),
-    )
-
-    lg = raw.get("logging", {})
+    lg = raw.get("logging", {}) or {}
     logging_cfg = LoggingConfig(
         level=lg.get("level", "INFO"),
         log_file=lg.get("log_file"),
     )
 
-    tr = raw.get("trends", {})
-    ax = tr.get("arxiv", {})
-    hf = tr.get("huggingface", {})
-    pwc = tr.get("paperswithcode", {})
-    opc = tr.get("operator_sources", {})
-    rep = tr.get("replicate", {})
-    orv = tr.get("openreview", {})
-    ortr = tr.get("openrouter", {})
-    nes = tr.get("new_entrant_sources", {})
-    lms = tr.get("local_model_sources", {})
-    trends = TrendsConfig(
-        enabled=tr.get("enabled", True),
-        arxiv=ArxivConfig(
-            enabled=ax.get("enabled", True),
-            categories=_yaml_list(ax.get("categories")) or ["cs.AI", "cs.LG", "cs.CL"],
-            max_papers=ax.get("max_papers", 30),
-        ),
-        huggingface=HuggingFaceConfig(
-            enabled=hf.get("enabled", False),
-            max_models=hf.get("max_models", 50),
-            min_downloads=hf.get("min_downloads", 100),
-        ),
-        paperswithcode=PapersWithCodeConfig(
-            enabled=pwc.get("enabled", False),
-            page_size=pwc.get("page_size", 20),
-            min_stars=pwc.get("min_stars", 0),
-        ),
-        operator_sources=OperatorChangelogConfig(
-            enabled=opc.get("enabled", False),
-            feeds=_yaml_list(opc.get("feeds")),
-        ),
-        replicate=ReplicateConfig(
-            enabled=rep.get("enabled", False),
-            limit=rep.get("limit", 20),
-        ),
-        openreview=OpenReviewConfig(
-            enabled=orv.get("enabled", False),
-            venues=_yaml_list(orv.get("venues"))
-            or [
-                "ICLR.cc/2025/Conference/-/Accepted",
-                "NeurIPS.cc/2025/Conference/-/Accepted",
-                "ICML.cc/2025/Conference/-/Accepted",
-            ],
-            limit=orv.get("limit", 25),
-        ),
-        openrouter=OpenRouterConfig(
-            enabled=ortr.get("enabled", False),
-            limit=ortr.get("limit", 100),
-        ),
-        new_entrant_sources=NewEntrantSourcesConfig(
-            enabled=nes.get("enabled", False),
-            feeds=_yaml_list(nes.get("feeds")),
-        ),
-        local_model_sources=LocalModelSourcesConfig(
-            enabled=lms.get("enabled", False),
-            feeds=_yaml_list(lms.get("feeds")),
-        ),
-    )
+    return Config(sources=sources, digest=digest, history=history, logging=logging_cfg)
 
-    return Config(
-        youtube=youtube,
-        blogs=blogs,
-        substack=substack,
-        hacker_news=hacker_news,
-        summary=summary,
-        history=history,
-        email=email,
-        logging=logging_cfg,
-        trends=trends,
-    )
+
+def require_env(key: str) -> str:
+    value = os.environ.get(key)
+    if not value:
+        raise RuntimeError(f"Required environment variable {key!r} is not set")
+    return value

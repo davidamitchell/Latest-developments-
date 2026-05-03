@@ -1,0 +1,7 @@
+# Raw fetch output — Schema Contract A
+#
+# Each file: data/raw/YYYY-MM-DD.jsonl
+# Format: one FetchedItem JSON object per line
+# Written by: fetch-and-process workflow after fetching, before processing
+# Read by: processing pipeline stages
+# Committed to: git (source of truth for re-processing without re-fetching)

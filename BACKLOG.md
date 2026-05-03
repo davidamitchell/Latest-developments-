@@ -927,6 +927,217 @@ Local/on-device AI is a significant and fast-growing segment currently not repre
 
 ---
 
+## W-0023
+
+status: done
+created: 2026-05-02
+updated: 2026-05-02
+
+### Outcome
+
+Partial improvement: trend analysis removed from `daily-digest.yml`; `rebuild-site.yml` given a `workflow_run` trigger. Superseded by ADR-0017's corrected architecture, which further separates fetching, processing, and the two parallel consumers. W-0026/W-0027/W-0028 complete the migration.
+
+---
+
+## W-0024
+
+status: done
+created: 2026-05-02
+updated: 2026-05-02
+
+### Outcome
+
+The two schema contracts are defined:
+
+- **Schema Contract A — `FetchedItem`** (`src/fetchers/__init__.py`): added `author` field (required); added `to_dict()` / `from_dict()` for JSONL persistence; docstring records the contract boundary.
+- **Schema Contract B — `ProcessedItem`** (`src/models.py`): new dataclass with all pipeline stage output fields (stages 1–8); `to_dict()` / `from_dict()` for JSONL persistence; docstring records the boundary rule (consumers must not call fetchers or pipeline stages).
+- **`data/raw/`** and **`data/processed/`** directories created with documented `.gitkeep` files.
+
+### Context
+
+ADR-0017 requires two explicit schema contracts between the three pipeline concerns. Without them, consumers can and do reach past the boundary into fetchers and processing internals.
+
+---
+
+## W-0025
+
+status: done
+created: 2026-05-02
+updated: 2026-05-02
+
+### Outcome
+
+Source configuration is redesigned so each source is defined once in `config/sources.yaml`. Each source is tagged for which consumers it feeds. All consumers select their sources from this single list; there is no duplication.
+
+### Context
+
+The current `sources.yaml` has two parallel source lists: email digest sources (`youtube`, `blogs`, `substack`, `hacker_news`) and trend analysis sources (`trends.*`). Operator blogs appear in both sections, requiring manual synchronisation. This violates Single Responsibility and Open/Closed principles — adding a new source requires editing two places.
+
+In the target architecture (ADR-0017), a single fetch step fetches ALL configured sources. Consumers select from `ProcessedItem` records, not from their own source lists. The configuration change unlocks the full pipeline separation.
+
+### Target schema
+
+```yaml
+# config/sources.yaml — sources defined once, tagged by consumer
+
+digest:
+  # Which source_classes to include in the email digest
+  include_classes: [operator, practitioner, media]
+  # Which named sources to always exclude (too noisy for email)
+  exclude_sources: []
+  prompt: |
+    ...
+  subject: "Daily AI Digest — {date}"
+  send_if_empty: false
+
+sources:
+  - name: "Anthropic Blog"
+    url: "https://www.anthropic.com/rss.xml"
+    type: rss
+    source_class: operator
+    enabled: true
+
+  - name: "arXiv cs.AI"
+    type: arxiv
+    category: cs.AI
+    source_class: primary
+    enabled: true
+
+  - name: "Nate Jones"
+    type: youtube
+    channel_id: "UC0C-17n9iuUQPylguM1d-lQ"
+    source_class: practitioner
+    enabled: true
+```
+
+### Notes
+
+- Write ADR-0018 before implementing — document the exact schema and migration plan
+- Update `src/config.py` with new typed config classes
+- Migrate `config/sources.yaml` — do not support old schema alongside new one
+- Update `src/pipeline/fetch.py` to iterate the unified source list
+- Update email-digest consumer to filter by `digest.include_classes` and `digest.exclude_sources`
+- Write tests for the new config loader and filter logic
+- Backward compatibility: delete old sections; this is a breaking config change but the only user is the pipeline owner
+
+---
+
+## W-0026
+
+status: done
+created: 2026-05-02
+updated: 2026-05-02
+
+### Outcome
+
+The fetch-and-process concern is implemented as two `src/pipeline/` modules and the `fetch-and-process.yml` workflow is activated. Fetching and processing run as two separate jobs in one workflow. Raw data is committed after fetching; processed data is committed after the pipeline.
+
+### Context
+
+ADR-0017 defines the target. Currently `src/main.py` does fetching + deduplication + Gemini summarisation + email in one function. `src/trends.py` does its own independent fetch + process. Neither reads from committed data files. The migration extracts the fetch and process concerns into `src/pipeline/`.
+
+### Implementation
+
+**`src/pipeline/fetch.py`** — CLI entry point for the fetch job:
+- Loads config, instantiates all enabled fetchers
+- Reads `state/processed.json` for deduplication
+- Calls each fetcher, collects `FetchedItem[]`
+- Writes `data/raw/YYYY-MM-DD.jsonl` (one `FetchedItem.to_dict()` per line)
+- Exit 0 even if no new items (consumers handle empty input)
+
+**`src/pipeline/run.py`** — CLI entry point for the process job:
+- Reads `data/raw/YYYY-MM-DD.jsonl` → `FetchedItem[]`
+- Runs each stage in order: ingest → clean → concept_extraction → theme_classification → summary_extraction → media_id → hype_scoring → credibility_scoring
+- Writes `data/processed/YYYY-MM-DD.jsonl` (one `ProcessedItem.to_dict()` per line)
+
+**`src/pipeline/stages/`** — one module per stage:
+
+| Module | Input | Output | Tool |
+|---|---|---|---|
+| `ingest.py` | `FetchedItem` | `ProcessedItem` (fields defaulted) | Python |
+| `clean.py` | `ProcessedItem` | `ProcessedItem` (cleaned_content set) | Python |
+| `concept_extraction.py` | `ProcessedItem` | `ProcessedItem` (concepts, actors, impact_vector) | Gemini |
+| `theme_classification.py` | `ProcessedItem` | `ProcessedItem` (theme, domain) | Gemini + `themes.py` |
+| `summary_extraction.py` | `ProcessedItem` | `ProcessedItem` (summary) | Gemini |
+| `media_id.py` | `ProcessedItem` | `ProcessedItem` (is_marketing, confidence) | Gemini + heuristic |
+| `hype_scoring.py` | `ProcessedItem` | `ProcessedItem` (hype_risk) | `credibility.py` |
+| `credibility_scoring.py` | `ProcessedItem` | `ProcessedItem` (credibility_score) | `credibility.py` |
+
+Each stage: `def run(items: list[ProcessedItem], config: Config) -> list[ProcessedItem]`
+
+### Notes
+
+- Gemini stages 3–6 can batch per-item requests in a single API call for efficiency — the stage boundary is logical, not necessarily a separate API call
+- `fetch-and-process.yml` already exists as a design document; activate it once `src/pipeline/fetch.py` and `src/pipeline/run.py` exist and tests pass
+- `daily-digest.yml` and the existing `rebuild-site.yml` continue to run until W-0027 and W-0028 complete — do not remove them prematurely
+- Write `tests/test_pipeline_*.py` for each stage; mock Gemini for all AI stages
+- Write an ADR if stage boundaries differ materially from this spec
+
+---
+
+## W-0027
+
+status: done
+created: 2026-05-02
+updated: 2026-05-02
+
+### Outcome
+
+The email digest is implemented as a pure consumer of `ProcessedItem` records. `src/digest/send.py` reads `data/processed/YYYY-MM-DD.jsonl`, applies digest configuration, formats and sends the email, writes `history/YYYY-MM-DD.txt`, and updates `state/processed.json`. The `email-digest.yml` workflow is activated. `daily-digest.yml` is retired.
+
+### Context
+
+Currently `src/main.py` does its own fetching + processing. In the target architecture, it reads from committed `ProcessedItem` records and has no knowledge of fetchers or pipeline stages. This is Dependency Inversion: the digest depends on the abstract `ProcessedItem` contract, not on concrete fetcher implementations.
+
+### Notes
+
+- Create `src/digest/` package
+- `src/digest/send.py` — CLI entry point:
+  - Reads `data/processed/YYYY-MM-DD.jsonl`
+  - Filters items by `digest.include_classes` from config
+  - Calls Gemini for narrative digest (using `summariser.py` rendering logic, refactored)
+  - Sends email via `emailer.py` (unchanged)
+  - Writes `history/YYYY-MM-DD.txt` — do not change this behaviour
+  - Updates `state/processed.json` (adds sent item IDs)
+  - `--dry-run` skips email and state update
+- `email-digest.yml` already exists as a design document; activate once this module passes tests
+- Retire `src/main.py` as the email entrypoint once `src/digest/send.py` is complete
+- Keep `src/summariser.py` rendering logic; `send.py` calls it with `ProcessedItem` records
+- Write tests in `tests/test_digest_send.py`; mock email sending and Gemini
+
+---
+
+## W-0028
+
+status: done
+created: 2026-05-02
+updated: 2026-05-02
+
+### Outcome
+
+The site build is implemented as a pure consumer of `ProcessedItem` records. `src/site/build.py` reads `data/processed/*.jsonl` (multiple days), computes trend state and aggregates, writes `docs/data/*.json`. The `rebuild-site.yml` workflow is updated to call `src.site.build`. `src/trends.py` is retired as the site build entrypoint.
+
+### Context
+
+Currently `src/trends.py` does its own fetching (arXiv, HuggingFace, etc.) and reads from `history/*.txt` (plaintext digest archives). In the target architecture, it reads structured `ProcessedItem` records from `data/processed/`, which already include theme labels, credibility scores, and hype risk — computed by the pipeline, not re-derived from plaintext. This eliminates duplicate Gemini calls and makes the trend analysis deterministic given fixed input.
+
+### Notes
+
+- Create `src/site/` package
+- `src/site/build.py` — CLI entry point:
+  - Reads all `data/processed/*.jsonl` files (rolling window, configurable)
+  - Groups `ProcessedItem` records by theme and date
+  - Computes `TrendMetrics` per theme using `trend_state.py` (unchanged)
+  - Calls `cluster_themes()` from `themes.py` if GEMINI_API_KEY available
+  - Writes `docs/data/meta.json`, `trends.json`, `themes.json`, `items.json`, `graph.json`, `sources.json`
+  - `--no-fetch` has no meaning in this architecture (no fetching here); flag kept for backward compat but is a no-op
+- `rebuild-site.yml` already exists as a design document; activate once this module passes tests
+- Retire `src/trends.py` as the site build entrypoint once `src/site/build.py` is complete
+- Existing `TrendMetrics`, `ThemeNode`, `GraphEdge` in `src/models.py` are unchanged
+- Write tests in `tests/test_site_build.py`; supply fixture `ProcessedItem` records
+
+---
+
 ## Deferred / Ideas
 
 | Idea | Notes |

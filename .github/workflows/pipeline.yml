@@ -1,0 +1,67 @@
+name: Pipeline
+
+# Orchestrator — runs the full pipeline in order:
+#   1. fetch-and-process  (fetch all sources → raw data → processed data)
+#   2. email-digest       (send email, commit state/history)     ┐ parallel
+#   3. rebuild-site       (build docs/data/*.json, deploy Pages) ┘
+#
+# This is the only workflow with a schedule. The individual workflows
+# (fetch-and-process, email-digest, rebuild-site) can still be triggered
+# independently via workflow_dispatch for debugging or catch-up runs.
+
+on:
+  schedule:
+    - cron: "0 7 * * *"  # 07:00 UTC daily
+
+  workflow_dispatch:
+    inputs:
+      debug:
+        description: "Enable debug logging"
+        type: boolean
+        default: false
+      dry_run:
+        description: "Dry run — fetch and process but skip sending email"
+        type: boolean
+        default: false
+      max_videos:
+        description: "Max videos per YouTube channel (leave blank to use config default)"
+        type: string
+        default: ""
+      skip_email:
+        description: "Skip email digest entirely (site rebuild still runs)"
+        type: boolean
+        default: false
+
+concurrency:
+  group: pipeline
+  cancel-in-progress: false
+
+# Reusable workflows inherit the caller's token. contents:write is required
+# because fetch-and-process, email-digest, and rebuild-site all commit back to main.
+permissions:
+  contents: write
+
+jobs:
+  fetch-and-process:
+    name: Fetch and Process
+    uses: ./.github/workflows/fetch-and-process.yml
+    with:
+      debug: ${{ inputs.debug || false }}
+      max_videos: ${{ inputs.max_videos || '' }}
+    secrets: inherit
+
+  email:
+    name: Email Digest
+    needs: fetch-and-process
+    if: ${{ !inputs.skip_email }}
+    uses: ./.github/workflows/email-digest.yml
+    with:
+      debug: ${{ inputs.debug || false }}
+      dry_run: ${{ inputs.dry_run || false }}
+    secrets: inherit
+
+  site:
+    name: Rebuild Site
+    needs: fetch-and-process
+    uses: ./.github/workflows/rebuild-site.yml
+    secrets: inherit
