@@ -1,5 +1,5 @@
 {
-  "generated": "2026-05-03T03:51:03.079773+00:00",
+  "generated": "2026-05-03T08:45:29.418591+00:00",
   "items": [
     {
       "id": "2JiMmye2ezg",
@@ -3496,6 +3496,45 @@
       "fetch_date": "2026-05-02",
       "credibility_score": 0.5,
       "hype_risk": 0.0,
+      "summary": ""
+    },
+    {
+      "id": "hf:andrebarrosilva1123/evolai-d",
+      "title": "Evolai D (andrebarrosilva1123)",
+      "url": "https://huggingface.co/andrebarrosilva1123/evolai-d",
+      "source_name": "Hugging Face",
+      "source_class": "primary",
+      "theme": "",
+      "domain": "unknown",
+      "fetch_date": "2026-05-03",
+      "credibility_score": 0.69,
+      "hype_risk": 0.41,
+      "summary": ""
+    },
+    {
+      "id": "hf:Naphula-Archives/Qliphoth-24B-v2-Prototypes-Q4_0-GGUF",
+      "title": "Qliphoth 24B V2 Prototypes Q4 0 Gguf (Naphula-Archives)",
+      "url": "https://huggingface.co/Naphula-Archives/Qliphoth-24B-v2-Prototypes-Q4_0-GGUF",
+      "source_name": "Hugging Face",
+      "source_class": "primary",
+      "theme": "",
+      "domain": "unknown",
+      "fetch_date": "2026-05-03",
+      "credibility_score": 0.69,
+      "hype_risk": 0.41,
+      "summary": ""
+    },
+    {
+      "id": "hf:andrebarrosilva1123/evolai-c",
+      "title": "Evolai C (andrebarrosilva1123)",
+      "url": "https://huggingface.co/andrebarrosilva1123/evolai-c",
+      "source_name": "Hugging Face",
+      "source_class": "primary",
+      "theme": "",
+      "domain": "unknown",
+      "fetch_date": "2026-05-03",
+      "credibility_score": 0.69,
+      "hype_risk": 0.41,
       "summary": ""
     }
   ]
