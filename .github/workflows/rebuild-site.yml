@@ -72,6 +72,5 @@ jobs:
             echo "Site data unchanged — nothing to commit"
           else
             git commit -m "chore: rebuild site data ${TODAY} [skip ci]"
-            git pull --rebase origin main
             git push origin main
           fi
