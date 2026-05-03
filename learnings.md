@@ -144,3 +144,26 @@ Applied to agent instructions: after writing any new mandate section, ask "if I 
 ### Is this a pattern?
 
 Yes — and it's not unique to this repo. Agent instructions written as prose mandates tend to overprescribe and underdocument. The fix is: write, simulate, fix gaps, commit.
+
+---
+
+## 2026-05-03 — Workflow YAML committed without validating entrypoints
+
+### What happened
+
+`daily-digest.yml` was committed with a daily schedule that called `python -m src.main` — a module that had been deleted when the pipeline was split into three concerns. This ran silently for however many days it was active.
+
+### Root cause
+
+Workflow YAML was treated as configuration, not code. No verification was done that the Python entrypoints referenced actually exist, accept the CLI args the workflow passes, or have the required env vars wired up.
+
+### Rule — before committing any workflow YAML change
+
+1. **Entrypoint exists:** `python -m <module>` — verify the file exists at `src/<module path>.py` with an `if __name__ == "__main__"` block or `main()`.
+2. **Args are accepted:** every `--flag` the workflow passes must appear in the module's `_parse_args()` / `argparse` setup. Argparse silently drops unknown args — this is how `--max-videos` was ignored for weeks.
+3. **Env vars are wired:** every `os.environ.get("KEY")` the module reads must appear in the workflow's `env:` block, sourced from `secrets.KEY`.
+4. **Reusable workflow permissions:** if a caller uses `workflow_call` to call workflows that commit back to the repo, the caller must declare `permissions: contents: write` — called workflows inherit the caller's token and cannot escalate permissions.
+
+### Is this a pattern?
+
+Yes. The same failure mode recurs because YAML changes feel low-risk. They are not. Treat every workflow change as a code change: trace the execution path end-to-end before committing.

@@ -300,12 +300,19 @@ Four workflows, each with one responsibility. Two data contracts passed between 
 
 | Workflow | Trigger | Commits | Responsibility |
 |---|---|---|---|
-| `fetch-and-process.yml` | Schedule (07:00 UTC) + `workflow_dispatch` | `data/raw/`, `data/processed/` | Fetch all sources; run pipeline |
-| `email-digest.yml` | `workflow_run` (fetch-and-process success) + `workflow_dispatch` | `state/processed.json`, `history/` | Send digest; archive |
-| `rebuild-site.yml` | `workflow_run` (fetch-and-process success) + `workflow_dispatch` | `docs/data/` | Build site from processed data |
+| `pipeline.yml` | Schedule (07:00 UTC) + `workflow_dispatch` | — | **Orchestrator** — calls the three below in order |
+| `fetch-and-process.yml` | `workflow_call` + `workflow_dispatch` | `data/raw/`, `data/processed/` | Fetch all sources; run pipeline |
+| `email-digest.yml` | `workflow_call` + `workflow_dispatch` | `state/processed.json`, `history/` | Send digest; archive |
+| `rebuild-site.yml` | `workflow_call` + `workflow_dispatch` | `docs/data/` | Build site from processed data |
 | `ci.yml` | Every push + PR | — | Lint and test |
 
-`email-digest` and `rebuild-site` both listen to `workflow_run: ["Fetch and Process"]`. They trigger in **parallel** and complete independently.
+`pipeline.yml` is the only workflow with a schedule. It calls `fetch-and-process`, then triggers `email-digest` and `rebuild-site` in **parallel**. Each individual workflow also supports `workflow_dispatch` for standalone manual runs.
+
+**Workflow validation checklist — required before committing any workflow YAML change:**
+1. Every `python -m <module>` entrypoint: verify `src/<path>.py` exists with `main()` / `__main__` block
+2. Every `--flag` the workflow passes: verify it appears in the module's `_parse_args()` — argparse silently drops unknown args
+3. Every `${{ secrets.KEY }}` env var: verify the module reads it with `os.environ.get("KEY")` or equivalent
+4. If using `workflow_call` in an orchestrator: the orchestrator must declare `permissions: contents: write` if any called workflow commits to the repo
 
 **fetch-and-process.yml** (primary pipeline):
 - Job 1 `fetch`: instantiates all enabled fetchers, deduplicates, writes `data/raw/YYYY-MM-DD.jsonl`, commits
@@ -338,6 +345,7 @@ Before marking a backlog slice as done:
 - [ ] `make test` passes (with mocked network)
 - [ ] Full testing pyramid applied: unit tests for business logic + smoke/integration tests where applicable
 - [ ] `make dry-run` works end-to-end
+- [ ] If workflow YAML changed: all four validation rules above applied
 - [ ] `PROGRESS.md` updated
 - [ ] Any new ADRs written and indexed
 - [ ] README updated if user-facing behaviour changed

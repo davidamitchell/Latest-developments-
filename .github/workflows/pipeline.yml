@@ -36,6 +36,11 @@ concurrency:
   group: pipeline
   cancel-in-progress: false
 
+# Reusable workflows inherit the caller's token. contents:write is required
+# because fetch-and-process, email-digest, and rebuild-site all commit back to main.
+permissions:
+  contents: write
+
 jobs:
   fetch-and-process:
     name: Fetch and Process
