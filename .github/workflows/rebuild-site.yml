@@ -9,22 +9,18 @@ name: Rebuild Site
 # (history/ is the email digest's concern — this workflow reads data/processed/ directly.)
 #
 # Triggers:
-#   - After Fetch and Process succeeds on main (automatic, parallel with email-digest)
-#   - workflow_dispatch (manual, with no_fetch option for debugging)
-#
-# Both this workflow and email-digest trigger from the same event.
-# They are parallel consumers with zero dependency on each other.
+#   - Called by pipeline.yml orchestrator (parallel with email-digest, after fetch-and-process)
+#   - workflow_dispatch (standalone manual run)
 
 on:
-  workflow_run:
-    workflows: ["Fetch and Process"]
-    types: [completed]
-    branches: [main]
+  # Called by pipeline.yml (orchestrator).
+  workflow_call:
 
+  # Standalone manual run.
   workflow_dispatch:
     inputs:
       no_fetch:
-        description: "Skip live source fetching — use committed data only"
+        description: "No-op — kept for backward compatibility"
         type: boolean
         default: false
 
@@ -32,11 +28,6 @@ jobs:
   rebuild:
     name: Build site data and deploy
     runs-on: ubuntu-latest
-
-    if: >
-      github.event_name == 'workflow_dispatch' ||
-      (github.event_name == 'workflow_run' &&
-       github.event.workflow_run.conclusion == 'success')
 
     permissions:
       contents: write

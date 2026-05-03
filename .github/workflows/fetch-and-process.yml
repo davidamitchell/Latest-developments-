@@ -13,9 +13,17 @@ name: Fetch and Process
 # The two consumers have zero dependency on each other.
 
 on:
-  schedule:
-    - cron: "0 7 * * *"
+  # Called by pipeline.yml (orchestrator) — schedule lives there.
+  workflow_call:
+    inputs:
+      debug:
+        type: boolean
+        default: false
+      max_videos:
+        type: string
+        default: ""
 
+  # Standalone manual run — skips email and site rebuild.
   workflow_dispatch:
     inputs:
       debug:
