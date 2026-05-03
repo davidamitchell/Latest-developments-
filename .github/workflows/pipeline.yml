@@ -62,6 +62,7 @@ jobs:
 
   site:
     name: Rebuild Site
-    needs: fetch-and-process
+    needs: [fetch-and-process, email]
+    if: ${{ always() && needs.fetch-and-process.result == 'success' }}
     uses: ./.github/workflows/rebuild-site.yml
     secrets: inherit
