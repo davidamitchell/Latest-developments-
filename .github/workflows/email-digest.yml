@@ -91,6 +91,7 @@ jobs:
             echo "State and history unchanged — nothing to commit"
           else
             git commit -m "chore: update state and history ${TODAY} [skip ci]"
+            git pull --rebase origin main
             git push origin main
           fi
 
