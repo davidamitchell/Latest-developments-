@@ -78,10 +78,7 @@ function formatLocalDateTime(isoString) {
   if (!isoString) return '—';
   const d = new Date(isoString);
   if (isNaN(d)) return isoString;
-  return d.toLocaleString(undefined, {
-    day: 'numeric', month: 'short', year: 'numeric',
-    hour: '2-digit', minute: '2-digit',
-  });
+  return d.toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
 }
 
 // Format a YYYY-MM-DD date string as a short local date (e.g. "3 May 2026").
