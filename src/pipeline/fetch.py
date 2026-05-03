@@ -234,6 +234,8 @@ def _parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description="Fetch all sources → data/raw/YYYY-MM-DD.jsonl")
     p.add_argument("--config", default="config/sources.yaml", help="Path to sources.yaml")
     p.add_argument("--date", default=None, help="Override fetch date (YYYY-MM-DD)")
+    p.add_argument("--max-videos", type=int, default=None,
+                   help="Override max_videos for all YouTube sources (useful for catch-up runs)")
     p.add_argument("--debug", action="store_true")
     return p.parse_args()
 
@@ -242,6 +244,12 @@ def main() -> int:
     args = _parse_args()
     cfg = load_config(Path(args.config))
     setup_logging(debug=args.debug, log_file=cfg.logging.log_file)
+
+    if args.max_videos is not None:
+        for entry in cfg.sources:
+            if entry.type == "youtube":
+                entry.options = {**entry.options, "max_videos": args.max_videos}
+        logger.info("--max-videos override: YouTube sources capped at %d", args.max_videos)
 
     today = args.date or datetime.now(UTC).strftime("%Y-%m-%d")
     out_path = _RAW_DIR / f"{today}.jsonl"

@@ -70,6 +70,39 @@ function hexAlpha(hex, alpha) {
   return hex + Math.round(alpha * 255).toString(16).padStart(2, '0');
 }
 
+/* ── Date / time helpers (all output in browser local timezone) ─────── */
+
+// Format an ISO datetime string (e.g. "2026-05-03T07:12:00Z") for display.
+// Uses the browser's local timezone — no timeZone override.
+function formatLocalDateTime(isoString) {
+  if (!isoString) return '—';
+  const d = new Date(isoString);
+  if (isNaN(d)) return isoString;
+  return d.toLocaleString(undefined, {
+    day: 'numeric', month: 'short', year: 'numeric',
+    hour: '2-digit', minute: '2-digit',
+  });
+}
+
+// Format a YYYY-MM-DD date string as a short local date (e.g. "3 May 2026").
+// Parses as local midnight to avoid UTC-offset surprises on date-only values.
+function formatLocalDate(dateStr) {
+  if (!dateStr) return '—';
+  const parts = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (!parts) return dateStr;
+  const d = new Date(+parts[1], +parts[2] - 1, +parts[3]);
+  return d.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
+// Short variant: "3 May" (no year) — used where space is tight.
+function formatLocalDateShort(dateStr) {
+  if (!dateStr) return '—';
+  const parts = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (!parts) return dateStr;
+  const d = new Date(+parts[1], +parts[2] - 1, +parts[3]);
+  return d.toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
+}
+
 /* ── Bootstrap ──────────────────────────────────────────────────────── */
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -146,11 +179,7 @@ function renderMeta(meta) {
   }
 
   if (lastRun && meta.last_run) {
-    const d = new Date(meta.last_run);
-    lastRun.textContent = d.toLocaleString('en-GB', {
-      day: 'numeric', month: 'short', year: 'numeric',
-      hour: '2-digit', minute: '2-digit', timeZone: 'UTC', timeZoneName: 'short',
-    });
+    lastRun.textContent = formatLocalDateTime(meta.last_run);
   }
 
   if (itemCount) itemCount.textContent = (meta.item_count ?? '—') + ' items';
@@ -238,9 +267,7 @@ function renderThemeCards(themes, items) {
     const hypeClass = hype > 0.6 ? 'hype-high' : hype > 0.35 ? 'hype-mid' : 'hype-low';
     const classesList = (t.source_classes || []).join(', ') || '—';
     const domain = t.domain || '';
-    const lastSeen = t.last_seen
-      ? new Date(t.last_seen).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
-      : '—';
+    const lastSeen = formatLocalDateShort(t.last_seen);
     const color = safeColor(themeColor(t.name), '#999');
 
     return `
@@ -311,7 +338,7 @@ function renderItemDrillDown(themeName, allItems) {
 
   const items = allItems
     .filter(i => i.theme === themeName)
-    .sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+    .sort((a, b) => (b.fetch_date || '').localeCompare(a.fetch_date || ''));
 
   const color = safeColor(themeColor(themeName), '#999');
   panel.style.borderLeftColor = color;
@@ -335,7 +362,7 @@ function renderItemDrillDown(themeName, allItems) {
     const badge    = `<span class="source-badge" style="background:${hexAlpha(clsColor, 0.12)};color:${clsColor};border:1px solid ${hexAlpha(clsColor, 0.25)}">${escHtml(cls)}</span>`;
     return `
       <tr>
-        <td class="date-cell">${escHtml(item.date || '—')}</td>
+        <td class="date-cell">${formatLocalDate(item.fetch_date)}</td>
         <td class="source-name-cell">${escHtml(item.source_name || '—')}</td>
         <td>${badge}</td>
       </tr>`;
@@ -405,7 +432,7 @@ function renderSourcesTab(data) {
     const color = CLASS_COLORS[cls] || '#555';
     const badge = `<span class="source-badge" style="background:${hexAlpha(color, 0.12)};color:${color};border:1px solid ${hexAlpha(color, 0.25)}">${escHtml(cls)}</span>`;
     const dateRange = s.first_seen && s.last_seen
-      ? `${s.first_seen} → ${s.last_seen}`
+      ? `${formatLocalDate(s.first_seen)} → ${formatLocalDate(s.last_seen)}`
       : '—';
     const themes = (s.top_themes || []).slice(0, 3)
       .map(t => {
