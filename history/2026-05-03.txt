@@ -1,85 +1,10 @@
 Daily AI Digest — 03 May 2026
 ========================================
 
-[AI summarisation failed: ClientError — no model processing was applied. Raw links only.]
-
-## Ollama Releases
-
-- v0.23.0 (03 May)
-  https://github.com/ollama/ollama/releases/tag/v0.23.0
-- v0.23.0-rc0 (03 May)
-  https://github.com/ollama/ollama/releases/tag/v0.23.0-rc0
-
-## llama.cpp Releases
-
-- b9010 (02 May)
-  https://github.com/ggml-org/llama.cpp/releases/tag/b9010
-- b9009 (02 May)
-  https://github.com/ggml-org/llama.cpp/releases/tag/b9009
-- b9008 (02 May)
-  https://github.com/ggml-org/llama.cpp/releases/tag/b9008
-- b9006 (02 May)
-  https://github.com/ggml-org/llama.cpp/releases/tag/b9006
-- b9004 (02 May)
-  https://github.com/ggml-org/llama.cpp/releases/tag/b9004
-
-## Nate Jones
-
-- AI Works Too Well at the Wrong Thing #IntentEngineering #AItruth (03 May)
-  https://www.youtube.com/watch?v=YRiPVdPqTlk
-- Anthropic Might Buy Atlassian For $40B. Here&#39;s Why It Makes Sense. (02 May)
-  https://www.youtube.com/watch?v=FDkvRl1RlT0
-
-## Matthew Berman
-
-- What is an AI Agent? (02 May)
-  https://www.youtube.com/watch?v=sVbifq89aS0
-
-## The AI Daily Brief
-
-- The Week AI Grew Up (02 May)
-  https://www.youtube.com/watch?v=IpD1chtKILE
-
-## Hacker News
-
-- Kimi K2.6 just beat Claude, GPT-5.5, and Gemini in a coding challenge (03 May)
-  https://news.ycombinator.com/item?id=47993235
-
 ## Hugging Face
 
-- Whisper Small Mn (kimeraaa) (03 May)
-  https://huggingface.co/kimeraaa/whisper-small-mn
-- Echoself (drzo) (03 May)
-  https://huggingface.co/drzo/echoself
-- Paw Programs (programasweights) (03 May)
-  https://huggingface.co/programasweights/paw-programs
-- Ling 2.6 Mlx 3.6Bit Inf (inferencerlabs) (03 May)
-  https://huggingface.co/inferencerlabs/Ling-2.6-MLX-3.6bit-INF
-- Eleuthia (RizFie) (03 May)
-  https://huggingface.co/RizFie/Eleuthia
-
-## OpenAI Blog
-
-- Introducing Advanced Account Security (30 Apr)
-  https://openai.com/index/advanced-account-security
-- Where the goblins came from (29 Apr)
-  https://openai.com/index/where-the-goblins-came-from
-- Building the compute infrastructure for the Intelligence Age (29 Apr)
-  https://openai.com/index/building-the-compute-infrastructure-for-the-intelligence-age
-- Cybersecurity in the Intelligence Age (29 Apr)
-  https://openai.com/index/cybersecurity-in-the-intelligence-age
-- Our commitment to community safety (28 Apr)
-  https://openai.com/index/our-commitment-to-community-safety
-
-## OpenRouter
-
-- xAI: Grok 4.3 (03 May)
-  https://openrouter.ai/models/x-ai/grok-4.3
-- IBM: Granite 4.1 8B (03 May)
-  https://openrouter.ai/models/ibm-granite/granite-4.1-8b
-- Owl Alpha (03 May)
-  https://openrouter.ai/models/openrouter/owl-alpha
-- NVIDIA: Nemotron 3 Nano Omni (free) (03 May)
-  https://openrouter.ai/models/nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free
-- Poolside: Laguna XS.2 (free) (03 May)
-  https://openrouter.ai/models/poolside/laguna-xs.2:free
+### Evolai D (andrebarrosilva1123)
+Source: Hugging Face
+URL: https://huggingface.co/andrebarrosilva1123/evolai-d
+Theme: Qwen3 Finetune
+Summary: `Evolai D` is a new LLM finetuned on the

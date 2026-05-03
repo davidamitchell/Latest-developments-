@@ -1,6 +1,6 @@
 {
-  "updated": "2026-05-03T08:25:12.805944+00:00",
-  "count": 1737,
+  "updated": "2026-05-03T08:45:10.909991+00:00",
+  "count": 1740,
   "processed": [
     "-0i2ERMGoq4",
     "-FhtPUkXKO4",
@@ -447,8 +447,11 @@
     "gVbD5cQ1GC8",
     "hFRQb2e5cJs",
     "hV5_XSEBZNg",
+    "hf:Naphula-Archives/Qliphoth-24B-v2-Prototypes-Q4_0-GGUF",
     "hf:RizFie/Eleuthia",
     "hf:aka7774/comfyui-models",
+    "hf:andrebarrosilva1123/evolai-c",
+    "hf:andrebarrosilva1123/evolai-d",
     "hf:drzo/echoself",
     "hf:inferencerlabs/Ling-2.6-MLX-3.6bit-INF",
     "hf:inferencerlabs/MiMo-V2.5-Pro-MLX-4.3bit-INF",
