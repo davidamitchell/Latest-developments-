@@ -130,6 +130,25 @@ def _build_source_list(
     return source_list
 
 
+def _build_source_classes(source_list: list[dict]) -> dict[str, dict]:
+    """Build the per-class summary dict expected by the Source Coverage Cards UI.
+
+    Returns {"primary": {"count": N, "sources": [...]}, "operator": {...}, ...}
+    """
+    _ALL_CLASSES = ("primary", "operator", "practitioner", "media", "market")
+    class_counts: dict[str, int] = {c: 0 for c in _ALL_CLASSES}
+    class_sources: dict[str, set] = {c: set() for c in _ALL_CLASSES}
+    for s in source_list:
+        cls = s.get("source_class", "practitioner")
+        if cls in class_counts:
+            class_counts[cls] += s.get("item_count", 0)
+            class_sources[cls].add(s["name"])
+    return {
+        cls: {"count": class_counts[cls], "sources": sorted(class_sources[cls])}
+        for cls in _ALL_CLASSES
+    }
+
+
 def _build_graph_edges(
     metrics: list[TrendMetrics],
     entries: list[tuple[str, str, str, str]],
@@ -201,8 +220,12 @@ def write_site_data(
         json.dumps({"generated": now_iso, "themes": [asdict(n) for n in theme_nodes]}, indent=2)
     )
 
+    source_classes = _build_source_classes(source_list)
     (docs_data_dir / "sources.json").write_text(
-        json.dumps({"generated": now_iso, "sources": source_list}, indent=2)
+        json.dumps(
+            {"generated": now_iso, "classes": source_classes, "sources": source_list},
+            indent=2,
+        )
     )
 
     graph_nodes = [

@@ -1,11 +1,15 @@
-name: Daily Digest
+name: Daily Digest (SUPERSEDED)
+
+# SUPERSEDED by the three-concern architecture (ADR-0017).
+# Schedule removed — this workflow will fail if triggered because src.main
+# was deleted when the pipeline was split into:
+#   fetch-and-process.yml   (fetch + pipeline)
+#   email-digest.yml        (email consumer)
+#   rebuild-site.yml        (site consumer)
+# Kept for historical reference only. Do not re-enable the schedule.
 
 on:
-  # Run every day at 07:00 UTC
-  schedule:
-    - cron: "0 7 * * *"
-
-  # Allow manual runs from the Actions tab
+  # Schedule intentionally removed — see comment above.
   workflow_dispatch:
     inputs:
       debug:

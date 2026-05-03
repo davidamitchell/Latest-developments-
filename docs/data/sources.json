@@ -1,5 +1,31 @@
 {
-  "generated": "2026-05-02T22:19:42.736375+00:00",
+  "generated": "2026-05-03T03:20:18.717692+00:00",
+  "classes": {
+    "primary": {
+      "count": 0,
+      "sources": []
+    },
+    "operator": {
+      "count": 0,
+      "sources": []
+    },
+    "practitioner": {
+      "count": 177,
+      "sources": [
+        "Hacker News",
+        "Nate Jones",
+        "Wes Roth"
+      ]
+    },
+    "media": {
+      "count": 0,
+      "sources": []
+    },
+    "market": {
+      "count": 0,
+      "sources": []
+    }
+  },
   "sources": [
     {
       "name": "Hacker News",
