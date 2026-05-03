@@ -13,7 +13,7 @@ import argparse
 import json
 import logging
 import sys
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 try:
@@ -186,20 +186,44 @@ def _build_fetchers(cfg: Config) -> list[tuple[str, object]]:
     return pairs
 
 
-def fetch_all(cfg: Config, already_processed: set[str]) -> list[FetchedItem]:
-    """Fetch from all enabled sources; deduplicate against already_processed."""
+_DEFAULT_MAX_AGE_DAYS = 7
+
+
+def _age_cutoff(max_age_days: int) -> datetime:
+    return datetime.now(UTC) - timedelta(days=max_age_days)
+
+
+def fetch_all(
+    cfg: Config,
+    already_processed: set[str],
+    max_age_days: int = _DEFAULT_MAX_AGE_DAYS,
+) -> list[FetchedItem]:
+    """Fetch from all enabled sources; deduplicate and apply age filter.
+
+    Items published more than max_age_days ago are dropped.  This prevents
+    a backlog of historical content from flooding the digest on the first run
+    after a new source is added or the pipeline is restarted.
+    """
     fetchers = _build_fetchers(cfg)
     seen = set(already_processed)
     result: list[FetchedItem] = []
+    cutoff = _age_cutoff(max_age_days)
+    too_old = 0
 
     for name, fetcher in fetchers:
         items = _safe_fetch(name, fetcher, already_processed)
         for item in items:
-            if item.id not in seen:
-                seen.add(item.id)
-                result.append(item)
+            if item.id in seen:
+                continue
+            if item.published and item.published < cutoff:
+                too_old += 1
+                continue
+            seen.add(item.id)
+            result.append(item)
 
-    logger.info("Total new items after deduplication: %d", len(result))
+    if too_old:
+        logger.info("Dropped %d item(s) older than %d days", too_old, max_age_days)
+    logger.info("Total new items after deduplication and age filter: %d", len(result))
     return result
 
 
