@@ -10,8 +10,8 @@
 # Runtime state (processed.json is committed by CI; local copies ignored if needed)
 # state/processed.json  <- intentionally NOT ignored; CI commits this file
 
-# Raw fetch data — large transient content, never commit
-data/raw/*.jsonl
+# data/raw/ and data/processed/ are intentionally committed — they are the
+# persistent data stores for the pipeline.  Do NOT add them here without an ADR.
 
 # Logs (file logging is optional and local)
 logs/
