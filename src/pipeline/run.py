@@ -31,13 +31,10 @@ from src.logger import setup_logging
 from src.models import ProcessedItem, read_processed_jsonl, write_processed_jsonl
 from src.pipeline.fetch import read_raw_jsonl
 from src.pipeline.stages.clean import clean
-from src.pipeline.stages.concept_extraction import extract_concepts
 from src.pipeline.stages.credibility_scoring import score_credibility
+from src.pipeline.stages.enrich import enrich
 from src.pipeline.stages.hype_scoring import score_hype
 from src.pipeline.stages.ingest import ingest
-from src.pipeline.stages.media_id import identify_marketing
-from src.pipeline.stages.summary_extraction import extract_summary
-from src.pipeline.stages.theme_classification import classify_theme
 
 logger = logging.getLogger(__name__)
 
@@ -55,17 +52,19 @@ def process(
     items: list[FetchedItem],
     gemini_api_key: str | None,
     fetch_date: str,
-) -> list[ProcessedItem]:
-    """Run all 8 pipeline stages over items; return ProcessedItem list.
+) -> tuple[list[ProcessedItem], int]:
+    """Run all 8 pipeline stages over items; return (results, ai_failures).
 
     When gemini_api_key is None, AI stages (3–6) are skipped gracefully and
     their fields remain at defaults. Non-AI stages always run.
+    ai_failures counts items where the combined Gemini call raised an exception.
     """
     if not items:
-        return []
+        return [], 0
 
     client = _make_gemini_client(gemini_api_key) if gemini_api_key else None
     results: list[ProcessedItem] = []
+    ai_failures = 0
 
     for fetched in items:
         # Stage 1 — Ingest
@@ -75,17 +74,10 @@ def process(
         processed = clean(processed, raw_content=fetched.content)
 
         if client is not None:
-            # Stage 3 — Concept Extraction
-            processed = extract_concepts(processed, client)
-
-            # Stage 4 — Theme Classification
-            processed = classify_theme(processed, client)
-
-            # Stage 5 — Summary Extraction
-            processed = extract_summary(processed, client)
-
-            # Stage 6 — Media / Marketing Identification
-            processed = identify_marketing(processed, client)
+            # Stages 3–6 — combined AI enrichment (1 Gemini call per item)
+            processed, ok = enrich(processed, client)
+            if not ok:
+                ai_failures += 1
 
         # Stage 7 — Hype Scoring (deterministic)
         processed = score_hype(processed)
@@ -95,8 +87,18 @@ def process(
 
         results.append(processed)
 
+    if client is not None and items:
+        failure_rate = ai_failures / len(items)
+        if ai_failures:
+            logger.warning(
+                "AI enrichment failed for %d/%d items (%.0f%%)",
+                ai_failures, len(items), failure_rate * 100,
+            )
+        else:
+            logger.info("AI enrichment succeeded for all %d items", len(items))
+
     logger.info("Processed %d item(s)", len(results))
-    return results
+    return results, ai_failures
 
 
 def _parse_args() -> argparse.Namespace:
@@ -129,9 +131,17 @@ def main() -> int:
     if not api_key:
         logger.warning("GEMINI_API_KEY not set — AI stages (3–6) will be skipped")
 
-    processed = process(items, gemini_api_key=api_key, fetch_date=today)
+    processed, ai_failures = process(items, gemini_api_key=api_key, fetch_date=today)
     write_processed_jsonl(processed, out_path)
     logger.info("Processing complete — %d item(s) written to %s", len(processed), out_path)
+
+    if api_key and items and ai_failures / len(items) > 0.5:
+        logger.error(
+            "AI enrichment failed for >50%% of items (%d/%d) — check Gemini quota/key",
+            ai_failures, len(items),
+        )
+        return 2
+
     return 0
 
 

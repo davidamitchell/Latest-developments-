@@ -156,7 +156,7 @@ class TestRunMain:
         with (
             patch("src.config.load_config") as mock_cfg,
             patch("src.pipeline.run.read_raw_jsonl", return_value=[item]),
-            patch("src.pipeline.run.process", return_value=[_make_processed()]),
+            patch("src.pipeline.run.process", return_value=([_make_processed()], 0)),
             patch("src.pipeline.run.write_processed_jsonl"),
             patch("sys.argv", ["run", "--date", "2026-05-02"]),
             patch.dict("os.environ", {k: v for k, v in __import__("os").environ.items()
@@ -172,7 +172,7 @@ class TestRunMain:
         with (
             patch("src.config.load_config") as mock_cfg,
             patch("src.pipeline.run.read_raw_jsonl", return_value=[item]),
-            patch("src.pipeline.run.process", return_value=[]) as mock_process,
+            patch("src.pipeline.run.process", return_value=([], 0)) as mock_process,
             patch("src.pipeline.run.write_processed_jsonl"),
             patch("sys.argv", ["run", "--date", "2026-05-02"]),
         ):

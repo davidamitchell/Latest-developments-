@@ -32,13 +32,22 @@ def _make_fetched(id_: str = "item-1") -> FetchedItem:
 # ── process ─────────────────────────────────────────────────────────────────
 
 class TestProcess:
-    """process(items, gemini_api_key, fetch_date) → list[ProcessedItem]"""
+    """process(items, gemini_api_key, fetch_date) → (list[ProcessedItem], int failures)"""
 
     def _null_client(self):
-        """A Gemini client mock that returns minimal valid responses."""
+        """A Gemini client mock that returns minimal valid combined-enrichment responses."""
         client = MagicMock()
         resp = MagicMock()
-        resp.text = "CONCEPTS: LLM\nACTORS: none\nIMPACT: capability\nTHEME: inference\nDOMAIN: infra\nMARKETING: false\nCONFIDENCE: 0.1\nSummary sentence one. Sentence two."
+        resp.text = (
+            "CONCEPTS: LLM\n"
+            "ACTORS: none\n"
+            "IMPACT: capability\n"
+            "THEME: inference\n"
+            "DOMAIN: infra\n"
+            "SUMMARY: Sentence one. Sentence two.\n"
+            "MARKETING: false\n"
+            "CONFIDENCE: 0.1"
+        )
         client.models.generate_content.return_value = resp
         return client
 
@@ -47,7 +56,7 @@ class TestProcess:
 
         items = [_make_fetched("a"), _make_fetched("b")]
         with patch("src.pipeline.run._make_gemini_client", return_value=self._null_client()):
-            result = process(items, gemini_api_key="fake-key", fetch_date="2026-05-02")
+            result, _ = process(items, gemini_api_key="fake-key", fetch_date="2026-05-02")
         assert isinstance(result, list)
 
     def test_returns_one_item_per_input(self):
@@ -55,7 +64,7 @@ class TestProcess:
 
         items = [_make_fetched("a"), _make_fetched("b")]
         with patch("src.pipeline.run._make_gemini_client", return_value=self._null_client()):
-            result = process(items, gemini_api_key="fake-key", fetch_date="2026-05-02")
+            result, _ = process(items, gemini_api_key="fake-key", fetch_date="2026-05-02")
         assert len(result) == 2
 
     def test_all_results_are_processed_items(self):
@@ -63,7 +72,7 @@ class TestProcess:
 
         items = [_make_fetched("x")]
         with patch("src.pipeline.run._make_gemini_client", return_value=self._null_client()):
-            result = process(items, gemini_api_key="fake-key", fetch_date="2026-05-02")
+            result, _ = process(items, gemini_api_key="fake-key", fetch_date="2026-05-02")
         assert all(isinstance(r, ProcessedItem) for r in result)
 
     def test_ids_match_input(self):
@@ -71,7 +80,7 @@ class TestProcess:
 
         items = [_make_fetched("id-1"), _make_fetched("id-2")]
         with patch("src.pipeline.run._make_gemini_client", return_value=self._null_client()):
-            result = process(items, gemini_api_key="fake-key", fetch_date="2026-05-02")
+            result, _ = process(items, gemini_api_key="fake-key", fetch_date="2026-05-02")
         result_ids = {r.id for r in result}
         assert result_ids == {"id-1", "id-2"}
 
@@ -80,7 +89,7 @@ class TestProcess:
 
         items = [_make_fetched("d1")]
         with patch("src.pipeline.run._make_gemini_client", return_value=self._null_client()):
-            result = process(items, gemini_api_key="fake-key", fetch_date="2026-05-02")
+            result, _ = process(items, gemini_api_key="fake-key", fetch_date="2026-05-02")
         assert all(r.fetch_date == "2026-05-02" for r in result)
 
     def test_cleaned_content_set(self):
@@ -88,7 +97,7 @@ class TestProcess:
 
         items = [_make_fetched("c1")]
         with patch("src.pipeline.run._make_gemini_client", return_value=self._null_client()):
-            result = process(items, gemini_api_key="fake-key", fetch_date="2026-05-02")
+            result, _ = process(items, gemini_api_key="fake-key", fetch_date="2026-05-02")
         assert all(len(r.cleaned_content) > 0 for r in result)
 
     def test_credibility_score_set(self):
@@ -96,7 +105,7 @@ class TestProcess:
 
         items = [_make_fetched("cs1")]
         with patch("src.pipeline.run._make_gemini_client", return_value=self._null_client()):
-            result = process(items, gemini_api_key="fake-key", fetch_date="2026-05-02")
+            result, _ = process(items, gemini_api_key="fake-key", fetch_date="2026-05-02")
         assert all(0.0 <= r.credibility_score <= 1.0 for r in result)
 
     def test_hype_risk_set(self):
@@ -104,27 +113,40 @@ class TestProcess:
 
         items = [_make_fetched("h1")]
         with patch("src.pipeline.run._make_gemini_client", return_value=self._null_client()):
-            result = process(items, gemini_api_key="fake-key", fetch_date="2026-05-02")
+            result, _ = process(items, gemini_api_key="fake-key", fetch_date="2026-05-02")
         assert all(0.0 <= r.hype_risk <= 1.0 for r in result)
 
     def test_empty_input_returns_empty_list(self):
         from src.pipeline.run import process
 
         with patch("src.pipeline.run._make_gemini_client", return_value=self._null_client()):
-            result = process([], gemini_api_key="fake-key", fetch_date="2026-05-02")
+            result, failures = process([], gemini_api_key="fake-key", fetch_date="2026-05-02")
         assert result == []
+        assert failures == 0
 
     def test_works_without_gemini_key(self):
         """When no Gemini key is provided, AI stages are skipped gracefully."""
         from src.pipeline.run import process
 
         items = [_make_fetched("no-key")]
-        result = process(items, gemini_api_key=None, fetch_date="2026-05-02")
+        result, failures = process(items, gemini_api_key=None, fetch_date="2026-05-02")
         assert len(result) == 1
         assert result[0].id == "no-key"
-        # Non-AI fields must still be populated
         assert result[0].fetch_date == "2026-05-02"
         assert result[0].credibility_score > 0.0
+        assert failures == 0
+
+    def test_ai_failure_counted(self):
+        """A Gemini exception increments the failure count."""
+        from src.pipeline.run import process
+
+        client = MagicMock()
+        client.models.generate_content.side_effect = RuntimeError("429 quota")
+        items = [_make_fetched("fail-1"), _make_fetched("fail-2")]
+        with patch("src.pipeline.run._make_gemini_client", return_value=client):
+            result, failures = process(items, gemini_api_key="fake-key", fetch_date="2026-05-02")
+        assert failures == 2
+        assert len(result) == 2
 
 
 # ── write_processed_jsonl ────────────────────────────────────────────────────
