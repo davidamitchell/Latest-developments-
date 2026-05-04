@@ -108,10 +108,11 @@ class TestClusterThemes:
         assert rels == []
 
     def test_api_failure_returns_fallback(self):
-        """When Gemini call fails, cluster_themes returns empty assignments gracefully."""
+        """When Gemini call fails after retries, cluster_themes returns safe defaults."""
         records = _make_records("Multi-agent coordination", "RAG with tools")
 
-        with patch("src.themes.genai.Client") as mock_client:
+        with patch("src.themes.genai.Client") as mock_client, \
+             patch("src.retry.time.sleep"):
             mock_instance = mock_client.return_value
             mock_instance.models.generate_content.side_effect = Exception("API down")
 
@@ -123,10 +124,11 @@ class TestClusterThemes:
         assert isinstance(rels, list)
 
     def test_json_decode_failure_returns_fallback(self):
-        """When Gemini returns invalid JSON, cluster_themes falls back gracefully."""
+        """When Gemini returns invalid JSON after retries, cluster_themes falls back."""
         records = _make_records("Agent orchestration systems")
 
-        with patch("src.themes.genai.Client") as mock_client:
+        with patch("src.themes.genai.Client") as mock_client, \
+             patch("src.retry.time.sleep"):
             mock_instance = mock_client.return_value
             mock_response = MagicMock()
             mock_response.text = "not valid json at all {{{"
@@ -220,6 +222,81 @@ class TestClusterThemes:
             url_to_theme, defs, rels = cluster_themes(records, [])
 
         assert url_to_theme.get("https://example.com/0") == "Benchmarks & Evals"
+
+    def test_retries_on_transient_error_then_succeeds(self):
+        """cluster_themes retries after a transient failure and returns results."""
+        records = _make_records("Inference cost optimization")
+        payload = {
+            "assignments": [{"url": "https://example.com/0", "theme": "Inference Cost Reduction", "domain": "infra"}],
+            "theme_definitions": [{"theme": "Inference Cost Reduction", "domain": "infra", "definition": "Cost."}],
+            "relationships": [],
+        }
+        good_response = MagicMock()
+        good_response.text = json.dumps(payload)
+
+        with patch("src.themes.genai.Client") as mock_client, \
+             patch("src.retry.time.sleep"):
+            mock_instance = mock_client.return_value
+            mock_instance.models.generate_content.side_effect = [
+                RuntimeError("503 transient"),
+                good_response,
+            ]
+            url_to_theme, defs, rels = cluster_themes(records, [])
+
+        assert url_to_theme.get("https://example.com/0") == "Inference Cost Reduction"
+        assert mock_instance.models.generate_content.call_count == 2
+
+    def test_sleeps_server_retry_delay_on_429(self):
+        """cluster_themes sleeps the retryDelay from a 429 before retrying."""
+        records = _make_records("Agent tool use")
+        payload = {
+            "assignments": [{"url": "https://example.com/0", "theme": "Agent Tool Use", "domain": "agents"}],
+            "theme_definitions": [],
+            "relationships": [],
+        }
+        good_response = MagicMock()
+        good_response.text = json.dumps(payload)
+
+        rate_limit_exc = RuntimeError("'retryDelay': '45s' RESOURCE_EXHAUSTED")
+
+        with patch("src.themes.genai.Client") as mock_client, \
+             patch("src.retry.time.sleep") as mock_sleep:
+            mock_instance = mock_client.return_value
+            mock_instance.models.generate_content.side_effect = [rate_limit_exc, good_response]
+            cluster_themes(records, [])
+
+        mock_sleep.assert_called_once_with(45.0)
+
+    def test_exhausted_retries_return_domain_fallback(self):
+        """After 3 failed attempts the fallback maps each item to its domain theme."""
+        records = [
+            CanonicalRecord(url="https://example.com/0", title="x", source_class="practitioner", domain="agents"),
+            CanonicalRecord(url="https://example.com/1", title="y", source_class="practitioner", domain="infra"),
+        ]
+
+        with patch("src.themes.genai.Client") as mock_client, \
+             patch("src.retry.time.sleep"):
+            mock_instance = mock_client.return_value
+            mock_instance.models.generate_content.side_effect = RuntimeError("always fails")
+            url_to_theme, defs, rels = cluster_themes(records, [])
+
+        assert url_to_theme["https://example.com/0"] != ""
+        assert url_to_theme["https://example.com/1"] != ""
+        assert defs == []
+        assert rels == []
+        assert mock_instance.models.generate_content.call_count == 3
+
+    def test_api_failure_call_count_is_max_attempts(self):
+        """Gemini is called exactly max_attempts times before giving up."""
+        records = _make_records("something")
+
+        with patch("src.themes.genai.Client") as mock_client, \
+             patch("src.retry.time.sleep"):
+            mock_instance = mock_client.return_value
+            mock_instance.models.generate_content.side_effect = Exception("quota")
+            cluster_themes(records, [])
+
+        assert mock_instance.models.generate_content.call_count == 3
 
 
 # ---------------------------------------------------------------------------

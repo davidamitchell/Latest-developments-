@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import re
 import time
 from collections.abc import Callable
 from typing import TypeVar
@@ -15,10 +16,14 @@ T = TypeVar("T")
 def _retry_after_delay(exc: Exception, base_delay: float, attempt: int) -> float:
     """Return the delay to sleep before the next attempt.
 
-    If the exception carries an HTTP response with a Retry-After header (as
-    required by RFC 6585 for 429 and commonly sent on 503), use that value.
-    Otherwise fall back to exponential backoff.
+    Checks (in order):
+    1. HTTP Retry-After header (RFC 6585) — present on httpx HTTPStatusError.
+    2. Gemini retryDelay in structured exception details (RetryInfo proto) — present
+       on 429 RESOURCE_EXHAUSTED responses from the google-genai SDK.
+    3. retryDelay embedded in the exception string representation.
+    4. Exponential backoff fallback.
     """
+    # 1. HTTP Retry-After header
     response = getattr(exc, "response", None)
     if response is not None:
         try:
@@ -27,6 +32,25 @@ def _retry_after_delay(exc: Exception, base_delay: float, attempt: int) -> float
                 return max(0.0, float(header))
         except Exception:
             pass
+
+    # 2. Gemini RetryInfo proto in structured .details list
+    details = getattr(exc, "details", None)
+    if isinstance(details, (list, tuple)):
+        for detail in details:
+            if isinstance(detail, dict):
+                rd = detail.get("retryDelay") or detail.get("retry_delay")
+                if rd:
+                    m = re.match(r"(\d+(?:\.\d+)?)", str(rd))
+                    if m:
+                        return float(m.group(1))
+
+    # 3. retryDelay embedded in the exception string (e.g. "'retryDelay': '39s'")
+    exc_str = str(exc)
+    m = re.search(r"['\"]retryDelay['\"]\s*:\s*['\"](\d+(?:\.\d+)?)s['\"]", exc_str)
+    if m:
+        return float(m.group(1))
+
+    # 4. Exponential fallback
     return base_delay * (2 ** (attempt - 1))
 
 
@@ -41,8 +65,9 @@ def with_backoff(
     """Call fn(), retrying on transient errors with exponential backoff.
 
     Exceptions listed in no_retry propagate immediately without retry.
-    If the exception carries an HTTP response with a Retry-After header the
-    server-specified delay is used instead of the exponential fallback.
+    If the exception carries an HTTP response with a Retry-After header, or a
+    Gemini retryDelay detail, the server-specified delay is used instead of the
+    exponential fallback.
     After max_attempts, raises RuntimeError wrapping the last exception.
     """
     last_exc: Exception | None = None

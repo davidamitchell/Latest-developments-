@@ -9,10 +9,10 @@ import re
 from collections import Counter
 
 from google import genai
-from google.genai import errors as genai_errors
 from google.genai import types
 
 from src.models import CanonicalRecord, GraphEdge, ThemeNode
+from src.retry import with_backoff
 
 logger = logging.getLogger(__name__)
 
@@ -205,6 +205,19 @@ Domains must be one of: {", ".join(DOMAIN_TAXONOMY)}.
 """
 
 
+def _call_gemini_cluster(client, prompt: str) -> dict:
+    """Make the Gemini call and parse the JSON response; raises on any failure."""
+    response = client.models.generate_content(
+        model="gemini-2.5-flash",
+        contents=prompt,
+        config=types.GenerateContentConfig(max_output_tokens=4096),
+    )
+    raw = response.text.strip()
+    raw = re.sub(r"^```(?:json)?\s*", "", raw, flags=re.MULTILINE)
+    raw = re.sub(r"\s*```$", "", raw, flags=re.MULTILINE)
+    return json.loads(raw)
+
+
 def cluster_themes(
     records: list[CanonicalRecord],
     existing_themes: list[str],
@@ -215,33 +228,26 @@ def cluster_themes(
         url_to_theme: dict mapping item URL → canonical theme name
         theme_definitions: list of {theme, domain, definition}
         relationships: list of {source, target, rel_type, weight}
+
+    Retries up to 3 times, honouring any retryDelay from 429 responses.
+    Falls back to domain-based theme assignment if all attempts fail.
     """
     if not records:
         return {}, [], []
 
-    # Fast pre-normalization: apply synonym map before calling Gemini
-    for rec in records:
-        if rec.claim:
-            rec.claim = rec.claim  # synonyms applied in final theme name, not claim
     existing_normalized = [normalize_theme_name(t) for t in existing_themes]
-
     prompt = _build_clustering_prompt(records, existing_normalized)
     client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY", ""))
 
     try:
-        response = client.models.generate_content(
-            model="gemini-2.5-flash",
-            contents=prompt,
-            config=types.GenerateContentConfig(max_output_tokens=4096),
+        data = with_backoff(
+            lambda: _call_gemini_cluster(client, prompt),
+            max_attempts=3,
+            base_delay=2.0,
+            label="theme-clustering",
         )
-        raw = response.text.strip()
-        # Strip markdown fences if present
-        raw = re.sub(r"^```(?:json)?\s*", "", raw, flags=re.MULTILINE)
-        raw = re.sub(r"\s*```$", "", raw, flags=re.MULTILINE)
-        data = json.loads(raw)
-    except (genai_errors.APIError, json.JSONDecodeError, Exception) as exc:
-        logger.warning("Theme clustering Gemini call failed: %s", exc)
-        # Fallback: assign "General" theme to everything
+    except RuntimeError as exc:
+        logger.warning("Theme clustering failed after retries: %s", exc)
         url_to_theme = {r.url: normalize_theme_name(r.domain or "General") for r in records}
         return url_to_theme, [], []
 
