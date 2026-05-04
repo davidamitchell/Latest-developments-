@@ -14,7 +14,7 @@ Each stage function has a defined input/output type:
 from __future__ import annotations
 
 from datetime import datetime, timezone
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -467,3 +467,120 @@ class TestCredibilityScoringStage:
         with mock.patch.object(cred_module, "score_credibility", wraps=cred_module.score_credibility) as spy:
             score_credibility(item)
             spy.assert_called_once()
+
+
+# ── Enrich: retry / rate-limit behaviour ─────────────────────────────────────
+
+class TestExtractRetryDelay:
+    def test_returns_none_when_no_detail(self):
+        from src.pipeline.stages.enrich import _extract_retry_delay
+
+        assert _extract_retry_delay(RuntimeError("plain error")) is None
+
+    def test_parses_single_quoted_retry_delay_from_str(self):
+        from src.pipeline.stages.enrich import _extract_retry_delay
+
+        exc = RuntimeError("RESOURCE_EXHAUSTED 'retryDelay': '39s' details")
+        assert _extract_retry_delay(exc) == 39.0
+
+    def test_parses_double_quoted_retry_delay_from_str(self):
+        from src.pipeline.stages.enrich import _extract_retry_delay
+
+        exc = RuntimeError('quota exceeded "retryDelay": "120s" retry')
+        assert _extract_retry_delay(exc) == 120.0
+
+    def test_reads_structured_details_list(self):
+        from src.pipeline.stages.enrich import _extract_retry_delay
+
+        exc = RuntimeError("rate limited")
+        exc.details = [{"@type": "type.googleapis.com/google.rpc.RetryInfo", "retryDelay": "60s"}]  # type: ignore[attr-defined]
+        assert _extract_retry_delay(exc) == 60.0
+
+    def test_structured_details_takes_priority(self):
+        from src.pipeline.stages.enrich import _extract_retry_delay
+
+        exc = RuntimeError("'retryDelay': '10s'")
+        exc.details = [{"retryDelay": "45s"}]  # type: ignore[attr-defined]
+        assert _extract_retry_delay(exc) == 45.0
+
+
+class TestEnrichRetry:
+    def _make_item(self):
+        return _make_processed()
+
+    def _good_client(self):
+        client = MagicMock()
+        resp = MagicMock()
+        resp.text = (
+            "CONCEPTS: LLM\nACTORS: none\nIMPACT: capability\n"
+            "THEME: inference\nDOMAIN: infra\n"
+            "SUMMARY: Sentence one. Sentence two.\nMARKETING: false\nCONFIDENCE: 0.1"
+        )
+        client.models.generate_content.return_value = resp
+        return client
+
+    @patch("src.pipeline.stages.enrich.time.sleep")
+    def test_success_on_first_call_does_not_sleep(self, mock_sleep):
+        from src.pipeline.stages.enrich import enrich
+
+        item, ok = enrich(self._make_item(), self._good_client())
+        assert ok is True
+        mock_sleep.assert_not_called()
+
+    @patch("src.pipeline.stages.enrich.time.sleep")
+    def test_retries_on_transient_error_and_succeeds(self, mock_sleep):
+        from src.pipeline.stages.enrich import enrich
+
+        client = MagicMock()
+        resp = MagicMock()
+        resp.text = (
+            "CONCEPTS: x\nACTORS: none\nIMPACT: unknown\n"
+            "THEME: t\nDOMAIN: general\nSUMMARY: s.\nMARKETING: false\nCONFIDENCE: 0.0"
+        )
+        client.models.generate_content.side_effect = [RuntimeError("503"), resp]
+        item, ok = enrich(self._make_item(), client)
+        assert ok is True
+        assert client.models.generate_content.call_count == 2
+        mock_sleep.assert_called_once()
+
+    @patch("src.pipeline.stages.enrich.time.sleep")
+    def test_sleeps_server_retry_delay_on_429(self, mock_sleep):
+        from src.pipeline.stages.enrich import enrich
+
+        exc = RuntimeError("'retryDelay': '39s' RESOURCE_EXHAUSTED")
+        resp = MagicMock()
+        resp.text = (
+            "CONCEPTS: x\nACTORS: none\nIMPACT: unknown\n"
+            "THEME: t\nDOMAIN: general\nSUMMARY: s.\nMARKETING: false\nCONFIDENCE: 0.0"
+        )
+        client = MagicMock()
+        client.models.generate_content.side_effect = [exc, resp]
+        enrich(self._make_item(), client)
+        mock_sleep.assert_called_once_with(39.0)
+
+    @patch("src.pipeline.stages.enrich.time.sleep")
+    def test_returns_false_after_max_attempts(self, mock_sleep):
+        from src.pipeline.stages.enrich import _MAX_ENRICH_ATTEMPTS, enrich
+
+        client = MagicMock()
+        client.models.generate_content.side_effect = RuntimeError("always fails")
+        item, ok = enrich(self._make_item(), client)
+        assert ok is False
+        assert client.models.generate_content.call_count == _MAX_ENRICH_ATTEMPTS
+
+    @patch("src.pipeline.stages.enrich.time.sleep")
+    def test_max_attempts_is_3(self, mock_sleep):
+        from src.pipeline.stages.enrich import _MAX_ENRICH_ATTEMPTS
+
+        assert _MAX_ENRICH_ATTEMPTS == 3
+
+    @patch("src.pipeline.stages.enrich.time.sleep")
+    def test_uses_exponential_backoff_when_no_retry_delay(self, mock_sleep):
+        from src.pipeline.stages.enrich import enrich
+
+        client = MagicMock()
+        client.models.generate_content.side_effect = RuntimeError("generic error")
+        enrich(self._make_item(), client)
+        delays = [c.args[0] for c in mock_sleep.call_args_list]
+        assert len(delays) == 2
+        assert delays[1] > delays[0]

@@ -1,6 +1,29 @@
 # Progress
 
-Last updated: 2026-05-01
+Last updated: 2026-05-04
+
+---
+
+## 2026-05-04 — Gemini rate limiting and HTTP Retry-After compliance
+
+**What changed:** The CI pipeline was exiting with code 2 because 245/250 Gemini enrichment calls failed with 429 RESOURCE_EXHAUSTED. Root cause: no pacing between requests, and 429 `retryDelay` values were discarded rather than honoured.
+
+Three changes applied to `claude/add-api-batching-fp1FZ`:
+
+1. `src/pipeline/run.py` — `_RateLimiter(rpm=5)` inserted into the `process()` loop. Enforces 12 s minimum between Gemini calls so the free-tier quota is never reached.
+2. `src/pipeline/stages/enrich.py` — `_extract_retry_delay()` parses the `retryDelay` field from 429 response details (structured `.details` list or string fallback). `enrich()` now loops up to 3 attempts, sleeping the server-specified delay on 429 and exponential backoff (2 s / 4 s) on other transient errors.
+3. `src/retry.py` — `_retry_after_delay()` reads the `Retry-After` header from httpx HTTP exceptions (RFC 6585). All fetchers using `with_backoff()` now automatically respect server-supplied back-off on 429/503.
+
+**Tests added:** 4 in `test_retry.py`, 14 in `test_pipeline_stages.py` (covering `_extract_retry_delay`, enrich retry logic, sleep behaviour). Fixed `test_ai_failure_counted` to mock `time.sleep` so it doesn't actually block.
+
+---
+
+### Mini-Retro
+
+1. **Did the process work?** Mostly. The root cause was correctly diagnosed from the CI log. The fix is layered correctly: rate limiter prevents hitting the quota; per-item retry handles the rare case where a 429 still slips through.
+2. **What slowed down?** Missing tests on the first pass — the copilot instructions require TDD (failing test first) but I implemented code before tests. Also introduced `_MAX_ENRICH_ATTEMPTS = 4` when the standard says max 3.
+3. **What single change would prevent this next time?** Read `copilot-instructions.md` before writing any code, specifically the TDD mandate and the "max 3 attempts" standard.
+4. **Is this a pattern?** Yes — the same class of error (ignoring API response metadata) applies to httpx fetchers that don't read `Retry-After`. Fixed systemically via `retry.py` rather than one fetcher at a time.
 
 ---
 

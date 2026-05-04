@@ -136,8 +136,10 @@ class TestProcess:
         assert result[0].credibility_score > 0.0
         assert failures == 0
 
-    def test_ai_failure_counted(self):
-        """A Gemini exception increments the failure count."""
+    @patch("src.pipeline.stages.enrich.time.sleep")
+    @patch("src.pipeline.run.time.sleep")
+    def test_ai_failure_counted(self, _run_sleep, _enrich_sleep):
+        """A Gemini exception exhausts retries and increments the failure count."""
         from src.pipeline.run import process
 
         client = MagicMock()
@@ -147,6 +149,58 @@ class TestProcess:
             result, failures = process(items, gemini_api_key="fake-key", fetch_date="2026-05-02")
         assert failures == 2
         assert len(result) == 2
+
+    @patch("src.pipeline.stages.enrich.time.sleep")
+    @patch("src.pipeline.run.time.sleep")
+    def test_rate_limiter_called_before_each_enrich(self, mock_run_sleep, _enrich_sleep):
+        """The rate limiter inserts a sleep between consecutive Gemini calls."""
+        from src.pipeline.run import process
+
+        items = [_make_fetched("rl-1"), _make_fetched("rl-2"), _make_fetched("rl-3")]
+        with patch("src.pipeline.run._make_gemini_client", return_value=self._null_client()):
+            process(items, gemini_api_key="fake-key", fetch_date="2026-05-02")
+        # After the first call, the rate limiter sleeps before each subsequent call.
+        assert mock_run_sleep.call_count >= 2
+
+
+# ── _RateLimiter ─────────────────────────────────────────────────────────────
+
+class TestRateLimiter:
+    def test_first_call_does_not_sleep(self):
+        from src.pipeline.run import _RateLimiter
+
+        with patch("src.pipeline.run.time.sleep") as mock_sleep, \
+             patch("src.pipeline.run.time.monotonic", side_effect=[1000.0, 1000.0]):
+            rl = _RateLimiter(rpm=5)
+            rl.wait()
+        mock_sleep.assert_not_called()
+
+    def test_rapid_second_call_sleeps(self):
+        from src.pipeline.run import _RateLimiter
+
+        # Simulate: first call at t=1000, second call immediately at t=1000.1
+        # With 5 RPM the interval is 12s, so we expect ~11.9s sleep.
+        monotonic_values = [1000.0, 1000.0, 1000.1, 1000.1]
+        with patch("src.pipeline.run.time.sleep") as mock_sleep, \
+             patch("src.pipeline.run.time.monotonic", side_effect=monotonic_values):
+            rl = _RateLimiter(rpm=5)
+            rl.wait()  # first call — no sleep
+            rl.wait()  # second call — should sleep
+        assert mock_sleep.call_count == 1
+        slept = mock_sleep.call_args.args[0]
+        assert 11.0 < slept < 12.5
+
+    def test_call_after_full_interval_does_not_sleep(self):
+        from src.pipeline.run import _RateLimiter
+
+        # Second call arrives 15s after first — no sleep needed.
+        monotonic_values = [1000.0, 1000.0, 1015.0, 1015.0]
+        with patch("src.pipeline.run.time.sleep") as mock_sleep, \
+             patch("src.pipeline.run.time.monotonic", side_effect=monotonic_values):
+            rl = _RateLimiter(rpm=5)
+            rl.wait()
+            rl.wait()
+        mock_sleep.assert_not_called()
 
 
 # ── write_processed_jsonl ────────────────────────────────────────────────────

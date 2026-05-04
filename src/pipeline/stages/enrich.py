@@ -82,16 +82,16 @@ def _parse(text: str, item_id: str) -> dict:
     if not theme:
         logger.debug("enrich: missing THEME for %r — response: %r", item_id, text[:200])
 
-    return dict(
-        concepts=concepts,
-        actors=actors,
-        impact_vector=impact,
-        theme=theme,
-        domain=domain,
-        summary=summary,
-        is_marketing=is_marketing,
-        marketing_confidence=confidence,
-    )
+    return {
+        "concepts": concepts,
+        "actors": actors,
+        "impact_vector": impact,
+        "theme": theme,
+        "domain": domain,
+        "summary": summary,
+        "is_marketing": is_marketing,
+        "marketing_confidence": confidence,
+    }
 
 
 def _extract_retry_delay(exc: Exception) -> float | None:
@@ -118,7 +118,7 @@ def _extract_retry_delay(exc: Exception) -> float | None:
     return None
 
 
-_MAX_ENRICH_ATTEMPTS = 4
+_MAX_ENRICH_ATTEMPTS = 3
 
 
 def enrich(item: ProcessedItem, client) -> tuple[ProcessedItem, bool]:
