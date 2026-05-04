@@ -132,8 +132,17 @@ def main() -> int:
         logger.warning("GEMINI_API_KEY not set — AI stages (3–6) will be skipped")
 
     processed, ai_failures = process(items, gemini_api_key=api_key, fetch_date=today)
-    write_processed_jsonl(processed, out_path)
-    logger.info("Processing complete — %d item(s) written to %s", len(processed), out_path)
+
+    # Merge with any items already in the processed file for this date so that
+    # a second same-day run does not erase the first run's data.
+    existing = read_processed_jsonl(out_path)
+    existing_ids = {item.id for item in existing}
+    merged = existing + [item for item in processed if item.id not in existing_ids]
+    write_processed_jsonl(merged, out_path)
+    logger.info(
+        "Processing complete — %d new item(s) added; %d total in %s",
+        len(processed), len(merged), out_path,
+    )
 
     if api_key and items and ai_failures / len(items) > 0.5:
         logger.error(
