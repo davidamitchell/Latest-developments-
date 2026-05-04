@@ -215,9 +215,11 @@ def fetch_all(
         for item in items:
             if item.id in seen:
                 continue
-            if item.published and item.published < cutoff:
-                too_old += 1
-                continue
+            if item.published:
+                pub = item.published if item.published.tzinfo is not None else item.published.replace(tzinfo=UTC)
+                if pub < cutoff:
+                    too_old += 1
+                    continue
             seen.add(item.id)
             result.append(item)
 

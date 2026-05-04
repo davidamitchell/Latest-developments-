@@ -70,6 +70,48 @@ class TestFetchAll:
         result = fetch_all(cfg, already_processed=set())
         assert all(isinstance(i, FetchedItem) for i in result)
 
+    def _fetch_all_with_items(self, items, max_age_days=7):
+        """Helper: run fetch_all with a fake fetcher that returns the given items."""
+        from src.config import Config
+        from src.pipeline.fetch import fetch_all
+
+        fake_fetcher = MagicMock()
+        fake_fetcher.fetch.return_value = items
+        cfg = Config()
+        with patch("src.pipeline.fetch._build_fetchers", return_value=[("fake", fake_fetcher)]):
+            return fetch_all(cfg, already_processed=set(), max_age_days=max_age_days)
+
+    def test_age_filter_drops_old_items(self):
+        """Items published more than max_age_days ago are excluded."""
+        old_item = FetchedItem(
+            id="old-1", title="Old", url="https://example.com/old",
+            content="", source_name="S", source_type="rss",
+            source_class="practitioner", author="", has_code=False,
+            evidence_type="unknown",
+            published=datetime(2020, 1, 1, tzinfo=timezone.utc),
+        )
+        result = self._fetch_all_with_items([old_item], max_age_days=7)
+        assert all(i.id != "old-1" for i in result)
+
+    def test_age_filter_keeps_recent_items(self):
+        """Items published within max_age_days are included."""
+        recent = _make_item("recent-1")  # published 2026-05-02, within 365 days
+        result = self._fetch_all_with_items([recent], max_age_days=365)
+        assert any(i.id == "recent-1" for i in result)
+
+    def test_age_filter_handles_naive_published_datetime(self):
+        """Age filter must not raise TypeError when item.published is timezone-naive."""
+        naive_item = FetchedItem(
+            id="naive-1", title="Naive dt", url="https://example.com/naive",
+            content="", source_name="S", source_type="rss",
+            source_class="practitioner", author="", has_code=False,
+            evidence_type="unknown",
+            published=datetime(2026, 5, 2, 9, 0),  # no tzinfo — naive
+        )
+        # Must not raise TypeError: can't compare offset-naive and offset-aware datetimes
+        result = self._fetch_all_with_items([naive_item], max_age_days=7)
+        assert isinstance(result, list)
+
 
 # ── write_raw_jsonl ─────────────────────────────────────────────────────────
 

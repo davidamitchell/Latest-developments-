@@ -53,6 +53,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 1
+          ref: ${{ github.ref }}
           submodules: true
 
       - name: Set up Python
@@ -86,7 +87,7 @@ jobs:
             echo "No new raw data — nothing to commit"
           else
             git commit -m "chore: raw fetch data ${TODAY} [skip ci]"
-            git push origin main
+            git push origin HEAD
           fi
 
   process:
@@ -101,7 +102,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 1
-          ref: main
+          ref: ${{ github.ref }}
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -132,7 +133,7 @@ jobs:
             echo "No new processed data — nothing to commit"
           else
             git commit -m "chore: processed pipeline data ${TODAY} [skip ci]"
-            git push origin main
+            git push origin HEAD
           fi
 
       - name: Send failure alert
