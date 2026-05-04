@@ -91,7 +91,7 @@ jobs:
             echo "State and history unchanged — nothing to commit"
           else
             git commit -m "chore: update state and history ${TODAY} [skip ci]"
-            git push origin main
+            git push origin HEAD
           fi
 
       - name: Send failure alert
