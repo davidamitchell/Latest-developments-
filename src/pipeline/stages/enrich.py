@@ -7,14 +7,16 @@ pressure on the Gemini free tier.
 
 Returns the item with all AI fields populated, plus an enrichment_ok flag
 (True if the call succeeded, False if it failed and defaults were used).
+
+Retry behaviour is delegated entirely to the Gemini client, which is
+configured with HttpRetryOptions in src/pipeline/run.py.  The _RateLimiter
+in run.py paces calls to ≤5 RPM so most 429s never occur.
 """
 
 from __future__ import annotations
 
 import dataclasses
 import logging
-import re
-import time
 
 from src.models import Domain, ImpactVector, ProcessedItem
 
@@ -94,42 +96,14 @@ def _parse(text: str, item_id: str) -> dict:
     }
 
 
-def _extract_retry_delay(exc: Exception) -> float | None:
-    """Return the server-requested retry delay in seconds, or None if not present.
-
-    Gemini 429 responses carry a RetryInfo proto in their error details with a
-    retryDelay field (e.g. '39s').  We check the structured .details attribute
-    first, then fall back to parsing the exception's string representation.
-    """
-    details = getattr(exc, "details", None)
-    if isinstance(details, (list, tuple)):
-        for detail in details:
-            if isinstance(detail, dict):
-                rd = detail.get("retryDelay") or detail.get("retry_delay")
-                if rd:
-                    m = re.match(r"(\d+(?:\.\d+)?)", str(rd))
-                    if m:
-                        return float(m.group(1))
-
-    exc_str = str(exc)
-    m = re.search(r"['\"]retryDelay['\"]\s*:\s*['\"](\d+(?:\.\d+)?)s['\"]", exc_str)
-    if m:
-        return float(m.group(1))
-    return None
-
-
-_MAX_ENRICH_ATTEMPTS = 3
-
-
 def enrich(item: ProcessedItem, client) -> tuple[ProcessedItem, bool]:
     """Run combined AI enrichment; return (enriched_item, ok).
 
-    ok is False when the API call fails after all retries; the item is returned
-    with default values so the pipeline can continue.
+    ok is False when the API call fails after the client's built-in retries.
+    The item is returned with default values so the pipeline can continue.
 
-    On 429 RESOURCE_EXHAUSTED the response body contains a retryDelay field
-    (e.g. '39s').  We extract that value and sleep exactly that long before
-    retrying, rather than ignoring it and hammering the quota further.
+    Retry behaviour (attempts, backoff, retryable status codes) is configured
+    on the client via HttpRetryOptions — not repeated here.
     """
     content = item.cleaned_content or item.title
     prompt = (
@@ -137,37 +111,14 @@ def enrich(item: ProcessedItem, client) -> tuple[ProcessedItem, bool]:
         f"Source: {item.source_name} (class: {item.source_class})\n\n"
         f"Content: {content[:5000]}"
     )
-    for attempt in range(1, _MAX_ENRICH_ATTEMPTS + 1):
-        try:
-            response = client.models.generate_content(
-                model="gemini-2.5-flash",
-                contents=prompt,
-                config={"system_instruction": _SYSTEM_PROMPT, "max_output_tokens": 500},
-            )
-            parsed = _parse(response.text, item.id)
-            return dataclasses.replace(item, **parsed), True
-        except Exception as exc:
-            if attempt == _MAX_ENRICH_ATTEMPTS:
-                logger.warning(
-                    "AI enrichment failed for %r after %d attempts: %s",
-                    item.id, _MAX_ENRICH_ATTEMPTS, exc,
-                )
-                return item, False
-
-            retry_delay = _extract_retry_delay(exc)
-            if retry_delay is not None:
-                logger.info(
-                    "enrich: rate-limited for %r (attempt %d/%d) — "
-                    "sleeping %.0fs as directed by API",
-                    item.id, attempt, _MAX_ENRICH_ATTEMPTS, retry_delay,
-                )
-                time.sleep(retry_delay)
-            else:
-                backoff = 2.0 * (2 ** (attempt - 1))
-                logger.warning(
-                    "enrich: transient error for %r (attempt %d/%d): %s — retry in %.0fs",
-                    item.id, attempt, _MAX_ENRICH_ATTEMPTS, exc, backoff,
-                )
-                time.sleep(backoff)
-
-    return item, False  # unreachable, satisfies type checker
+    try:
+        response = client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=prompt,
+            config={"system_instruction": _SYSTEM_PROMPT, "max_output_tokens": 500},
+        )
+        parsed = _parse(response.text, item.id)
+        return dataclasses.replace(item, **parsed), True
+    except Exception as exc:
+        logger.warning("AI enrichment failed for %r: %s", item.id, exc)
+        return item, False

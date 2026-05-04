@@ -13,10 +13,8 @@ Each stage function has a defined input/output type:
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
-from unittest.mock import MagicMock, patch
-
-import pytest
+from datetime import UTC, datetime
+from unittest.mock import MagicMock
 
 from src.fetchers import FetchedItem
 from src.models import ProcessedItem
@@ -38,27 +36,27 @@ def _make_fetched(
         source_type="rss",
         source_class=source_class,
         author="Alice",
-        published=published or datetime(2026, 5, 2, 9, 0, tzinfo=timezone.utc),
+        published=published or datetime(2026, 5, 2, 9, 0, tzinfo=UTC),
         has_code=has_code,
         evidence_type=evidence_type,
     )
 
 
 def _make_processed(**kwargs) -> ProcessedItem:
-    defaults = dict(
-        id="item-1",
-        title="Test Title About LLMs",
-        url="https://example.com/item-1",
-        source_name="Test Source",
-        source_type="rss",
-        source_class="practitioner",
-        author="Alice",
-        published=datetime(2026, 5, 2, 9, 0, tzinfo=timezone.utc),
-        has_code=False,
-        evidence_type="analysis",
-        fetch_date="2026-05-02",
-        cleaned_content="This is a test article about LLM inference performance.",
-    )
+    defaults = {
+        "id": "item-1",
+        "title": "Test Title About LLMs",
+        "url": "https://example.com/item-1",
+        "source_name": "Test Source",
+        "source_type": "rss",
+        "source_class": "practitioner",
+        "author": "Alice",
+        "published": datetime(2026, 5, 2, 9, 0, tzinfo=UTC),
+        "has_code": False,
+        "evidence_type": "analysis",
+        "fetch_date": "2026-05-02",
+        "cleaned_content": "This is a test article about LLM inference performance.",
+    }
     defaults.update(kwargs)
     return ProcessedItem(**defaults)
 
@@ -414,9 +412,10 @@ class TestHypeScoringStage:
 
     def test_does_not_call_external_services(self):
         """Hype scoring delegates to src.credibility.detect_hype — no I/O."""
-        from src.pipeline.stages.hype_scoring import score_hype
         import unittest.mock as mock
+
         import src.credibility as cred_module
+        from src.pipeline.stages.hype_scoring import score_hype
 
         item = _make_processed()
         with mock.patch("src.pipeline.stages.hype_scoring.detect_hype", wraps=cred_module.detect_hype) as spy:
@@ -459,9 +458,10 @@ class TestCredibilityScoringStage:
 
     def test_does_not_call_external_services(self):
         """Credibility scoring is purely deterministic — no I/O."""
-        from src.pipeline.stages.credibility_scoring import score_credibility
         import unittest.mock as mock
+
         import src.credibility as cred_module
+        from src.pipeline.stages.credibility_scoring import score_credibility
 
         item = _make_processed()
         with mock.patch.object(cred_module, "score_credibility", wraps=cred_module.score_credibility) as spy:
@@ -469,42 +469,12 @@ class TestCredibilityScoringStage:
             spy.assert_called_once()
 
 
-# ── Enrich: retry / rate-limit behaviour ─────────────────────────────────────
+# ── Enrich: success and failure behaviour ────────────────────────────────────
 
-class TestExtractRetryDelay:
-    def test_returns_none_when_no_detail(self):
-        from src.pipeline.stages.enrich import _extract_retry_delay
+class TestEnrich:
+    """Retry behaviour is delegated to the Gemini client (HttpRetryOptions).
+    These tests verify the parse/return contract only."""
 
-        assert _extract_retry_delay(RuntimeError("plain error")) is None
-
-    def test_parses_single_quoted_retry_delay_from_str(self):
-        from src.pipeline.stages.enrich import _extract_retry_delay
-
-        exc = RuntimeError("RESOURCE_EXHAUSTED 'retryDelay': '39s' details")
-        assert _extract_retry_delay(exc) == 39.0
-
-    def test_parses_double_quoted_retry_delay_from_str(self):
-        from src.pipeline.stages.enrich import _extract_retry_delay
-
-        exc = RuntimeError('quota exceeded "retryDelay": "120s" retry')
-        assert _extract_retry_delay(exc) == 120.0
-
-    def test_reads_structured_details_list(self):
-        from src.pipeline.stages.enrich import _extract_retry_delay
-
-        exc = RuntimeError("rate limited")
-        exc.details = [{"@type": "type.googleapis.com/google.rpc.RetryInfo", "retryDelay": "60s"}]  # type: ignore[attr-defined]
-        assert _extract_retry_delay(exc) == 60.0
-
-    def test_structured_details_takes_priority(self):
-        from src.pipeline.stages.enrich import _extract_retry_delay
-
-        exc = RuntimeError("'retryDelay': '10s'")
-        exc.details = [{"retryDelay": "45s"}]  # type: ignore[attr-defined]
-        assert _extract_retry_delay(exc) == 45.0
-
-
-class TestEnrichRetry:
     def _make_item(self):
         return _make_processed()
 
@@ -519,68 +489,20 @@ class TestEnrichRetry:
         client.models.generate_content.return_value = resp
         return client
 
-    @patch("src.pipeline.stages.enrich.time.sleep")
-    def test_success_on_first_call_does_not_sleep(self, mock_sleep):
+    def test_success_returns_enriched_item_and_ok_true(self):
         from src.pipeline.stages.enrich import enrich
 
         item, ok = enrich(self._make_item(), self._good_client())
         assert ok is True
-        mock_sleep.assert_not_called()
+        assert item.theme == "inference"
+        assert item.domain == "infra"
+        assert item.impact_vector == "capability"
 
-    @patch("src.pipeline.stages.enrich.time.sleep")
-    def test_retries_on_transient_error_and_succeeds(self, mock_sleep):
+    def test_failure_returns_original_item_and_ok_false(self):
         from src.pipeline.stages.enrich import enrich
 
         client = MagicMock()
-        resp = MagicMock()
-        resp.text = (
-            "CONCEPTS: x\nACTORS: none\nIMPACT: unknown\n"
-            "THEME: t\nDOMAIN: general\nSUMMARY: s.\nMARKETING: false\nCONFIDENCE: 0.0"
-        )
-        client.models.generate_content.side_effect = [RuntimeError("503"), resp]
-        item, ok = enrich(self._make_item(), client)
-        assert ok is True
-        assert client.models.generate_content.call_count == 2
-        mock_sleep.assert_called_once()
-
-    @patch("src.pipeline.stages.enrich.time.sleep")
-    def test_sleeps_server_retry_delay_on_429(self, mock_sleep):
-        from src.pipeline.stages.enrich import enrich
-
-        exc = RuntimeError("'retryDelay': '39s' RESOURCE_EXHAUSTED")
-        resp = MagicMock()
-        resp.text = (
-            "CONCEPTS: x\nACTORS: none\nIMPACT: unknown\n"
-            "THEME: t\nDOMAIN: general\nSUMMARY: s.\nMARKETING: false\nCONFIDENCE: 0.0"
-        )
-        client = MagicMock()
-        client.models.generate_content.side_effect = [exc, resp]
-        enrich(self._make_item(), client)
-        mock_sleep.assert_called_once_with(39.0)
-
-    @patch("src.pipeline.stages.enrich.time.sleep")
-    def test_returns_false_after_max_attempts(self, mock_sleep):
-        from src.pipeline.stages.enrich import _MAX_ENRICH_ATTEMPTS, enrich
-
-        client = MagicMock()
-        client.models.generate_content.side_effect = RuntimeError("always fails")
+        client.models.generate_content.side_effect = RuntimeError("API down")
         item, ok = enrich(self._make_item(), client)
         assert ok is False
-        assert client.models.generate_content.call_count == _MAX_ENRICH_ATTEMPTS
-
-    @patch("src.pipeline.stages.enrich.time.sleep")
-    def test_max_attempts_is_3(self, mock_sleep):
-        from src.pipeline.stages.enrich import _MAX_ENRICH_ATTEMPTS
-
-        assert _MAX_ENRICH_ATTEMPTS == 3
-
-    @patch("src.pipeline.stages.enrich.time.sleep")
-    def test_uses_exponential_backoff_when_no_retry_delay(self, mock_sleep):
-        from src.pipeline.stages.enrich import enrich
-
-        client = MagicMock()
-        client.models.generate_content.side_effect = RuntimeError("generic error")
-        enrich(self._make_item(), client)
-        delays = [c.args[0] for c in mock_sleep.call_args_list]
-        assert len(delays) == 2
-        assert delays[1] > delays[0]
+        assert client.models.generate_content.call_count == 1

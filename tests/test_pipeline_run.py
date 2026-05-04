@@ -3,11 +3,8 @@
 from __future__ import annotations
 
 import json
-from datetime import datetime, timezone
-from pathlib import Path
+from datetime import UTC, datetime
 from unittest.mock import MagicMock, patch
-
-import pytest
 
 from src.fetchers import FetchedItem
 from src.models import ProcessedItem
@@ -23,7 +20,7 @@ def _make_fetched(id_: str = "item-1") -> FetchedItem:
         source_type="rss",
         source_class="practitioner",
         author="Alice",
-        published=datetime(2026, 5, 2, tzinfo=timezone.utc),
+        published=datetime(2026, 5, 2, tzinfo=UTC),
         has_code=False,
         evidence_type="analysis",
     )
@@ -136,31 +133,27 @@ class TestProcess:
         assert result[0].credibility_score > 0.0
         assert failures == 0
 
-    @patch("src.pipeline.stages.enrich.time.sleep")
-    @patch("src.pipeline.run.time.sleep")
-    def test_ai_failure_counted(self, _run_sleep, _enrich_sleep):
-        """A Gemini exception exhausts retries and increments the failure count."""
+    def test_ai_failure_counted(self):
+        """When the Gemini client raises after its internal retries, failures are counted."""
         from src.pipeline.run import process
 
         client = MagicMock()
-        client.models.generate_content.side_effect = RuntimeError("429 quota")
+        client.models.generate_content.side_effect = RuntimeError("quota exceeded")
         items = [_make_fetched("fail-1"), _make_fetched("fail-2")]
         with patch("src.pipeline.run._make_gemini_client", return_value=client):
             result, failures = process(items, gemini_api_key="fake-key", fetch_date="2026-05-02")
         assert failures == 2
         assert len(result) == 2
 
-    @patch("src.pipeline.stages.enrich.time.sleep")
     @patch("src.pipeline.run.time.sleep")
-    def test_rate_limiter_called_before_each_enrich(self, mock_run_sleep, _enrich_sleep):
-        """The rate limiter inserts a sleep between consecutive Gemini calls."""
+    def test_rate_limiter_paces_gemini_calls(self, mock_sleep):
+        """The rate limiter sleeps between consecutive Gemini calls."""
         from src.pipeline.run import process
 
         items = [_make_fetched("rl-1"), _make_fetched("rl-2"), _make_fetched("rl-3")]
         with patch("src.pipeline.run._make_gemini_client", return_value=self._null_client()):
             process(items, gemini_api_key="fake-key", fetch_date="2026-05-02")
-        # After the first call, the rate limiter sleeps before each subsequent call.
-        assert mock_run_sleep.call_count >= 2
+        assert mock_sleep.call_count >= 2
 
 
 # ── _RateLimiter ─────────────────────────────────────────────────────────────

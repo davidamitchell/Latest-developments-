@@ -64,9 +64,25 @@ class _RateLimiter:
 
 
 def _make_gemini_client(api_key: str):
-    """Construct and return a Gemini client."""
+    """Construct and return a Gemini client with transport-level retry enabled.
+
+    The SDK does NOT retry by default — retry_options must be set explicitly.
+    We use 3 attempts (1 initial + 2 retries) on 429/503/5xx, with exponential
+    backoff starting at 5 s.  The _RateLimiter in process() prevents most 429s
+    from occurring; this is the safety net for when they slip through.
+    """
     from google import genai
-    return genai.Client(api_key=api_key)
+    from google.genai.types import HttpOptions, HttpRetryOptions
+    return genai.Client(
+        api_key=api_key,
+        http_options=HttpOptions(
+            retry_options=HttpRetryOptions(
+                attempts=3,
+                initial_delay=5.0,
+                max_delay=60.0,
+            )
+        ),
+    )
 
 
 def process(
