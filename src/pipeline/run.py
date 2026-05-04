@@ -17,6 +17,7 @@ import json
 import logging
 import os
 import sys
+import time
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -42,6 +43,27 @@ _RAW_DIR = Path("data/raw")
 _PROCESSED_DIR = Path("data/processed")
 
 
+class _RateLimiter:
+    """Token-bucket pacer for the Gemini free tier (default: 5 RPM).
+
+    Calling .wait() before each API request ensures the pipeline never fires
+    more than `rpm` requests per 60-second window, keeping us under the
+    GenerateRequestsPerMinutePerProjectPerModel-FreeTier quota.
+    """
+
+    def __init__(self, rpm: int = 5) -> None:
+        self._interval = 60.0 / rpm
+        self._last: float = 0.0
+
+    def wait(self) -> None:
+        now = time.monotonic()
+        gap = self._interval - (now - self._last)
+        if gap > 0:
+            logger.debug("Rate limiter: waiting %.1fs before next Gemini call", gap)
+            time.sleep(gap)
+        self._last = time.monotonic()
+
+
 def _make_gemini_client(api_key: str):
     """Construct and return a Gemini client."""
     from google import genai
@@ -63,6 +85,7 @@ def process(
         return [], 0
 
     client = _make_gemini_client(gemini_api_key) if gemini_api_key else None
+    rate_limiter = _RateLimiter(rpm=5) if client is not None else None
     results: list[ProcessedItem] = []
     ai_failures = 0
 
@@ -74,6 +97,8 @@ def process(
         processed = clean(processed, raw_content=fetched.content)
 
         if client is not None:
+            # Pace to ≤5 RPM before each Gemini call to stay under the free-tier quota.
+            rate_limiter.wait()  # type: ignore[union-attr]
             # Stages 3–6 — combined AI enrichment (1 Gemini call per item)
             processed, ok = enrich(processed, client)
             if not ok:
