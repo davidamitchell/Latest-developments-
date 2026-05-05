@@ -203,7 +203,7 @@ def load_config(path: Path = Path("config/sources.yaml")) -> Config:
         log_file=lg.get("log_file"),
     )
 
-    pl = raw.get("pipeline", {}) or {}
+    pl = raw.get("pipeline") or {}
     pipeline = PipelineConfig(
         gemini_rpm=pl.get("gemini_rpm", 5),
         enrich_max_output_tokens=pl.get("enrich_max_output_tokens", 500),

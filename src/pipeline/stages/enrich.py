@@ -58,7 +58,12 @@ class GenerativeModel(Protocol):
     """
 
     class _Models(Protocol):
-        def generate_content(self, model: str, contents: str, config: object) -> object: ...
+        def generate_content(
+            self,
+            model: str,
+            contents: str,
+            config: types.GenerateContentConfig,
+        ) -> object: ...
 
     models: _Models
 
@@ -168,8 +173,11 @@ def enrich(
         )
         # finish_reason must be STOP before accessing response.text — other
         # reasons (SAFETY, MAX_TOKENS, RECITATION) raise ValueError per SDK docs.
-        candidate = response.candidates[0] if response.candidates else None
-        finish_reason = candidate.finish_reason if candidate else None
+        if not response.candidates:
+            logger.warning("AI enrichment for %r returned no candidates — using defaults", item.id)
+            return item, False
+        candidate = response.candidates[0]
+        finish_reason = candidate.finish_reason
         if finish_reason != FinishReason.STOP:
             logger.warning(
                 "AI enrichment for %r stopped with finish_reason=%r — using defaults",

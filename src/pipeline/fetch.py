@@ -53,6 +53,10 @@ from src.state import load_state
 logger = logging.getLogger(__name__)
 
 _RAW_DIR = Path("data/raw")
+# Default videos-per-channel when a YouTube source entry omits max_videos.
+# Mirrors the default in YouTubeConfig.max_videos_per_channel — kept in sync here
+# as a module constant so _build_fetchers does not construct a throwaway instance.
+_DEFAULT_YT_MAX_VIDEOS: int = 5
 
 
 def _safe_fetch(name: str, fetcher, already_processed: set[str]) -> list[FetchedItem]:
@@ -158,15 +162,12 @@ def _build_fetchers(cfg: Config) -> list[tuple[str, object]]:
 
     yt_entries = [e for e in enabled if e.type == "youtube"]
     if yt_entries:
-        # max_videos_per_channel on YouTubeConfig is the global fallback when a
-        # channel entry does not specify max_videos explicitly.
-        yt_default = YouTubeConfig()
         yt_cfg = YouTubeConfig(
             channels=[
                 YouTubeChannel(
                     name=e.name,
                     channel_id=e.options["channel_id"],
-                    max_videos=e.options.get("max_videos", yt_default.max_videos_per_channel),
+                    max_videos=e.options.get("max_videos", _DEFAULT_YT_MAX_VIDEOS),
                 )
                 for e in yt_entries
             ]
