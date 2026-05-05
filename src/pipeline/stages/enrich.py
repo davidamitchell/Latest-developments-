@@ -17,6 +17,11 @@ from __future__ import annotations
 
 import dataclasses
 import logging
+from typing import Protocol
+
+from google.genai import types
+from google.genai.errors import ClientError, ServerError
+from google.genai.types import FinishReason
 
 from src.models import Domain, ImpactVector, ProcessedItem
 
@@ -44,6 +49,20 @@ MARKETING: true or false  (is this primarily promotional content rather than sub
 CONFIDENCE: a float 0.0–1.0  (confidence in the MARKETING assessment)"""
 
 
+class GenerativeModel(Protocol):
+    """Minimal interface required from the Gemini client.
+
+    Defining the Protocol here (DIP) lets callers depend on this abstraction
+    rather than on the concrete google.genai.Client.  Tests can pass any object
+    with a models.generate_content method; production code passes the real client.
+    """
+
+    class _Models(Protocol):
+        def generate_content(self, model: str, contents: str, config: object) -> object: ...
+
+    models: _Models
+
+
 def _parse(text: str, item_id: str) -> dict:
     """Parse the combined response into a field dict."""
     fields: dict[str, str] = {}
@@ -58,31 +77,49 @@ def _parse(text: str, item_id: str) -> dict:
     concepts_raw = _get("CONCEPTS")
     concepts = [c.strip() for c in concepts_raw.split(",")
                 if c.strip() and c.strip().lower() != "none"] if concepts_raw else []
+    if not concepts_raw:
+        logger.debug("enrich: missing CONCEPTS for %r — defaulting to []", item_id)
 
     actors_raw = _get("ACTORS")
     actors = [a.strip() for a in actors_raw.split(",")
                if a.strip() and a.strip().lower() != "none"] if actors_raw else []
+    if not actors_raw:
+        logger.debug("enrich: missing ACTORS for %r — defaulting to []", item_id)
 
     impact_raw = _get("IMPACT").lower()
     impact: ImpactVector = impact_raw if impact_raw in _VALID_IMPACTS else "unknown"  # type: ignore[assignment]
+    if impact_raw and impact_raw not in _VALID_IMPACTS:
+        logger.debug("enrich: unrecognised IMPACT %r for %r — defaulting to 'unknown'", impact_raw, item_id)
+    elif not impact_raw:
+        logger.debug("enrich: missing IMPACT for %r — defaulting to 'unknown'", item_id)
 
     theme = _get("THEME")
+    if not theme:
+        logger.debug("enrich: missing THEME for %r — response: %r", item_id, text[:200])
 
     domain_raw = _get("DOMAIN").lower()
     domain: Domain = domain_raw if domain_raw in _VALID_DOMAINS else "unknown"  # type: ignore[assignment]
+    if domain_raw and domain_raw not in _VALID_DOMAINS:
+        logger.debug("enrich: unrecognised DOMAIN %r for %r — defaulting to 'unknown'", domain_raw, item_id)
+    elif not domain_raw:
+        logger.debug("enrich: missing DOMAIN for %r — defaulting to 'unknown'", item_id)
 
     summary = _get("SUMMARY")
+    if not summary:
+        logger.debug("enrich: missing SUMMARY for %r — defaulting to ''", item_id)
 
     marketing_raw = _get("MARKETING").lower()
     is_marketing = marketing_raw == "true"
+    if not marketing_raw:
+        logger.debug("enrich: missing MARKETING for %r — defaulting to False", item_id)
 
     try:
         confidence = max(0.0, min(1.0, float(_get("CONFIDENCE"))))
     except ValueError:
+        logger.debug("enrich: non-float CONFIDENCE for %r — defaulting to 0.0", item_id)
         confidence = 0.0
-
-    if not theme:
-        logger.debug("enrich: missing THEME for %r — response: %r", item_id, text[:200])
+    if not _get("CONFIDENCE"):
+        logger.debug("enrich: missing CONFIDENCE for %r — defaulting to 0.0", item_id)
 
     return {
         "concepts": concepts,
@@ -96,7 +133,11 @@ def _parse(text: str, item_id: str) -> dict:
     }
 
 
-def enrich(item: ProcessedItem, client) -> tuple[ProcessedItem, bool]:
+def enrich(
+    item: ProcessedItem,
+    client: GenerativeModel,
+    max_output_tokens: int = 500,
+) -> tuple[ProcessedItem, bool]:
     """Run combined AI enrichment; return (enriched_item, ok).
 
     ok is False when the API call fails after the client's built-in retries.
@@ -104,6 +145,10 @@ def enrich(item: ProcessedItem, client) -> tuple[ProcessedItem, bool]:
 
     Retry behaviour (attempts, backoff, retryable status codes) is configured
     on the client via HttpRetryOptions — not repeated here.
+
+    Only google.genai transport errors (ClientError, ServerError) are caught.
+    Programming errors (AttributeError, TypeError, etc.) propagate so they are
+    not silently swallowed as enrichment failures.
     """
     content = item.cleaned_content or item.title
     prompt = (
@@ -111,14 +156,28 @@ def enrich(item: ProcessedItem, client) -> tuple[ProcessedItem, bool]:
         f"Source: {item.source_name} (class: {item.source_class})\n\n"
         f"Content: {content[:5000]}"
     )
+    config = types.GenerateContentConfig(
+        system_instruction=_SYSTEM_PROMPT,
+        max_output_tokens=max_output_tokens,
+    )
     try:
         response = client.models.generate_content(
             model="gemini-2.5-flash",
             contents=prompt,
-            config={"system_instruction": _SYSTEM_PROMPT, "max_output_tokens": 500},
+            config=config,
         )
+        # finish_reason must be STOP before accessing response.text — other
+        # reasons (SAFETY, MAX_TOKENS, RECITATION) raise ValueError per SDK docs.
+        candidate = response.candidates[0] if response.candidates else None
+        finish_reason = candidate.finish_reason if candidate else None
+        if finish_reason != FinishReason.STOP:
+            logger.warning(
+                "AI enrichment for %r stopped with finish_reason=%r — using defaults",
+                item.id, finish_reason,
+            )
+            return item, False
         parsed = _parse(response.text, item.id)
         return dataclasses.replace(item, **parsed), True
-    except Exception as exc:
+    except (ClientError, ServerError) as exc:
         logger.warning("AI enrichment failed for %r: %s", item.id, exc)
         return item, False

@@ -2,11 +2,8 @@
 
 Each stage function has a defined input/output type:
   ingest(item, fetch_date) -> ProcessedItem
-  clean(item) -> ProcessedItem
-  extract_concepts(item, client) -> ProcessedItem
-  classify_theme(item, client) -> ProcessedItem
-  extract_summary(item, client) -> ProcessedItem
-  identify_marketing(item, client) -> ProcessedItem
+  clean(item, raw_content) -> ProcessedItem
+  enrich(item, client) -> (ProcessedItem, bool)
   score_hype(item) -> ProcessedItem
   score_credibility(item) -> ProcessedItem
 """
@@ -15,6 +12,8 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 from unittest.mock import MagicMock
+
+import pytest
 
 from src.fetchers import FetchedItem
 from src.models import ProcessedItem
@@ -154,227 +153,132 @@ class TestCleanStage:
         assert result.cleaned_content == ""
 
 
-# ── Stage 3: Concept Extraction ─────────────────────────────────────────────
+# ── Stage 3-6: _parse() — direct partition tests ─────────────────────────────
+# _parse() is the core logic unit of enrich.py. These tests call it with real
+# string inputs (no mocks) and cover all specified partitions.
 
-class TestConceptExtractionStage:
-    def _make_mock_client(self, response_text: str) -> MagicMock:
-        client = MagicMock()
-        response = MagicMock()
-        response.text = response_text
-        client.models.generate_content.return_value = response
-        return client
+class TestParse:
+    """Partition tests for enrich._parse() — the primary logic unit."""
 
-    def test_returns_processed_item(self):
-        from src.pipeline.stages.concept_extraction import extract_concepts
+    def _parse(self, text: str) -> dict:
+        from src.pipeline.stages.enrich import _parse
+        return _parse(text, "test-item")
 
-        client = self._make_mock_client(
-            "CONCEPTS: LLM inference, attention mechanism\n"
-            "ACTORS: Anthropic, Google\n"
-            "IMPACT: capability"
-        )
-        item = _make_processed()
-        result = extract_concepts(item, client)
-        assert isinstance(result, ProcessedItem)
+    _FULL_RESPONSE = (
+        "CONCEPTS: LLM inference, attention mechanism\n"
+        "ACTORS: Anthropic, Google\n"
+        "IMPACT: capability\n"
+        "THEME: inference scaling\n"
+        "DOMAIN: infra\n"
+        "SUMMARY: Researchers found faster inference. Benchmarks show 2x speedup.\n"
+        "MARKETING: false\n"
+        "CONFIDENCE: 0.1"
+    )
 
-    def test_sets_concepts_list(self):
-        from src.pipeline.stages.concept_extraction import extract_concepts
+    # ── Typical value ─────────────────────────────────────────────────────────
 
-        client = self._make_mock_client(
-            "CONCEPTS: LLM inference, attention mechanism\n"
-            "ACTORS: Anthropic, Google\n"
-            "IMPACT: capability"
-        )
-        item = _make_processed()
-        result = extract_concepts(item, client)
-        assert isinstance(result.concepts, list)
-        assert len(result.concepts) >= 1
+    def test_typical_full_response_parses_all_fields(self):
+        result = self._parse(self._FULL_RESPONSE)
+        assert result["concepts"] == ["LLM inference", "attention mechanism"]
+        assert result["actors"] == ["Anthropic", "Google"]
+        assert result["impact_vector"] == "capability"
+        assert result["theme"] == "inference scaling"
+        assert result["domain"] == "infra"
+        assert "Researchers" in result["summary"]
+        assert result["is_marketing"] is False
+        assert result["marketing_confidence"] == pytest.approx(0.1)
 
-    def test_sets_actors_list(self):
-        from src.pipeline.stages.concept_extraction import extract_concepts
+    # ── Empty / missing fields ────────────────────────────────────────────────
 
-        client = self._make_mock_client(
-            "CONCEPTS: inference\nACTORS: Anthropic, OpenAI\nIMPACT: capability"
-        )
-        item = _make_processed()
-        result = extract_concepts(item, client)
-        assert isinstance(result.actors, list)
+    def test_empty_response_returns_all_defaults(self):
+        result = self._parse("")
+        assert result["concepts"] == []
+        assert result["actors"] == []
+        assert result["impact_vector"] == "unknown"
+        assert result["theme"] == ""
+        assert result["domain"] == "unknown"
+        assert result["summary"] == ""
+        assert result["is_marketing"] is False
+        assert result["marketing_confidence"] == 0.0
 
-    def test_sets_valid_impact_vector(self):
-        from src.pipeline.stages.concept_extraction import extract_concepts
+    def test_missing_individual_fields_fall_back_to_defaults(self):
+        result = self._parse("IMPACT: cost")
+        assert result["impact_vector"] == "cost"
+        assert result["concepts"] == []
+        assert result["theme"] == ""
 
-        client = self._make_mock_client(
-            "CONCEPTS: inference\nACTORS: none\nIMPACT: cost"
-        )
-        item = _make_processed()
-        result = extract_concepts(item, client)
+    # ── IMPACT partition ──────────────────────────────────────────────────────
+
+    def test_all_valid_impact_values_accepted(self):
         valid = {"cost", "latency", "capability", "safety", "adoption", "unknown"}
-        assert result.impact_vector in valid
+        for v in valid:
+            result = self._parse(f"IMPACT: {v}")
+            assert result["impact_vector"] == v
 
-    def test_unknown_impact_on_bad_response(self):
-        from src.pipeline.stages.concept_extraction import extract_concepts
+    def test_unrecognised_impact_defaults_to_unknown(self):
+        result = self._parse("IMPACT: revolutionary")
+        assert result["impact_vector"] == "unknown"
 
-        client = self._make_mock_client("garbage response with no structure")
-        item = _make_processed()
-        result = extract_concepts(item, client)
-        assert result.impact_vector == "unknown"
+    def test_impact_case_insensitive(self):
+        result = self._parse("IMPACT: CAPABILITY")
+        assert result["impact_vector"] == "capability"
 
-    def test_gemini_failure_returns_item_unchanged(self):
-        from src.pipeline.stages.concept_extraction import extract_concepts
+    # ── CONFIDENCE partition ──────────────────────────────────────────────────
 
-        client = MagicMock()
-        client.models.generate_content.side_effect = Exception("API down")
-        item = _make_processed()
-        result = extract_concepts(item, client)
-        assert isinstance(result, ProcessedItem)
-        assert result.concepts == []
-        assert result.impact_vector == "unknown"
+    def test_confidence_non_float_string_defaults_to_zero(self):
+        result = self._parse("CONFIDENCE: high")
+        assert result["marketing_confidence"] == 0.0
 
+    def test_confidence_below_zero_clamped_to_zero(self):
+        result = self._parse("CONFIDENCE: -0.5")
+        assert result["marketing_confidence"] == 0.0
 
-# ── Stage 4: Theme Classification ───────────────────────────────────────────
+    def test_confidence_above_one_clamped_to_one(self):
+        result = self._parse("CONFIDENCE: 1.5")
+        assert result["marketing_confidence"] == 1.0
 
-class TestThemeClassificationStage:
-    def _make_mock_client(self, response_text: str) -> MagicMock:
-        client = MagicMock()
-        response = MagicMock()
-        response.text = response_text
-        client.models.generate_content.return_value = response
-        return client
+    def test_confidence_boundary_values_accepted(self):
+        assert self._parse("CONFIDENCE: 0.0")["marketing_confidence"] == 0.0
+        assert self._parse("CONFIDENCE: 1.0")["marketing_confidence"] == 1.0
 
-    def test_returns_processed_item(self):
-        from src.pipeline.stages.theme_classification import classify_theme
+    # ── ACTORS: none ─────────────────────────────────────────────────────────
 
-        client = self._make_mock_client("THEME: agentic RAG\nDOMAIN: agents")
-        item = _make_processed()
-        result = classify_theme(item, client)
-        assert isinstance(result, ProcessedItem)
+    def test_actors_none_string_produces_empty_list(self):
+        result = self._parse("ACTORS: none")
+        assert result["actors"] == []
 
-    def test_sets_theme_string(self):
-        from src.pipeline.stages.theme_classification import classify_theme
+    def test_actors_none_case_insensitive(self):
+        result = self._parse("ACTORS: None")
+        assert result["actors"] == []
 
-        client = self._make_mock_client("THEME: agentic RAG\nDOMAIN: agents")
-        item = _make_processed()
-        result = classify_theme(item, client)
-        assert isinstance(result.theme, str)
-        assert len(result.theme) > 0
+    def test_actors_mixed_with_none_filters_none(self):
+        result = self._parse("ACTORS: Anthropic, none, Google")
+        assert "none" not in [a.lower() for a in result["actors"]]
+        assert "Anthropic" in result["actors"]
 
-    def test_sets_valid_domain(self):
-        from src.pipeline.stages.theme_classification import classify_theme
+    # ── SUMMARY with inner colon ──────────────────────────────────────────────
 
-        client = self._make_mock_client("THEME: agentic RAG\nDOMAIN: agents")
-        item = _make_processed()
-        result = classify_theme(item, client)
-        valid = {"multimodal","agents","infra","reasoning","safety","evals","data","hardware","general","unknown"}
-        assert result.domain in valid
+    def test_summary_with_colon_mid_sentence_not_split(self):
+        result = self._parse(
+            "SUMMARY: The model achieves 90%: a new record for this benchmark."
+        )
+        assert "90%" in result["summary"]
+        assert "new record" in result["summary"]
 
-    def test_unknown_domain_on_bad_response(self):
-        from src.pipeline.stages.theme_classification import classify_theme
+    # ── CONCEPTS boundary ────────────────────────────────────────────────────
 
-        client = self._make_mock_client("nothing useful here")
-        item = _make_processed()
-        result = classify_theme(item, client)
-        assert result.domain == "unknown"
+    def test_concepts_with_six_items_all_parsed(self):
+        """Behaviour for >5 items: all are parsed; the system prompt constrains the model."""
+        result = self._parse("CONCEPTS: a, b, c, d, e, f")
+        assert len(result["concepts"]) == 6
 
-    def test_gemini_failure_returns_item_unchanged(self):
-        from src.pipeline.stages.theme_classification import classify_theme
+    def test_concepts_single_item(self):
+        result = self._parse("CONCEPTS: transformer")
+        assert result["concepts"] == ["transformer"]
 
-        client = MagicMock()
-        client.models.generate_content.side_effect = Exception("API down")
-        item = _make_processed()
-        result = classify_theme(item, client)
-        assert isinstance(result, ProcessedItem)
-        assert result.theme == ""
-        assert result.domain == "unknown"
-
-
-# ── Stage 5: Summary Extraction ─────────────────────────────────────────────
-
-class TestSummaryExtractionStage:
-    def _make_mock_client(self, response_text: str) -> MagicMock:
-        client = MagicMock()
-        response = MagicMock()
-        response.text = response_text
-        client.models.generate_content.return_value = response
-        return client
-
-    def test_returns_processed_item(self):
-        from src.pipeline.stages.summary_extraction import extract_summary
-
-        client = self._make_mock_client("Researchers found that LLM inference is faster. New benchmarks show 2x speedup. This impacts production deployments.")
-        item = _make_processed()
-        result = extract_summary(item, client)
-        assert isinstance(result, ProcessedItem)
-
-    def test_sets_summary_string(self):
-        from src.pipeline.stages.summary_extraction import extract_summary
-
-        client = self._make_mock_client("Researchers found that LLM inference is faster. New benchmarks show 2x speedup.")
-        item = _make_processed()
-        result = extract_summary(item, client)
-        assert isinstance(result.summary, str)
-        assert len(result.summary) > 0
-
-    def test_gemini_failure_leaves_summary_empty(self):
-        from src.pipeline.stages.summary_extraction import extract_summary
-
-        client = MagicMock()
-        client.models.generate_content.side_effect = Exception("API down")
-        item = _make_processed()
-        result = extract_summary(item, client)
-        assert result.summary == ""
-
-
-# ── Stage 6: Media / Marketing Identification ────────────────────────────────
-
-class TestMediaIdStage:
-    def _make_mock_client(self, response_text: str) -> MagicMock:
-        client = MagicMock()
-        response = MagicMock()
-        response.text = response_text
-        client.models.generate_content.return_value = response
-        return client
-
-    def test_returns_processed_item(self):
-        from src.pipeline.stages.media_id import identify_marketing
-
-        client = self._make_mock_client("MARKETING: false\nCONFIDENCE: 0.1")
-        item = _make_processed()
-        result = identify_marketing(item, client)
-        assert isinstance(result, ProcessedItem)
-
-    def test_sets_is_marketing_bool(self):
-        from src.pipeline.stages.media_id import identify_marketing
-
-        client = self._make_mock_client("MARKETING: true\nCONFIDENCE: 0.9")
-        item = _make_processed()
-        result = identify_marketing(item, client)
-        assert isinstance(result.is_marketing, bool)
-        assert result.is_marketing is True
-
-    def test_sets_marketing_confidence_float(self):
-        from src.pipeline.stages.media_id import identify_marketing
-
-        client = self._make_mock_client("MARKETING: false\nCONFIDENCE: 0.2")
-        item = _make_processed()
-        result = identify_marketing(item, client)
-        assert 0.0 <= result.marketing_confidence <= 1.0
-
-    def test_not_marketing_when_false(self):
-        from src.pipeline.stages.media_id import identify_marketing
-
-        client = self._make_mock_client("MARKETING: false\nCONFIDENCE: 0.05")
-        item = _make_processed()
-        result = identify_marketing(item, client)
-        assert result.is_marketing is False
-
-    def test_gemini_failure_defaults_not_marketing(self):
-        from src.pipeline.stages.media_id import identify_marketing
-
-        client = MagicMock()
-        client.models.generate_content.side_effect = Exception("API down")
-        item = _make_processed()
-        result = identify_marketing(item, client)
-        assert result.is_marketing is False
-        assert result.marketing_confidence == 0.0
+    def test_concepts_none_string_produces_empty_list(self):
+        result = self._parse("CONCEPTS: none")
+        assert result["concepts"] == []
 
 
 # ── Stage 7: Hype Scoring ────────────────────────────────────────────────────
@@ -473,12 +377,13 @@ class TestCredibilityScoringStage:
 
 class TestEnrich:
     """Retry behaviour is delegated to the Gemini client (HttpRetryOptions).
-    These tests verify the parse/return contract only."""
+    These tests verify the parse/return contract and finish_reason handling."""
 
     def _make_item(self):
         return _make_processed()
 
     def _good_client(self):
+        from google.genai.types import FinishReason
         client = MagicMock()
         resp = MagicMock()
         resp.text = (
@@ -486,6 +391,9 @@ class TestEnrich:
             "THEME: inference\nDOMAIN: infra\n"
             "SUMMARY: Sentence one. Sentence two.\nMARKETING: false\nCONFIDENCE: 0.1"
         )
+        candidate = MagicMock()
+        candidate.finish_reason = FinishReason.STOP
+        resp.candidates = [candidate]
         client.models.generate_content.return_value = resp
         return client
 
@@ -498,11 +406,64 @@ class TestEnrich:
         assert item.domain == "infra"
         assert item.impact_vector == "capability"
 
-    def test_failure_returns_original_item_and_ok_false(self):
+    def test_transport_error_returns_original_item_and_ok_false(self):
+        """ClientError (transport failure) is caught; ok=False returned."""
+        from google.genai.errors import ClientError
+
         from src.pipeline.stages.enrich import enrich
 
         client = MagicMock()
-        client.models.generate_content.side_effect = RuntimeError("API down")
+        client.models.generate_content.side_effect = ClientError(429, {"error": "quota"})
         item, ok = enrich(self._make_item(), client)
         assert ok is False
         assert client.models.generate_content.call_count == 1
+
+    def test_server_error_returns_original_item_and_ok_false(self):
+        """ServerError (5xx) is caught; ok=False returned."""
+        from google.genai.errors import ServerError
+
+        from src.pipeline.stages.enrich import enrich
+
+        client = MagicMock()
+        client.models.generate_content.side_effect = ServerError(503, {"error": "unavailable"})
+        item, ok = enrich(self._make_item(), client)
+        assert ok is False
+
+    def test_programming_error_propagates(self):
+        """AttributeError and other programming errors must not be swallowed."""
+        from src.pipeline.stages.enrich import enrich
+
+        client = MagicMock()
+        client.models.generate_content.side_effect = AttributeError("bug")
+        with pytest.raises(AttributeError):
+            enrich(self._make_item(), client)
+
+    def test_non_stop_finish_reason_returns_ok_false(self):
+        """SAFETY/MAX_TOKENS finish reasons return ok=False; response.text is never accessed."""
+        from google.genai.types import FinishReason
+
+        from src.pipeline.stages.enrich import enrich
+
+        client = MagicMock()
+        resp = MagicMock()
+        # Raise if .text is accessed — ensures enrich() does not call it
+        type(resp).text = property(lambda self: (_ for _ in ()).throw(ValueError("must not access .text")))
+        candidate = MagicMock()
+        candidate.finish_reason = FinishReason.SAFETY
+        resp.candidates = [candidate]
+        client.models.generate_content.return_value = resp
+        item, ok = enrich(self._make_item(), client)
+        assert ok is False
+
+    def test_max_output_tokens_parameter_passed_to_config(self):
+        """enrich() passes max_output_tokens to GenerateContentConfig."""
+        from google.genai import types
+
+        from src.pipeline.stages.enrich import enrich
+
+        client = self._good_client()
+        enrich(self._make_item(), client, max_output_tokens=256)
+        call_kwargs = client.models.generate_content.call_args
+        config_arg = call_kwargs.kwargs.get("config") or call_kwargs.args[2]
+        assert isinstance(config_arg, types.GenerateContentConfig)
+        assert config_arg.max_output_tokens == 256

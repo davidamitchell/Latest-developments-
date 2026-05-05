@@ -22,7 +22,6 @@ from typing import Any
 
 import yaml
 
-
 # ── Public Config dataclasses ─────────────────────────────────────────────────
 
 @dataclass
@@ -69,11 +68,25 @@ class LoggingConfig:
 
 
 @dataclass
+class PipelineConfig:
+    """Processing pipeline settings.
+
+    gemini_rpm controls the rate limiter in src/pipeline/run.py.
+    enrich_max_output_tokens controls the Gemini token budget per enrichment call.
+    Both can be adjusted in config/sources.yaml under the 'pipeline' section
+    without touching production code.
+    """
+    gemini_rpm: int = 5
+    enrich_max_output_tokens: int = 500
+
+
+@dataclass
 class Config:
     sources: list[SourceEntry] = field(default_factory=list)
     digest: DigestConfig = field(default_factory=DigestConfig)
     history: HistoryConfig = field(default_factory=HistoryConfig)
     logging: LoggingConfig = field(default_factory=LoggingConfig)
+    pipeline: PipelineConfig = field(default_factory=PipelineConfig)
 
 
 # ── Internal fetcher-adapter helpers ─────────────────────────────────────────
@@ -190,7 +203,13 @@ def load_config(path: Path = Path("config/sources.yaml")) -> Config:
         log_file=lg.get("log_file"),
     )
 
-    return Config(sources=sources, digest=digest, history=history, logging=logging_cfg)
+    pl = raw.get("pipeline", {}) or {}
+    pipeline = PipelineConfig(
+        gemini_rpm=pl.get("gemini_rpm", 5),
+        enrich_max_output_tokens=pl.get("enrich_max_output_tokens", 500),
+    )
+
+    return Config(sources=sources, digest=digest, history=history, logging=logging_cfg, pipeline=pipeline)
 
 
 def require_env(key: str) -> str:

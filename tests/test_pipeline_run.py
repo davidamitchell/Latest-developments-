@@ -33,6 +33,7 @@ class TestProcess:
 
     def _null_client(self):
         """A Gemini client mock that returns minimal valid combined-enrichment responses."""
+        from google.genai.types import FinishReason
         client = MagicMock()
         resp = MagicMock()
         resp.text = (
@@ -45,6 +46,9 @@ class TestProcess:
             "MARKETING: false\n"
             "CONFIDENCE: 0.1"
         )
+        candidate = MagicMock()
+        candidate.finish_reason = FinishReason.STOP
+        resp.candidates = [candidate]
         client.models.generate_content.return_value = resp
         return client
 
@@ -134,11 +138,13 @@ class TestProcess:
         assert failures == 0
 
     def test_ai_failure_counted(self):
-        """When the Gemini client raises after its internal retries, failures are counted."""
+        """When the Gemini client raises a transport error, failures are counted."""
+        from google.genai.errors import ClientError
+
         from src.pipeline.run import process
 
         client = MagicMock()
-        client.models.generate_content.side_effect = RuntimeError("quota exceeded")
+        client.models.generate_content.side_effect = ClientError(429, {"error": "quota exceeded"})
         items = [_make_fetched("fail-1"), _make_fetched("fail-2")]
         with patch("src.pipeline.run._make_gemini_client", return_value=client):
             result, failures = process(items, gemini_api_key="fake-key", fetch_date="2026-05-02")
@@ -217,7 +223,7 @@ class TestWriteProcessedJsonl:
         )
 
     def test_writes_one_line_per_item(self, tmp_path):
-        from src.pipeline.run import write_processed_jsonl
+        from src.models import write_processed_jsonl
 
         items = [self._make_processed("p1"), self._make_processed("p2")]
         path = tmp_path / "processed.jsonl"
@@ -226,7 +232,7 @@ class TestWriteProcessedJsonl:
         assert len(lines) == 2
 
     def test_each_line_is_valid_json(self, tmp_path):
-        from src.pipeline.run import write_processed_jsonl
+        from src.models import write_processed_jsonl
 
         items = [self._make_processed("p3")]
         path = tmp_path / "processed.jsonl"
@@ -237,7 +243,7 @@ class TestWriteProcessedJsonl:
             assert "credibility_score" in d
 
     def test_roundtrip_via_from_dict(self, tmp_path):
-        from src.pipeline.run import write_processed_jsonl
+        from src.models import write_processed_jsonl
 
         original = self._make_processed("rt-2")
         path = tmp_path / "processed.jsonl"
@@ -248,14 +254,14 @@ class TestWriteProcessedJsonl:
         assert restored.fetch_date == original.fetch_date
 
     def test_creates_parent_directories(self, tmp_path):
-        from src.pipeline.run import write_processed_jsonl
+        from src.models import write_processed_jsonl
 
         path = tmp_path / "data" / "processed" / "2026-05-02.jsonl"
         write_processed_jsonl([self._make_processed("d1")], path)
         assert path.exists()
 
     def test_empty_list_writes_empty_file(self, tmp_path):
-        from src.pipeline.run import write_processed_jsonl
+        from src.models import write_processed_jsonl
 
         path = tmp_path / "empty.jsonl"
         write_processed_jsonl([], path)
@@ -283,7 +289,7 @@ class TestReadProcessedJsonl:
         )
 
     def test_reads_items_written_by_write(self, tmp_path):
-        from src.pipeline.run import read_processed_jsonl, write_processed_jsonl
+        from src.models import read_processed_jsonl, write_processed_jsonl
 
         items = [self._make_processed("r1"), self._make_processed("r2")]
         path = tmp_path / "p.jsonl"
@@ -293,12 +299,12 @@ class TestReadProcessedJsonl:
         assert {r.id for r in result} == {"r1", "r2"}
 
     def test_returns_empty_list_for_missing_file(self, tmp_path):
-        from src.pipeline.run import read_processed_jsonl
+        from src.models import read_processed_jsonl
 
         assert read_processed_jsonl(tmp_path / "nope.jsonl") == []
 
     def test_skips_malformed_lines(self, tmp_path):
-        from src.pipeline.run import read_processed_jsonl
+        from src.models import read_processed_jsonl
 
         good = json.dumps(self._make_processed("g2").to_dict())
         path = tmp_path / "mixed.jsonl"
