@@ -13,10 +13,10 @@ default values — the pipeline still completes and writes output.
 from __future__ import annotations
 
 import argparse
-import json
 import logging
 import os
 import sys
+import time
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -42,27 +42,69 @@ _RAW_DIR = Path("data/raw")
 _PROCESSED_DIR = Path("data/processed")
 
 
+class _RateLimiter:
+    """Token-bucket pacer for the Gemini free tier (default: 5 RPM).
+
+    Calling .wait() before each API request ensures the pipeline never fires
+    more than `rpm` requests per 60-second window, keeping us under the
+    GenerateRequestsPerMinutePerProjectPerModel-FreeTier quota.
+    """
+
+    def __init__(self, rpm: int = 5) -> None:
+        self._interval = 60.0 / rpm
+        self._last: float = 0.0
+
+    def wait(self) -> None:
+        now = time.monotonic()
+        gap = self._interval - (now - self._last)
+        if gap > 0:
+            logger.debug("Rate limiter: waiting %.1fs before next Gemini call", gap)
+            time.sleep(gap)
+        self._last = time.monotonic()
+
+
 def _make_gemini_client(api_key: str):
-    """Construct and return a Gemini client."""
+    """Construct and return a Gemini client with transport-level retry enabled.
+
+    The SDK does NOT retry by default — retry_options must be set explicitly.
+    We use 3 attempts (1 initial + 2 retries) on 429/503/5xx, with exponential
+    backoff starting at 5 s.  The _RateLimiter in process() prevents most 429s
+    from occurring; this is the safety net for when they slip through.
+    """
     from google import genai
-    return genai.Client(api_key=api_key)
+    from google.genai.types import HttpOptions, HttpRetryOptions
+    return genai.Client(
+        api_key=api_key,
+        http_options=HttpOptions(
+            retry_options=HttpRetryOptions(
+                attempts=3,
+                initial_delay=5.0,
+                max_delay=60.0,
+            )
+        ),
+    )
 
 
 def process(
     items: list[FetchedItem],
     gemini_api_key: str | None,
     fetch_date: str,
+    rpm: int = 5,
+    enrich_max_output_tokens: int = 500,
 ) -> tuple[list[ProcessedItem], int]:
     """Run all 8 pipeline stages over items; return (results, ai_failures).
 
     When gemini_api_key is None, AI stages (3–6) are skipped gracefully and
     their fields remain at defaults. Non-AI stages always run.
     ai_failures counts items where the combined Gemini call raised an exception.
+
+    rpm and enrich_max_output_tokens can be overridden via pipeline config.
     """
     if not items:
         return [], 0
 
     client = _make_gemini_client(gemini_api_key) if gemini_api_key else None
+    rate_limiter = _RateLimiter(rpm=rpm) if client is not None else None
     results: list[ProcessedItem] = []
     ai_failures = 0
 
@@ -74,8 +116,10 @@ def process(
         processed = clean(processed, raw_content=fetched.content)
 
         if client is not None:
+            # Pace to ≤rpm RPM before each Gemini call to stay under the free-tier quota.
+            rate_limiter.wait()  # type: ignore[union-attr]
             # Stages 3–6 — combined AI enrichment (1 Gemini call per item)
-            processed, ok = enrich(processed, client)
+            processed, ok = enrich(processed, client, max_output_tokens=enrich_max_output_tokens)
             if not ok:
                 ai_failures += 1
 
@@ -99,6 +143,29 @@ def process(
 
     logger.info("Processed %d item(s)", len(results))
     return results, ai_failures
+
+
+def _merge_and_write(
+    out_path: Path,
+    new_items: list[ProcessedItem],
+) -> list[ProcessedItem]:
+    """Merge new_items with any items already in out_path; write and return merged list."""
+    existing = read_processed_jsonl(out_path)
+    existing_ids = {item.id for item in existing}
+    merged = existing + [item for item in new_items if item.id not in existing_ids]
+    write_processed_jsonl(merged, out_path)
+    return merged
+
+
+def _exit_code(ai_failures: int, total: int, api_key_present: bool) -> int:
+    """Return 2 if AI failure rate exceeds 50%, else 0."""
+    if api_key_present and total and ai_failures / total > 0.5:
+        logger.error(
+            "AI enrichment failed for >50%% of items (%d/%d) — check Gemini quota/key",
+            ai_failures, total,
+        )
+        return 2
+    return 0
 
 
 def _parse_args() -> argparse.Namespace:
@@ -127,31 +194,29 @@ def main() -> int:
         write_processed_jsonl([], out_path)
         return 0
 
+    # GEMINI_API_KEY is intentionally optional: when absent, AI stages (3–6)
+    # are skipped and pipeline output uses default field values.  This allows
+    # the pipeline to complete without an API key — useful for testing and for
+    # runs where enrichment is not required.
     api_key = os.environ.get("GEMINI_API_KEY") or None
     if not api_key:
         logger.warning("GEMINI_API_KEY not set — AI stages (3–6) will be skipped")
 
-    processed, ai_failures = process(items, gemini_api_key=api_key, fetch_date=today)
+    processed, ai_failures = process(
+        items,
+        gemini_api_key=api_key,
+        fetch_date=today,
+        rpm=cfg.pipeline.gemini_rpm,
+        enrich_max_output_tokens=cfg.pipeline.enrich_max_output_tokens,
+    )
 
-    # Merge with any items already in the processed file for this date so that
-    # a second same-day run does not erase the first run's data.
-    existing = read_processed_jsonl(out_path)
-    existing_ids = {item.id for item in existing}
-    merged = existing + [item for item in processed if item.id not in existing_ids]
-    write_processed_jsonl(merged, out_path)
+    merged = _merge_and_write(out_path, processed)
     logger.info(
         "Processing complete — %d new item(s) added; %d total in %s",
         len(processed), len(merged), out_path,
     )
 
-    if api_key and items and ai_failures / len(items) > 0.5:
-        logger.error(
-            "AI enrichment failed for >50%% of items (%d/%d) — check Gemini quota/key",
-            ai_failures, len(items),
-        )
-        return 2
-
-    return 0
+    return _exit_code(ai_failures, len(items), bool(api_key))
 
 
 if __name__ == "__main__":

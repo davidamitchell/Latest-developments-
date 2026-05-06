@@ -108,7 +108,7 @@ class TestClusterThemes:
         assert rels == []
 
     def test_api_failure_returns_fallback(self):
-        """When Gemini call fails, cluster_themes returns empty assignments gracefully."""
+        """When Gemini call fails (after SDK-internal retries), cluster_themes returns safe defaults."""
         records = _make_records("Multi-agent coordination", "RAG with tools")
 
         with patch("src.themes.genai.Client") as mock_client:
@@ -220,6 +220,38 @@ class TestClusterThemes:
             url_to_theme, defs, rels = cluster_themes(records, [])
 
         assert url_to_theme.get("https://example.com/0") == "Benchmarks & Evals"
+
+    def test_api_failure_maps_to_domain_fallback(self):
+        """When the Gemini call fails, each item falls back to its domain as the theme."""
+        records = [
+            CanonicalRecord(url="https://example.com/0", title="x", source_class="practitioner", domain="agents"),
+            CanonicalRecord(url="https://example.com/1", title="y", source_class="practitioner", domain="infra"),
+        ]
+
+        with patch("src.themes.genai.Client") as mock_client:
+            mock_instance = mock_client.return_value
+            mock_instance.models.generate_content.side_effect = RuntimeError("quota exceeded")
+            url_to_theme, defs, rels = cluster_themes(records, [])
+
+        assert url_to_theme["https://example.com/0"] != ""
+        assert url_to_theme["https://example.com/1"] != ""
+        assert defs == []
+        assert rels == []
+
+    def test_client_created_with_retry_options(self):
+        """The Gemini client is always constructed with HttpRetryOptions enabled."""
+        records = _make_records("inference cost")
+
+        with patch("src.themes.genai.Client") as mock_client:
+            mock_instance = mock_client.return_value
+            mock_instance.models.generate_content.side_effect = Exception("fail")
+            cluster_themes(records, [])
+
+        call_kwargs = mock_client.call_args.kwargs
+        http_options = call_kwargs.get("http_options")
+        assert http_options is not None
+        assert http_options.retry_options is not None
+        assert http_options.retry_options.attempts == 3
 
 
 # ---------------------------------------------------------------------------

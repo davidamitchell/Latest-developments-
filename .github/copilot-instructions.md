@@ -106,6 +106,11 @@ LAYER 3B — SITE BUILD   ProcessedItem[] → trend analysis → docs/data/*.jso
 - Run `make check` before committing
 - No unused imports; no bare `except:` clauses
 
+### External Libraries and APIs
+- Use typed SDK objects for external library configuration (e.g. `types.GenerateContentConfig`, not raw dicts). Verify the expected parameter type from the library API reference before implementing.
+- Before writing code that calls an external library or API, complete the integration-point and failure-mode checks in `.github/skills/swe/SKILL.md` section 6.1.
+- For every `except` clause, catch the specific exception type from the library's published exception hierarchy. `except Exception` requires explicit justification in a comment.
+
 ### Logging
 - Use the project logger (`src/logger.py`) — never `print()` in production code
 - Log levels: `DEBUG` for per-item detail, `INFO` for pipeline stages, `WARNING` for skipped/degraded paths, `ERROR` for failures
@@ -122,6 +127,7 @@ LAYER 3B — SITE BUILD   ProcessedItem[] → trend analysis → docs/data/*.jso
 - Mock all network calls and the Gemini API (`patch("src.summariser.genai.Client", ...)`)
 - **Apply the full testing pyramid:** unit tests on all business logic; integration/smoke tests in `tests/test_smoke.py` to exercise the full pipeline end-to-end; unit tests are necessary but not sufficient.
 - **Bug fixes must start with a failing test.** Write a test that reproduces the bug first, confirm it fails, then apply the fix and confirm the test passes. Never commit a bug fix without a companion regression test.
+- **Apply partition testing** as defined in `.github/skills/tdd/SKILL.md`. Every function with conditional logic over its inputs requires partitions for: typical value, boundary, empty/zero, and invalid/malformed. Use real inputs for pure functions — mocks are for external dependencies only.
 
 ---
 
@@ -342,6 +348,7 @@ Before marking a backlog slice as done:
 
 - [ ] Code merged to the development branch
 - [ ] `make check` passes (ruff lint + format)
+- [ ] `pytest --collect-only` produces zero errors (no import errors after any module rename or delete)
 - [ ] `make test` passes (with mocked network)
 - [ ] Full testing pyramid applied: unit tests for business logic + smoke/integration tests where applicable
 - [ ] `make dry-run` works end-to-end

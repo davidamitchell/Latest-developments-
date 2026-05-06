@@ -9,7 +9,6 @@ import re
 from collections import Counter
 
 from google import genai
-from google.genai import errors as genai_errors
 from google.genai import types
 
 from src.models import CanonicalRecord, GraphEdge, ThemeNode
@@ -215,18 +214,24 @@ def cluster_themes(
         url_to_theme: dict mapping item URL → canonical theme name
         theme_definitions: list of {theme, domain, definition}
         relationships: list of {source, target, rel_type, weight}
+
+    Retry behaviour (attempts, backoff, retryable status codes) is handled by
+    the SDK via HttpRetryOptions on the client.  Falls back to domain-based
+    theme assignment if all retries fail or JSON is unparseable.
     """
     if not records:
         return {}, [], []
 
-    # Fast pre-normalization: apply synonym map before calling Gemini
-    for rec in records:
-        if rec.claim:
-            rec.claim = rec.claim  # synonyms applied in final theme name, not claim
     existing_normalized = [normalize_theme_name(t) for t in existing_themes]
-
     prompt = _build_clustering_prompt(records, existing_normalized)
-    client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY", ""))
+
+    from google.genai.types import HttpOptions, HttpRetryOptions
+    client = genai.Client(
+        api_key=os.environ.get("GEMINI_API_KEY", ""),
+        http_options=HttpOptions(
+            retry_options=HttpRetryOptions(attempts=3, initial_delay=5.0, max_delay=60.0)
+        ),
+    )
 
     try:
         response = client.models.generate_content(
@@ -235,13 +240,11 @@ def cluster_themes(
             config=types.GenerateContentConfig(max_output_tokens=4096),
         )
         raw = response.text.strip()
-        # Strip markdown fences if present
         raw = re.sub(r"^```(?:json)?\s*", "", raw, flags=re.MULTILINE)
         raw = re.sub(r"\s*```$", "", raw, flags=re.MULTILINE)
         data = json.loads(raw)
-    except (genai_errors.APIError, json.JSONDecodeError, Exception) as exc:
-        logger.warning("Theme clustering Gemini call failed: %s", exc)
-        # Fallback: assign "General" theme to everything
+    except Exception as exc:
+        logger.warning("Theme clustering failed: %s", exc)
         url_to_theme = {r.url: normalize_theme_name(r.domain or "General") for r in records}
         return url_to_theme, [], []
 

@@ -290,6 +290,18 @@ digest:
     - <url> | <summary>
 
 # ---------------------------------------------------------------------------
+# pipeline — processing pipeline settings
+#
+# gemini_rpm: requests per minute sent to Gemini; default 5 (free-tier limit).
+#   At 5 RPM, 100 items take a minimum of 20 minutes.
+#   Raise this only when using a paid tier with a higher quota.
+# enrich_max_output_tokens: Gemini token budget per enrichment call; default 500.
+# ---------------------------------------------------------------------------
+pipeline:
+  gemini_rpm: 5
+  enrich_max_output_tokens: 500
+
+# ---------------------------------------------------------------------------
 # history — shared global section
 # ---------------------------------------------------------------------------
 history:

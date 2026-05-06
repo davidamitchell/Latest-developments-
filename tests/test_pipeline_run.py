@@ -3,11 +3,8 @@
 from __future__ import annotations
 
 import json
-from datetime import datetime, timezone
-from pathlib import Path
+from datetime import UTC, datetime
 from unittest.mock import MagicMock, patch
-
-import pytest
 
 from src.fetchers import FetchedItem
 from src.models import ProcessedItem
@@ -23,7 +20,7 @@ def _make_fetched(id_: str = "item-1") -> FetchedItem:
         source_type="rss",
         source_class="practitioner",
         author="Alice",
-        published=datetime(2026, 5, 2, tzinfo=timezone.utc),
+        published=datetime(2026, 5, 2, tzinfo=UTC),
         has_code=False,
         evidence_type="analysis",
     )
@@ -36,6 +33,7 @@ class TestProcess:
 
     def _null_client(self):
         """A Gemini client mock that returns minimal valid combined-enrichment responses."""
+        from google.genai.types import FinishReason
         client = MagicMock()
         resp = MagicMock()
         resp.text = (
@@ -48,6 +46,9 @@ class TestProcess:
             "MARKETING: false\n"
             "CONFIDENCE: 0.1"
         )
+        candidate = MagicMock()
+        candidate.finish_reason = FinishReason.STOP
+        resp.candidates = [candidate]
         client.models.generate_content.return_value = resp
         return client
 
@@ -137,16 +138,68 @@ class TestProcess:
         assert failures == 0
 
     def test_ai_failure_counted(self):
-        """A Gemini exception increments the failure count."""
+        """When the Gemini client raises a transport error, failures are counted."""
+        from google.genai.errors import ClientError
+
         from src.pipeline.run import process
 
         client = MagicMock()
-        client.models.generate_content.side_effect = RuntimeError("429 quota")
+        client.models.generate_content.side_effect = ClientError(429, {"error": "quota exceeded"})
         items = [_make_fetched("fail-1"), _make_fetched("fail-2")]
         with patch("src.pipeline.run._make_gemini_client", return_value=client):
             result, failures = process(items, gemini_api_key="fake-key", fetch_date="2026-05-02")
         assert failures == 2
         assert len(result) == 2
+
+    @patch("src.pipeline.run.time.sleep")
+    def test_rate_limiter_paces_gemini_calls(self, mock_sleep):
+        """The rate limiter sleeps between consecutive Gemini calls."""
+        from src.pipeline.run import process
+
+        items = [_make_fetched("rl-1"), _make_fetched("rl-2"), _make_fetched("rl-3")]
+        with patch("src.pipeline.run._make_gemini_client", return_value=self._null_client()):
+            process(items, gemini_api_key="fake-key", fetch_date="2026-05-02")
+        assert mock_sleep.call_count >= 2
+
+
+# ── _RateLimiter ─────────────────────────────────────────────────────────────
+
+class TestRateLimiter:
+    def test_first_call_does_not_sleep(self):
+        from src.pipeline.run import _RateLimiter
+
+        with patch("src.pipeline.run.time.sleep") as mock_sleep, \
+             patch("src.pipeline.run.time.monotonic", side_effect=[1000.0, 1000.0]):
+            rl = _RateLimiter(rpm=5)
+            rl.wait()
+        mock_sleep.assert_not_called()
+
+    def test_rapid_second_call_sleeps(self):
+        from src.pipeline.run import _RateLimiter
+
+        # Simulate: first call at t=1000, second call immediately at t=1000.1
+        # With 5 RPM the interval is 12s, so we expect ~11.9s sleep.
+        monotonic_values = [1000.0, 1000.0, 1000.1, 1000.1]
+        with patch("src.pipeline.run.time.sleep") as mock_sleep, \
+             patch("src.pipeline.run.time.monotonic", side_effect=monotonic_values):
+            rl = _RateLimiter(rpm=5)
+            rl.wait()  # first call — no sleep
+            rl.wait()  # second call — should sleep
+        assert mock_sleep.call_count == 1
+        slept = mock_sleep.call_args.args[0]
+        assert 11.0 < slept < 12.5
+
+    def test_call_after_full_interval_does_not_sleep(self):
+        from src.pipeline.run import _RateLimiter
+
+        # Second call arrives 15s after first — no sleep needed.
+        monotonic_values = [1000.0, 1000.0, 1015.0, 1015.0]
+        with patch("src.pipeline.run.time.sleep") as mock_sleep, \
+             patch("src.pipeline.run.time.monotonic", side_effect=monotonic_values):
+            rl = _RateLimiter(rpm=5)
+            rl.wait()
+            rl.wait()
+        mock_sleep.assert_not_called()
 
 
 # ── write_processed_jsonl ────────────────────────────────────────────────────
@@ -170,7 +223,7 @@ class TestWriteProcessedJsonl:
         )
 
     def test_writes_one_line_per_item(self, tmp_path):
-        from src.pipeline.run import write_processed_jsonl
+        from src.models import write_processed_jsonl
 
         items = [self._make_processed("p1"), self._make_processed("p2")]
         path = tmp_path / "processed.jsonl"
@@ -179,7 +232,7 @@ class TestWriteProcessedJsonl:
         assert len(lines) == 2
 
     def test_each_line_is_valid_json(self, tmp_path):
-        from src.pipeline.run import write_processed_jsonl
+        from src.models import write_processed_jsonl
 
         items = [self._make_processed("p3")]
         path = tmp_path / "processed.jsonl"
@@ -190,7 +243,7 @@ class TestWriteProcessedJsonl:
             assert "credibility_score" in d
 
     def test_roundtrip_via_from_dict(self, tmp_path):
-        from src.pipeline.run import write_processed_jsonl
+        from src.models import write_processed_jsonl
 
         original = self._make_processed("rt-2")
         path = tmp_path / "processed.jsonl"
@@ -201,14 +254,14 @@ class TestWriteProcessedJsonl:
         assert restored.fetch_date == original.fetch_date
 
     def test_creates_parent_directories(self, tmp_path):
-        from src.pipeline.run import write_processed_jsonl
+        from src.models import write_processed_jsonl
 
         path = tmp_path / "data" / "processed" / "2026-05-02.jsonl"
         write_processed_jsonl([self._make_processed("d1")], path)
         assert path.exists()
 
     def test_empty_list_writes_empty_file(self, tmp_path):
-        from src.pipeline.run import write_processed_jsonl
+        from src.models import write_processed_jsonl
 
         path = tmp_path / "empty.jsonl"
         write_processed_jsonl([], path)
@@ -236,7 +289,7 @@ class TestReadProcessedJsonl:
         )
 
     def test_reads_items_written_by_write(self, tmp_path):
-        from src.pipeline.run import read_processed_jsonl, write_processed_jsonl
+        from src.models import read_processed_jsonl, write_processed_jsonl
 
         items = [self._make_processed("r1"), self._make_processed("r2")]
         path = tmp_path / "p.jsonl"
@@ -246,12 +299,12 @@ class TestReadProcessedJsonl:
         assert {r.id for r in result} == {"r1", "r2"}
 
     def test_returns_empty_list_for_missing_file(self, tmp_path):
-        from src.pipeline.run import read_processed_jsonl
+        from src.models import read_processed_jsonl
 
         assert read_processed_jsonl(tmp_path / "nope.jsonl") == []
 
     def test_skips_malformed_lines(self, tmp_path):
-        from src.pipeline.run import read_processed_jsonl
+        from src.models import read_processed_jsonl
 
         good = json.dumps(self._make_processed("g2").to_dict())
         path = tmp_path / "mixed.jsonl"

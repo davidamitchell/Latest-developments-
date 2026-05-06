@@ -13,6 +13,7 @@ import argparse
 import json
 import logging
 import sys
+from collections.abc import Callable
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
@@ -52,6 +53,10 @@ from src.state import load_state
 logger = logging.getLogger(__name__)
 
 _RAW_DIR = Path("data/raw")
+# Default videos-per-channel when a YouTube source entry omits max_videos.
+# Mirrors the default in YouTubeConfig.max_videos_per_channel — kept in sync here
+# as a module constant so _build_fetchers does not construct a throwaway instance.
+_DEFAULT_YT_MAX_VIDEOS: int = 5
 
 
 def _safe_fetch(name: str, fetcher, already_processed: set[str]) -> list[FetchedItem]:
@@ -65,12 +70,76 @@ def _safe_fetch(name: str, fetcher, already_processed: set[str]) -> list[Fetched
         return []
 
 
+# ── Singleton fetcher registry (OCP) ─────────────────────────────────────────
+# Adding a new singleton source type means adding one entry here — no existing
+# code changes required.  Each factory receives the SourceEntry and returns a
+# (name, fetcher_instance) pair.
+
+_SINGLETON_FACTORIES: dict[str, Callable[[SourceEntry], tuple[str, object]]] = {
+    "hackernews": lambda e: (
+        e.name,
+        HackerNewsFetcher(HackerNewsConfig(
+            min_score=e.options.get("min_score", 100),
+            keywords=e.options.get("keywords", []),
+            max_stories=e.options.get("max_stories", 10),
+        )),
+    ),
+    "arxiv": lambda e: (
+        e.name,
+        ArxivFetcher(
+            categories=e.options.get("categories", ["cs.AI", "cs.LG", "cs.CL"]),
+            max_papers=e.options.get("max_papers", 30),
+        ),
+    ),
+    "huggingface": lambda e: (
+        e.name,
+        HuggingFaceFetcher(
+            max_models=e.options.get("max_models", 50),
+            min_downloads=e.options.get("min_downloads", 100),
+        ),
+    ),
+    "paperswithcode": lambda e: (
+        e.name,
+        PapersWithCodeFetcher(
+            page_size=e.options.get("page_size", 20),
+            min_stars=e.options.get("min_stars", 0),
+        ),
+    ),
+    "operator_changelog": lambda e: (
+        e.name,
+        OperatorChangelogFetcher(
+            feeds=e.options.get("feeds", []),
+            source_class=e.source_class,
+        ),
+    ),
+    "replicate": lambda e: (
+        e.name,
+        ReplicateFetcher(limit=e.options.get("limit", 20)),
+    ),
+    "openreview": lambda e: (
+        e.name,
+        OpenReviewFetcher(
+            venues=e.options.get("venues", []),
+            limit=e.options.get("limit", 25),
+        ),
+    ),
+    "openrouter": lambda e: (
+        e.name,
+        OpenRouterFetcher(limit=e.options.get("limit", 100)),
+    ),
+}
+
+# Types handled by multi-source aggregation above — not passed to the registry.
+_AGGREGATE_TYPES: frozenset[str] = frozenset({"rss", "youtube", "substack"})
+
+
 def _build_fetchers(cfg: Config) -> list[tuple[str, object]]:
     """Return (name, fetcher_instance) pairs for every enabled source.
 
     Translates the flat cfg.sources list into fetcher instances.
     Multi-entry types (rss, youtube, substack) are aggregated into a single
-    fetcher. Singleton types (hackernews, arxiv, etc.) produce one fetcher each.
+    fetcher. Singleton types delegate to _SINGLETON_FACTORIES so that adding
+    a new type requires no changes to this function.
     """
     pairs: list[tuple[str, object]] = []
     enabled = [e for e in cfg.sources if e.enabled]
@@ -98,7 +167,7 @@ def _build_fetchers(cfg: Config) -> list[tuple[str, object]]:
                 YouTubeChannel(
                     name=e.name,
                     channel_id=e.options["channel_id"],
-                    max_videos=e.options.get("max_videos", 5),
+                    max_videos=e.options.get("max_videos", _DEFAULT_YT_MAX_VIDEOS),
                 )
                 for e in yt_entries
             ]
@@ -115,73 +184,16 @@ def _build_fetchers(cfg: Config) -> list[tuple[str, object]]:
         )
         pairs.append(("Substack", SubstackFetcher(ss_cfg)))
 
-    # ── Singleton types — one fetcher per entry ───────────────────────────────
+    # ── Singleton types — dispatch via registry (OCP) ─────────────────────────
 
     for entry in enabled:
-        if entry.type == "hackernews":
-            hn_cfg = HackerNewsConfig(
-                min_score=entry.options.get("min_score", 100),
-                keywords=entry.options.get("keywords", []),
-                max_stories=entry.options.get("max_stories", 10),
-            )
-            pairs.append((entry.name, HackerNewsFetcher(hn_cfg)))
-
-        elif entry.type == "arxiv":
-            pairs.append((
-                entry.name,
-                ArxivFetcher(
-                    categories=entry.options.get("categories", ["cs.AI", "cs.LG", "cs.CL"]),
-                    max_papers=entry.options.get("max_papers", 30),
-                ),
-            ))
-
-        elif entry.type == "huggingface":
-            pairs.append((
-                entry.name,
-                HuggingFaceFetcher(
-                    max_models=entry.options.get("max_models", 50),
-                    min_downloads=entry.options.get("min_downloads", 100),
-                ),
-            ))
-
-        elif entry.type == "paperswithcode":
-            pairs.append((
-                entry.name,
-                PapersWithCodeFetcher(
-                    page_size=entry.options.get("page_size", 20),
-                    min_stars=entry.options.get("min_stars", 0),
-                ),
-            ))
-
-        elif entry.type == "operator_changelog":
-            pairs.append((
-                entry.name,
-                OperatorChangelogFetcher(
-                    feeds=entry.options.get("feeds", []),
-                    source_class=entry.source_class,
-                ),
-            ))
-
-        elif entry.type == "replicate":
-            pairs.append((
-                entry.name,
-                ReplicateFetcher(limit=entry.options.get("limit", 20)),
-            ))
-
-        elif entry.type == "openreview":
-            pairs.append((
-                entry.name,
-                OpenReviewFetcher(
-                    venues=entry.options.get("venues", []),
-                    limit=entry.options.get("limit", 25),
-                ),
-            ))
-
-        elif entry.type == "openrouter":
-            pairs.append((
-                entry.name,
-                OpenRouterFetcher(limit=entry.options.get("limit", 100)),
-            ))
+        if entry.type in _AGGREGATE_TYPES:
+            continue
+        factory = _SINGLETON_FACTORIES.get(entry.type)
+        if factory is not None:
+            pairs.append(factory(entry))
+        else:
+            logger.warning("Unknown source type %r in entry %r — skipping", entry.type, entry.name)
 
     return pairs
 

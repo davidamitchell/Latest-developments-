@@ -12,6 +12,27 @@ logger = logging.getLogger(__name__)
 T = TypeVar("T")
 
 
+def _retry_after_delay(exc: Exception, base_delay: float, attempt: int) -> float:
+    """Return the delay to sleep before the next attempt.
+
+    If the exception carries an HTTP response with a Retry-After header (RFC
+    6585 — required on 429, common on 503) that value is used.  Otherwise falls
+    back to exponential backoff.
+
+    httpx raises HTTPStatusError on 4xx/5xx; the exception carries the full
+    response object (including headers) in its .response attribute.
+    """
+    response = getattr(exc, "response", None)
+    if response is not None:
+        try:
+            header = response.headers.get("Retry-After") or response.headers.get("retry-after")
+            if header:
+                return max(0.0, float(header))
+        except Exception:
+            pass
+    return base_delay * (2 ** (attempt - 1))
+
+
 def with_backoff(
     fn: Callable[[], T],
     *,
@@ -20,10 +41,11 @@ def with_backoff(
     label: str = "",
     no_retry: tuple[type[Exception], ...] = (),
 ) -> T:
-    """
-    Call fn(), retrying on transient errors with exponential backoff.
+    """Call fn(), retrying on transient errors with exponential backoff.
 
     Exceptions listed in no_retry propagate immediately without retry.
+    If the exception carries an HTTP Retry-After header the server-specified
+    delay is used instead of the exponential fallback.
     After max_attempts, raises RuntimeError wrapping the last exception.
     """
     last_exc: Exception | None = None
@@ -36,7 +58,7 @@ def with_backoff(
             last_exc = e
             if attempt == max_attempts:
                 break
-            delay = base_delay * (2 ** (attempt - 1))
+            delay = _retry_after_delay(e, base_delay, attempt)
             prefix = f"{label}: " if label else ""
             logger.warning(
                 "%sfailed (attempt %d/%d): %s — retry in %.0fs",
