@@ -5,6 +5,7 @@ from __future__ import annotations
 from unittest.mock import MagicMock, patch
 
 import pytest
+from google.genai.errors import ClientError
 
 from src.retry import _retry_after_delay, with_backoff
 
@@ -73,6 +74,33 @@ def test_retry_after_delay_falls_back_to_exponential() -> None:
     assert _retry_after_delay(exc, base_delay=2.0, attempt=1) == 2.0
     assert _retry_after_delay(exc, base_delay=2.0, attempt=2) == 4.0
     assert _retry_after_delay(exc, base_delay=2.0, attempt=3) == 8.0
+
+
+def test_retry_after_delay_uses_gemini_retry_info_details() -> None:
+    exc = ClientError(429, {"error": "quota"})
+    exc.details = [
+        {
+            "@type": "type.googleapis.com/google.rpc.RetryInfo",
+            "retryDelay": "47s",
+        }
+    ]
+
+    assert _retry_after_delay(exc, base_delay=1.0, attempt=1) == 47.0
+
+
+def test_retry_after_delay_gemini_retry_info_takes_priority_over_header() -> None:
+    response = MagicMock()
+    response.headers.get.side_effect = lambda k, default=None: "10" if k == "Retry-After" else default
+    exc = ClientError(429, {"error": "quota"})
+    exc.response = response  # type: ignore[attr-defined]
+    exc.details = [
+        {
+            "@type": "type.googleapis.com/google.rpc.RetryInfo",
+            "retryDelay": "47s",
+        }
+    ]
+
+    assert _retry_after_delay(exc, base_delay=1.0, attempt=1) == 47.0
 
 
 def test_retry_after_delay_reads_header_from_response() -> None:

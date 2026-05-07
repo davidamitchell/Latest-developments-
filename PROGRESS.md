@@ -732,3 +732,28 @@ Three gaps identified by working the backlog:
 3. **What single change would prevent this next time?** The architecture confusion accumulated because concerns were added incrementally without stopping to ask "does this belong here?". ADR-0017's pipeline boundary rule (step 8 in chain-of-thought) is the standing fix: before adding any step to a workflow, confirm it belongs to that workflow's responsibility.
 
 4. **Is this a pattern?** Yes — workflow sprawl from incremental addition is a common pattern. The antidote is always the same: explicit responsibility ownership per workflow, documented in the instructions, enforced by a chain-of-thought checkpoint.
+
+---
+
+## 2026-05-07 — Gemini retryDelay workaround (SDK sync retry bug)
+
+**What changed:** Removed SDK `HttpRetryOptions` usage from both Gemini call sites (`src/pipeline/run.py` and `src/themes.py`) and switched to application-level retries via `with_backoff()`.
+
+- `src/retry.py`: `_retry_after_delay()` now prioritizes Gemini `google.rpc.RetryInfo.retryDelay` from structured `ClientError.details` (e.g. `"47s"`) before HTTP `Retry-After`, then exponential fallback.
+- `src/pipeline/run.py`: `_make_gemini_client()` now builds a plain `genai.Client(api_key=...)`; `process()` wraps `enrich()` with `with_backoff(max_attempts=3, base_delay=60.0)` and keeps `_RateLimiter` in place.
+- `src/themes.py`: `cluster_themes()` now uses a plain `genai.Client` and wraps `generate_content()` with `with_backoff(max_attempts=3, base_delay=60.0)`.
+- `src/pipeline/stages/enrich.py`: docstrings updated to reflect caller-managed retries.
+- Tests updated/added in `tests/test_retry.py`, `tests/test_pipeline_run.py`, and `tests/test_themes.py` to cover RetryInfo parsing and 429 retry behavior.
+
+**Validation:**
+- `ruff check` on changed files: pass
+- `pytest tests/test_retry.py tests/test_pipeline_run.py tests/test_themes.py`: pass
+- `pytest --collect-only`: pass (627 collected)
+- `make check`: fails due pre-existing unrelated lint issues in untouched files
+
+### Mini-Retro
+
+1. **Did the process work?** Yes. CI logs confirmed the root cause; focused edits plus targeted tests validated the workaround without widening scope.
+2. **What slowed down or went wrong?** Existing fallback tests in `test_themes.py` became slow after introducing `with_backoff` and needed `time.sleep` patching.
+3. **What single change would prevent this next time?** When adding retries, immediately patch sleep in failure-path tests to avoid long-running suites.
+4. **Is this a pattern?** Yes — introducing retry wrappers often changes test runtime characteristics; test harnesses should explicitly stub delay calls.

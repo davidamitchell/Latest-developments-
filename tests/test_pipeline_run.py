@@ -6,6 +6,8 @@ import json
 from datetime import UTC, datetime
 from unittest.mock import MagicMock, patch
 
+import pytest
+
 from src.fetchers import FetchedItem
 from src.models import ProcessedItem
 
@@ -150,6 +152,56 @@ class TestProcess:
             result, failures = process(items, gemini_api_key="fake-key", fetch_date="2026-05-02")
         assert failures == 2
         assert len(result) == 2
+
+    def test_process_retries_client_error_using_server_retry_delay(self):
+        from google.genai.errors import ClientError
+
+        from src.pipeline.run import process
+
+        client = MagicMock()
+        items = [_make_fetched("retry-429")]
+
+        transient = ClientError(429, {"error": "quota exceeded"})
+        transient.details = [
+            {
+                "@type": "type.googleapis.com/google.rpc.RetryInfo",
+                "retryDelay": "47s",
+            }
+        ]
+        calls = 0
+
+        def enrich_side_effect(item: ProcessedItem, *_args, **_kwargs):
+            nonlocal calls
+            calls += 1
+            if calls == 1:
+                raise transient
+            return item, True
+
+        with patch("src.pipeline.run._make_gemini_client", return_value=client), \
+             patch("src.pipeline.run.enrich", side_effect=enrich_side_effect), \
+             patch("src.pipeline.run.time.sleep"), \
+             patch("src.retry.time.sleep") as retry_sleep:
+            result, failures = process(items, gemini_api_key="fake-key", fetch_date="2026-05-02")
+
+        assert len(result) == 1
+        assert failures == 0
+        assert calls == 2
+        retry_sleep.assert_called_once_with(47.0)
+
+    def test_process_propagates_non_retryable_enrich_errors(self):
+        from src.pipeline.run import process
+
+        client = MagicMock()
+        items = [_make_fetched("non-retryable")]
+
+        with patch("src.pipeline.run._make_gemini_client", return_value=client), \
+             patch("src.pipeline.run.enrich", side_effect=ValueError("bad payload")), \
+             patch("src.pipeline.run.time.sleep"), \
+             patch("src.retry.time.sleep") as retry_sleep, \
+             pytest.raises(ValueError, match="bad payload"):
+                process(items, gemini_api_key="fake-key", fetch_date="2026-05-02")
+
+        retry_sleep.assert_not_called()
 
     @patch("src.pipeline.run.time.sleep")
     def test_rate_limiter_paces_gemini_calls(self, mock_sleep):

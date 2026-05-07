@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import re
 import time
 from collections.abc import Callable
 from typing import TypeVar
@@ -15,13 +16,29 @@ T = TypeVar("T")
 def _retry_after_delay(exc: Exception, base_delay: float, attempt: int) -> float:
     """Return the delay to sleep before the next attempt.
 
-    If the exception carries an HTTP response with a Retry-After header (RFC
-    6585 — required on 429, common on 503) that value is used.  Otherwise falls
-    back to exponential backoff.
+    If the exception is a Gemini ClientError containing structured RetryInfo
+    details, that retryDelay value is used first.
+
+    Otherwise, if the exception carries an HTTP response with a Retry-After
+    header (RFC 6585 — required on 429, common on 503) that value is used.
+    Falls back to exponential backoff when neither server hint is available.
 
     httpx raises HTTPStatusError on 4xx/5xx; the exception carries the full
     response object (including headers) in its .response attribute.
     """
+    details = getattr(exc, "details", None)
+    if isinstance(details, list):
+        for entry in details:
+            if not isinstance(entry, dict):
+                continue
+            if entry.get("@type") != "type.googleapis.com/google.rpc.RetryInfo":
+                continue
+            retry_delay = entry.get("retryDelay")
+            if isinstance(retry_delay, str):
+                match = re.fullmatch(r"\s*(\d+)\s*s\s*", retry_delay)
+                if match:
+                    return float(int(match.group(1)))
+
     response = getattr(exc, "response", None)
     if response is not None:
         try:

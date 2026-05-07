@@ -12,6 +12,7 @@ from google import genai
 from google.genai import types
 
 from src.models import CanonicalRecord, GraphEdge, ThemeNode
+from src.retry import with_backoff
 
 logger = logging.getLogger(__name__)
 
@@ -215,9 +216,8 @@ def cluster_themes(
         theme_definitions: list of {theme, domain, definition}
         relationships: list of {source, target, rel_type, weight}
 
-    Retry behaviour (attempts, backoff, retryable status codes) is handled by
-    the SDK via HttpRetryOptions on the client.  Falls back to domain-based
-    theme assignment if all retries fail or JSON is unparseable.
+    Retry behaviour is handled by application-level backoff. Falls back to
+    domain-based theme assignment if all retries fail or JSON is unparseable.
     """
     if not records:
         return {}, [], []
@@ -225,19 +225,18 @@ def cluster_themes(
     existing_normalized = [normalize_theme_name(t) for t in existing_themes]
     prompt = _build_clustering_prompt(records, existing_normalized)
 
-    from google.genai.types import HttpOptions, HttpRetryOptions
-    client = genai.Client(
-        api_key=os.environ.get("GEMINI_API_KEY", ""),
-        http_options=HttpOptions(
-            retry_options=HttpRetryOptions(attempts=3, initial_delay=5.0, max_delay=60.0)
-        ),
-    )
+    client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY", ""))
 
     try:
-        response = client.models.generate_content(
-            model="gemini-2.5-flash",
-            contents=prompt,
-            config=types.GenerateContentConfig(max_output_tokens=4096),
+        response = with_backoff(
+            lambda: client.models.generate_content(
+                model="gemini-2.5-flash",
+                contents=prompt,
+                config=types.GenerateContentConfig(max_output_tokens=4096),
+            ),
+            max_attempts=3,
+            base_delay=60.0,
+            label="cluster_themes",
         )
         raw = response.text.strip()
         raw = re.sub(r"^```(?:json)?\s*", "", raw, flags=re.MULTILINE)
