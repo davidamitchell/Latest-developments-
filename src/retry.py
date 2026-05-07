@@ -11,6 +11,7 @@ from typing import TypeVar
 logger = logging.getLogger(__name__)
 
 T = TypeVar("T")
+_RETRY_DELAY_PATTERN = re.compile(r"\s*(\d+)\s*s\s*")
 
 
 def _retry_after_delay(exc: Exception, base_delay: float, attempt: int) -> float:
@@ -35,9 +36,10 @@ def _retry_after_delay(exc: Exception, base_delay: float, attempt: int) -> float
                 continue
             retry_delay = entry.get("retryDelay")
             if isinstance(retry_delay, str):
-                match = re.fullmatch(r"\s*(\d+)\s*s\s*", retry_delay)
+                match = _RETRY_DELAY_PATTERN.fullmatch(retry_delay)
                 if match:
-                    return float(int(match.group(1)))
+                    return float(match.group(1))
+                logger.debug("Invalid Gemini RetryInfo.retryDelay value %r; using fallback", retry_delay)
 
     response = getattr(exc, "response", None)
     if response is not None:

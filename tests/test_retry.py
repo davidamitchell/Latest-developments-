@@ -76,7 +76,7 @@ def test_retry_after_delay_falls_back_to_exponential() -> None:
     assert _retry_after_delay(exc, base_delay=2.0, attempt=3) == 8.0
 
 
-def test_retry_after_delay_uses_gemini_retry_info_details() -> None:
+def test_retry_after_delay_reads_gemini_retry_info_details() -> None:
     exc = ClientError(429, {"error": "quota"})
     exc.details = [
         {

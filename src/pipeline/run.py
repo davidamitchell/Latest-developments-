@@ -43,6 +43,14 @@ _RAW_DIR = Path("data/raw")
 _PROCESSED_DIR = Path("data/processed")
 
 
+class _NonRetryableEnrichError(Exception):
+    """Wrap non-transport enrich errors so with_backoff won't retry them.
+
+    Raised when enrich() throws a programming/runtime error that is
+    not a Gemini transport condition (ClientError/ServerError).
+    """
+
+
 class _RateLimiter:
     """Token-bucket pacer for the Gemini free tier (default: 5 RPM).
 
@@ -107,23 +115,24 @@ def process(
         if client is not None:
             from google.genai.errors import ClientError, ServerError
 
-            class _NonRetryableEnrichError(Exception):
-                """Sentinel exception for non-retryable enrich errors."""
+            def _make_enrich_once(current: ProcessedItem):
+                def _enrich_once() -> tuple[ProcessedItem, bool]:
+                    try:
+                        return enrich(current, client, max_output_tokens=enrich_max_output_tokens)
+                    except (ClientError, ServerError):
+                        raise
+                    except Exception as exc:
+                        raise _NonRetryableEnrichError from exc
 
-            def _enrich_once(current: ProcessedItem = processed) -> tuple[ProcessedItem, bool]:
-                try:
-                    return enrich(current, client, max_output_tokens=enrich_max_output_tokens)
-                except (ClientError, ServerError):
-                    raise
-                except Exception as exc:
-                    raise _NonRetryableEnrichError from exc
+                return _enrich_once
 
             # Pace to ≤rpm RPM before each Gemini call to stay under the free-tier quota.
             rate_limiter.wait()  # type: ignore[union-attr]
             # Stages 3–6 — combined AI enrichment (1 Gemini call per item)
+            pre_enrich = processed
             try:
                 processed, ok = with_backoff(
-                    _enrich_once,
+                    _make_enrich_once(processed),
                     max_attempts=3,
                     base_delay=60.0,
                     label=f"enrich:{processed.id}",
@@ -131,14 +140,13 @@ def process(
                 )
             except RuntimeError as exc:
                 if isinstance(exc.__cause__, (ClientError, ServerError)):
+                    processed = pre_enrich
                     logger.warning("AI enrichment failed for %r after retries: %s", processed.id, exc.__cause__)
                     ok = False
                 else:
                     raise
             except _NonRetryableEnrichError as exc:
-                if exc.__cause__ is not None:
-                    raise exc.__cause__ from None
-                raise
+                raise exc.__cause__ from None
             if not ok:
                 ai_failures += 1
 

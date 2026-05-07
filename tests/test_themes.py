@@ -256,6 +256,7 @@ class TestClusterThemes:
         assert call_kwargs.get("http_options") is None
 
     def test_retries_on_client_error_429(self):
+        """cluster_themes retries 429 ClientError and sleeps for RetryInfo.retryDelay."""
         records = _make_records("inference cost")
         err = ClientError(429, {"error": "quota exceeded"})
         err.details = [
