@@ -5,6 +5,8 @@ from __future__ import annotations
 import json
 from unittest.mock import MagicMock, patch
 
+from google.genai.errors import ClientError
+
 from src.models import CanonicalRecord
 from src.themes import (
     DOMAIN_TAXONOMY,
@@ -111,7 +113,8 @@ class TestClusterThemes:
         """When Gemini call fails (after SDK-internal retries), cluster_themes returns safe defaults."""
         records = _make_records("Multi-agent coordination", "RAG with tools")
 
-        with patch("src.themes.genai.Client") as mock_client:
+        with patch("src.themes.genai.Client") as mock_client, \
+             patch("src.retry.time.sleep"):
             mock_instance = mock_client.return_value
             mock_instance.models.generate_content.side_effect = Exception("API down")
 
@@ -228,7 +231,8 @@ class TestClusterThemes:
             CanonicalRecord(url="https://example.com/1", title="y", source_class="practitioner", domain="infra"),
         ]
 
-        with patch("src.themes.genai.Client") as mock_client:
+        with patch("src.themes.genai.Client") as mock_client, \
+             patch("src.retry.time.sleep"):
             mock_instance = mock_client.return_value
             mock_instance.models.generate_content.side_effect = RuntimeError("quota exceeded")
             url_to_theme, defs, rels = cluster_themes(records, [])
@@ -238,20 +242,48 @@ class TestClusterThemes:
         assert defs == []
         assert rels == []
 
-    def test_client_created_with_retry_options(self):
-        """The Gemini client is always constructed with HttpRetryOptions enabled."""
+    def test_client_created_without_http_retry_options(self):
+        """Gemini client is created without SDK HttpRetryOptions."""
         records = _make_records("inference cost")
 
-        with patch("src.themes.genai.Client") as mock_client:
+        with patch("src.themes.genai.Client") as mock_client, \
+             patch("src.retry.time.sleep"):
             mock_instance = mock_client.return_value
             mock_instance.models.generate_content.side_effect = Exception("fail")
             cluster_themes(records, [])
 
         call_kwargs = mock_client.call_args.kwargs
-        http_options = call_kwargs.get("http_options")
-        assert http_options is not None
-        assert http_options.retry_options is not None
-        assert http_options.retry_options.attempts == 3
+        assert call_kwargs.get("http_options") is None
+
+    def test_retries_on_client_error_429(self):
+        """cluster_themes retries 429 ClientError and sleeps for RetryInfo.retryDelay."""
+        records = _make_records("inference cost")
+        err = ClientError(429, {"error": "quota exceeded"})
+        err.details = [
+            {"@type": "type.googleapis.com/google.rpc.RetryInfo", "retryDelay": "39s"}
+        ]
+        response = MagicMock()
+        response.text = json.dumps(
+            {
+                "assignments": [
+                    {"url": "https://example.com/0", "theme": "Inference Cost Reduction", "domain": "infra"}
+                ],
+                "theme_definitions": [],
+                "relationships": [],
+            }
+        )
+
+        with patch("src.themes.genai.Client") as mock_client, \
+             patch("src.retry.time.sleep") as retry_sleep:
+            mock_instance = mock_client.return_value
+            mock_instance.models.generate_content.side_effect = [err, response]
+            url_to_theme, defs, rels = cluster_themes(records, [])
+
+        assert url_to_theme["https://example.com/0"] == "Inference Cost Reduction"
+        assert defs == []
+        assert rels == []
+        assert mock_instance.models.generate_content.call_count == 2
+        retry_sleep.assert_called_once_with(39.0)
 
 
 # ---------------------------------------------------------------------------

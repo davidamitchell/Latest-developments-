@@ -167,3 +167,19 @@ Workflow YAML was treated as configuration, not code. No verification was done t
 ### Is this a pattern?
 
 Yes. The same failure mode recurs because YAML changes feel low-risk. They are not. Treat every workflow change as a code change: trace the execution path end-to-end before committing.
+
+---
+
+## 2026-05-07 — Retry wrappers require sleep stubbing in failure-path tests
+
+### Pattern
+
+When a previously single-shot path is wrapped with `with_backoff()`, existing tests that assert fallback behavior on exceptions can become slow because retries now sleep by default.
+
+### Applied fix
+
+Patch `src.retry.time.sleep` in tests that intentionally trigger retry exhaustion (`cluster_themes` fallback tests) so behavior is exercised without wall-clock delays.
+
+### Why this matters
+
+Without this, targeted test runs can appear hung or exceed CI time budgets even when logic is correct.

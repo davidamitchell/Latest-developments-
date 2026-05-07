@@ -376,7 +376,7 @@ class TestCredibilityScoringStage:
 # ── Enrich: success and failure behaviour ────────────────────────────────────
 
 class TestEnrich:
-    """Retry behaviour is delegated to the Gemini client (HttpRetryOptions).
+    """Retry behaviour is delegated to caller-level with_backoff logic.
     These tests verify the parse/return contract and finish_reason handling."""
 
     def _make_item(self):

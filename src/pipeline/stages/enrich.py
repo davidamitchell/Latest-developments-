@@ -8,9 +8,9 @@ pressure on the Gemini free tier.
 Returns the item with all AI fields populated, plus an enrichment_ok flag
 (True if the call succeeded, False if it failed and defaults were used).
 
-Retry behaviour is delegated entirely to the Gemini client, which is
-configured with HttpRetryOptions in src/pipeline/run.py.  The _RateLimiter
-in run.py paces calls to ≤5 RPM so most 429s never occur.
+Retry behaviour is handled by src.retry.with_backoff in src/pipeline/run.py.
+This stage performs one enrichment attempt and returns (item, ok). The
+_RateLimiter in run.py still paces calls to ≤5 RPM so most 429s never occur.
 """
 
 from __future__ import annotations
@@ -145,11 +145,11 @@ def enrich(
 ) -> tuple[ProcessedItem, bool]:
     """Run combined AI enrichment; return (enriched_item, ok).
 
-    ok is False when the API call fails after the client's built-in retries.
-    The item is returned with default values so the pipeline can continue.
+    ok is False when the API call fails for this attempt. The item is returned
+    with default values so the pipeline can continue.
 
-    Retry behaviour (attempts, backoff, retryable status codes) is configured
-    on the client via HttpRetryOptions — not repeated here.
+    Retry behaviour is handled by the caller (process() in run.py) via
+    src.retry.with_backoff.
 
     Only google.genai transport errors (ClientError, ServerError) are caught.
     Programming errors (AttributeError, TypeError, etc.) propagate so they are

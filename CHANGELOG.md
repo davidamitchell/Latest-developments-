@@ -7,9 +7,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Fixed
+- **Gemini SDK retryDelay workaround (2026-05-07)**:
+  1. Removed SDK `HttpRetryOptions` usage from `src/pipeline/run.py` and `src/themes.py` because sync SDK retries ignore server `retryDelay` on 429 responses.
+  2. Extended `_retry_after_delay()` in `src/retry.py` to prioritize Gemini `google.rpc.RetryInfo.retryDelay` (from structured `ClientError.details`) before HTTP `Retry-After`, then exponential backoff.
+  3. `process()` now wraps enrichment calls with `with_backoff(max_attempts=3, base_delay=60.0)` and keeps `_RateLimiter` pacing in place.
+  4. `cluster_themes()` now wraps `generate_content()` with `with_backoff(max_attempts=3, base_delay=60.0)`, preserving domain-based fallback only after retries fail.
 - **Gemini rate limiting (2026-05-04)**: The pipeline was exhausting the 5-RPM free-tier quota immediately by firing all enrichment requests in a tight loop. Three fixes applied across two sessions:
   1. `_RateLimiter` in `src/pipeline/run.py` enforces ≥12 s between Gemini calls (60 s ÷ 5 RPM), preventing quota exhaustion before it starts.
-  2. `enrich()` in `src/pipeline/stages/enrich.py` now parses the `retryDelay` value from 429 `RESOURCE_EXHAUSTED` responses (e.g. `'retryDelay': '39s'`) and sleeps exactly that long before retrying the same item (max 3 attempts). Transient errors without a server-supplied delay fall back to exponential backoff (2 s / 4 s).
+  2. Retry pacing now lives in application-level `with_backoff()` + `_retry_after_delay()` (not inside `enrich()`), so server-supplied retry hints are handled centrally.
   3. `with_backoff()` in `src/retry.py` now reads the `Retry-After` header from HTTP exceptions (RFC 6585) **and** the Gemini `retryDelay` from structured exception details or string representation, benefiting all fetchers and the theme-clustering call.
 - **Theme clustering retry (2026-05-04)**: `cluster_themes()` in `src/themes.py` was making a single-shot Gemini call with no retry — any 429 or transient error immediately fell back to mapping every item to its domain. It now uses `with_backoff()` (max 3 attempts, honouring `retryDelay`), with domain-based fallback only after all attempts fail.
 

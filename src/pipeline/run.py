@@ -35,11 +35,20 @@ from src.pipeline.stages.credibility_scoring import score_credibility
 from src.pipeline.stages.enrich import enrich
 from src.pipeline.stages.hype_scoring import score_hype
 from src.pipeline.stages.ingest import ingest
+from src.retry import with_backoff
 
 logger = logging.getLogger(__name__)
 
 _RAW_DIR = Path("data/raw")
 _PROCESSED_DIR = Path("data/processed")
+
+
+class _NonRetryableEnrichError(Exception):
+    """Wrap non-transport enrich errors so with_backoff won't retry them.
+
+    Raised when enrich() throws a programming/runtime error that is
+    not a Gemini transport condition (ClientError/ServerError).
+    """
 
 
 class _RateLimiter:
@@ -64,25 +73,13 @@ class _RateLimiter:
 
 
 def _make_gemini_client(api_key: str):
-    """Construct and return a Gemini client with transport-level retry enabled.
+    """Construct and return a Gemini client.
 
-    The SDK does NOT retry by default — retry_options must be set explicitly.
-    We use 3 attempts (1 initial + 2 retries) on 429/503/5xx, with exponential
-    backoff starting at 5 s.  The _RateLimiter in process() prevents most 429s
-    from occurring; this is the safety net for when they slip through.
+    Retry policy is handled at the application level in process() via
+    src.retry.with_backoff so Gemini retryDelay hints can be honoured.
     """
     from google import genai
-    from google.genai.types import HttpOptions, HttpRetryOptions
-    return genai.Client(
-        api_key=api_key,
-        http_options=HttpOptions(
-            retry_options=HttpRetryOptions(
-                attempts=3,
-                initial_delay=5.0,
-                max_delay=60.0,
-            )
-        ),
-    )
+    return genai.Client(api_key=api_key)
 
 
 def process(
@@ -116,10 +113,40 @@ def process(
         processed = clean(processed, raw_content=fetched.content)
 
         if client is not None:
+            from google.genai.errors import ClientError, ServerError
+
+            def _make_enrich_once(current: ProcessedItem):
+                def _enrich_once() -> tuple[ProcessedItem, bool]:
+                    try:
+                        return enrich(current, client, max_output_tokens=enrich_max_output_tokens)
+                    except (ClientError, ServerError):
+                        raise
+                    except Exception as exc:
+                        raise _NonRetryableEnrichError from exc
+
+                return _enrich_once
+
             # Pace to ≤rpm RPM before each Gemini call to stay under the free-tier quota.
             rate_limiter.wait()  # type: ignore[union-attr]
             # Stages 3–6 — combined AI enrichment (1 Gemini call per item)
-            processed, ok = enrich(processed, client, max_output_tokens=enrich_max_output_tokens)
+            pre_enrich = processed
+            try:
+                processed, ok = with_backoff(
+                    _make_enrich_once(processed),
+                    max_attempts=3,
+                    base_delay=60.0,
+                    label=f"enrich:{processed.id}",
+                    no_retry=(_NonRetryableEnrichError,),
+                )
+            except RuntimeError as exc:
+                if isinstance(exc.__cause__, (ClientError, ServerError)):
+                    processed = pre_enrich
+                    logger.warning("AI enrichment failed for %r after retries: %s", processed.id, exc.__cause__)
+                    ok = False
+                else:
+                    raise
+            except _NonRetryableEnrichError as exc:
+                raise exc.__cause__ from None
             if not ok:
                 ai_failures += 1
 
