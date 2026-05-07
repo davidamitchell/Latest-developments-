@@ -148,7 +148,9 @@ class TestProcess:
         client = MagicMock()
         client.models.generate_content.side_effect = ClientError(429, {"error": "quota exceeded"})
         items = [_make_fetched("fail-1"), _make_fetched("fail-2")]
-        with patch("src.pipeline.run._make_gemini_client", return_value=client):
+        with patch("src.pipeline.run._make_gemini_client", return_value=client), \
+             patch("src.pipeline.run.time.sleep"), \
+             patch("src.retry.time.sleep"):
             result, failures = process(items, gemini_api_key="fake-key", fetch_date="2026-05-02")
         assert failures == 2
         assert len(result) == 2

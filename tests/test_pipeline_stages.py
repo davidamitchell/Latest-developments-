@@ -406,28 +406,28 @@ class TestEnrich:
         assert item.domain == "infra"
         assert item.impact_vector == "capability"
 
-    def test_transport_error_returns_original_item_and_ok_false(self):
-        """ClientError (transport failure) is caught; ok=False returned."""
+    def test_client_error_propagates(self):
+        """ClientError (transport failure) propagates so with_backoff can retry."""
         from google.genai.errors import ClientError
 
         from src.pipeline.stages.enrich import enrich
 
         client = MagicMock()
         client.models.generate_content.side_effect = ClientError(429, {"error": "quota"})
-        item, ok = enrich(self._make_item(), client)
-        assert ok is False
+        with pytest.raises(ClientError):
+            enrich(self._make_item(), client)
         assert client.models.generate_content.call_count == 1
 
-    def test_server_error_returns_original_item_and_ok_false(self):
-        """ServerError (5xx) is caught; ok=False returned."""
+    def test_server_error_propagates(self):
+        """ServerError (5xx) propagates so with_backoff can retry."""
         from google.genai.errors import ServerError
 
         from src.pipeline.stages.enrich import enrich
 
         client = MagicMock()
         client.models.generate_content.side_effect = ServerError(503, {"error": "unavailable"})
-        item, ok = enrich(self._make_item(), client)
-        assert ok is False
+        with pytest.raises(ServerError):
+            enrich(self._make_item(), client)
 
     def test_programming_error_propagates(self):
         """AttributeError and other programming errors must not be swallowed."""

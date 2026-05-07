@@ -20,7 +20,6 @@ import logging
 from typing import Protocol
 
 from google.genai import types
-from google.genai.errors import ClientError, ServerError
 from google.genai.types import FinishReason
 
 from src.models import Domain, ImpactVector, ProcessedItem
@@ -165,27 +164,23 @@ def enrich(
         system_instruction=_SYSTEM_PROMPT,
         max_output_tokens=max_output_tokens,
     )
-    try:
-        response = client.models.generate_content(
-            model="gemini-2.5-flash",
-            contents=prompt,
-            config=config,
-        )
-        # finish_reason must be STOP before accessing response.text — other
-        # reasons (SAFETY, MAX_TOKENS, RECITATION) raise ValueError per SDK docs.
-        if not response.candidates:
-            logger.warning("AI enrichment for %r returned no candidates — using defaults", item.id)
-            return item, False
-        candidate = response.candidates[0]
-        finish_reason = candidate.finish_reason
-        if finish_reason != FinishReason.STOP:
-            logger.warning(
-                "AI enrichment for %r stopped with finish_reason=%r — using defaults",
-                item.id, finish_reason,
-            )
-            return item, False
-        parsed = _parse(response.text, item.id)
-        return dataclasses.replace(item, **parsed), True
-    except (ClientError, ServerError) as exc:
-        logger.warning("AI enrichment failed for %r: %s", item.id, exc)
+    response = client.models.generate_content(
+        model="gemini-2.5-flash",
+        contents=prompt,
+        config=config,
+    )
+    # finish_reason must be STOP before accessing response.text — other
+    # reasons (SAFETY, MAX_TOKENS, RECITATION) raise ValueError per SDK docs.
+    if not response.candidates:
+        logger.warning("AI enrichment for %r returned no candidates — using defaults", item.id)
         return item, False
+    candidate = response.candidates[0]
+    finish_reason = candidate.finish_reason
+    if finish_reason != FinishReason.STOP:
+        logger.warning(
+            "AI enrichment for %r stopped with finish_reason=%r — using defaults",
+            item.id, finish_reason,
+        )
+        return item, False
+    parsed = _parse(response.text, item.id)
+    return dataclasses.replace(item, **parsed), True
