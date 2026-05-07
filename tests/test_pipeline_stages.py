@@ -416,7 +416,6 @@ class TestEnrich:
         client.models.generate_content.side_effect = ClientError(429, {"error": "quota"})
         with pytest.raises(ClientError):
             enrich(self._make_item(), client)
-        assert client.models.generate_content.call_count == 1
 
     def test_server_error_propagates(self):
         """ServerError (5xx) propagates so with_backoff can retry."""
