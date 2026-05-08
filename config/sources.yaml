@@ -160,7 +160,7 @@ sources:
     source_class: practitioner
     enabled: true
     min_score: 100
-    max_stories: 10
+    max_stories: 5
     keywords:
       - "LLM"
       - "large language model"
@@ -189,26 +189,26 @@ sources:
       - cs.CL
       - cs.CV
       - cs.RO
-    max_papers: 30
+    max_papers: 10
 
   - type: huggingface
     name: "HuggingFace Models"
     source_class: primary
     enabled: true
-    max_models: 50
-    min_downloads: 100
+    max_models: 15
+    min_downloads: 1000
 
   - type: paperswithcode
     name: "Papers with Code"
     source_class: primary
-    enabled: true
-    page_size: 20
+    enabled: false
+    page_size: 10
     min_stars: 0
 
   - type: operator_changelog
     name: "Operator Changelogs"
     source_class: operator
-    enabled: true
+    enabled: false
     feeds:
       - "https://www.anthropic.com/rss.xml"
       - "https://openai.com/blog/rss.xml"
@@ -219,13 +219,13 @@ sources:
     name: "Replicate Models"
     source_class: operator
     enabled: true
-    limit: 20
+    limit: 10
 
   - type: openreview
     name: "OpenReview Papers"
     source_class: primary
-    enabled: true
-    limit: 25
+    enabled: false
+    limit: 10
     venues:
       - "ICLR.cc/2025/Conference/-/Accepted"
       - "NeurIPS.cc/2025/Conference/-/Accepted"
@@ -235,7 +235,7 @@ sources:
     name: "OpenRouter Pricing"
     source_class: market
     enabled: true
-    limit: 100
+    limit: 25
 
 # ---------------------------------------------------------------------------
 # digest — email digest settings
