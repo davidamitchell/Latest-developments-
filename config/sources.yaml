@@ -41,19 +41,19 @@ sources:
     name: "OpenAI Blog"
     url: "https://openai.com/blog/rss.xml"
     source_class: operator
-    enabled: false
+    enabled: true
 
   - type: rss
     name: "Google AI Blog"
     url: "https://blog.google/technology/ai/rss/"
     source_class: operator
-    enabled: false
+    enabled: true
 
   - type: rss
     name: "DeepMind Blog"
     url: "https://deepmind.google/blog/rss.xml"
     source_class: operator
-    enabled: false
+    enabled: true
 
   - type: rss
     name: "Ethan Mollick — One Useful Thing"
