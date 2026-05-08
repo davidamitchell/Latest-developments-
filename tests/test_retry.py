@@ -144,3 +144,37 @@ def test_with_backoff_uses_retry_after_header() -> None:
 
     assert result == "ok"
     mock_sleep.assert_called_once_with(30.0)
+
+
+def test_with_backoff_logs_detailed_429_timing_and_headers(caplog: pytest.LogCaptureFixture) -> None:
+    response = MagicMock()
+    response.status_code = 429
+    response.headers = {"Retry-After": "30", "x-ratelimit-limit": "60"}
+
+    exc = ClientError(429, {"error": "rate limited"})
+    exc.response = response  # type: ignore[attr-defined]
+    exc.details = [
+        {
+            "@type": "type.googleapis.com/google.rpc.RetryInfo",
+            "retryDelay": "47s",
+        }
+    ]
+
+    calls = 0
+
+    def fn() -> str:
+        nonlocal calls
+        calls += 1
+        if calls == 1:
+            raise exc
+        return "ok"
+
+    caplog.set_level("WARNING")
+    with patch("src.retry.time.sleep"), patch("src.retry.time.monotonic", side_effect=[100.0, 147.0]):
+        result = with_backoff(fn, max_attempts=2, base_delay=5.0, label="enrich:item-1")
+
+    assert result == "ok"
+    joined = "\n".join(caplog.messages)
+    assert "429 retry timing: server instructed wait=47.000s; planned wait=47.000s" in joined
+    assert "429 response headers: {'Retry-After': '30', 'x-ratelimit-limit': '60'}" in joined
+    assert "429 retry timing: actual wait=47.000s" in joined
