@@ -283,8 +283,14 @@ def main() -> int:
 
     items = read_raw_jsonl(raw_path)
     if not items:
-        logger.info("No raw items found for %s — writing empty processed file", today)
-        write_processed_jsonl([], out_path)
+        logger.info("No raw items found for %s — preserving existing processed file if present", today)
+        merged = _merge_and_write(out_path, [])
+        logger.info(
+            "Processing complete — %d new item(s) added; %d total in %s",
+            0,
+            len(merged),
+            out_path,
+        )
         return 0
 
     # GEMINI_API_KEY is intentionally optional: when absent, AI stages (3–6)

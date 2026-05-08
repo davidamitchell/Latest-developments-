@@ -757,3 +757,28 @@ Three gaps identified by working the backlog:
 2. **What slowed down or went wrong?** Existing fallback tests in `test_themes.py` became slow after introducing `with_backoff` and needed `time.sleep` patching.
 3. **What single change would prevent this next time?** When adding retries, immediately patch sleep in failure-path tests to avoid long-running suites.
 4. **Is this a pattern?** Yes — introducing retry wrappers often changes test runtime characteristics; test harnesses should explicitly stub delay calls.
+
+---
+
+## 2026-05-08 — Prevent same-day pipeline reruns from overwriting data
+
+**What changed:** Investigated Pipeline #18 logs and commits (`256f271`, `c442922`) and confirmed that rerunning the pipeline on the same day could overwrite both `data/raw/YYYY-MM-DD.jsonl` and `data/processed/YYYY-MM-DD.jsonl` with empty files when no new items were fetched.
+
+- `src/pipeline/fetch.py`: added `_merge_and_write_raw()` and switched `main()` to merge newly fetched items into existing same-day raw data instead of overwriting the file.
+- `src/pipeline/run.py`: changed the no-raw-items path to preserve existing processed data by merging with `[]` rather than writing an empty file.
+- Added regression coverage:
+  - `tests/test_pipeline_fetch.py`: merge-and-write raw preserves existing items and appends only unique new IDs.
+  - `tests/test_pipeline_run.py`: merge-and-write processed preserves existing items when no new input is present.
+
+**Validation:**
+- `pytest tests/test_pipeline_fetch.py -q`: pass
+- `pytest tests/test_pipeline_run.py -q`: pass
+- `pytest tests/test_smoke.py::TestRunMain::test_exits_zero_with_no_raw_items -q`: pass
+- `make check`: fails due pre-existing unrelated lint issues in untouched files
+
+### Mini-Retro
+
+1. **Did the process work?** Yes. Pipeline #18 logs and its bot commits made the overwrite path clear before any code changes.
+2. **What slowed down or went wrong?** The repo has existing unrelated lint failures, so full-lint validation remains noisy for targeted fixes.
+3. **What single change would prevent this next time?** Add a dedicated regression test around same-day rerun semantics for both raw and processed outputs whenever pipeline persistence logic changes.
+4. **Is this a pattern?** Yes — date-keyed outputs are vulnerable to accidental clobbering when reruns write whole files instead of merging.

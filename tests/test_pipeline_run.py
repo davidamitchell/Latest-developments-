@@ -359,6 +359,38 @@ class TestQuotaDetection:
         assert _remaining_item_count(5, 0) == 4
         assert _remaining_item_count(5, 4) == 0
 
+
+class TestMergeAndWriteProcessed:
+    def _make_processed(self, id_: str) -> ProcessedItem:
+        return ProcessedItem(
+            id=id_,
+            title="T",
+            url="https://example.com",
+            source_name="S",
+            source_type="rss",
+            source_class="practitioner",
+            author="",
+            published=None,
+            has_code=False,
+            evidence_type="unknown",
+            fetch_date="2026-05-02",
+            cleaned_content="cleaned text",
+        )
+
+    def test_preserves_existing_items_when_no_new_items(self, tmp_path):
+        from src.models import read_processed_jsonl, write_processed_jsonl
+        from src.pipeline.run import _merge_and_write
+
+        path = tmp_path / "processed.jsonl"
+        existing = [self._make_processed("existing-1"), self._make_processed("existing-2")]
+        write_processed_jsonl(existing, path)
+
+        merged = _merge_and_write(path, [])
+        reloaded = read_processed_jsonl(path)
+
+        assert [item.id for item in merged] == ["existing-1", "existing-2"]
+        assert [item.id for item in reloaded] == ["existing-1", "existing-2"]
+
 # ── write_processed_jsonl ────────────────────────────────────────────────────
 
 class TestWriteProcessedJsonl:

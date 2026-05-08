@@ -204,3 +204,30 @@ class TestReadRawJsonl:
         result = read_raw_jsonl(path)
         assert len(result) == 1
         assert result[0].id == "g1"
+
+
+class TestMergeAndWriteRaw:
+    def test_preserves_existing_items_when_no_new_items(self, tmp_path):
+        from src.pipeline.fetch import _merge_and_write_raw, read_raw_jsonl, write_raw_jsonl
+
+        path = tmp_path / "raw.jsonl"
+        existing = [_make_item("existing-1"), _make_item("existing-2")]
+        write_raw_jsonl(existing, path)
+
+        merged = _merge_and_write_raw(path, [])
+        reloaded = read_raw_jsonl(path)
+
+        assert [item.id for item in merged] == ["existing-1", "existing-2"]
+        assert [item.id for item in reloaded] == ["existing-1", "existing-2"]
+
+    def test_appends_new_unique_items_without_duplicates(self, tmp_path):
+        from src.pipeline.fetch import _merge_and_write_raw, read_raw_jsonl, write_raw_jsonl
+
+        path = tmp_path / "raw.jsonl"
+        write_raw_jsonl([_make_item("existing-1")], path)
+
+        merged = _merge_and_write_raw(path, [_make_item("existing-1"), _make_item("new-1")])
+        reloaded = read_raw_jsonl(path)
+
+        assert [item.id for item in merged] == ["existing-1", "new-1"]
+        assert [item.id for item in reloaded] == ["existing-1", "new-1"]

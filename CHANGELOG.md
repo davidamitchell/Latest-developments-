@@ -7,6 +7,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Fixed
+- **Same-day pipeline rerun data overwrite (2026-05-08)**:
+  1. `src/pipeline/fetch.py` now merges new items into `data/raw/YYYY-MM-DD.jsonl` instead of overwriting the file.
+  2. `src/pipeline/run.py` now preserves existing `data/processed/YYYY-MM-DD.jsonl` when a rerun has no new raw items.
+  3. Added regression tests in `tests/test_pipeline_fetch.py` and `tests/test_pipeline_run.py` for non-overwrite merge behavior.
 - **Gemini SDK retryDelay workaround (2026-05-07)**:
   1. Removed SDK `HttpRetryOptions` usage from `src/pipeline/run.py` and `src/themes.py` because sync SDK retries ignore server `retryDelay` on 429 responses.
   2. Extended `_retry_after_delay()` in `src/retry.py` to prioritize Gemini `google.rpc.RetryInfo.retryDelay` (from structured `ClientError.details`) before HTTP `Retry-After`, then exponential backoff.
