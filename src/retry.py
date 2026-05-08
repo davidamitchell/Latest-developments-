@@ -112,7 +112,8 @@ def with_backoff(
             last_exc = e
             if attempt == max_attempts:
                 break
-            delay = _retry_after_delay(e, base_delay, attempt)
+            instructed = _server_retry_delay(e)
+            delay = instructed if instructed is not None else base_delay * (2 ** (attempt - 1))
             prefix = f"{label}: " if label else ""
             logger.warning(
                 "%sfailed (attempt %d/%d): %s — retry in %.0fs",
@@ -123,7 +124,6 @@ def with_backoff(
                 delay,
             )
             if _status_code(e) == 429:
-                instructed = _server_retry_delay(e)
                 headers = _response_headers(e)
                 logger.warning(
                     "%s429 retry timing: server instructed wait=%s; planned wait=%.3fs",
