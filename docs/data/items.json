@@ -1,5 +1,5 @@
 {
-  "generated": "2026-05-08T10:08:25.857618+00:00",
+  "generated": "2026-05-08T22:01:09.993032+00:00",
   "items": [
     {
       "id": "2JiMmye2ezg",
@@ -3665,6 +3665,84 @@
       "fetch_date": "2026-05-08",
       "credibility_score": 0.69,
       "hype_risk": 0.41,
+      "summary": ""
+    },
+    {
+      "id": "https://blog.google/company-news/inside-google/company-announcements/the-small-brief",
+      "title": "See what happens when creative legends use AI to make ads for small businesses.",
+      "url": "https://blog.google/company-news/inside-google/company-announcements/the-small-brief",
+      "source_name": "Google AI Blog",
+      "source_class": "operator",
+      "theme": "",
+      "domain": "unknown",
+      "fetch_date": "2026-05-08",
+      "credibility_score": 0.54,
+      "hype_risk": 0.53,
+      "summary": ""
+    },
+    {
+      "id": "https://blog.google/products-and-platforms/products/search/gardening-tips",
+      "title": "5 gardening tips you can try right in Search",
+      "url": "https://blog.google/products-and-platforms/products/search/gardening-tips",
+      "source_name": "Google AI Blog",
+      "source_class": "operator",
+      "theme": "",
+      "domain": "unknown",
+      "fetch_date": "2026-05-08",
+      "credibility_score": 0.54,
+      "hype_risk": 0.53,
+      "summary": ""
+    },
+    {
+      "id": "https://blog.google/innovation-and-ai/technology/ai/future-vision-film-competition-xprize",
+      "title": "Google is partnering with XPRIZE and Range Media Partners on the $3.5 million Future Vision film competition.",
+      "url": "https://blog.google/innovation-and-ai/technology/ai/future-vision-film-competition-xprize",
+      "source_name": "Google AI Blog",
+      "source_class": "operator",
+      "theme": "AI film competition",
+      "domain": "general",
+      "fetch_date": "2026-05-08",
+      "credibility_score": 0.54,
+      "hype_risk": 0.53,
+      "summary": "Google has announced a partnership with XPRIZE and Range Media Partners to launch the $3.5 million Future Vision film competition. This initiative aims to encourage innovation in film creation, likely involving AI."
+    },
+    {
+      "id": "https://blog.google/innovation-and-ai/technology/ai/google-ai-updates-april-2026",
+      "title": "The latest AI news we announced in April 2026",
+      "url": "https://blog.google/innovation-and-ai/technology/ai/google-ai-updates-april-2026",
+      "source_name": "Google AI Blog",
+      "source_class": "operator",
+      "theme": "",
+      "domain": "unknown",
+      "fetch_date": "2026-05-08",
+      "credibility_score": 0.54,
+      "hype_risk": 0.53,
+      "summary": ""
+    },
+    {
+      "id": "https://blog.google/innovation-and-ai/technology/developers-tools/event-driven-webhooks",
+      "title": "Reduce friction and latency for long-running jobs with Webhooks in Gemini API",
+      "url": "https://blog.google/innovation-and-ai/technology/developers-tools/event-driven-webhooks",
+      "source_name": "Google AI Blog",
+      "source_class": "operator",
+      "theme": "",
+      "domain": "unknown",
+      "fetch_date": "2026-05-08",
+      "credibility_score": 0.54,
+      "hype_risk": 0.53,
+      "summary": ""
+    },
+    {
+      "id": "https://deepmind.google/blog/alphaevolve-impact",
+      "title": "AlphaEvolve: How our Gemini-powered coding agent is scaling impact across fields",
+      "url": "https://deepmind.google/blog/alphaevolve-impact",
+      "source_name": "DeepMind Blog",
+      "source_class": "operator",
+      "theme": "",
+      "domain": "unknown",
+      "fetch_date": "2026-05-08",
+      "credibility_score": 0.54,
+      "hype_risk": 0.53,
       "summary": ""
     }
   ]
