@@ -1,0 +1,17 @@
+Daily AI Digest — 08 May 2026
+========================================
+
+[AI summarisation failed: ClientError — no model processing was applied. Raw links only.]
+
+## arXiv
+
+- LCM: Lossless Context Management (08 May)
+  https://arxiv.org/abs/2605.04050
+- Regularized Centered Emphatic Temporal Difference Learning (08 May)
+  https://arxiv.org/abs/2605.04100
+- Are Flat Minima an Illusion? (08 May)
+  https://arxiv.org/abs/2605.05209
+- Nationwide EHR-Based Chronic Rhinosinusitis Prediction Using Demographic-Stratified Models (08 May)
+  https://arxiv.org/abs/2605.05213
+- AdaGATE: Adaptive Gap-Aware Token-Efficient Evidence Assembly for Multi-Hop Retrieval-Augmented Generation (08 May)
+  https://arxiv.org/abs/2605.05245
