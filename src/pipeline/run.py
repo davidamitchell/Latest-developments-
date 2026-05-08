@@ -41,6 +41,10 @@ logger = logging.getLogger(__name__)
 
 _RAW_DIR = Path("data/raw")
 _PROCESSED_DIR = Path("data/processed")
+# Tokens seen in Gemini 429 quota responses (QuotaFailure details / error text).
+_QUOTA_METRIC_TOKEN = "generate_content_free_tier_requests"
+_QUOTA_PERDAY_TOKEN = "generaterequestsperday"
+_QUOTA_METRIC_PHRASE = "quota exceeded for metric"
 
 
 class _NonRetryableEnrichError(Exception):
@@ -59,7 +63,7 @@ def _is_quota_exhausted_error(exc: Exception) -> bool:
     """Return True when a Gemini transport error indicates quota exhaustion."""
     code = getattr(exc, "code", None)
     status_code = getattr(exc, "status_code", None)
-    if code not in (None, 429) and status_code not in (None, 429):
+    if (code is not None and code != 429) or (status_code is not None and status_code != 429):
         return False
 
     details = getattr(exc, "details", None)
@@ -72,17 +76,29 @@ def _is_quota_exhausted_error(exc: Exception) -> bool:
             for violation in entry.get("violations", []):
                 if not isinstance(violation, dict):
                     continue
-                metric = str(violation.get("quotaMetric", "")).lower()
-                quota_id = str(violation.get("quotaId", "")).lower()
-                if "generate_content_free_tier_requests" in metric or "perday" in quota_id:
+                metric = violation.get("quotaMetric", "").lower()
+                quota_id = violation.get("quotaId", "").lower()
+                if _QUOTA_METRIC_TOKEN in metric or _QUOTA_PERDAY_TOKEN in quota_id:
                     return True
 
     text = str(exc).lower()
     return (
-        "generate_content_free_tier_requests" in text
-        or "generaterequestsperday" in text
-        or "quota exceeded for metric" in text
+        _QUOTA_METRIC_TOKEN in text
+        or _QUOTA_PERDAY_TOKEN in text
+        or _QUOTA_METRIC_PHRASE in text
     )
+
+
+def _log_quota_exhausted(item_id: str, remaining: int) -> None:
+    logger.warning(
+        "Gemini quota exhausted while enriching %r; skipping AI enrichment for remaining %d item(s)",
+        item_id,
+        remaining,
+    )
+
+
+def _remaining_item_count(total: int, idx: int) -> int:
+    return total - idx - 1
 
 
 class _RateLimiter:
@@ -179,23 +195,15 @@ def process(
                 processed = pre_enrich
                 ok = False
                 ai_disabled_for_quota = True
-                remaining = len(items) - idx - 1
-                logger.warning(
-                    "Gemini quota exhausted while enriching %r; skipping AI enrichment for remaining %d item(s)",
-                    processed.id,
-                    remaining,
-                )
+                remaining = _remaining_item_count(len(items), idx)
+                _log_quota_exhausted(processed.id, remaining)
             except RuntimeError as exc:
                 if isinstance(exc.__cause__, (ClientError, ServerError)):
                     processed = pre_enrich
                     if _is_quota_exhausted_error(exc.__cause__):
                         ai_disabled_for_quota = True
-                        remaining = len(items) - idx - 1
-                        logger.warning(
-                            "Gemini quota exhausted while enriching %r; skipping AI enrichment for remaining %d item(s)",
-                            processed.id,
-                            remaining,
-                        )
+                        remaining = _remaining_item_count(len(items), idx)
+                        _log_quota_exhausted(processed.id, remaining)
                     else:
                         logger.warning(
                             "AI enrichment failed for %r after retries: %s", processed.id, exc.__cause__

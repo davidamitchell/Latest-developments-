@@ -195,7 +195,7 @@ sources:
     name: "HuggingFace Models"
     source_class: primary
     enabled: false
-    max_models: 3
+    max_models: 8
     min_downloads: 5000
 
   - type: paperswithcode
