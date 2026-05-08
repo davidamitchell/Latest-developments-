@@ -41,79 +41,79 @@ sources:
     name: "OpenAI Blog"
     url: "https://openai.com/blog/rss.xml"
     source_class: operator
-    enabled: true
+    enabled: false
 
   - type: rss
     name: "Google AI Blog"
     url: "https://blog.google/technology/ai/rss/"
     source_class: operator
-    enabled: true
+    enabled: false
 
   - type: rss
     name: "DeepMind Blog"
     url: "https://deepmind.google/blog/rss.xml"
     source_class: operator
-    enabled: true
+    enabled: false
 
   - type: rss
     name: "Ethan Mollick — One Useful Thing"
     url: "https://www.oneusefulthing.org/feed"
     source_class: practitioner
-    enabled: true
+    enabled: false
 
   - type: rss
     name: "Simon Willison's Weblog"
     url: "https://simonwillison.net/atom/everything/"
     source_class: practitioner
-    enabled: true
+    enabled: false
 
   - type: rss
     name: "Together AI Blog"
     url: "https://www.together.ai/blog/rss.xml"
     source_class: operator
-    enabled: true
+    enabled: false
 
   - type: rss
     name: "Lambda Blog"
     url: "https://lambda.ai/blog/rss.xml"
     source_class: operator
-    enabled: true
+    enabled: false
 
   - type: rss
     name: "Groq SDK Releases"
     url: "https://github.com/groq/groq-python/releases.atom"
     source_class: operator
-    enabled: true
+    enabled: false
 
   - type: rss
     name: "Cerebras SDK Releases"
     url: "https://github.com/Cerebras/cerebras-cloud-sdk-python/releases.atom"
     source_class: operator
-    enabled: true
+    enabled: false
 
   - type: rss
     name: "Mistral Inference Releases"
     url: "https://github.com/mistralai/mistral-inference/releases.atom"
     source_class: operator
-    enabled: true
+    enabled: false
 
   - type: rss
     name: "Ollama Releases"
     url: "https://github.com/ollama/ollama/releases.atom"
     source_class: practitioner
-    enabled: true
+    enabled: false
 
   - type: rss
     name: "llama.cpp Releases"
     url: "https://github.com/ggerganov/llama.cpp/releases.atom"
     source_class: practitioner
-    enabled: true
+    enabled: false
 
   - type: rss
     name: "LocalAI Releases"
     url: "https://github.com/mudler/LocalAI/releases.atom"
     source_class: practitioner
-    enabled: true
+    enabled: false
 
   # ── YouTube channels ──────────────────────────────────────────────────────
 
@@ -121,28 +121,28 @@ sources:
     name: "Nate Jones"
     channel_id: "UC0C-17n9iuUQPylguM1d-lQ"
     source_class: practitioner
-    enabled: true
+    enabled: false
     max_videos: 5
 
   - type: youtube
     name: "Wes Roth"
     channel_id: "UCqcbQf6yw5KzRoDDcZ_wBSw"
     source_class: practitioner
-    enabled: true
+    enabled: false
     max_videos: 3
 
   - type: youtube
     name: "Matthew Berman"
     channel_id: "UCawZsQWqfGSbCI5yjkdVkTA"
     source_class: practitioner
-    enabled: true
+    enabled: false
     max_videos: 3
 
   - type: youtube
     name: "The AI Daily Brief"
     channel_id: "UCKelCK4ZaO6HeEI1KQjqzWA"
     source_class: media
-    enabled: true
+    enabled: false
     max_videos: 3
 
   # ── Substack newsletters ──────────────────────────────────────────────────
@@ -151,14 +151,14 @@ sources:
     name: "Nate's Newsletter"
     slug: "natesnewsletter"
     source_class: media
-    enabled: true
+    enabled: false
 
   # ── Singleton fetchers — one entry per fetcher ────────────────────────────
 
   - type: hackernews
     name: "Hacker News"
     source_class: practitioner
-    enabled: true
+    enabled: false
     min_score: 100
     max_stories: 3
     keywords:
@@ -189,13 +189,13 @@ sources:
       - cs.CL
       - cs.CV
       - cs.RO
-    max_papers: 5
+    max_papers: 2
 
   - type: huggingface
     name: "HuggingFace Models"
     source_class: primary
-    enabled: true
-    max_models: 8
+    enabled: false
+    max_models: 3
     min_downloads: 5000
 
   - type: paperswithcode

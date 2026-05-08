@@ -146,7 +146,7 @@ class TestProcess:
         from src.pipeline.run import process
 
         client = MagicMock()
-        client.models.generate_content.side_effect = ClientError(429, {"error": "quota exceeded"})
+        client.models.generate_content.side_effect = ClientError(429, {"error": "temporary upstream error"})
         items = [_make_fetched("fail-1"), _make_fetched("fail-2")]
         with patch("src.pipeline.run._make_gemini_client", return_value=client), \
              patch("src.pipeline.run.time.sleep"), \
@@ -154,6 +154,45 @@ class TestProcess:
             result, failures = process(items, gemini_api_key="fake-key", fetch_date="2026-05-02")
         assert failures == 2
         assert len(result) == 2
+
+    def test_quota_exhaustion_stops_ai_for_remaining_items(self):
+        """When free-tier quota is exhausted, process() stops further AI calls in this run."""
+        from google.genai.errors import ClientError
+
+        from src.pipeline.run import process
+
+        quota_exc = ClientError(
+            429,
+            {
+                "error": {
+                    "code": 429,
+                    "message": "Quota exceeded for metric: generate_content_free_tier_requests",
+                    "status": "RESOURCE_EXHAUSTED",
+                }
+            },
+        )
+        quota_exc.details = [
+            {
+                "@type": "type.googleapis.com/google.rpc.QuotaFailure",
+                "violations": [
+                    {"quotaMetric": "generativelanguage.googleapis.com/generate_content_free_tier_requests"}
+                ],
+            }
+        ]
+
+        client = MagicMock()
+        client.models.generate_content.side_effect = quota_exc
+        items = [_make_fetched("quota-1"), _make_fetched("quota-2"), _make_fetched("quota-3")]
+
+        with patch("src.pipeline.run._make_gemini_client", return_value=client), \
+             patch("src.pipeline.run.time.sleep"), \
+             patch("src.retry.time.sleep") as retry_sleep:
+            result, failures = process(items, gemini_api_key="fake-key", fetch_date="2026-05-02")
+
+        assert len(result) == 3
+        assert failures == 1
+        assert client.models.generate_content.call_count == 1
+        retry_sleep.assert_not_called()
 
     def test_process_retries_client_error_using_server_retry_delay(self):
         from google.genai.errors import ClientError
