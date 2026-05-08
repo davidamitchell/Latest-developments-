@@ -160,7 +160,7 @@ sources:
     source_class: practitioner
     enabled: true
     min_score: 100
-    max_stories: 5
+    max_stories: 3
     keywords:
       - "LLM"
       - "large language model"
@@ -189,14 +189,14 @@ sources:
       - cs.CL
       - cs.CV
       - cs.RO
-    max_papers: 10
+    max_papers: 5
 
   - type: huggingface
     name: "HuggingFace Models"
     source_class: primary
     enabled: true
-    max_models: 15
-    min_downloads: 1000
+    max_models: 8
+    min_downloads: 5000
 
   - type: paperswithcode
     name: "Papers with Code"
@@ -218,8 +218,8 @@ sources:
   - type: replicate
     name: "Replicate Models"
     source_class: operator
-    enabled: true
-    limit: 10
+    enabled: false
+    limit: 5
 
   - type: openreview
     name: "OpenReview Papers"
@@ -234,8 +234,8 @@ sources:
   - type: openrouter
     name: "OpenRouter Pricing"
     source_class: market
-    enabled: true
-    limit: 25
+    enabled: false
+    limit: 10
 
 # ---------------------------------------------------------------------------
 # digest — email digest settings
