@@ -1,15 +1,13 @@
 {
-  "generated": "2026-05-08T22:01:09.993032+00:00",
+  "generated": "2026-05-08T22:42:15.135939+00:00",
   "classes": {
     "primary": {
       "count": 0,
       "sources": []
     },
     "operator": {
-      "count": 1,
-      "sources": [
-        "Google AI Blog"
-      ]
+      "count": 0,
+      "sources": []
     },
     "practitioner": {
       "count": 177,
@@ -72,17 +70,6 @@
         "AI Commentary",
         "Agi Speculation",
         "Agi Philosophy"
-      ]
-    },
-    {
-      "name": "Google AI Blog",
-      "source_class": "operator",
-      "item_count": 1,
-      "first_seen": "2026-05-08",
-      "last_seen": "2026-05-08",
-      "days_active": 1,
-      "top_themes": [
-        "AI Film Competition"
       ]
     }
   ]
