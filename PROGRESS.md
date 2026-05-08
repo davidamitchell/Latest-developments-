@@ -749,7 +749,7 @@ Three gaps identified by working the backlog:
 - `ruff check` on changed files: pass
 - `pytest tests/test_retry.py tests/test_pipeline_run.py tests/test_themes.py`: pass
 - `pytest --collect-only`: pass (627 collected)
-- `make check`: fails due pre-existing unrelated lint issues in untouched files
+- `make check`: fails due to pre-existing unrelated lint issues in untouched files
 
 ### Mini-Retro
 
