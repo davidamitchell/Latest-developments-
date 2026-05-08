@@ -41,7 +41,13 @@ def _server_retry_delay(exc: Exception) -> float | None:
     return None
 
 
-def _retry_after_delay(exc: Exception, base_delay: float, attempt: int) -> float:
+def _retry_after_delay(
+    exc: Exception,
+    base_delay: float,
+    attempt: int,
+    *,
+    server_delay: float | None = None,
+) -> float:
     """Return the delay to sleep before the next attempt.
 
     If the exception is a Gemini ClientError containing structured RetryInfo
@@ -54,9 +60,9 @@ def _retry_after_delay(exc: Exception, base_delay: float, attempt: int) -> float
     httpx raises HTTPStatusError on 4xx/5xx; the exception carries the full
     response object (including headers) in its .response attribute.
     """
-    server_delay = _server_retry_delay(exc)
-    if server_delay is not None:
-        return server_delay
+    resolved_delay = server_delay if server_delay is not None else _server_retry_delay(exc)
+    if resolved_delay is not None:
+        return resolved_delay
     return base_delay * (2 ** (attempt - 1))
 
 
@@ -113,7 +119,7 @@ def with_backoff(
             if attempt == max_attempts:
                 break
             instructed = _server_retry_delay(e)
-            delay = instructed if instructed is not None else base_delay * (2 ** (attempt - 1))
+            delay = _retry_after_delay(e, base_delay, attempt, server_delay=instructed)
             prefix = f"{label}: " if label else ""
             logger.warning(
                 "%sfailed (attempt %d/%d): %s — retry in %.0fs",

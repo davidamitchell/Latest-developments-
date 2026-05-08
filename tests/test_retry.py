@@ -177,4 +177,4 @@ def test_with_backoff_logs_detailed_429_timing_and_headers(caplog: pytest.LogCap
     joined = "\n".join(caplog.messages)
     assert "429 retry timing: server instructed wait=47.000s; planned wait=47.000s" in joined
     assert "429 response headers: {'Retry-After': '30', 'x-ratelimit-limit': '60'}" in joined
-    assert "429 retry timing: actual wait=" in joined
+    assert "429 retry timing: actual wait=47.000s" in joined
