@@ -163,6 +163,13 @@ def enrich(
     config = types.GenerateContentConfig(
         system_instruction=_SYSTEM_PROMPT,
         max_output_tokens=max_output_tokens,
+        # Disable thinking for structured extraction — this task needs format
+        # adherence, not chain-of-thought reasoning. With thinking enabled,
+        # gemini-2.5-flash thinking tokens compete for the max_output_tokens
+        # budget, truncating the structured response (finish_reason=MAX_TOKENS)
+        # and leaving items unenriched. Setting thinking_budget=0 keeps the
+        # full output budget for the 8-line structured format.
+        thinking_config=types.ThinkingConfig(thinking_budget=0),
     )
     response = client.models.generate_content(
         model="gemini-2.5-flash",
@@ -170,7 +177,8 @@ def enrich(
         config=config,
     )
     # finish_reason must be STOP before accessing response.text — other
-    # reasons (SAFETY, MAX_TOKENS, RECITATION) raise ValueError per SDK docs.
+    # reasons (SAFETY, MAX_TOKENS, RECITATION) mean the response is unusable.
+    # Log the actual finish_reason so failures are diagnosable in pipeline logs.
     if not response.candidates:
         logger.warning("AI enrichment for %r returned no candidates — using defaults", item.id)
         return item, False
@@ -178,8 +186,10 @@ def enrich(
     finish_reason = candidate.finish_reason
     if finish_reason != FinishReason.STOP:
         logger.warning(
-            "AI enrichment for %r stopped with finish_reason=%r — using defaults",
-            item.id, finish_reason,
+            "AI enrichment for %r: finish_reason=%r (expected STOP) — using defaults. "
+            "If reason is MAX_TOKENS, increase enrich_max_output_tokens in sources.yaml. "
+            "If reason is SAFETY, the content was blocked.",
+            item.id, finish_reason.name if hasattr(finish_reason, 'name') else finish_reason,
         )
         return item, False
     parsed = _parse(response.text, item.id)

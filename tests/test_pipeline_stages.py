@@ -466,3 +466,50 @@ class TestEnrich:
         config_arg = call_kwargs.kwargs.get("config") or call_kwargs.args[2]
         assert isinstance(config_arg, types.GenerateContentConfig)
         assert config_arg.max_output_tokens == 256
+
+    def test_thinking_disabled_in_config(self):
+        """thinking_budget=0 must be set so thinking tokens don't consume the output budget.
+
+        gemini-2.5-flash is a thinking model. Without thinking_budget=0, thinking
+        tokens compete with max_output_tokens, truncating the structured response
+        with finish_reason=MAX_TOKENS and leaving items unenriched.
+        """
+        from google.genai import types
+
+        from src.pipeline.stages.enrich import enrich
+
+        client = self._good_client()
+        enrich(self._make_item(), client)
+        call_kwargs = client.models.generate_content.call_args
+        config_arg = call_kwargs.kwargs.get("config") or call_kwargs.args[2]
+        assert isinstance(config_arg, types.GenerateContentConfig)
+        assert config_arg.thinking_config is not None, (
+            "thinking_config must be set to disable thinking for structured extraction"
+        )
+        assert config_arg.thinking_config.thinking_budget == 0, (
+            "thinking_budget must be 0 to prevent token competition with max_output_tokens"
+        )
+
+    def test_max_tokens_finish_reason_returns_ok_false_with_warning(self):
+        """MAX_TOKENS finish_reason returns ok=False.
+
+        This is the failure mode when thinking tokens consume the output budget.
+        Verifying it returns ok=False (not crashing) ensures the pipeline can
+        continue rather than stalling on this item.
+        """
+        from google.genai.types import FinishReason
+
+        from src.pipeline.stages.enrich import enrich
+
+        client = MagicMock()
+        resp = MagicMock()
+        type(resp).text = property(
+            lambda self: (_ for _ in ()).throw(ValueError("must not access .text on truncated response"))
+        )
+        candidate = MagicMock()
+        candidate.finish_reason = FinishReason.MAX_TOKENS
+        resp.candidates = [candidate]
+        client.models.generate_content.return_value = resp
+        item, ok = enrich(self._make_item(), client)
+        assert ok is False
+        assert item.theme == ""
