@@ -1,139 +1,42 @@
 {
-  "generated": "2026-05-09T08:31:47.331834+00:00",
+  "generated": "2026-05-09T09:57:46.982317+00:00",
   "nodes": [
-    {
-      "id": "Agentic Workflows",
-      "domain": "agents",
-      "state": "declining",
-      "volume": 0.93
-    },
     {
       "id": "AI Workforce & Jobs",
       "domain": "general",
       "state": "declining",
-      "volume": 0.58
+      "volume": 0.39
     },
     {
-      "id": "AI Business Strategy",
-      "domain": "general",
+      "id": "Agentic Workflows",
+      "domain": "agents",
       "state": "declining",
-      "volume": 0.58
+      "volume": 0.39
     },
     {
       "id": "AI Infrastructure",
       "domain": "infra",
       "state": "declining",
-      "volume": 0.47
-    },
-    {
-      "id": "AI Safety & Alignment",
-      "domain": "safety",
-      "state": "declining",
-      "volume": 0.35
-    },
-    {
-      "id": "Local LLM Applications",
-      "domain": "general",
-      "state": "declining",
-      "volume": 0.35
-    },
-    {
-      "id": "Supply Chain Security",
-      "domain": "infra",
-      "state": "declining",
-      "volume": 0.35
-    },
-    {
-      "id": "Local LLM Inference",
-      "domain": "infra",
-      "state": "declining",
-      "volume": 0.35
-    },
-    {
-      "id": "LLM Capabilities",
-      "domain": "reasoning",
-      "state": "declining",
-      "volume": 0.35
+      "volume": 0.26
     },
     {
       "id": "Agent Reliability",
       "domain": "agents",
       "state": "declining",
-      "volume": 0.23
+      "volume": 0.26
     },
     {
-      "id": "Open-Source AI Agents",
-      "domain": "agents",
-      "state": "declining",
-      "volume": 0.23
-    },
-    {
-      "id": "AI Development Pace",
+      "id": "Local LLM Applications",
       "domain": "general",
       "state": "declining",
-      "volume": 0.23
+      "volume": 0.26
+    },
+    {
+      "id": "LLM Capabilities",
+      "domain": "reasoning",
+      "state": "declining",
+      "volume": 0.26
     }
   ],
-  "edges": [
-    {
-      "source": "AI Infrastructure",
-      "target": "Local LLM Inference",
-      "rel_type": "causal",
-      "weight": 1
-    },
-    {
-      "source": "Local LLM Inference",
-      "target": "Local LLM Applications",
-      "rel_type": "causal",
-      "weight": 1
-    },
-    {
-      "source": "LLM Capabilities",
-      "target": "Agentic Workflows",
-      "rel_type": "causal",
-      "weight": 1
-    },
-    {
-      "source": "Agent Reliability",
-      "target": "Agentic Workflows",
-      "rel_type": "causal",
-      "weight": 1
-    },
-    {
-      "source": "AI Safety & Alignment",
-      "target": "AI Business Strategy",
-      "rel_type": "causal",
-      "weight": 1
-    },
-    {
-      "source": "AI Development Pace",
-      "target": "AI Safety & Alignment",
-      "rel_type": "contradictory",
-      "weight": 1
-    },
-    {
-      "source": "Open-Source AI Agents",
-      "target": "AI Development Pace",
-      "rel_type": "causal",
-      "weight": 1
-    },
-    {
-      "source": "AI Workforce & Jobs",
-      "target": "AI Business Strategy",
-      "rel_type": "causal",
-      "weight": 1
-    },
-    {
-      "source": "Supply Chain Security",
-      "target": "AI Infrastructure",
-      "rel_type": "causal",
-      "weight": 1
-    },
-    {
-      "source": "AI Infrastructure",
-      "target": "Agentic Workflows",
-      "rel_type": "causal",
-      "weight": 1
-    }
-  ]
+  "edges": []
 }

@@ -1,10 +1,10 @@
 {
-  "generated": "2026-05-09T06:39:23.696347+00:00",
+  "generated": "2026-05-09T09:57:46.982317+00:00",
   "run_id": "2026-05-09",
-  "total_items": 206,
+  "total_items": 209,
   "themed_items": 86,
-  "unthemed_items": 120,
-  "enrichment_rate": 0.417,
+  "unthemed_items": 123,
+  "enrichment_rate": 0.411,
   "qualifying_theme_items": 14,
   "qualifying_themes": 6,
   "source_count": 6,
@@ -12,7 +12,7 @@
     "first": "2026-03-03",
     "last": "2026-05-09"
   },
-  "ai_note": "AI enrichment incomplete \u2014 86/206 items themed (42%). Check GEMINI_API_KEY secret and pipeline logs.",
+  "ai_note": "AI enrichment incomplete \u2014 86/209 items themed (41%). Check GEMINI_API_KEY secret and pipeline logs.",
   "files": [
     {
       "file": "2026-03-03.jsonl",
@@ -443,8 +443,8 @@
     },
     {
       "file": "2026-05-09.jsonl",
-      "total": 33,
-      "valid": 33,
+      "total": 36,
+      "valid": 36,
       "filtered_hist": 0,
       "themed": 0
     }
