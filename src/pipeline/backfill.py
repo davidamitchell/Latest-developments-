@@ -1,7 +1,7 @@
 """Backfill AI enrichment for ProcessedItems where theme is missing.
 
 CLI: python -m src.pipeline.backfill [--all] [--date YYYY-MM-DD] [--dry-run]
-     [--max-items N] [--debug]
+     [--max-items N] [--commit-progress] [--debug]
 
 Reads data/processed/*.jsonl, finds items with theme == "", and re-runs the
 combined AI enrich stage on them. Updates files in-place.
@@ -10,6 +10,8 @@ Use --all to scan all processed files (default: today only).
 Use --date to target a specific date.
 Use --dry-run to report counts without writing changes.
 Use --max-items N to stop after enriching N items (for chunked runs).
+Use --commit-progress to git-commit each updated file immediately so partial
+  progress is preserved if the run is interrupted.
 
 This is an ops tool for recovering from periods when GEMINI_API_KEY was absent
 or when gemini-2.5-flash thinking tokens exhausted the max_output_tokens budget
@@ -21,6 +23,7 @@ from __future__ import annotations
 import argparse
 import logging
 import os
+import subprocess
 import sys
 from datetime import UTC, datetime
 from pathlib import Path
@@ -207,6 +210,26 @@ def backfill_file(
     return enriched_count, failed_count, stop
 
 
+def _git_commit_file(path: Path) -> None:
+    """Stage and commit a single processed file to preserve incremental progress."""
+    try:
+        subprocess.run(["git", "add", str(path)], check=True, capture_output=True)
+        diff = subprocess.run(["git", "diff", "--cached", "--quiet"], capture_output=True)
+        if diff.returncode == 0:
+            return  # nothing to commit
+        subprocess.run(
+            [
+                "git", "commit", "-m",
+                f"chore: backfill AI enrichment {path.name} [skip ci]",
+            ],
+            check=True,
+            capture_output=True,
+        )
+        logger.info("Committed progress: %s", path.name)
+    except Exception as exc:
+        logger.warning("Could not commit progress for %s: %s", path.name, exc)
+
+
 def backfill_all(
     processed_dir: Path,
     client: object,
@@ -215,12 +238,15 @@ def backfill_all(
     dry_run: bool = False,
     date_filter: str | None = None,
     max_items: int | None = None,
+    commit_progress: bool = False,
 ) -> tuple[int, int, int]:
     """Backfill all (or a single date's) processed files.
 
     Returns (total_enriched, total_failed, files_updated).
     files_updated counts files where at least one item was enriched (or would
     be enriched in dry_run mode).
+    When commit_progress is True, each updated file is git-committed immediately
+    so partial progress survives an interrupted run.
     """
     if date_filter:
         paths = [processed_dir / f"{date_filter}.jsonl"]
@@ -245,6 +271,8 @@ def backfill_all(
         total_failed += failed
         if enriched > 0:
             files_updated += 1
+            if commit_progress:
+                _git_commit_file(path)
         if stop:
             break
 
@@ -269,6 +297,12 @@ def _parse_args() -> argparse.Namespace:
         default=None,
         dest="max_items",
         help="Stop after enriching this many items (for chunked GitHub Actions runs)",
+    )
+    p.add_argument(
+        "--commit-progress",
+        action="store_true",
+        dest="commit_progress",
+        help="Git-commit each updated file immediately to preserve progress on interruption",
     )
     p.add_argument("--debug", action="store_true")
     return p.parse_args()
@@ -314,6 +348,7 @@ def main() -> int:
         dry_run=args.dry_run,
         date_filter=date_filter,
         max_items=args.max_items,
+        commit_progress=args.commit_progress,
     )
 
     logger.info(

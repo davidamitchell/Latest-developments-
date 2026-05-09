@@ -76,7 +76,11 @@ jobs:
           if [ -n "$MAX_ITEMS" ] && [ "$MAX_ITEMS" != "0" ]; then
             ARGS="$ARGS --max-items $MAX_ITEMS"
           fi
-          if [ "${{ inputs.dry_run }}" = "true" ]; then ARGS="$ARGS --dry-run"; fi
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            ARGS="$ARGS --dry-run"
+          else
+            ARGS="$ARGS --commit-progress"
+          fi
           if [ "${{ inputs.debug }}" = "true" ]; then ARGS="$ARGS --debug"; fi
           echo "args=$ARGS" >> "$GITHUB_OUTPUT"
 
@@ -86,7 +90,7 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: python -m src.pipeline.backfill ${{ steps.args.outputs.args }}
 
-      - name: Commit updated processed data
+      - name: Commit any remaining processed data
         if: always() && inputs.dry_run != 'true'
         run: |
           git config user.name "github-actions[bot]"
