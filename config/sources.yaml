@@ -59,25 +59,25 @@ sources:
     name: "Ethan Mollick — One Useful Thing"
     url: "https://www.oneusefulthing.org/feed"
     source_class: practitioner
-    enabled: false
+    enabled: true
 
   - type: rss
     name: "Simon Willison's Weblog"
     url: "https://simonwillison.net/atom/everything/"
     source_class: practitioner
-    enabled: false
+    enabled: true
 
   - type: rss
     name: "Together AI Blog"
     url: "https://www.together.ai/blog/rss.xml"
     source_class: operator
-    enabled: false
+    enabled: true
 
   - type: rss
     name: "Lambda Blog"
     url: "https://lambda.ai/blog/rss.xml"
     source_class: operator
-    enabled: false
+    enabled: true
 
   - type: rss
     name: "Groq SDK Releases"
@@ -121,22 +121,22 @@ sources:
     name: "Nate Jones"
     channel_id: "UC0C-17n9iuUQPylguM1d-lQ"
     source_class: practitioner
-    enabled: false
-    max_videos: 5
+    enabled: true
+    max_videos: 8
 
   - type: youtube
     name: "Wes Roth"
     channel_id: "UCqcbQf6yw5KzRoDDcZ_wBSw"
     source_class: practitioner
-    enabled: false
-    max_videos: 3
+    enabled: true
+    max_videos: 5
 
   - type: youtube
     name: "Matthew Berman"
     channel_id: "UCawZsQWqfGSbCI5yjkdVkTA"
     source_class: practitioner
-    enabled: false
-    max_videos: 3
+    enabled: true
+    max_videos: 5
 
   - type: youtube
     name: "The AI Daily Brief"
@@ -151,16 +151,16 @@ sources:
     name: "Nate's Newsletter"
     slug: "natesnewsletter"
     source_class: media
-    enabled: false
+    enabled: true
 
   # ── Singleton fetchers — one entry per fetcher ────────────────────────────
 
   - type: hackernews
     name: "Hacker News"
     source_class: practitioner
-    enabled: false
+    enabled: true
     min_score: 100
-    max_stories: 3
+    max_stories: 8
     keywords:
       - "LLM"
       - "large language model"
@@ -189,20 +189,20 @@ sources:
       - cs.CL
       - cs.CV
       - cs.RO
-    max_papers: 2
+    max_papers: 8
 
   - type: huggingface
     name: "HuggingFace Models"
     source_class: primary
-    enabled: false
-    max_models: 8
-    min_downloads: 5000
+    enabled: true
+    max_models: 15
+    min_downloads: 1000
 
   - type: paperswithcode
     name: "Papers with Code"
     source_class: primary
-    enabled: false
-    page_size: 10
+    enabled: true
+    page_size: 15
     min_stars: 0
 
   - type: operator_changelog
@@ -224,8 +224,8 @@ sources:
   - type: openreview
     name: "OpenReview Papers"
     source_class: primary
-    enabled: false
-    limit: 10
+    enabled: true
+    limit: 15
     venues:
       - "ICLR.cc/2025/Conference/-/Accepted"
       - "NeurIPS.cc/2025/Conference/-/Accepted"

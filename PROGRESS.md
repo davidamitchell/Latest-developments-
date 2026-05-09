@@ -760,6 +760,35 @@ Three gaps identified by working the backlog:
 
 ---
 
+## 2026-05-09 — Increase source volume for broader pipeline testing
+
+**What changed:** Increased source and item volume in `config/sources.yaml` to move beyond the ultra-conservative quota-protection profile used during 429 triage.
+
+- Re-enabled additional RSS sources: Ethan Mollick, Simon Willison, Together AI, Lambda.
+- Re-enabled YouTube channels: Nate Jones, Wes Roth, Matthew Berman; increased `max_videos` caps.
+- Re-enabled Substack source: Nate's Newsletter.
+- Re-enabled singleton sources: Hacker News, HuggingFace Models, Papers with Code, OpenReview Papers.
+- Increased item caps:
+  - `hackernews.max_stories`: 3 → 8
+  - `arxiv.max_papers`: 2 → 8
+  - `huggingface.max_models`: 8 → 15
+  - `huggingface.min_downloads`: 5000 → 1000
+  - `paperswithcode.page_size`: 10 → 15
+  - `openreview.limit`: 10 → 15
+
+**Validation:**
+- `pytest tests/test_config.py -q`: pass
+- `make check`: fails due to pre-existing unrelated lint issues in untouched files
+
+### Mini-Retro
+
+1. **Did the process work?** Yes. Prior commit history made it straightforward to selectively restore volume without touching runtime logic.
+2. **What slowed down or went wrong?** None in this slice; the only failing validation remains existing unrelated lint debt.
+3. **What single change would prevent this next time?** Add a documented “low-volume vs high-volume” source preset approach to avoid repeated manual toggling in `sources.yaml`.
+4. **Is this a pattern?** Yes — volume tuning requests are recurring; a preset/config profile split would reduce churn.
+
+---
+
 ## 2026-05-08 — Prevent same-day pipeline reruns from overwriting data
 
 **What changed:** Investigated Pipeline #18 logs and commits (`256f271`, `c442922`) and confirmed that rerunning the pipeline on the same day could overwrite both `data/raw/YYYY-MM-DD.jsonl` and `data/processed/YYYY-MM-DD.jsonl` with empty files when no new items were fetched.
