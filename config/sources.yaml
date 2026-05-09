@@ -83,37 +83,37 @@ sources:
     name: "Groq SDK Releases"
     url: "https://github.com/groq/groq-python/releases.atom"
     source_class: operator
-    enabled: false
+    enabled: true
 
   - type: rss
     name: "Cerebras SDK Releases"
     url: "https://github.com/Cerebras/cerebras-cloud-sdk-python/releases.atom"
     source_class: operator
-    enabled: false
+    enabled: true
 
   - type: rss
     name: "Mistral Inference Releases"
     url: "https://github.com/mistralai/mistral-inference/releases.atom"
     source_class: operator
-    enabled: false
+    enabled: true
 
   - type: rss
     name: "Ollama Releases"
     url: "https://github.com/ollama/ollama/releases.atom"
     source_class: practitioner
-    enabled: false
+    enabled: true
 
   - type: rss
     name: "llama.cpp Releases"
     url: "https://github.com/ggerganov/llama.cpp/releases.atom"
     source_class: practitioner
-    enabled: false
+    enabled: true
 
   - type: rss
     name: "LocalAI Releases"
     url: "https://github.com/mudler/LocalAI/releases.atom"
     source_class: practitioner
-    enabled: false
+    enabled: true
 
   # ── YouTube channels ──────────────────────────────────────────────────────
 
@@ -142,7 +142,7 @@ sources:
     name: "The AI Daily Brief"
     channel_id: "UCKelCK4ZaO6HeEI1KQjqzWA"
     source_class: media
-    enabled: false
+    enabled: true
     max_videos: 3
 
   # ── Substack newsletters ──────────────────────────────────────────────────
@@ -178,6 +178,11 @@ sources:
       - "OpenAI"
       - "DeepMind"
       - "Mistral"
+      - "Opencode"
+      - "Claws"
+      - "post training"
+      - "copilot"
+      - "cowork"
 
   - type: arxiv
     name: "arXiv"
@@ -208,7 +213,7 @@ sources:
   - type: operator_changelog
     name: "Operator Changelogs"
     source_class: operator
-    enabled: false
+    enabled: true
     feeds:
       - "https://www.anthropic.com/rss.xml"
       - "https://openai.com/blog/rss.xml"
