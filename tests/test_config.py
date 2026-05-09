@@ -19,8 +19,8 @@ import pytest
 
 from src.config import Config, DigestConfig, HistoryConfig, LoggingConfig, SourceEntry, load_config
 
-
 # ── helpers ─────────────────────────────────────────────────────────────────
+
 
 def _write_yaml(tmp_path: Path, content: str) -> Path:
     p = tmp_path / "sources.yaml"
@@ -29,6 +29,7 @@ def _write_yaml(tmp_path: Path, content: str) -> Path:
 
 
 # ── SourceEntry ──────────────────────────────────────────────────────────────
+
 
 class TestSourceEntry:
     def test_required_fields(self):
@@ -62,6 +63,7 @@ class TestSourceEntry:
 
 # ── DigestConfig ─────────────────────────────────────────────────────────────
 
+
 class TestDigestConfig:
     def test_defaults(self):
         cfg = DigestConfig()
@@ -77,7 +79,6 @@ class TestDigestConfig:
     def test_is_independent_of_source_config(self):
         """DigestConfig must not reference source names, types, or source topology."""
         import inspect
-        import src.config as config_module
 
         src_text = inspect.getsource(DigestConfig)
         forbidden = ["source_name", "source_type", "channel_id", "slug", "url"]
@@ -88,15 +89,18 @@ class TestDigestConfig:
 
     def test_filter_predicates_are_processed_item_fields(self):
         """The three filter predicates correspond to ProcessedItem fields."""
-        from src.models import ProcessedItem
         import dataclasses
+
+        from src.models import ProcessedItem
+
         pi_fields = {f.name for f in dataclasses.fields(ProcessedItem)}
-        assert "credibility_score" in pi_fields   # min_credibility predicate
-        assert "hype_risk" in pi_fields            # max_hype_risk predicate
-        assert "is_marketing" in pi_fields         # exclude_marketing predicate
+        assert "credibility_score" in pi_fields  # min_credibility predicate
+        assert "hype_risk" in pi_fields  # max_hype_risk predicate
+        assert "is_marketing" in pi_fields  # exclude_marketing predicate
 
 
 # ── Config dataclass ─────────────────────────────────────────────────────────
+
 
 class TestConfigDataclass:
     def test_has_sources_list(self):
@@ -138,6 +142,7 @@ class TestConfigDataclass:
 
 # ── load_config ───────────────────────────────────────────────────────────────
 
+
 class TestLoadConfig:
     def test_missing_file_raises(self, tmp_path):
         with pytest.raises(FileNotFoundError):
@@ -151,14 +156,17 @@ class TestLoadConfig:
         assert isinstance(cfg.digest, DigestConfig)
 
     def test_loads_rss_source(self, tmp_path):
-        p = _write_yaml(tmp_path, """
+        p = _write_yaml(
+            tmp_path,
+            """
             sources:
               - type: rss
                 name: Anthropic Blog
                 url: "https://www.anthropic.com/rss.xml"
                 source_class: operator
                 enabled: true
-        """)
+        """,
+        )
         cfg = load_config(p)
         assert len(cfg.sources) == 1
         entry = cfg.sources[0]
@@ -169,7 +177,9 @@ class TestLoadConfig:
         assert entry.options["url"] == "https://www.anthropic.com/rss.xml"
 
     def test_loads_youtube_source(self, tmp_path):
-        p = _write_yaml(tmp_path, """
+        p = _write_yaml(
+            tmp_path,
+            """
             sources:
               - type: youtube
                 name: Nate Jones
@@ -177,7 +187,8 @@ class TestLoadConfig:
                 source_class: practitioner
                 enabled: true
                 max_videos: 5
-        """)
+        """,
+        )
         cfg = load_config(p)
         entry = cfg.sources[0]
         assert entry.type == "youtube"
@@ -185,21 +196,26 @@ class TestLoadConfig:
         assert entry.options["max_videos"] == 5
 
     def test_loads_substack_source(self, tmp_path):
-        p = _write_yaml(tmp_path, """
+        p = _write_yaml(
+            tmp_path,
+            """
             sources:
               - type: substack
                 name: Nate's Newsletter
                 slug: natesnewsletter
                 source_class: media
                 enabled: true
-        """)
+        """,
+        )
         cfg = load_config(p)
         entry = cfg.sources[0]
         assert entry.type == "substack"
         assert entry.options["slug"] == "natesnewsletter"
 
     def test_loads_hackernews_singleton(self, tmp_path):
-        p = _write_yaml(tmp_path, """
+        p = _write_yaml(
+            tmp_path,
+            """
             sources:
               - type: hackernews
                 name: Hacker News
@@ -210,7 +226,8 @@ class TestLoadConfig:
                 keywords:
                   - llm
                   - agents
-        """)
+        """,
+        )
         cfg = load_config(p)
         entry = cfg.sources[0]
         assert entry.type == "hackernews"
@@ -219,7 +236,9 @@ class TestLoadConfig:
         assert "llm" in entry.options["keywords"]
 
     def test_loads_arxiv_singleton(self, tmp_path):
-        p = _write_yaml(tmp_path, """
+        p = _write_yaml(
+            tmp_path,
+            """
             sources:
               - type: arxiv
                 name: arXiv
@@ -227,7 +246,8 @@ class TestLoadConfig:
                 enabled: true
                 categories: [cs.AI, cs.LG]
                 max_papers: 25
-        """)
+        """,
+        )
         cfg = load_config(p)
         entry = cfg.sources[0]
         assert entry.type == "arxiv"
@@ -236,20 +256,25 @@ class TestLoadConfig:
 
     def test_disabled_entry_is_still_loaded(self, tmp_path):
         """Disabled sources are loaded but have enabled=False."""
-        p = _write_yaml(tmp_path, """
+        p = _write_yaml(
+            tmp_path,
+            """
             sources:
               - type: huggingface
                 name: HuggingFace Models
                 source_class: primary
                 enabled: false
                 max_models: 50
-        """)
+        """,
+        )
         cfg = load_config(p)
         assert len(cfg.sources) == 1
         assert cfg.sources[0].enabled is False
 
     def test_loads_multiple_sources(self, tmp_path):
-        p = _write_yaml(tmp_path, """
+        p = _write_yaml(
+            tmp_path,
+            """
             sources:
               - type: rss
                 name: Blog A
@@ -265,7 +290,8 @@ class TestLoadConfig:
                 name: Hacker News
                 source_class: practitioner
                 enabled: true
-        """)
+        """,
+        )
         cfg = load_config(p)
         assert len(cfg.sources) == 3
         types = [e.type for e in cfg.sources]
@@ -273,7 +299,9 @@ class TestLoadConfig:
         assert "hackernews" in types
 
     def test_loads_digest_section(self, tmp_path):
-        p = _write_yaml(tmp_path, """
+        p = _write_yaml(
+            tmp_path,
+            """
             digest:
               subject: "My AI Digest — {date}"
               send_if_empty: true
@@ -284,7 +312,8 @@ class TestLoadConfig:
               max_tokens: 1500
               max_items_per_source: 3
               prompt: "Summarise these items."
-        """)
+        """,
+        )
         cfg = load_config(p)
         d = cfg.digest
         assert d.subject == "My AI Digest — {date}"
@@ -306,23 +335,29 @@ class TestLoadConfig:
         assert d.exclude_marketing is False
 
     def test_history_section_loads(self, tmp_path):
-        p = _write_yaml(tmp_path, """
+        p = _write_yaml(
+            tmp_path,
+            """
             history:
               enabled: false
               history_days: 14
               history_dir: "digests"
-        """)
+        """,
+        )
         cfg = load_config(p)
         assert cfg.history.enabled is False
         assert cfg.history.history_days == 14
         assert cfg.history.history_dir == "digests"
 
     def test_logging_section_loads(self, tmp_path):
-        p = _write_yaml(tmp_path, """
+        p = _write_yaml(
+            tmp_path,
+            """
             logging:
               level: DEBUG
               log_file: "logs/out.log"
-        """)
+        """,
+        )
         cfg = load_config(p)
         assert cfg.logging.level == "DEBUG"
         assert cfg.logging.log_file == "logs/out.log"
@@ -335,7 +370,9 @@ class TestLoadConfig:
 
     def test_digest_and_sources_are_independent(self, tmp_path):
         """Changing sources section does not affect digest section and vice versa."""
-        p = _write_yaml(tmp_path, """
+        p = _write_yaml(
+            tmp_path,
+            """
             sources:
               - type: rss
                 name: Blog A
@@ -344,7 +381,8 @@ class TestLoadConfig:
                 enabled: true
             digest:
               min_credibility: 0.5
-        """)
+        """,
+        )
         cfg = load_config(p)
         assert len(cfg.sources) == 1
         assert cfg.digest.min_credibility == pytest.approx(0.5)

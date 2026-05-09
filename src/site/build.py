@@ -25,6 +25,7 @@ from pathlib import Path
 
 try:
     from dotenv import load_dotenv  # type: ignore[import-untyped]
+
     load_dotenv()
 except ImportError:
     pass
@@ -33,10 +34,7 @@ from src.config import load_config
 from src.logger import setup_logging
 from src.models import CanonicalRecord, ProcessedItem, ThemeNode, TrendMetrics, read_processed_jsonl
 from src.themes import cluster_themes, normalize_theme_name
-from src.trend_state import classify_state, compute_stability
 from src.trends import (
-    _backfill_history,
-    _dates_in_window,
     _load_existing_metrics,
     build_trend_metrics,
 )
@@ -62,7 +60,7 @@ def load_processed_items(
 
     Returns a tuple of:
       - items: valid ProcessedItem list
-      - file_log: per-file audit dicts with keys file, total, valid, filtered
+      - file_log: per-file audit dicts with keys file, total, valid, filtered_hist, themed
     """
     if not data_dir.exists():
         logger.debug("Processed data directory not found: %s", data_dir)
@@ -75,9 +73,7 @@ def load_processed_items(
         valid = [i for i in raw if not i.id.startswith("hist-")]
         filtered = len(raw) - len(valid)
         if filtered:
-            logger.debug(
-                "Filtered %d hist- items from %s", filtered, jsonl_file.name
-            )
+            logger.debug("Filtered %d hist- items from %s", filtered, jsonl_file.name)
         all_items.extend(valid)
         file_log.append(
             {
@@ -93,9 +89,7 @@ def load_processed_items(
     hist_total = sum(f["filtered_hist"] for f in file_log)
     if hist_total:
         logger.info("Filtered %d legacy hist- items across all files", hist_total)
-    logger.info(
-        "Loaded %d valid ProcessedItem records from %s", len(all_items), data_dir
-    )
+    logger.info("Loaded %d valid ProcessedItem records from %s", len(all_items), data_dir)
     return all_items, file_log
 
 
@@ -105,7 +99,7 @@ def items_to_entries(
     """Convert ProcessedItem list to (date_str, theme, source_class, source_name) tuples.
 
     Items with no theme assigned are skipped — the pipeline may not have run
-    AI stages on all items (e.g. when GEMINI_API_KEY was absent).
+    AI stages on all items (e.g. enrichment failure or missing API key).
     """
     entries: list[tuple[str, str, str, str]] = []
     for item in items:
@@ -153,7 +147,7 @@ def _build_source_list(
             per_source[name]["dates"].add(date_str)
 
     # Pass 2: augment with theme data from entries (themed items only)
-    for date_str, theme, _cls, name in entries:
+    for _date_str, theme, _cls, name in entries:
         if name in per_source:
             per_source[name]["themed_count"] += 1
             per_source[name]["theme_counts"][theme] += 1
@@ -182,9 +176,9 @@ def _build_source_classes(source_list: list[dict]) -> dict[str, dict]:
 
     Returns {"primary": {"count": N, "sources": [...]}, "operator": {...}, ...}
     """
-    _ALL_CLASSES = ("primary", "operator", "practitioner", "media", "market")
-    class_counts: dict[str, int] = {c: 0 for c in _ALL_CLASSES}
-    class_sources: dict[str, set] = {c: set() for c in _ALL_CLASSES}
+    _all_classes = ("primary", "operator", "practitioner", "media", "market")
+    class_counts: dict[str, int] = dict.fromkeys(_all_classes, 0)
+    class_sources: dict[str, set] = {c: set() for c in _all_classes}
     for s in source_list:
         cls = s.get("source_class", "practitioner")
         if cls in class_counts:
@@ -192,7 +186,7 @@ def _build_source_classes(source_list: list[dict]) -> dict[str, dict]:
             class_sources[cls].add(s["name"])
     return {
         cls: {"count": class_counts[cls], "sources": sorted(class_sources[cls])}
-        for cls in _ALL_CLASSES
+        for cls in _all_classes
     }
 
 
@@ -210,7 +204,7 @@ def _build_graph_edges(
     edges: list[dict] = []
     theme_list = [m.theme for m in metrics if m.theme in top_themes]
     for i, t1 in enumerate(theme_list):
-        for t2 in theme_list[i + 1:]:
+        for t2 in theme_list[i + 1 :]:
             shared = len(dates_per_theme[t1] & dates_per_theme[t2])
             if shared >= 3:
                 edges.append(
@@ -294,8 +288,7 @@ def write_site_data(
     )
 
     graph_nodes = [
-        {"id": m.theme, "domain": m.domain, "state": m.state, "volume": m.volume}
-        for m in metrics
+        {"id": m.theme, "domain": m.domain, "state": m.state, "volume": m.volume} for m in metrics
     ]
     (docs_data_dir / "graph.json").write_text(
         json.dumps({"generated": now_iso, "nodes": graph_nodes, "edges": edges}, indent=2)
@@ -406,9 +399,7 @@ def build(
                 for m in metrics
             ]
             existing_theme_names = [m.theme for m in metrics]
-            _, theme_definitions, gemini_edges = cluster_themes(
-                theme_records, existing_theme_names
-            )
+            _, theme_definitions, gemini_edges = cluster_themes(theme_records, existing_theme_names)
             def_lookup = {td["theme"]: td for td in theme_definitions if td.get("theme")}
             for m in metrics:
                 if m.theme in def_lookup:
@@ -452,8 +443,13 @@ def build(
         return
 
     write_site_data(
-        metrics, theme_nodes, source_list, edges, docs_data_dir,
-        items=items, file_log=file_log,
+        metrics,
+        theme_nodes,
+        source_list,
+        edges,
+        docs_data_dir,
+        items=items,
+        file_log=file_log,
     )
 
 

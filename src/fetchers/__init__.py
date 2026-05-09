@@ -21,17 +21,21 @@ class FetchedItem:
     for the full contract.
     """
 
-    id: str            # Stable dedup key — video ID, URL, or HN story ID
+    id: str  # Stable dedup key — video ID, URL, or HN story ID
     title: str
     url: str
-    content: str       # Full text from the source (cleaned of markup by the fetcher)
-    source_name: str   # Human-readable source label, e.g. "Anthropic Blog"
-    source_type: str   # Fetcher category: "youtube" | "rss" | "substack" | "hackernews" | "arxiv" | …
-    source_class: str  # Credibility class: "primary" | "operator" | "practitioner" | "media" | "market"
-    author: str = ""   # Author name where available; empty string when not provided by the source
+    content: str  # Full text from the source (cleaned of markup by the fetcher)
+    source_name: str  # Human-readable source label, e.g. "Anthropic Blog"
+    source_type: (
+        str  # Fetcher category: "youtube" | "rss" | "substack" | "hackernews" | "arxiv" | …
+    )
+    source_class: (
+        str  # Credibility class: "primary" | "operator" | "practitioner" | "media" | "market"
+    )
+    author: str = ""  # Author name where available; empty string when not provided by the source
     published: datetime | None = None
-    has_code: bool = False     # True when item links directly to a code repository
-    evidence_type: str = ""    # "experiment" | "benchmark" | "anecdote" | "announcement" | "analysis"
+    has_code: bool = False  # True when item links directly to a code repository
+    evidence_type: str = ""  # "experiment" | "benchmark" | "anecdote" | "announcement" | "analysis"
 
     def to_dict(self) -> dict[str, Any]:
         """Serialise to a JSON-serialisable dict for raw data persistence."""
@@ -80,4 +84,3 @@ class Fetcher(Protocol):
     def fetch(self, already_processed: set[str]) -> list[FetchedItem]:
         """Return new items, excluding any ID present in already_processed."""
         ...
-

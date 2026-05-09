@@ -650,7 +650,7 @@ function renderLogSection(logData, meta) {
         ${_logStat('Total items loaded', totalItems)}
         ${_logStat('AI-enriched (themed)', themedItems)}
         ${_logStat('Unenriched', unthemed)}
-        ${_logStat('Enrichment rate', enrichRate, data.enrichment_rate < 0.5 ? '#ffa502' : '#00C3A5')}
+        ${_logStat('Enrichment rate', enrichRate, data.enrichment_rate != null ? (data.enrichment_rate < 0.5 ? '#ffa502' : '#00C3A5') : 'var(--text)')}
         ${_logStat('Qualifying themes', themeCount)}
         ${_logStat('Active sources', sourceCount)}
         ${_logStat('Data from', dateFirst)}
@@ -763,8 +763,9 @@ function _renderItemsTable(items) {
       : '<span style="color:#333;font-size:0.7rem">—</span>';
     const hype   = item.hype_risk != null ? Math.round(item.hype_risk * 100) + '%' : '—';
     const cred   = item.credibility_score != null ? item.credibility_score.toFixed(2) : '—';
-    const titleHtml = item.url
-      ? `<a href="${escHtml(item.url)}" target="_blank" rel="noopener"
+    const safeUrl = (item.url || '').match(/^https?:\/\//) ? item.url : '';
+    const titleHtml = safeUrl
+      ? `<a href="${escHtml(safeUrl)}" target="_blank" rel="noopener"
              style="color:var(--text);text-decoration:none;font-size:0.75rem"
              title="${escHtml(item.summary || item.title)}">${escHtml(item.title || '—')}</a>`
       : `<span style="font-size:0.75rem;color:var(--text-muted)">${escHtml(item.title || '—')}</span>`;

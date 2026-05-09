@@ -41,13 +41,11 @@ from __future__ import annotations
 import argparse
 import hashlib
 import html
-import json
 import re
 import sys
-from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from dataclasses import dataclass
 from pathlib import Path
-from urllib.parse import urlparse, parse_qs
+from urllib.parse import parse_qs, urlparse
 
 # ── repo root on sys.path so we can import from src ──────────────────────────
 _REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -55,21 +53,22 @@ sys.path.insert(0, str(_REPO_ROOT))
 
 from src.models import ProcessedItem, write_processed_jsonl  # noqa: E402
 
-
 # ── source metadata lookup ────────────────────────────────────────────────────
 
 _SOURCE_META: dict[str, dict] = {
-    "nate jones":    {"source_type": "youtube",     "source_class": "practitioner"},
-    "wes roth":      {"source_type": "youtube",     "source_class": "practitioner"},
-    "matthew berman":{"source_type": "youtube",     "source_class": "practitioner"},
-    "hacker news":   {"source_type": "hackernews",  "source_class": "practitioner"},
+    "nate jones": {"source_type": "youtube", "source_class": "practitioner"},
+    "wes roth": {"source_type": "youtube", "source_class": "practitioner"},
+    "matthew berman": {"source_type": "youtube", "source_class": "practitioner"},
+    "hacker news": {"source_type": "hackernews", "source_class": "practitioner"},
 }
+
 
 def _source_meta(name: str) -> dict:
     return _SOURCE_META.get(name.lower(), {"source_type": "rss", "source_class": "practitioner"})
 
 
 # ── URL / ID helpers ──────────────────────────────────────────────────────────
+
 
 def _extract_id(url: str) -> str:
     """Extract a short canonical ID from a URL."""
@@ -94,6 +93,7 @@ def _synthetic_id(fetch_date: str, source_name: str, title: str) -> str:
 
 
 # ── parsed item intermediate ──────────────────────────────────────────────────
+
 
 @dataclass
 class _RawItem:
@@ -130,6 +130,7 @@ class _RawItem:
 
 # ── format-specific parsers ───────────────────────────────────────────────────
 
+
 def _is_failure_file(lines: list[str]) -> bool:
     for line in lines[:5]:
         if "AI summarisation failed" in line:
@@ -147,8 +148,13 @@ def _parse_format_c(lines: list[str], fetch_date: str) -> list[_RawItem]:
         # Section header
         if line.startswith("## ") and not line.startswith("## Item"):
             section = line[3:].strip()
-            if section not in ("Suggested Sources", "TL;DR", "Trends", "Item Summaries",
-                               "Item Themes"):
+            if section not in (
+                "Suggested Sources",
+                "TL;DR",
+                "Trends",
+                "Item Summaries",
+                "Item Themes",
+            ):
                 current_source = section
         # Bullet item: "- Title (date)"
         elif line.startswith("- ") and current_source:
@@ -161,12 +167,14 @@ def _parse_format_c(lines: list[str], fetch_date: str) -> list[_RawItem]:
                     url = next_line
                     i += 1
             if title:
-                items.append(_RawItem(
-                    fetch_date=fetch_date,
-                    source_name=current_source,
-                    title=title,
-                    url=url,
-                ))
+                items.append(
+                    _RawItem(
+                        fetch_date=fetch_date,
+                        source_name=current_source,
+                        title=title,
+                        url=url,
+                    )
+                )
         i += 1
     return items
 
@@ -208,8 +216,7 @@ def _parse_format_ab(lines: list[str], fetch_date: str) -> list[_RawItem]:
                 url_summary[parts[0].strip()] = parts[1].strip()
 
     # Parse items
-    _SKIP_SECTIONS = {"suggested sources", "tl;dr", "trends", "item themes",
-                      "item summaries"}
+    _SKIP_SECTIONS = {"suggested sources", "tl;dr", "trends", "item themes", "item summaries"}
 
     current: _RawItem | None = None
 
@@ -292,6 +299,7 @@ def parse_history_file(path: Path) -> list[_RawItem]:
 
 # ── deduplication ─────────────────────────────────────────────────────────────
 
+
 def _deduplicate(items: list[_RawItem]) -> list[_RawItem]:
     """Remove duplicate IDs within a single day's items, keeping first seen."""
     seen: set[str] = set()
@@ -305,6 +313,7 @@ def _deduplicate(items: list[_RawItem]) -> list[_RawItem]:
 
 
 # ── main ──────────────────────────────────────────────────────────────────────
+
 
 def migrate(history_dir: Path, out_dir: Path, dry_run: bool = False) -> None:
     history_files = sorted(history_dir.glob("*.txt"))
@@ -338,8 +347,10 @@ def migrate(history_dir: Path, out_dir: Path, dry_run: bool = False) -> None:
         total_items += len(processed)
         total_files += 1
 
-    print(f"\nDone: {total_files} file(s), {total_items} item(s) total"
-          + (" [dry-run]" if dry_run else ""))
+    print(
+        f"\nDone: {total_files} file(s), {total_items} item(s) total"
+        + (" [dry-run]" if dry_run else "")
+    )
 
 
 def _parse_args() -> argparse.Namespace:

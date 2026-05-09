@@ -24,12 +24,14 @@ import yaml
 
 # ── Public Config dataclasses ─────────────────────────────────────────────────
 
+
 @dataclass
 class SourceEntry:
     """One entry in the flat sources list."""
-    type: str                        # rss | youtube | substack | hackernews | arxiv | ...
+
+    type: str  # rss | youtube | substack | hackernews | arxiv | ...
     name: str
-    source_class: str                # primary | operator | practitioner | media | market
+    source_class: str  # primary | operator | practitioner | media | market
     enabled: bool = True
     options: dict[str, Any] = field(default_factory=dict)
 
@@ -41,6 +43,7 @@ class DigestConfig:
     Completely independent of the sources list. All filter predicates
     reference ProcessedItem field names only — not source names or types.
     """
+
     subject: str = "Daily AI Digest — {date}"
     send_if_empty: bool = False
     # ProcessedItem-field predicates
@@ -76,6 +79,7 @@ class PipelineConfig:
     Both can be adjusted in config/sources.yaml under the 'pipeline' section
     without touching production code.
     """
+
     gemini_rpm: int = 5
     enrich_max_output_tokens: int = 500
 
@@ -92,6 +96,7 @@ class Config:
 # ── Internal fetcher-adapter helpers ─────────────────────────────────────────
 # Used exclusively by src/pipeline/fetch.py to construct fetcher instances
 # from SourceEntry objects. NOT part of the Config public API.
+
 
 @dataclass
 class RSSFeed:
@@ -209,7 +214,9 @@ def load_config(path: Path = Path("config/sources.yaml")) -> Config:
         enrich_max_output_tokens=pl.get("enrich_max_output_tokens", 500),
     )
 
-    return Config(sources=sources, digest=digest, history=history, logging=logging_cfg, pipeline=pipeline)
+    return Config(
+        sources=sources, digest=digest, history=history, logging=logging_cfg, pipeline=pipeline
+    )
 
 
 def require_env(key: str) -> str:

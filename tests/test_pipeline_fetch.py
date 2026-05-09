@@ -6,11 +6,8 @@ Tests specify the interface; implementation must make them pass.
 from __future__ import annotations
 
 import json
-from datetime import datetime, timezone
-from pathlib import Path
+from datetime import UTC, datetime
 from unittest.mock import MagicMock, patch
-
-import pytest
 
 from src.fetchers import FetchedItem
 
@@ -25,13 +22,14 @@ def _make_item(id_: str = "item-1", source_type: str = "rss") -> FetchedItem:
         source_type=source_type,
         source_class="practitioner",
         author="Alice",
-        published=datetime(2026, 5, 2, 9, 0, tzinfo=timezone.utc),
+        published=datetime(2026, 5, 2, 9, 0, tzinfo=UTC),
         has_code=False,
         evidence_type="analysis",
     )
 
 
 # ── fetch_all ───────────────────────────────────────────────────────────────
+
 
 class TestFetchAll:
     """fetch_all(cfg, already_processed) → list[FetchedItem]"""
@@ -84,11 +82,17 @@ class TestFetchAll:
     def test_age_filter_drops_old_items(self):
         """Items published more than max_age_days ago are excluded."""
         old_item = FetchedItem(
-            id="old-1", title="Old", url="https://example.com/old",
-            content="", source_name="S", source_type="rss",
-            source_class="practitioner", author="", has_code=False,
+            id="old-1",
+            title="Old",
+            url="https://example.com/old",
+            content="",
+            source_name="S",
+            source_type="rss",
+            source_class="practitioner",
+            author="",
+            has_code=False,
             evidence_type="unknown",
-            published=datetime(2020, 1, 1, tzinfo=timezone.utc),
+            published=datetime(2020, 1, 1, tzinfo=UTC),
         )
         result = self._fetch_all_with_items([old_item], max_age_days=7)
         assert all(i.id != "old-1" for i in result)
@@ -102,9 +106,15 @@ class TestFetchAll:
     def test_age_filter_handles_naive_published_datetime(self):
         """Age filter must not raise TypeError when item.published is timezone-naive."""
         naive_item = FetchedItem(
-            id="naive-1", title="Naive dt", url="https://example.com/naive",
-            content="", source_name="S", source_type="rss",
-            source_class="practitioner", author="", has_code=False,
+            id="naive-1",
+            title="Naive dt",
+            url="https://example.com/naive",
+            content="",
+            source_name="S",
+            source_type="rss",
+            source_class="practitioner",
+            author="",
+            has_code=False,
             evidence_type="unknown",
             published=datetime(2026, 5, 2, 9, 0),  # no tzinfo — naive
         )
@@ -114,6 +124,7 @@ class TestFetchAll:
 
 
 # ── write_raw_jsonl ─────────────────────────────────────────────────────────
+
 
 class TestWriteRawJsonl:
     """write_raw_jsonl(items, path) writes one JSON line per FetchedItem."""
@@ -168,6 +179,7 @@ class TestWriteRawJsonl:
 
 
 # ── read_raw_jsonl ──────────────────────────────────────────────────────────
+
 
 class TestReadRawJsonl:
     """read_raw_jsonl(path) → list[FetchedItem] — inverse of write_raw_jsonl."""

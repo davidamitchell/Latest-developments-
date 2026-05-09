@@ -28,7 +28,9 @@ def _server_retry_delay(exc: Exception) -> float | None:
                 match = _RETRY_DELAY_PATTERN.fullmatch(retry_delay)
                 if match:
                     return float(match.group(1))
-                logger.debug("Invalid Gemini RetryInfo.retryDelay value %r; using fallback", retry_delay)
+                logger.debug(
+                    "Invalid Gemini RetryInfo.retryDelay value %r; using fallback", retry_delay
+                )
 
     response = getattr(exc, "response", None)
     if response is not None:

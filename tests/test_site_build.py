@@ -8,15 +8,13 @@ It must not import any fetcher or pipeline stage directly.
 from __future__ import annotations
 
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
-
-import pytest
 
 from src.models import ProcessedItem
 
-
 # ── helpers ─────────────────────────────────────────────────────────────────
+
 
 def _make_processed(
     id_: str = "item-1",
@@ -36,7 +34,7 @@ def _make_processed(
         source_type="rss",
         source_class=source_class,
         author="Alice",
-        published=datetime(2026, 5, 2, 9, 0, tzinfo=timezone.utc),
+        published=datetime(2026, 5, 2, 9, 0, tzinfo=UTC),
         has_code=False,
         evidence_type="analysis",
         fetch_date=fetch_date,
@@ -57,6 +55,7 @@ def _write_processed_jsonl(items: list[ProcessedItem], path: Path) -> None:
 
 
 # ── load_processed_items ─────────────────────────────────────────────────────
+
 
 class TestLoadProcessedItems:
     """load_processed_items(data_dir, window_days) → (list[ProcessedItem], list[dict])"""
@@ -83,8 +82,12 @@ class TestLoadProcessedItems:
         from src.site.build import load_processed_items
 
         proc_dir = tmp_path / "processed"
-        _write_processed_jsonl([_make_processed("d1", fetch_date="2026-05-01")], proc_dir / "2026-05-01.jsonl")
-        _write_processed_jsonl([_make_processed("d2", fetch_date="2026-05-02")], proc_dir / "2026-05-02.jsonl")
+        _write_processed_jsonl(
+            [_make_processed("d1", fetch_date="2026-05-01")], proc_dir / "2026-05-01.jsonl"
+        )
+        _write_processed_jsonl(
+            [_make_processed("d2", fetch_date="2026-05-02")], proc_dir / "2026-05-02.jsonl"
+        )
 
         result, _ = load_processed_items(proc_dir, window_days=30)
         assert len(result) == 2
@@ -134,6 +137,7 @@ class TestLoadProcessedItems:
 
 # ── items_to_entries ─────────────────────────────────────────────────────────
 
+
 class TestItemsToEntries:
     """items_to_entries(items) → list of (date_str, theme, source_class, source_name) tuples."""
 
@@ -150,8 +154,13 @@ class TestItemsToEntries:
         from src.site.build import items_to_entries
         from src.themes import normalize_theme_name
 
-        item = _make_processed("a", theme="LLM agents", source_class="primary",
-                               source_name="arXiv", fetch_date="2026-05-02")
+        item = _make_processed(
+            "a",
+            theme="LLM agents",
+            source_class="primary",
+            source_name="arXiv",
+            fetch_date="2026-05-02",
+        )
         date_str, theme, cls, name = items_to_entries([item])[0]
         assert date_str == "2026-05-02"
         assert theme == normalize_theme_name("LLM agents")
@@ -180,25 +189,46 @@ class TestItemsToEntries:
 
 # ── write_site_data ──────────────────────────────────────────────────────────
 
+
 class TestWriteSiteData:
     """write_site_data(metrics, theme_nodes, source_list, edges, docs_data_dir)"""
 
     def _make_minimal_inputs(self):
-        from src.models import TrendMetrics, ThemeNode
+        from src.models import ThemeNode, TrendMetrics
+
         metrics = [
-            TrendMetrics(theme="inference scaling", domain="infra", state="emerging",
-                        volume=3.0, velocity=0.2, diversity=2, item_count=4)
+            TrendMetrics(
+                theme="inference scaling",
+                domain="infra",
+                state="emerging",
+                volume=3.0,
+                velocity=0.2,
+                diversity=2,
+                item_count=4,
+            )
         ]
         theme_nodes = [
             ThemeNode(name="inference scaling", domain="infra", state="emerging", item_count=4)
         ]
         source_list = [
-            {"name": "arXiv", "source_class": "primary", "item_count": 4,
-             "first_seen": "2026-05-01", "last_seen": "2026-05-02",
-             "days_active": 2, "top_themes": ["inference scaling"]}
+            {
+                "name": "arXiv",
+                "source_class": "primary",
+                "item_count": 4,
+                "first_seen": "2026-05-01",
+                "last_seen": "2026-05-02",
+                "days_active": 2,
+                "top_themes": ["inference scaling"],
+            }
         ]
-        edges = [{"source": "inference scaling", "target": "agentic RAG",
-                  "rel_type": "compositional", "weight": 3}]
+        edges = [
+            {
+                "source": "inference scaling",
+                "target": "agentic RAG",
+                "rel_type": "compositional",
+                "weight": 3,
+            }
+        ]
         return metrics, theme_nodes, source_list, edges
 
     def test_creates_docs_data_directory(self, tmp_path):
@@ -278,9 +308,18 @@ class TestWriteSiteData:
 
         docs_dir = tmp_path / "docs" / "data"
         metrics, nodes, sources, edges = self._make_minimal_inputs()
-        file_log = [{"file": "2026-05-02.jsonl", "total": 1, "valid": 1, "filtered_hist": 0, "themed": 1}]
-        write_site_data(metrics, nodes, sources, edges, docs_dir,
-                        items=[_make_processed("item-1")], file_log=file_log)
+        file_log = [
+            {"file": "2026-05-02.jsonl", "total": 1, "valid": 1, "filtered_hist": 0, "themed": 1}
+        ]
+        write_site_data(
+            metrics,
+            nodes,
+            sources,
+            edges,
+            docs_dir,
+            items=[_make_processed("item-1")],
+            file_log=file_log,
+        )
         assert (docs_dir / "log.json").exists()
         data = json.loads((docs_dir / "log.json").read_text())
         assert "total_items" in data
@@ -304,20 +343,41 @@ class TestWriteSiteData:
 
 # ── build (integration) ──────────────────────────────────────────────────────
 
+
 class TestBuild:
     """build(processed_dir, docs_data_dir, window_days, dry_run) → writes docs/data/"""
 
     def _setup_processed_data(self, tmp_path) -> Path:
         proc_dir = tmp_path / "data" / "processed"
         items = [
-            _make_processed("a1", theme="inference scaling", source_class="primary",
-                            source_name="arXiv", fetch_date="2026-05-01"),
-            _make_processed("a2", theme="inference scaling", source_class="practitioner",
-                            source_name="Hacker News", fetch_date="2026-05-01"),
-            _make_processed("b1", theme="agentic RAG", source_class="operator",
-                            source_name="Anthropic", fetch_date="2026-05-02"),
-            _make_processed("b2", theme="agentic RAG", source_class="practitioner",
-                            source_name="YouTube", fetch_date="2026-05-02"),
+            _make_processed(
+                "a1",
+                theme="inference scaling",
+                source_class="primary",
+                source_name="arXiv",
+                fetch_date="2026-05-01",
+            ),
+            _make_processed(
+                "a2",
+                theme="inference scaling",
+                source_class="practitioner",
+                source_name="Hacker News",
+                fetch_date="2026-05-01",
+            ),
+            _make_processed(
+                "b1",
+                theme="agentic RAG",
+                source_class="operator",
+                source_name="Anthropic",
+                fetch_date="2026-05-02",
+            ),
+            _make_processed(
+                "b2",
+                theme="agentic RAG",
+                source_class="practitioner",
+                source_name="YouTube",
+                fetch_date="2026-05-02",
+            ),
         ]
         _write_processed_jsonl(items[:2], proc_dir / "2026-05-01.jsonl")
         _write_processed_jsonl(items[2:], proc_dir / "2026-05-02.jsonl")
@@ -375,4 +435,5 @@ class TestBuild:
     def test_build_does_not_import_fetchers(self):
         """build.py must not import any fetcher or pipeline stage."""
         import src.site.build as build_module
+
         assert build_module is not None

@@ -22,6 +22,7 @@ from pathlib import Path
 
 try:
     from dotenv import load_dotenv  # type: ignore[import-untyped]
+
     load_dotenv()
 except ImportError:
     pass
@@ -83,9 +84,7 @@ def _is_quota_exhausted_error(exc: Exception) -> bool:
 
     text = str(exc).lower()
     return (
-        _QUOTA_METRIC_TOKEN in text
-        or _QUOTA_PERDAY_TOKEN in text
-        or _QUOTA_METRIC_PHRASE in text
+        _QUOTA_METRIC_TOKEN in text or _QUOTA_PERDAY_TOKEN in text or _QUOTA_METRIC_PHRASE in text
     )
 
 
@@ -129,6 +128,7 @@ def _make_gemini_client(api_key: str):
     src.retry.with_backoff so Gemini retryDelay hints can be honoured.
     """
     from google import genai
+
     return genai.Client(api_key=api_key)
 
 
@@ -206,7 +206,9 @@ def process(
                         _log_quota_exhausted(processed.id, remaining)
                     else:
                         logger.warning(
-                            "AI enrichment failed for %r after retries: %s", processed.id, exc.__cause__
+                            "AI enrichment failed for %r after retries: %s",
+                            processed.id,
+                            exc.__cause__,
                         )
                     ok = False
                 else:
@@ -229,7 +231,9 @@ def process(
         if ai_failures:
             logger.warning(
                 "AI enrichment failed for %d/%d items (%.0f%%)",
-                ai_failures, len(items), failure_rate * 100,
+                ai_failures,
+                len(items),
+                failure_rate * 100,
             )
         else:
             logger.info("AI enrichment succeeded for all %d items", len(items))
@@ -255,7 +259,8 @@ def _exit_code(ai_failures: int, total: int, api_key_present: bool) -> int:
     if api_key_present and total and ai_failures / total > 0.5:
         logger.error(
             "AI enrichment failed for >50%% of items (%d/%d) — check Gemini quota/key",
-            ai_failures, total,
+            ai_failures,
+            total,
         )
         return 2
     return 0
@@ -272,6 +277,7 @@ def main() -> int:
     args = _parse_args()
 
     from src.config import load_config
+
     cfg = load_config()
     setup_logging(debug=args.debug, log_file=cfg.logging.log_file)
 
@@ -283,7 +289,9 @@ def main() -> int:
 
     items = read_raw_jsonl(raw_path)
     if not items:
-        logger.info("No raw items found for %s — preserving existing processed file if present", today)
+        logger.info(
+            "No raw items found for %s — preserving existing processed file if present", today
+        )
         merged = _merge_and_write(out_path, [])
         logger.info(
             "Processing complete — %d new item(s) added; %d total in %s",
@@ -312,7 +320,9 @@ def main() -> int:
     merged = _merge_and_write(out_path, processed)
     logger.info(
         "Processing complete — %d new item(s) added; %d total in %s",
-        len(processed), len(merged), out_path,
+        len(processed),
+        len(merged),
+        out_path,
     )
 
     return _exit_code(ai_failures, len(items), bool(api_key))
