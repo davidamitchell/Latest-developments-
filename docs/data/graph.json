@@ -1,5 +1,5 @@
 {
-  "generated": "2026-05-08T22:42:15.135939+00:00",
+  "generated": "2026-05-09T01:59:44.734248+00:00",
   "nodes": [
     {
       "id": "Agentic Workflows",
@@ -74,66 +74,5 @@
       "volume": 0.23
     }
   ],
-  "edges": [
-    {
-      "source": "Local LLM Inference",
-      "target": "Local LLM Applications",
-      "rel_type": "causal",
-      "weight": 1
-    },
-    {
-      "source": "Agentic Workflows",
-      "target": "Agent Reliability",
-      "rel_type": "compositional",
-      "weight": 1
-    },
-    {
-      "source": "Open-Source AI Agents",
-      "target": "Agentic Workflows",
-      "rel_type": "causal",
-      "weight": 1
-    },
-    {
-      "source": "AI Infrastructure",
-      "target": "LLM Capabilities",
-      "rel_type": "causal",
-      "weight": 1
-    },
-    {
-      "source": "AI Development Pace",
-      "target": "AI Safety & Alignment",
-      "rel_type": "causal",
-      "weight": 1
-    },
-    {
-      "source": "AI Business Strategy",
-      "target": "AI Workforce & Jobs",
-      "rel_type": "causal",
-      "weight": 1
-    },
-    {
-      "source": "LLM Capabilities",
-      "target": "Agentic Workflows",
-      "rel_type": "causal",
-      "weight": 1
-    },
-    {
-      "source": "Agent Reliability",
-      "target": "AI Safety & Alignment",
-      "rel_type": "causal",
-      "weight": 1
-    },
-    {
-      "source": "AI Infrastructure",
-      "target": "Local LLM Inference",
-      "rel_type": "causal",
-      "weight": 1
-    },
-    {
-      "source": "AI Safety & Alignment",
-      "target": "AI Development Pace",
-      "rel_type": "contradictory",
-      "weight": 1
-    }
-  ]
+  "edges": []
 }
