@@ -846,3 +846,31 @@ Three gaps identified by working the backlog:
 3. **What single change would prevent this next time?** The learnings.md should note "use `uv run python -m pytest` not bare `pytest`" — added below.
 4. **Is this a pattern?** The `hist-` pollution is a migration artefact from `src/trends.py → src/site/build.py`. The old pipeline wrote fragments to `data/processed/` via a different code path. The filter is now permanent. The AI enrichment gap (42%) is a recurring operational issue — GEMINI_API_KEY must be active for the pipeline to produce useful trend data.
 
+---
+
+## 2026-05-09 — Code review pass: skills applied, lint clean, backlog updated
+
+**What changed (continuation of same session):**
+
+Initialized `.github/skills` submodule and applied `code-review` skill to all changes from this session.
+
+**Code review findings addressed:**
+
+1. `app.js` `renderLogSection`: `_logStat('Enrichment rate', ...)` colour expression accessed `data.enrichment_rate` without null guard. JavaScript coerces `null < 0.5` to `true`, showing amber warning when enrichment rate is unknown. Fixed: `data.enrichment_rate != null ? (...)` ternary.
+2. `app.js` `_renderItemsTable`: URL `href` used `escHtml(item.url)` which prevents HTML injection but does not block `javascript:` scheme. Fixed: `safeUrl` variable with `/^https?:\/\//` regex guard; items with non-HTTP URLs render as plain text.
+3. `enrich.py` docstring: claimed "Only google.genai transport errors are caught" — there is no `except` block in `enrich()`, the docstring was wrong. Fixed to accurately state errors propagate to `run.py`.
+4. `build.py` `load_processed_items` docstring: listed key as `"filtered"` instead of `"filtered_hist"`. Fixed.
+5. `build.py` `items_to_entries` docstring: blamed enrichment gaps on GEMINI_API_KEY absence (which was the initial wrong diagnosis). Updated to generic "enrichment failure or missing API key".
+6. Ruff auto-fix (`--fix` + format) run across the full codebase: 56 issues fixed in 22 files. 12 pre-existing issues remain in files not touched this session (test_smoke.py, scripts/).
+
+**Tests:** 625 passed, 1 skipped (live YouTube API test requires credentials) across full test suite.
+
+**Backlog:** Added W-0029 (re-enrich 120 unenriched items post thinking_budget fix) and W-0030 (ADR for thinking_budget=0 decision).
+
+### Mini-Retro
+
+1. **Did the process work?** Yes — reading the code-review skill before applying it gave a structured review that caught 2 real bugs (null enrichment_rate color, javascript: URL) and 2 misleading docstrings.
+2. **What slowed down?** Background test tasks outputting to temp files that became empty before monitor could read them. Use synchronous pytest with a timeout next time, or monitor for the completion signal explicitly.
+3. **What single change would prevent this next time?** Run `make check` before committing session changes, not after, to avoid a separate lint-only commit.
+4. **Is this a pattern?** Docstring/comment drift happens when root cause diagnoses change mid-session. Comments should be reviewed during the code review pass, not just at time of writing.
+
