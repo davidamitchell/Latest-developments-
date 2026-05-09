@@ -198,3 +198,32 @@ Without this, targeted test runs can appear hung or exceed CI time budgets even 
 
 **All themes declining = pipeline signal, not trend signal.** When every theme shows `state: declining`, the most likely cause is that no new AI-enriched items have been added in the last 14 days (the `_VOLUME_WINDOW_DAYS`). Check GEMINI_API_KEY and pipeline logs before interpreting declining states as genuine trend signals.
 
+
+---
+
+## 2026-05-09 — Lazy import wrapper pattern for google.genai in tests
+
+### Pattern
+
+Any module that does `from google.genai import types` at module level will fail to collect in the container's system Python test environment. The `cryptography` package has a broken native Rust extension (`pyo3_runtime.PanicException: Python API call failed`) in this environment.
+
+### Fix
+
+Wrap the google.genai-dependent call in a **module-level function** with a lazy inner import:
+
+```python
+def enrich(item, client, max_output_tokens=500):
+    from src.pipeline.stages.enrich import enrich as _enrich  # lazy import
+    return _enrich(item, client, max_output_tokens=max_output_tokens)
+```
+
+This means:
+1. Importing the module does **not** trigger `google.genai` at import time.
+2. Tests can patch `src.mymodule.enrich` cleanly (it is a module-level name).
+3. The real import only fires when the function is actually called in production.
+
+**Applied in:** `src/pipeline/backfill.py` (wraps `src.pipeline.stages.enrich.enrich`).
+
+### Why module-level matters for patching
+
+`patch("src.mymodule.enrich")` only works when `enrich` is a name in `mymodule`'s namespace. A lazy import *inside* a function body creates a local name that cannot be patched from outside. A module-level wrapper function makes the name patchable while still deferring the real import.
