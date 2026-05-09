@@ -811,3 +811,38 @@ Three gaps identified by working the backlog:
 2. **What slowed down or went wrong?** The repo has existing unrelated lint failures, so full-lint validation remains noisy for targeted fixes.
 3. **What single change would prevent this next time?** Add a dedicated regression test around same-day rerun semantics for both raw and processed outputs whenever pipeline persistence logic changes.
 4. **Is this a pattern?** Yes — date-keyed outputs are vulnerable to accidental clobbering when reruns write whole files instead of merging.
+
+---
+
+## 2026-05-09 — Site data quality: insights tab, sources accuracy, processing log
+
+**What changed:**
+
+**Root causes found:**
+1. `_build_source_list` iterated `entries` (themed items only) instead of all items — arXiv, Matthew Berman, and Hugging Face (11 items combined) were invisible in the Sources tab because they had no AI-assigned themes.
+2. `meta.json item_count` was `sum(m.item_count for m in metrics)` = 43 (qualifying-theme items only), not total items. The site header showed "43 items" when 305 were loaded.
+3. 99 legacy `hist-` prefixed items from the old `src/trends.py` history-parsing pipeline were polluting `data/processed/`. These had empty URLs and single-word titles ("Big", "Labor") and were being loaded as valid ProcessedItem records, skewing counts and theme analysis.
+4. Insights tab (`renderInsightsTab`) was never implemented — only a static empty-state placeholder existed in the HTML.
+5. No processing log visible on the site — no way to see why enrichment was incomplete.
+6. AI enrichment rate: only 86 of 206 valid items (42%) have themes — GEMINI_API_KEY absent or quota exhausted in recent pipeline runs.
+
+**Changes made (`build.py`):**
+- `load_processed_items` now returns `(items, file_log)` tuple; filters `hist-` items with per-file count
+- `_build_source_list` iterates all items (pass 1) then augments with theme data from entries (pass 2)
+- `meta.json` now has `total_items`, `themed_items`, `unthemed_items`, `enrichment_rate`, `source_count`, `date_range`
+- `log.json` added: per-file processing audit with `ai_note` warning when enrichment rate < 95%
+
+**Changes made (`app.js` + `index.html`):**
+- `renderInsightsTab()` derives 5 insight card types from trends data: AI health warning, all-declining alert, cross-source confirmed signals, hype alerts, coverage gaps
+- `renderLogSection()`: pipeline run audit with stats grid and per-file breakdown table
+- `renderItemsExplorer()`: searchable, filterable table of all 206 processed items (source, theme, text filters)
+
+**Tests:** 26/26 pass; 3 new tests for hist- filtering, file_log structure, and enrichment rate fields in meta.json.
+
+### Mini-Retro
+
+1. **Did the process work?** Yes — traced root causes before writing any code; each fix addressed a specific identified bug rather than patching symptoms.
+2. **What slowed down?** `uv run python -m pytest` vs bare `pytest` uses a different Python interpreter — spent time diagnosing a missing `yaml` import that was only missing in the pytest tool's env, not the project venv. Fix: always use `uv run python -m pytest`.
+3. **What single change would prevent this next time?** The learnings.md should note "use `uv run python -m pytest` not bare `pytest`" — added below.
+4. **Is this a pattern?** The `hist-` pollution is a migration artefact from `src/trends.py → src/site/build.py`. The old pipeline wrote fragments to `data/processed/` via a different code path. The filter is now permanent. The AI enrichment gap (42%) is a recurring operational issue — GEMINI_API_KEY must be active for the pipeline to produce useful trend data.
+
