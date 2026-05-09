@@ -1,6 +1,6 @@
 {
-  "updated": "2026-05-09T08:30:11.365626+00:00",
-  "count": 1891,
+  "updated": "2026-05-09T09:54:23.569355+00:00",
+  "count": 1893,
   "processed": [
     "-0i2ERMGoq4",
     "-FhtPUkXKO4",
@@ -494,6 +494,8 @@
     "hf:aka7774/comfyui-models",
     "hf:andrebarrosilva1123/evolai-c",
     "hf:andrebarrosilva1123/evolai-d",
+    "hf:andrebarrosilva1123/evolai-mamba2-b",
+    "hf:arda-argmax/sortformer-finetuned",
     "hf:drzo/echoself",
     "hf:inferencerlabs/Ling-2.6-MLX-3.6bit-INF",
     "hf:inferencerlabs/MiMo-V2.5-Pro-MLX-4.3bit-INF",

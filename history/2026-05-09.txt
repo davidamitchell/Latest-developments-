@@ -1,29 +1,11 @@
 Daily AI Digest — 09 May 2026
 ========================================
 
-## Hacker News
+[AI summarisation failed: ClientError — no model processing was applied. Raw links only.]
 
-### A recent experience with ChatGPT 5.5 Pro
-Source: Hacker News
-URL: https://news.ycombinator.com/item?id=48071262
-Theme: Mathematical AI Research
-Summary: ChatGPT 5.5 Pro demonstrated advanced mathematical reasoning by solving and significantly improving upon open research problems in additive number theory, delivering PhD-level results. The LLM generated original ideas, including a polynomial upper bound for a problem, which was validated by human mathematicians. This suggests frontier LLMs can contribute novel mathematical insights, challenging traditional notions of research authorship and publication.
+## Hugging Face
 
-## TL;DR section
-* ChatGPT 5.5 Pro is achieving PhD-level mathematical research, demonstrating original problem-solving and idea generation.
-* The ability of LLMs to produce novel mathematical insights may necessitate new paradigms for academic publication and credit.
-* The ongoing advancements in LLM reasoning capabilities highlight a rapid shift in AI's capacity for complex, abstract problem-solving.
-
-Recurring theme: Increasing mathematical and scientific reasoning capabilities of LLMs.
-
-## Item Themes section
-- https://news.ycombinator.com/item?id=48071262 | Mathematical AI Research
-
-## Item Summaries section
-- https://news.ycombinator.com/item?id=48071262 | ChatGPT 5.5 Pro demonstrated advanced mathematical reasoning by solving and significantly improving upon open research problems in additive number theory, delivering PhD-level results. The LLM generated original ideas, including a polynomial upper bound for a problem, which was validated by human mathematicians. This suggests frontier LLMs can contribute novel mathematical insights, challenging traditional notions of research authorship and publication.
-
-## Trends section
-*   **Advanced LLM Reasoning:** Today's item directly showcases ChatGPT 5.5 Pro's ability to perform PhD-level mathematical research, generating original ideas and improving on existing proofs. This echoes previous discussions on AI alignment fails (02 May) and LLMs' increasing capability to solve research-level problems, but marks a significant step towards *original* mathematical contribution, rather than just solving problems with existing solutions.
-*   **Practical Implications for Researchers:** The discussion about publishing AI-generated mathematical content on arXiv highlights a new, emerging challenge for academic and open-source communities. This is a practical concern for those working with LLMs, similar to the "OpenClaw" or "HERMES.md" filtering issues (01 May, 30 Apr) that impact developer workflows.
-*   **Focus on Frontier Models:** The item features a cutting-edge model (ChatGPT 5.5 Pro), aligning with the trend of discussing new models and their capabilities (e.g., Google AI's Gemini in AlphaEvolve on 06 May, or Claude in various items on 01 May).
-*   **Absence of Traditional Open-Source Releases:** Unlike some previous digests that featured `llama.cpp` optimizations (02 May) or Hugging Face model finetunes (03 May), today's digest is focused entirely on the capabilities of a proprietary, frontier LLM rather than open-source tools or models.
+- Evolai Mamba2 B (andrebarrosilva1123) (09 May)
+  https://huggingface.co/andrebarrosilva1123/evolai-mamba2-b
+- Sortformer Finetuned (arda-argmax) (09 May)
+  https://huggingface.co/arda-argmax/sortformer-finetuned
