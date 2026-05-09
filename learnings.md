@@ -227,3 +227,30 @@ This means:
 ### Why module-level matters for patching
 
 `patch("src.mymodule.enrich")` only works when `enrich` is a name in `mymodule`'s namespace. A lazy import *inside* a function body creates a local name that cannot be patched from outside. A module-level wrapper function makes the name patchable while still deferring the real import.
+
+---
+
+## 2026-05-09 — Error-path tests are mandatory for external API wrappers
+
+### Pattern
+
+`backfill.py` shipped with 9 tests but none covering quota exhaustion or programming-error propagation. Both paths had bugs (quota did not short-circuit; programming errors were swallowed). The tests covered the happy path and `ok=False`, which is insufficient for functions that wrap external APIs.
+
+### Rule
+
+Any function that calls the Gemini API must have tests for ALL five partitions:
+1. **Success** — enrichment returns `(item, True)`
+2. **ok=False** — enrichment returns `(item, False)`, item kept with defaults
+3. **Transport error** — `ClientError`/`ServerError` retried by `with_backoff`
+4. **Quota exhaustion** — `QuotaExhaustedEnrichError` stops the entire batch (no more API calls)
+5. **Programming error** — `AttributeError`/`TypeError` propagates unchanged (not swallowed)
+
+Partitions 4 and 5 were the ones that were missing and that had bugs.
+
+### Shared implementations
+
+Gemini quota and retry sentinel types live in `src/pipeline/_quota.py`. Always import from there — never re-implement locally. Local re-implementations diverge silently (this is exactly what happened).
+
+### Why the import matters
+
+`_quota.py` has no heavy transitive dependencies. Importing `run.py` pulls in `fetch.py → hackernews.py → trafilatura`, which breaks test collection in environments without that package. `_quota.py` avoids this.

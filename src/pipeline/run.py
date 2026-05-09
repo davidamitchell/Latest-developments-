@@ -30,6 +30,18 @@ except ImportError:
 from src.fetchers import FetchedItem
 from src.logger import setup_logging
 from src.models import ProcessedItem, read_processed_jsonl, write_processed_jsonl
+from src.pipeline._quota import (
+    NonRetryableEnrichError as _NonRetryableEnrichError,
+)
+from src.pipeline._quota import (
+    QuotaExhaustedEnrichError as _QuotaExhaustedEnrichError,
+)
+from src.pipeline._quota import (
+    is_quota_exhausted_error as _is_quota_exhausted_error,
+)
+from src.pipeline._quota import (
+    log_quota_exhausted as _log_quota_exhausted,
+)
 from src.pipeline.fetch import read_raw_jsonl
 from src.pipeline.stages.clean import clean
 from src.pipeline.stages.credibility_scoring import score_credibility
@@ -42,58 +54,6 @@ logger = logging.getLogger(__name__)
 
 _RAW_DIR = Path("data/raw")
 _PROCESSED_DIR = Path("data/processed")
-# Tokens seen in Gemini 429 quota responses (QuotaFailure details / error text).
-_QUOTA_METRIC_TOKEN = "generate_content_free_tier_requests"
-_QUOTA_PERDAY_TOKEN = "generaterequestsperday"
-_QUOTA_METRIC_PHRASE = "quota exceeded for metric"
-
-
-class _NonRetryableEnrichError(Exception):
-    """Wrap non-transport enrich errors so with_backoff won't retry them.
-
-    Raised when enrich() throws a programming/runtime error that is
-    not a Gemini transport condition (ClientError/ServerError).
-    """
-
-
-class _QuotaExhaustedEnrichError(Exception):
-    """Signal that Gemini free-tier quota is exhausted for this run."""
-
-
-def _is_quota_exhausted_error(exc: Exception) -> bool:
-    """Return True when a Gemini transport error indicates quota exhaustion."""
-    code = getattr(exc, "code", None)
-    status_code = getattr(exc, "status_code", None)
-    if (code is not None and code != 429) or (status_code is not None and status_code != 429):
-        return False
-
-    details = getattr(exc, "details", None)
-    if isinstance(details, list):
-        for entry in details:
-            if not isinstance(entry, dict):
-                continue
-            if entry.get("@type") != "type.googleapis.com/google.rpc.QuotaFailure":
-                continue
-            for violation in entry.get("violations", []):
-                if not isinstance(violation, dict):
-                    continue
-                metric = violation.get("quotaMetric", "").lower()
-                quota_id = violation.get("quotaId", "").lower()
-                if _QUOTA_METRIC_TOKEN in metric or _QUOTA_PERDAY_TOKEN in quota_id:
-                    return True
-
-    text = str(exc).lower()
-    return (
-        _QUOTA_METRIC_TOKEN in text or _QUOTA_PERDAY_TOKEN in text or _QUOTA_METRIC_PHRASE in text
-    )
-
-
-def _log_quota_exhausted(item_id: str, remaining: int) -> None:
-    logger.warning(
-        "Gemini quota exhausted while enriching %r; skipping AI enrichment for remaining %d item(s)",
-        item_id,
-        remaining,
-    )
 
 
 def _remaining_item_count(total: int, idx: int) -> int:

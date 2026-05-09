@@ -1,6 +1,7 @@
 """Backfill AI enrichment for ProcessedItems where theme is missing.
 
-CLI: python -m src.pipeline.backfill [--all] [--date YYYY-MM-DD] [--dry-run] [--debug]
+CLI: python -m src.pipeline.backfill [--all] [--date YYYY-MM-DD] [--dry-run]
+     [--max-items N] [--commit-progress] [--debug]
 
 Reads data/processed/*.jsonl, finds items with theme == "", and re-runs the
 combined AI enrich stage on them. Updates files in-place.
@@ -8,6 +9,9 @@ combined AI enrich stage on them. Updates files in-place.
 Use --all to scan all processed files (default: today only).
 Use --date to target a specific date.
 Use --dry-run to report counts without writing changes.
+Use --max-items N to stop after enriching N items (for chunked runs).
+Use --commit-progress to git-commit each updated file immediately so partial
+  progress is preserved if the run is interrupted.
 
 This is an ops tool for recovering from periods when GEMINI_API_KEY was absent
 or when gemini-2.5-flash thinking tokens exhausted the max_output_tokens budget
@@ -19,6 +23,7 @@ from __future__ import annotations
 import argparse
 import logging
 import os
+import subprocess
 import sys
 from datetime import UTC, datetime
 from pathlib import Path
@@ -32,6 +37,7 @@ except ImportError:
 
 from src.logger import setup_logging
 from src.models import ProcessedItem, read_processed_jsonl, write_processed_jsonl
+from src.pipeline._quota import is_rate_limited
 from src.retry import with_backoff
 
 logger = logging.getLogger(__name__)
@@ -62,17 +68,19 @@ def backfill_file(
     rate_limiter: object,
     max_output_tokens: int,
     dry_run: bool = False,
-) -> tuple[int, int]:
+    budget: int | None = None,
+) -> tuple[int, int, bool]:
     """Enrich items with theme == '' in a single processed file.
 
-    Returns (enriched_count, failed_count).  When dry_run is True, counts
-    are computed but the file is not written.
+    Returns (enriched_count, failed_count, stop).  stop=True signals the caller
+    to halt processing of subsequent files (quota exhausted or budget reached).
+    When dry_run is True, counts are computed but the file is not written.
     """
     items = read_processed_jsonl(path)
     unenriched = [i for i in items if not i.theme]
 
     if not unenriched:
-        return 0, 0
+        return 0, 0, False
 
     logger.info(
         "%s: %d unenriched item(s) of %d total", path.name, len(unenriched), len(items)
@@ -80,29 +88,107 @@ def backfill_file(
 
     if dry_run:
         logger.info("Dry run — skipping enrichment calls for %s", path.name)
-        return len(unenriched), 0
+        return len(unenriched), 0, False
+
+    if budget is not None and budget <= 0:
+        return 0, 0, True
 
     item_map: dict[str, ProcessedItem] = {i.id: i for i in items}
     enriched_count = 0
     failed_count = 0
+    quota_exhausted = False
+    budget_used = 0
+    stop = False
 
-    for item in unenriched:
+    from src.pipeline._quota import (  # noqa: I001, PLC0415
+        NonRetryableEnrichError as _NonRetryableEnrichError,
+        QuotaExhaustedEnrichError as _QuotaExhaustedEnrichError,
+        is_quota_exhausted_error as _is_quota_exhausted_error,
+        log_quota_exhausted as _log_quota_exhausted,
+    )
+
+    for idx, item in enumerate(unenriched):
+        if quota_exhausted:
+            failed_count += 1
+            continue
+
+        if budget is not None and budget_used >= budget:
+            stop = True
+            break
+
         rate_limiter.wait()  # type: ignore[union-attr]
+        budget_used += 1
 
-        def _attempt(current: ProcessedItem = item):
-            return enrich(current, client, max_output_tokens=max_output_tokens)  # type: ignore[arg-type]
+        def _make_attempt(current: ProcessedItem = item):
+            def _attempt():
+                try:
+                    return enrich(current, client, max_output_tokens=max_output_tokens)  # type: ignore[arg-type]
+                except Exception as exc:
+                    # Pass quota-sentinel through so the outer handler can stop the batch.
+                    if isinstance(exc, _QuotaExhaustedEnrichError):
+                        raise
+                    # Any 429 stops the batch — plain rate-limit or quota-metric 429.
+                    if is_rate_limited(exc):
+                        raise _QuotaExhaustedEnrichError from exc
+                    # Only classify as a Gemini transport error if the exception
+                    # originated from google.genai — avoids importing the C-extension
+                    # backed google.genai.errors for non-Gemini exceptions (e.g.
+                    # AttributeError from a programming mistake in enrich()).
+                    if type(exc).__module__.startswith("google.genai"):
+                        from google.genai.errors import (  # noqa: PLC0415, B023
+                            ClientError,
+                            ServerError,
+                        )
 
+                        if isinstance(exc, (ClientError, ServerError)):  # noqa: B023
+                            if _is_quota_exhausted_error(exc):
+                                raise _QuotaExhaustedEnrichError from exc
+                            raise  # let with_backoff retry ServerError / non-quota ClientError
+                    raise _NonRetryableEnrichError from exc
+
+            return _attempt
+
+        pre_enrich = item
         try:
             enriched_item, ok = with_backoff(
-                _attempt,
+                _make_attempt(item),
                 max_attempts=3,
-                base_delay=60.0,
+                base_delay=5.0,
                 label=f"backfill:{item.id}",
+                no_retry=(_NonRetryableEnrichError, _QuotaExhaustedEnrichError),
             )
-        except Exception as exc:
-            logger.warning("Backfill failed for %r after retries: %s", item.id, exc)
+        except _QuotaExhaustedEnrichError:
+            enriched_item = pre_enrich
             ok = False
-            enriched_item = item
+            quota_exhausted = True
+            remaining = len(unenriched) - idx - 1
+            _log_quota_exhausted(item.id, remaining)
+        except RuntimeError as exc:
+            cause = exc.__cause__
+            cause_module = type(cause).__module__ if cause is not None else ""
+            is_gemini_transport = False
+            if cause_module.startswith("google.genai"):
+                from google.genai.errors import ClientError, ServerError  # noqa: PLC0415
+
+                is_gemini_transport = isinstance(cause, (ClientError, ServerError))
+
+            if is_gemini_transport:
+                enriched_item = pre_enrich
+                if _is_quota_exhausted_error(exc.__cause__):
+                    quota_exhausted = True
+                    remaining = len(unenriched) - idx - 1
+                    _log_quota_exhausted(item.id, remaining)
+                else:
+                    logger.warning(
+                        "AI enrichment failed for %r after retries: %s",
+                        item.id,
+                        exc.__cause__,
+                    )
+                ok = False
+            else:
+                raise
+        except _NonRetryableEnrichError as exc:
+            raise exc.__cause__ from None  # type: ignore[misc]
 
         if ok:
             item_map[item.id] = enriched_item
@@ -112,13 +198,36 @@ def backfill_file(
             failed_count += 1
             logger.warning("Enrichment returned ok=False for %r — keeping defaults", item.id)
 
+    if quota_exhausted:
+        stop = True
+
     # Preserve original insertion order
     ordered = [item_map[i.id] for i in items]
     write_processed_jsonl(ordered, path)
     logger.info(
         "%s: enriched %d, failed %d", path.name, enriched_count, failed_count
     )
-    return enriched_count, failed_count
+    return enriched_count, failed_count, stop
+
+
+def _git_commit_file(path: Path) -> None:
+    """Stage and commit a single processed file to preserve incremental progress."""
+    try:
+        subprocess.run(["git", "add", str(path)], check=True, capture_output=True)
+        diff = subprocess.run(["git", "diff", "--cached", "--quiet"], capture_output=True)
+        if diff.returncode == 0:
+            return  # nothing to commit
+        subprocess.run(
+            [
+                "git", "commit", "-m",
+                f"chore: backfill AI enrichment {path.name} [skip ci]",
+            ],
+            check=True,
+            capture_output=True,
+        )
+        logger.info("Committed progress: %s", path.name)
+    except Exception as exc:
+        logger.warning("Could not commit progress for %s: %s", path.name, exc)
 
 
 def backfill_all(
@@ -128,12 +237,16 @@ def backfill_all(
     max_output_tokens: int,
     dry_run: bool = False,
     date_filter: str | None = None,
+    max_items: int | None = None,
+    commit_progress: bool = False,
 ) -> tuple[int, int, int]:
     """Backfill all (or a single date's) processed files.
 
     Returns (total_enriched, total_failed, files_updated).
     files_updated counts files where at least one item was enriched (or would
     be enriched in dry_run mode).
+    When commit_progress is True, each updated file is git-committed immediately
+    so partial progress survives an interrupted run.
     """
     if date_filter:
         paths = [processed_dir / f"{date_filter}.jsonl"]
@@ -150,13 +263,18 @@ def backfill_all(
     files_updated = 0
 
     for path in paths:
-        enriched, failed = backfill_file(
-            path, client, rate_limiter, max_output_tokens, dry_run=dry_run
+        budget = (max_items - total_enriched) if max_items is not None else None
+        enriched, failed, stop = backfill_file(
+            path, client, rate_limiter, max_output_tokens, dry_run=dry_run, budget=budget
         )
         total_enriched += enriched
         total_failed += failed
         if enriched > 0:
             files_updated += 1
+            if commit_progress:
+                _git_commit_file(path)
+        if stop:
+            break
 
     return total_enriched, total_failed, files_updated
 
@@ -173,6 +291,19 @@ def _parse_args() -> argparse.Namespace:
     )
     p.add_argument("--date", default=None, help="Target a specific date (YYYY-MM-DD)")
     p.add_argument("--dry-run", action="store_true", help="Report counts without writing files")
+    p.add_argument(
+        "--max-items",
+        type=int,
+        default=None,
+        dest="max_items",
+        help="Stop after enriching this many items (for chunked GitHub Actions runs)",
+    )
+    p.add_argument(
+        "--commit-progress",
+        action="store_true",
+        dest="commit_progress",
+        help="Git-commit each updated file immediately to preserve progress on interruption",
+    )
     p.add_argument("--debug", action="store_true")
     return p.parse_args()
 
@@ -216,6 +347,8 @@ def main() -> int:
         max_output_tokens=cfg.pipeline.enrich_max_output_tokens,
         dry_run=args.dry_run,
         date_filter=date_filter,
+        max_items=args.max_items,
+        commit_progress=args.commit_progress,
     )
 
     logger.info(
