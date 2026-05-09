@@ -1,24 +1,29 @@
 {
-  "generated": "2026-05-09T09:57:46.982317+00:00",
+  "generated": "2026-05-09T10:07:11.294040+00:00",
   "classes": {
     "primary": {
-      "count": 13,
+      "count": 14,
       "sources": [
         "Hugging Face",
         "arXiv"
       ]
     },
     "operator": {
-      "count": 0,
-      "sources": []
+      "count": 18,
+      "sources": [
+        "OpenAI Blog"
+      ]
     },
     "practitioner": {
-      "count": 196,
+      "count": 219,
       "sources": [
         "Hacker News",
         "Matthew Berman",
         "Nate Jones",
-        "Wes Roth"
+        "Ollama Releases",
+        "The AI Daily Brief",
+        "Wes Roth",
+        "llama.cpp Releases"
       ]
     },
     "media": {
@@ -80,6 +85,36 @@
       ]
     },
     {
+      "name": "OpenAI Blog",
+      "source_class": "operator",
+      "item_count": 18,
+      "themed_count": 0,
+      "first_seen": "2026-05-09",
+      "last_seen": "2026-05-09",
+      "days_active": 1,
+      "top_themes": []
+    },
+    {
+      "name": "Ollama Releases",
+      "source_class": "practitioner",
+      "item_count": 10,
+      "themed_count": 0,
+      "first_seen": "2026-05-09",
+      "last_seen": "2026-05-09",
+      "days_active": 1,
+      "top_themes": []
+    },
+    {
+      "name": "llama.cpp Releases",
+      "source_class": "practitioner",
+      "item_count": 10,
+      "themed_count": 0,
+      "first_seen": "2026-05-09",
+      "last_seen": "2026-05-09",
+      "days_active": 1,
+      "top_themes": []
+    },
+    {
       "name": "arXiv",
       "source_class": "primary",
       "item_count": 8,
@@ -92,7 +127,7 @@
     {
       "name": "Hugging Face",
       "source_class": "primary",
-      "item_count": 5,
+      "item_count": 6,
       "themed_count": 0,
       "first_seen": "2026-05-03",
       "last_seen": "2026-05-09",
@@ -103,6 +138,16 @@
       "name": "Matthew Berman",
       "source_class": "practitioner",
       "item_count": 5,
+      "themed_count": 0,
+      "first_seen": "2026-05-09",
+      "last_seen": "2026-05-09",
+      "days_active": 1,
+      "top_themes": []
+    },
+    {
+      "name": "The AI Daily Brief",
+      "source_class": "practitioner",
+      "item_count": 3,
       "themed_count": 0,
       "first_seen": "2026-05-09",
       "last_seen": "2026-05-09",
