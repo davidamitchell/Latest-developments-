@@ -254,3 +254,38 @@ Gemini quota and retry sentinel types live in `src/pipeline/_quota.py`. Always i
 ### Why the import matters
 
 `_quota.py` has no heavy transitive dependencies. Importing `run.py` pulls in `fetch.py → hackernews.py → trafilatura`, which breaks test collection in environments without that package. `_quota.py` avoids this.
+
+---
+
+## 2026-05-09 — Workflow git operations: three ordering and push gaps
+
+Three bugs surfaced from the backfill workflow, all caused by the same class of mistake: treating workflow steps as independent when they share mutable git state.
+
+### Gap 1 — git config must precede any step that calls git commit
+
+`git config user.name/email` was set in the final "Commit" step. The Python script called `subprocess.run(["git", "commit", ...])` in an earlier step. The commit failed silently (caught by `except Exception`, logged as a warning). All progress landed in the safety-net commit instead.
+
+**Rule:** If a Python script (or any step) runs `git commit`, `git config user.name/email` **must** be set in an earlier, dedicated step. Never assume it inherits from the environment.
+
+### Gap 2 — local commits without push are lost if the job ends before the push step
+
+`_git_commit_file` committed but did not push. The safety-net step only pushed inside the `else` branch (when there were uncommitted changes). If `--commit-progress` had already committed everything, the `git diff --cached` check exited clean → the `else` branch was skipped → no push → all per-file commits were silently discarded when the job ended.
+
+**Rule:** Any workflow step responsible for pushing must do so **unconditionally** (outside any `if` guard), not only when it also creates a new commit. Separate the "commit if needed" logic from the "always push" action:
+
+```bash
+if ! git diff --cached --quiet; then
+  git commit -m "..."
+fi
+git push origin HEAD   # always — picks up any locally-committed-but-not-pushed commits
+```
+
+### Gap 3 — no test for the git commit integration path
+
+`commit_progress=True` in `backfill_all` had zero test coverage. Both gaps above went undetected because the test suite never exercised the code path. The fix was to add three tests: commit called per enriched file, not called by default, not called for already-enriched files.
+
+**Rule:** Any workflow-integrated behaviour (subprocess git calls, flag-gated side effects) must have a unit test that mocks the subprocess and asserts call count and arguments. Workflow YAML cannot be unit-tested; the Python side can.
+
+### Is this a pattern?
+
+Yes. Every failure in this backfill sequence came from an untested side-effect path. The common theme: the happy path (enrich items, write files) was tested; the operational paths (git commit, git push, quota stop) were not. Operational paths are exactly where production failures hide.

@@ -899,3 +899,29 @@ Implemented `src/pipeline/backfill.py` — a CLI ops tool that re-enriches `Proc
 2. **What slowed down?** Broken cryptography native extension in the container's system Python prevents `google.genai` from importing during tests. Solved by making `enrich` a module-level wrapper with a lazy inner import, allowing `patch("src.pipeline.backfill.enrich")` to work without google.genai being imported.
 3. **What single change would prevent this next time?** The "lazy import wrapper" pattern for google.genai-dependent modules should be documented in `learnings.md` so future tests don't hit the same import-time friction.
 4. **Is this a pattern?** Yes — any module that imports `google.genai` at module level will fail to collect in this test environment. The pattern to follow: wrap the call in a module-level function with a lazy inner import.
+
+---
+
+## 2026-05-09 — Backfill reliability: three production bugs fixed
+
+**Continuation of the backfill session. Three false starts in production.**
+
+### What changed
+
+**False start 1 (original backfill):** No quota short-circuit; programming errors swallowed. Fixed via shared `_quota.py` and 5-partition error-path tests.
+
+**False start 2 (after retry fix):** Plain 429s kept retrying (only quota-metric 429s stopped the batch). No `--max-items` chunking → 6-hour GitHub Actions timeout. `base_delay=60s` compounded retries. Fixed: `is_rate_limited()` stops on any 429; `--max-items N` (default 50 in workflow); `base_delay=5s`.
+
+**False start 3 (after chunking fix):** `--commit-progress` per-file commits silently failed (git config not set when Python ran). Even after fixing git config ordering, the safety-net step only pushed inside an `if uncommitted-changes` guard — so per-file commits were never pushed. Fixed: git config now in its own step before the Python script; safety-net always pushes unconditionally.
+
+**Additional:**
+- 3 new tests for `commit_progress` behaviour in `backfill_all`
+- Workflow validation checklist in copilot-instructions.md extended with two new rules (git config ordering, unconditional push)
+- learnings.md: documented all three gap patterns
+
+### Mini-Retro
+
+1. **Did the process work?** No — three iterations where each fix exposed the next gap. The core problem was building on an untested foundation (the original backfill had no operational-path tests).
+2. **What slowed down?** Each bug only appeared in production, not in tests, because operational paths (git commit, git push, quota stop) had no test coverage. The happy path was tested; everything else was not.
+3. **What single change would prevent this next time?** Write tests for operational side-effects before writing the production code. `commit_progress` had no test from the start — the rule "every flag-gated side effect needs a test" would have caught it.
+4. **Is this a pattern?** Yes. All three failures are the same class: untested operational paths. Production failure is the only feedback mechanism when operational paths have no tests. The fix is mandatory: any subprocess call, any git operation, any quota-stop behaviour needs a unit test that mocks the side effect and asserts call count.
