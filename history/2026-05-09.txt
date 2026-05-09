@@ -3,9 +3,55 @@ Daily AI Digest — 09 May 2026
 
 [AI summarisation failed: ClientError — no model processing was applied. Raw links only.]
 
+## Ollama Releases
+
+- v0.30.0-rc7 (08 May)
+  https://github.com/ollama/ollama/releases/tag/v0.30.0-rc7
+- v0.30.0-rc6 (07 May)
+  https://github.com/ollama/ollama/releases/tag/v0.30.0-rc6
+- v0.30.0-rc5 (07 May)
+  https://github.com/ollama/ollama/releases/tag/v0.30.0-rc5
+- v0.30.0-rc4: ci: windows mlx tuning (07 May)
+  https://github.com/ollama/ollama/releases/tag/v0.30.0-rc4
+- v0.30.0-rc3 (07 May)
+  https://github.com/ollama/ollama/releases/tag/v0.30.0-rc3
+
+## llama.cpp Releases
+
+- b9085 (09 May)
+  https://github.com/ggml-org/llama.cpp/releases/tag/b9085
+- b9084 (09 May)
+  https://github.com/ggml-org/llama.cpp/releases/tag/b9084
+- b9082 (08 May)
+  https://github.com/ggml-org/llama.cpp/releases/tag/b9082
+- b9081 (08 May)
+  https://github.com/ggml-org/llama.cpp/releases/tag/b9081
+- b9080 (08 May)
+  https://github.com/ggml-org/llama.cpp/releases/tag/b9080
+
+## The AI Daily Brief
+
+- The Week the AI Story Shifted (08 May)
+  https://www.youtube.com/watch?v=ef4WR5vUJro
+- Surprise Elon-Anthropic Team Up Reshapes AI Race (07 May)
+  https://www.youtube.com/watch?v=RnqEXgcwg-g
+- Who Cares About Consumer AI (06 May)
+  https://www.youtube.com/watch?v=f2lynShlg20
+
 ## Hugging Face
 
-- Evolai Mamba2 B (andrebarrosilva1123) (09 May)
-  https://huggingface.co/andrebarrosilva1123/evolai-mamba2-b
-- Sortformer Finetuned (arda-argmax) (09 May)
-  https://huggingface.co/arda-argmax/sortformer-finetuned
+- Evolai Mamba2 C (andrebarrosilva1123) (09 May)
+  https://huggingface.co/andrebarrosilva1123/evolai-mamba2-c
+
+## OpenAI Blog
+
+- Running Codex safely at OpenAI (08 May)
+  https://openai.com/index/running-codex-safely
+- Scaling Trusted Access for Cyber with GPT-5.5 and GPT-5.5-Cyber (07 May)
+  https://openai.com/index/gpt-5-5-with-trusted-access-for-cyber
+- Parloa builds service agents customers want to talk to (07 May)
+  https://openai.com/index/parloa
+- Advancing voice intelligence with new models in the API (07 May)
+  https://openai.com/index/advancing-voice-intelligence-with-new-models-in-the-api
+- Introducing Trusted Contact in ChatGPT (07 May)
+  https://openai.com/index/introducing-trusted-contact-in-chatgpt
