@@ -67,11 +67,20 @@ def _make_enrich_fail():
     return _enrich
 
 
+def _make_429_error():
+    """A fake ClientError with code=429 but no quota-metric details."""
+    err = Exception("429 TooManyRequests")
+    err.code = 429  # type: ignore[attr-defined]
+    err.__module__ = "google.genai.errors"
+    err.__class__ = type("ClientError", (Exception,), {"__module__": "google.genai.errors"})
+    return err
+
+
 # ── backfill_file ────────────────────────────────────────────────────────────
 
 
 class TestBackfillFile:
-    """backfill_file(path, client, rate_limiter, max_output_tokens) → (enriched, failed)"""
+    """backfill_file(path, client, ...) → (enriched, failed, stop)"""
 
     def test_unenriched_item_gets_theme(self, tmp_path):
         """Items with theme == '' are enriched and written back."""
@@ -82,10 +91,11 @@ class TestBackfillFile:
         write_processed_jsonl([item], path)
 
         with patch("src.pipeline.backfill.enrich", side_effect=_make_enrich_ok("inference scaling")):
-            enriched, failed = backfill_file(path, MagicMock(), _NullRateLimiter(), 500)
+            enriched, failed, stop = backfill_file(path, MagicMock(), _NullRateLimiter(), 500)
 
         assert enriched == 1
         assert failed == 0
+        assert stop is False
         result = json.loads(path.read_text().strip())
         assert result["theme"] == "inference scaling"
 
@@ -99,10 +109,11 @@ class TestBackfillFile:
 
         mock_enrich = MagicMock()
         with patch("src.pipeline.backfill.enrich", mock_enrich):
-            enriched, failed = backfill_file(path, MagicMock(), _NullRateLimiter(), 500)
+            enriched, failed, stop = backfill_file(path, MagicMock(), _NullRateLimiter(), 500)
 
         assert enriched == 0
         assert failed == 0
+        assert stop is False
         mock_enrich.assert_not_called()
         result = json.loads(path.read_text().strip())
         assert result["theme"] == "existing theme"
@@ -127,7 +138,7 @@ class TestBackfillFile:
             return _make_enrich_ok("new theme")(item, client, max_output_tokens)
 
         with patch("src.pipeline.backfill.enrich", side_effect=_counting_enrich):
-            enriched, failed = backfill_file(path, MagicMock(), _NullRateLimiter(), 500)
+            enriched, failed, stop = backfill_file(path, MagicMock(), _NullRateLimiter(), 500)
 
         assert enriched == 1
         assert failed == 0
@@ -139,7 +150,7 @@ class TestBackfillFile:
         assert results["c"] == "also existing"
 
     def test_empty_file_returns_zero(self, tmp_path):
-        """An empty processed file returns (0, 0) without calling enrich."""
+        """An empty processed file returns (0, 0, False) without calling enrich."""
         from src.pipeline.backfill import _NullRateLimiter, backfill_file
 
         path = tmp_path / "2026-05-09.jsonl"
@@ -147,10 +158,11 @@ class TestBackfillFile:
 
         mock_enrich = MagicMock()
         with patch("src.pipeline.backfill.enrich", mock_enrich):
-            enriched, failed = backfill_file(path, MagicMock(), _NullRateLimiter(), 500)
+            enriched, failed, stop = backfill_file(path, MagicMock(), _NullRateLimiter(), 500)
 
         assert enriched == 0
         assert failed == 0
+        assert stop is False
         mock_enrich.assert_not_called()
 
     def test_failed_enrichment_counts_as_failed(self, tmp_path):
@@ -165,15 +177,16 @@ class TestBackfillFile:
             patch("src.pipeline.backfill.enrich", side_effect=_make_enrich_fail()),
             patch("src.retry.time.sleep"),
         ):
-            enriched, failed = backfill_file(path, MagicMock(), _NullRateLimiter(), 500)
+            enriched, failed, stop = backfill_file(path, MagicMock(), _NullRateLimiter(), 500)
 
         assert enriched == 0
         assert failed == 1
+        assert stop is False
         result = json.loads(path.read_text().strip())
         assert result["theme"] == ""
 
-    def test_quota_exhaustion_short_circuits_remaining_items(self, tmp_path):
-        """When quota is exhausted on item N, items N+1..end are skipped without API calls."""
+    def test_quota_sentinel_stops_batch(self, tmp_path):
+        """QuotaExhaustedEnrichError on item N stops all remaining items; stop=True."""
         from src.pipeline._quota import QuotaExhaustedEnrichError
         from src.pipeline.backfill import _NullRateLimiter, backfill_file
 
@@ -191,11 +204,67 @@ class TestBackfillFile:
             return item, True
 
         with patch("src.pipeline.backfill.enrich", side_effect=_quota_on_first):
-            enriched, failed = backfill_file(path, MagicMock(), _NullRateLimiter(), 500)
+            enriched, failed, stop = backfill_file(path, MagicMock(), _NullRateLimiter(), 500)
 
         assert call_count == 1
         assert enriched == 0
         assert failed == 3
+        assert stop is True
+
+    def test_any_429_stops_batch(self, tmp_path):
+        """A plain 429 ClientError (no quota-metric in details) stops the batch immediately."""
+        from src.pipeline.backfill import _NullRateLimiter, backfill_file
+
+        path = tmp_path / "2026-05-09.jsonl"
+        items = [_make_processed(str(i), theme="") for i in range(3)]
+        write_processed_jsonl(items, path)
+
+        call_count = 0
+
+        class Fake429(Exception):
+            code = 429
+
+        def _429_on_first(item, client, max_output_tokens=500):
+            nonlocal call_count
+            call_count += 1
+            if call_count == 1:
+                raise Fake429("rate limited")
+            return item, True
+
+        # Fake429 has __module__ = "builtins" so bypasses the google.genai isinstance check —
+        # the is_rate_limited path must fire before the module check to catch it.
+        with (
+            patch("src.pipeline.backfill.enrich", side_effect=_429_on_first),
+            patch("src.pipeline.backfill.is_rate_limited", return_value=True),
+        ):
+            enriched, failed, stop = backfill_file(path, MagicMock(), _NullRateLimiter(), 500)
+
+        assert call_count == 1
+        assert stop is True
+
+    def test_budget_stops_after_n_items(self, tmp_path):
+        """With budget=2, only 2 items are enriched even if more are available; stop=True."""
+        from src.pipeline.backfill import _NullRateLimiter, backfill_file
+
+        path = tmp_path / "2026-05-09.jsonl"
+        items = [_make_processed(str(i), theme="") for i in range(5)]
+        write_processed_jsonl(items, path)
+
+        call_count = 0
+
+        def _count_calls(item, client, max_output_tokens=500):
+            nonlocal call_count
+            call_count += 1
+            return _make_enrich_ok()(item, client, max_output_tokens)
+
+        with patch("src.pipeline.backfill.enrich", side_effect=_count_calls):
+            enriched, failed, stop = backfill_file(
+                path, MagicMock(), _NullRateLimiter(), 500, budget=2
+            )
+
+        assert call_count == 2
+        assert enriched == 2
+        assert stop is True
 
     def test_programming_error_propagates(self, tmp_path):
         """Non-transport errors (e.g. AttributeError) are re-raised, not swallowed."""
@@ -283,3 +352,48 @@ class TestBackfillAll:
         assert enriched == 0
         assert files == 0
         mock_enrich.assert_not_called()
+
+    def test_max_items_limits_total_enriched(self, tmp_path):
+        """max_items=2 stops after enriching 2 items across all files."""
+        from src.pipeline.backfill import _NullRateLimiter, backfill_all
+
+        for date in ("2026-04-01", "2026-04-02", "2026-04-03"):
+            p = tmp_path / f"{date}.jsonl"
+            write_processed_jsonl([_make_processed(f"item-{date}", theme="")], p)
+
+        call_count = 0
+
+        def _count(item, client, max_output_tokens=500):
+            nonlocal call_count
+            call_count += 1
+            return _make_enrich_ok()(item, client, max_output_tokens)
+
+        with patch("src.pipeline.backfill.enrich", side_effect=_count):
+            enriched, failed, files = backfill_all(
+                tmp_path, MagicMock(), _NullRateLimiter(), 500, max_items=2
+            )
+
+        assert call_count == 2
+        assert enriched == 2
+
+    def test_quota_stop_halts_subsequent_files(self, tmp_path):
+        """When quota is hit in file 1, file 2 is not touched."""
+        from src.pipeline._quota import QuotaExhaustedEnrichError
+        from src.pipeline.backfill import _NullRateLimiter, backfill_all
+
+        for date in ("2026-04-01", "2026-04-02"):
+            p = tmp_path / f"{date}.jsonl"
+            write_processed_jsonl([_make_processed(f"item-{date}", theme="")], p)
+
+        call_count = 0
+
+        def _quota_always(item, client, max_output_tokens=500):
+            nonlocal call_count
+            call_count += 1
+            raise QuotaExhaustedEnrichError
+
+        with patch("src.pipeline.backfill.enrich", side_effect=_quota_always):
+            enriched, failed, files = backfill_all(tmp_path, MagicMock(), _NullRateLimiter(), 500)
+
+        assert call_count == 1
+        assert enriched == 0

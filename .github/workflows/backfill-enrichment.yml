@@ -5,6 +5,9 @@ name: Backfill AI Enrichment
 # or after the thinking_budget=0 fix (cb6dfe0) to recover items that silently
 # stored unenriched due to finish_reason=MAX_TOKENS.
 #
+# Use max_items (default 50) to chunk large backfills across multiple runs —
+# each run commits partial progress so no work is lost on timeout or failure.
+#
 # After this workflow commits updated data/processed/ files, trigger
 # rebuild-site.yml manually to regenerate docs/data/*.json.
 
@@ -15,6 +18,11 @@ on:
         description: "Which files to backfill: 'all' (all dates) or a specific YYYY-MM-DD"
         required: true
         default: "all"
+        type: string
+      max_items:
+        description: "Stop after enriching this many items (0 = unlimited)"
+        required: false
+        default: "50"
         type: string
       dry_run:
         description: "Dry run — report counts without writing files"
@@ -64,17 +72,22 @@ jobs:
           else
             ARGS="$ARGS --date $SCOPE"
           fi
+          MAX_ITEMS="${{ inputs.max_items }}"
+          if [ -n "$MAX_ITEMS" ] && [ "$MAX_ITEMS" != "0" ]; then
+            ARGS="$ARGS --max-items $MAX_ITEMS"
+          fi
           if [ "${{ inputs.dry_run }}" = "true" ]; then ARGS="$ARGS --dry-run"; fi
           if [ "${{ inputs.debug }}" = "true" ]; then ARGS="$ARGS --debug"; fi
           echo "args=$ARGS" >> "$GITHUB_OUTPUT"
 
       - name: Run enrichment backfill
+        continue-on-error: true
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: python -m src.pipeline.backfill ${{ steps.args.outputs.args }}
 
       - name: Commit updated processed data
-        if: ${{ inputs.dry_run != 'true' }}
+        if: always() && inputs.dry_run != 'true'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"

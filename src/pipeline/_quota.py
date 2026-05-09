@@ -56,6 +56,13 @@ def is_quota_exhausted_error(exc: Exception) -> bool:
     )
 
 
+def is_rate_limited(exc: Exception) -> bool:
+    """Return True for any HTTP 429 response, regardless of quota-metric details."""
+    code = getattr(exc, "code", None)
+    status_code = getattr(exc, "status_code", None)
+    return code == 429 or status_code == 429
+
+
 def log_quota_exhausted(item_id: str, remaining: int) -> None:
     logger.warning(
         "Gemini quota exhausted while enriching %r; skipping AI enrichment for remaining %d item(s)",
