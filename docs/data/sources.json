@@ -1,22 +1,18 @@
 {
-  "generated": "2026-05-09T06:39:23.696347+00:00",
+  "generated": "2026-05-09T08:31:47.331834+00:00",
   "classes": {
     "primary": {
-      "count": 11,
-      "sources": [
-        "Hugging Face",
-        "arXiv"
-      ]
+      "count": 0,
+      "sources": []
     },
     "operator": {
       "count": 0,
       "sources": []
     },
     "practitioner": {
-      "count": 195,
+      "count": 177,
       "sources": [
         "Hacker News",
-        "Matthew Berman",
         "Nate Jones",
         "Wes Roth"
       ]
@@ -34,80 +30,47 @@
     {
       "name": "Hacker News",
       "source_class": "practitioner",
-      "item_count": 96,
-      "themed_count": 37,
+      "item_count": 80,
       "first_seen": "2026-03-03",
-      "last_seen": "2026-05-09",
-      "days_active": 30,
+      "last_seen": "2026-05-01",
+      "days_active": 28,
       "top_themes": [
         "Local LLM Applications",
-        "LLM Tooling Issues",
-        "LLM Resource Optimization",
-        "AI Security Audits",
-        "LLM Productivity Impact"
+        "Local LLM Inference",
+        "Open-Source AI Agents",
+        "AI Business Strategy",
+        "Supply Chain Security"
       ]
     },
     {
       "name": "Nate Jones",
       "source_class": "practitioner",
-      "item_count": 70,
-      "themed_count": 40,
+      "item_count": 75,
       "first_seen": "2026-03-03",
-      "last_seen": "2026-05-09",
-      "days_active": 38,
+      "last_seen": "2026-05-02",
+      "days_active": 46,
       "top_themes": [
-        "AI Workforce & Jobs",
         "Agentic Workflows",
-        "Agent Reliability",
-        "Local AI Workflow",
-        "AI Industry Dynamics"
+        "AI Workforce & Jobs",
+        "AI Safety & Alignment",
+        "AI Infrastructure",
+        "AI Business Strategy"
       ]
     },
     {
       "name": "Wes Roth",
       "source_class": "practitioner",
-      "item_count": 24,
-      "themed_count": 9,
+      "item_count": 22,
       "first_seen": "2026-03-03",
-      "last_seen": "2026-05-09",
-      "days_active": 19,
+      "last_seen": "2026-05-01",
+      "days_active": 21,
       "top_themes": [
+        "LLM Capabilities",
         "LLM Misuse",
         "AI Commentary",
         "Agi Speculation",
-        "Agi Philosophy",
-        "AI Hardware Ecosystem"
+        "Agi Philosophy"
       ]
-    },
-    {
-      "name": "arXiv",
-      "source_class": "primary",
-      "item_count": 8,
-      "themed_count": 0,
-      "first_seen": "2026-05-09",
-      "last_seen": "2026-05-09",
-      "days_active": 1,
-      "top_themes": []
-    },
-    {
-      "name": "Matthew Berman",
-      "source_class": "practitioner",
-      "item_count": 5,
-      "themed_count": 0,
-      "first_seen": "2026-05-09",
-      "last_seen": "2026-05-09",
-      "days_active": 1,
-      "top_themes": []
-    },
-    {
-      "name": "Hugging Face",
-      "source_class": "primary",
-      "item_count": 3,
-      "themed_count": 0,
-      "first_seen": "2026-05-03",
-      "last_seen": "2026-05-03",
-      "days_active": 1,
-      "top_themes": []
     }
   ]
 }
