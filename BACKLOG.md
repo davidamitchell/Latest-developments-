@@ -1138,6 +1138,50 @@ Currently `src/trends.py` does its own fetching (arXiv, HuggingFace, etc.) and r
 
 ---
 
+## W-0029
+
+status: ready
+created: 2026-05-09
+updated: 2026-05-09
+
+### Outcome
+
+The pipeline re-enriches all 120 currently-unenriched `ProcessedItem` records after the `thinking_budget=0` fix. The site shows enrichment_rate ≥ 0.85, and the Insights tab no longer displays the "AI enrichment incomplete" warning.
+
+### Context
+
+The `gemini-2.5-flash` thinking model was exhausting the `max_output_tokens=500` budget with thinking tokens, producing `finish_reason=MAX_TOKENS` on every call and silently storing unenriched items. Fix committed in `cb6dfe0` (thinking_budget=0). The 120 unenriched items remain in `data/processed/` and need a pipeline re-run or backfill.
+
+### Notes
+
+- Trigger a manual `workflow_dispatch` run on `daily-digest.yml` or `rebuild-site.yml` once the `thinking_budget=0` branch is merged
+- Alternatively, implement a backfill mode: re-process any `ProcessedItem` where `theme == ""` through the enrich stage only
+- Monitor `docs/data/log.json` enrichment_rate after the run
+
+---
+
+## W-0030
+
+status: ready
+created: 2026-05-09
+updated: 2026-05-09
+
+### Outcome
+
+An ADR (ADR-0016) records the decision to disable Gemini 2.5 Flash thinking for structured extraction tasks, documenting the root cause, alternatives considered, and the `thinking_budget=0` approach.
+
+### Context
+
+`ThinkingConfig(thinking_budget=0)` was added to `enrich.py` after discovering that thinking tokens compete with `max_output_tokens` in `gemini-2.5-flash`, causing 100% enrichment failure. This is a non-obvious constraint that future contributors need to understand. The decision also applies to any other structured extraction prompts that might be added.
+
+### Notes
+
+- Use the `adr` skill or write directly to `docs/adr/0016-gemini-thinking-budget.md`
+- Reference ADR-0009 (Gemini API integration) as context
+- Capture: root cause, alternatives (increase max_output_tokens vs disable thinking), decision, consequences
+
+---
+
 ## Deferred / Ideas
 
 | Idea | Notes |

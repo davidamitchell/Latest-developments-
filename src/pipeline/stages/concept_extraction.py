@@ -13,7 +13,6 @@ from __future__ import annotations
 
 import dataclasses
 import logging
-import re
 
 from src.models import ImpactVector, ProcessedItem
 
@@ -40,10 +39,14 @@ def _parse_response(text: str) -> tuple[list[str], list[str], ImpactVector]:
         line = line.strip()
         if line.upper().startswith("CONCEPTS:"):
             raw = line.split(":", 1)[1].strip()
-            concepts = [c.strip() for c in raw.split(",") if c.strip() and c.strip().lower() != "none"]
+            concepts = [
+                c.strip() for c in raw.split(",") if c.strip() and c.strip().lower() != "none"
+            ]
         elif line.upper().startswith("ACTORS:"):
             raw = line.split(":", 1)[1].strip()
-            actors = [a.strip() for a in raw.split(",") if a.strip() and a.strip().lower() != "none"]
+            actors = [
+                a.strip() for a in raw.split(",") if a.strip() and a.strip().lower() != "none"
+            ]
         elif line.upper().startswith("IMPACT:"):
             raw = line.split(":", 1)[1].strip().lower()
             if raw in _VALID_IMPACTS:

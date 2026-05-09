@@ -30,8 +30,18 @@ _VALID_IMPACTS: frozenset[str] = frozenset(
     {"cost", "latency", "capability", "safety", "adoption", "unknown"}
 )
 _VALID_DOMAINS: frozenset[str] = frozenset(
-    {"multimodal", "agents", "infra", "reasoning", "safety", "evals",
-     "data", "hardware", "general", "unknown"}
+    {
+        "multimodal",
+        "agents",
+        "infra",
+        "reasoning",
+        "safety",
+        "evals",
+        "data",
+        "hardware",
+        "general",
+        "unknown",
+    }
 )
 
 _SYSTEM_PROMPT = """\
@@ -79,21 +89,29 @@ def _parse(text: str, item_id: str) -> dict:
         return fields.get(key, "")
 
     concepts_raw = _get("CONCEPTS")
-    concepts = [c.strip() for c in concepts_raw.split(",")
-                if c.strip() and c.strip().lower() != "none"] if concepts_raw else []
+    concepts = (
+        [c.strip() for c in concepts_raw.split(",") if c.strip() and c.strip().lower() != "none"]
+        if concepts_raw
+        else []
+    )
     if not concepts_raw:
         logger.debug("enrich: missing CONCEPTS for %r — defaulting to []", item_id)
 
     actors_raw = _get("ACTORS")
-    actors = [a.strip() for a in actors_raw.split(",")
-               if a.strip() and a.strip().lower() != "none"] if actors_raw else []
+    actors = (
+        [a.strip() for a in actors_raw.split(",") if a.strip() and a.strip().lower() != "none"]
+        if actors_raw
+        else []
+    )
     if not actors_raw:
         logger.debug("enrich: missing ACTORS for %r — defaulting to []", item_id)
 
     impact_raw = _get("IMPACT").lower()
     impact: ImpactVector = impact_raw if impact_raw in _VALID_IMPACTS else "unknown"  # type: ignore[assignment]
     if impact_raw and impact_raw not in _VALID_IMPACTS:
-        logger.debug("enrich: unrecognised IMPACT %r for %r — defaulting to 'unknown'", impact_raw, item_id)
+        logger.debug(
+            "enrich: unrecognised IMPACT %r for %r — defaulting to 'unknown'", impact_raw, item_id
+        )
     elif not impact_raw:
         logger.debug("enrich: missing IMPACT for %r — defaulting to 'unknown'", item_id)
 
@@ -104,7 +122,9 @@ def _parse(text: str, item_id: str) -> dict:
     domain_raw = _get("DOMAIN").lower()
     domain: Domain = domain_raw if domain_raw in _VALID_DOMAINS else "unknown"  # type: ignore[assignment]
     if domain_raw and domain_raw not in _VALID_DOMAINS:
-        logger.debug("enrich: unrecognised DOMAIN %r for %r — defaulting to 'unknown'", domain_raw, item_id)
+        logger.debug(
+            "enrich: unrecognised DOMAIN %r for %r — defaulting to 'unknown'", domain_raw, item_id
+        )
     elif not domain_raw:
         logger.debug("enrich: missing DOMAIN for %r — defaulting to 'unknown'", item_id)
 
@@ -150,9 +170,10 @@ def enrich(
     Retry behaviour is handled by the caller (process() in run.py) via
     src.retry.with_backoff.
 
-    Only google.genai transport errors (ClientError, ServerError) are caught.
-    Programming errors (AttributeError, TypeError, etc.) propagate so they are
-    not silently swallowed as enrichment failures.
+    Transport errors (ClientError, ServerError) are NOT caught here — they
+    propagate to run.py where src.retry.with_backoff handles retries.
+    Programming errors (AttributeError, TypeError, etc.) also propagate so
+    they are not silently swallowed as enrichment failures.
     """
     content = item.cleaned_content or item.title
     prompt = (
@@ -163,6 +184,13 @@ def enrich(
     config = types.GenerateContentConfig(
         system_instruction=_SYSTEM_PROMPT,
         max_output_tokens=max_output_tokens,
+        # Disable thinking for structured extraction — this task needs format
+        # adherence, not chain-of-thought reasoning. With thinking enabled,
+        # gemini-2.5-flash thinking tokens compete for the max_output_tokens
+        # budget, truncating the structured response (finish_reason=MAX_TOKENS)
+        # and leaving items unenriched. Setting thinking_budget=0 keeps the
+        # full output budget for the 8-line structured format.
+        thinking_config=types.ThinkingConfig(thinking_budget=0),
     )
     response = client.models.generate_content(
         model="gemini-2.5-flash",
@@ -170,7 +198,8 @@ def enrich(
         config=config,
     )
     # finish_reason must be STOP before accessing response.text — other
-    # reasons (SAFETY, MAX_TOKENS, RECITATION) raise ValueError per SDK docs.
+    # reasons (SAFETY, MAX_TOKENS, RECITATION) mean the response is unusable.
+    # Log the actual finish_reason so failures are diagnosable in pipeline logs.
     if not response.candidates:
         logger.warning("AI enrichment for %r returned no candidates — using defaults", item.id)
         return item, False
@@ -178,8 +207,11 @@ def enrich(
     finish_reason = candidate.finish_reason
     if finish_reason != FinishReason.STOP:
         logger.warning(
-            "AI enrichment for %r stopped with finish_reason=%r — using defaults",
-            item.id, finish_reason,
+            "AI enrichment for %r: finish_reason=%r (expected STOP) — using defaults. "
+            "If reason is MAX_TOKENS, increase enrich_max_output_tokens in sources.yaml. "
+            "If reason is SAFETY, the content was blocked.",
+            item.id,
+            finish_reason.name if hasattr(finish_reason, "name") else finish_reason,
         )
         return item, False
     parsed = _parse(response.text, item.id)

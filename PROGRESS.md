@@ -811,3 +811,66 @@ Three gaps identified by working the backlog:
 2. **What slowed down or went wrong?** The repo has existing unrelated lint failures, so full-lint validation remains noisy for targeted fixes.
 3. **What single change would prevent this next time?** Add a dedicated regression test around same-day rerun semantics for both raw and processed outputs whenever pipeline persistence logic changes.
 4. **Is this a pattern?** Yes — date-keyed outputs are vulnerable to accidental clobbering when reruns write whole files instead of merging.
+
+---
+
+## 2026-05-09 — Site data quality: insights tab, sources accuracy, processing log
+
+**What changed:**
+
+**Root causes found:**
+1. `_build_source_list` iterated `entries` (themed items only) instead of all items — arXiv, Matthew Berman, and Hugging Face (11 items combined) were invisible in the Sources tab because they had no AI-assigned themes.
+2. `meta.json item_count` was `sum(m.item_count for m in metrics)` = 43 (qualifying-theme items only), not total items. The site header showed "43 items" when 305 were loaded.
+3. 99 legacy `hist-` prefixed items from the old `src/trends.py` history-parsing pipeline were polluting `data/processed/`. These had empty URLs and single-word titles ("Big", "Labor") and were being loaded as valid ProcessedItem records, skewing counts and theme analysis.
+4. Insights tab (`renderInsightsTab`) was never implemented — only a static empty-state placeholder existed in the HTML.
+5. No processing log visible on the site — no way to see why enrichment was incomplete.
+6. AI enrichment rate: only 86 of 206 valid items (42%) have themes — GEMINI_API_KEY absent or quota exhausted in recent pipeline runs.
+
+**Changes made (`build.py`):**
+- `load_processed_items` now returns `(items, file_log)` tuple; filters `hist-` items with per-file count
+- `_build_source_list` iterates all items (pass 1) then augments with theme data from entries (pass 2)
+- `meta.json` now has `total_items`, `themed_items`, `unthemed_items`, `enrichment_rate`, `source_count`, `date_range`
+- `log.json` added: per-file processing audit with `ai_note` warning when enrichment rate < 95%
+
+**Changes made (`app.js` + `index.html`):**
+- `renderInsightsTab()` derives 5 insight card types from trends data: AI health warning, all-declining alert, cross-source confirmed signals, hype alerts, coverage gaps
+- `renderLogSection()`: pipeline run audit with stats grid and per-file breakdown table
+- `renderItemsExplorer()`: searchable, filterable table of all 206 processed items (source, theme, text filters)
+
+**Tests:** 26/26 pass; 3 new tests for hist- filtering, file_log structure, and enrichment rate fields in meta.json.
+
+### Mini-Retro
+
+1. **Did the process work?** Yes — traced root causes before writing any code; each fix addressed a specific identified bug rather than patching symptoms.
+2. **What slowed down?** `uv run python -m pytest` vs bare `pytest` uses a different Python interpreter — spent time diagnosing a missing `yaml` import that was only missing in the pytest tool's env, not the project venv. Fix: always use `uv run python -m pytest`.
+3. **What single change would prevent this next time?** The learnings.md should note "use `uv run python -m pytest` not bare `pytest`" — added below.
+4. **Is this a pattern?** The `hist-` pollution is a migration artefact from `src/trends.py → src/site/build.py`. The old pipeline wrote fragments to `data/processed/` via a different code path. The filter is now permanent. The AI enrichment gap (42%) is a recurring operational issue — GEMINI_API_KEY must be active for the pipeline to produce useful trend data.
+
+---
+
+## 2026-05-09 — Code review pass: skills applied, lint clean, backlog updated
+
+**What changed (continuation of same session):**
+
+Initialized `.github/skills` submodule and applied `code-review` skill to all changes from this session.
+
+**Code review findings addressed:**
+
+1. `app.js` `renderLogSection`: `_logStat('Enrichment rate', ...)` colour expression accessed `data.enrichment_rate` without null guard. JavaScript coerces `null < 0.5` to `true`, showing amber warning when enrichment rate is unknown. Fixed: `data.enrichment_rate != null ? (...)` ternary.
+2. `app.js` `_renderItemsTable`: URL `href` used `escHtml(item.url)` which prevents HTML injection but does not block `javascript:` scheme. Fixed: `safeUrl` variable with `/^https?:\/\//` regex guard; items with non-HTTP URLs render as plain text.
+3. `enrich.py` docstring: claimed "Only google.genai transport errors are caught" — there is no `except` block in `enrich()`, the docstring was wrong. Fixed to accurately state errors propagate to `run.py`.
+4. `build.py` `load_processed_items` docstring: listed key as `"filtered"` instead of `"filtered_hist"`. Fixed.
+5. `build.py` `items_to_entries` docstring: blamed enrichment gaps on GEMINI_API_KEY absence (which was the initial wrong diagnosis). Updated to generic "enrichment failure or missing API key".
+6. Ruff auto-fix (`--fix` + format) run across the full codebase: 56 issues fixed in 22 files. 12 pre-existing issues remain in files not touched this session (test_smoke.py, scripts/).
+
+**Tests:** 625 passed, 1 skipped (live YouTube API test requires credentials) across full test suite.
+
+**Backlog:** Added W-0029 (re-enrich 120 unenriched items post thinking_budget fix) and W-0030 (ADR for thinking_budget=0 decision).
+
+### Mini-Retro
+
+1. **Did the process work?** Yes — reading the code-review skill before applying it gave a structured review that caught 2 real bugs (null enrichment_rate color, javascript: URL) and 2 misleading docstrings.
+2. **What slowed down?** Background test tasks outputting to temp files that became empty before monitor could read them. Use synchronous pytest with a timeout next time, or monitor for the completion signal explicitly.
+3. **What single change would prevent this next time?** Run `make check` before committing session changes, not after, to avoid a separate lint-only commit.
+4. **Is this a pattern?** Docstring/comment drift happens when root cause diagnoses change mid-session. Comments should be reviewed during the code review pass, not just at time of writing.
+

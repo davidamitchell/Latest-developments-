@@ -19,6 +19,7 @@ from pathlib import Path
 
 try:
     from dotenv import load_dotenv  # type: ignore[import-untyped]
+
     load_dotenv()
 except ImportError:
     pass
@@ -78,11 +79,13 @@ def _safe_fetch(name: str, fetcher, already_processed: set[str]) -> list[Fetched
 _SINGLETON_FACTORIES: dict[str, Callable[[SourceEntry], tuple[str, object]]] = {
     "hackernews": lambda e: (
         e.name,
-        HackerNewsFetcher(HackerNewsConfig(
-            min_score=e.options.get("min_score", 100),
-            keywords=e.options.get("keywords", []),
-            max_stories=e.options.get("max_stories", 10),
-        )),
+        HackerNewsFetcher(
+            HackerNewsConfig(
+                min_score=e.options.get("min_score", 100),
+                keywords=e.options.get("keywords", []),
+                max_stories=e.options.get("max_stories", 10),
+            )
+        ),
     ),
     "arxiv": lambda e: (
         e.name,
@@ -178,8 +181,7 @@ def _build_fetchers(cfg: Config) -> list[tuple[str, object]]:
     if ss_entries:
         ss_cfg = SubstackConfig(
             publications=[
-                SubstackPublication(name=e.name, slug=e.options["slug"])
-                for e in ss_entries
+                SubstackPublication(name=e.name, slug=e.options["slug"]) for e in ss_entries
             ]
         )
         pairs.append(("Substack", SubstackFetcher(ss_cfg)))
@@ -228,7 +230,11 @@ def fetch_all(
             if item.id in seen:
                 continue
             if item.published:
-                pub = item.published if item.published.tzinfo is not None else item.published.replace(tzinfo=UTC)
+                pub = (
+                    item.published
+                    if item.published.tzinfo is not None
+                    else item.published.replace(tzinfo=UTC)
+                )
                 if pub < cutoff:
                     too_old += 1
                     continue
@@ -281,8 +287,12 @@ def _parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description="Fetch all sources → data/raw/YYYY-MM-DD.jsonl")
     p.add_argument("--config", default="config/sources.yaml", help="Path to sources.yaml")
     p.add_argument("--date", default=None, help="Override fetch date (YYYY-MM-DD)")
-    p.add_argument("--max-videos", type=int, default=None,
-                   help="Override max_videos for all YouTube sources (useful for catch-up runs)")
+    p.add_argument(
+        "--max-videos",
+        type=int,
+        default=None,
+        help="Override max_videos for all YouTube sources (useful for catch-up runs)",
+    )
     p.add_argument("--debug", action="store_true")
     return p.parse_args()
 

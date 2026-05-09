@@ -183,3 +183,18 @@ Patch `src.retry.time.sleep` in tests that intentionally trigger retry exhaustio
 ### Why this matters
 
 Without this, targeted test runs can appear hung or exceed CI time budgets even when logic is correct.
+
+---
+
+## 2026-05-09 — Data pipeline and site build learnings
+
+**Use `uv run python -m pytest`, not bare `pytest`.** The `pytest` binary uses a separate tool venv that does not have project dependencies installed. `uv run python -m pytest` uses the project venv where all deps are present.
+
+**`hist-` IDs are legacy migration pollution.** Items with `id` starting with `hist-` were written by the old `src/trends.py` history-parsing pipeline. They have empty URLs and single-word titles. They do not represent real FetchedItem records. `load_processed_items` in `src/site/build.py` now filters them permanently.
+
+**`_build_source_list` must iterate `items`, not `entries`.** `entries` only contains AI-themed items. Sources with zero themed items (arXiv, HuggingFace, Matthew Berman when GEMINI_API_KEY is absent) become invisible in the Sources tab if you build the source list from `entries` only. The fix is a two-pass approach: count item_count from all items, then augment with theme data from entries.
+
+**AI enrichment rate is an ops metric, not a code metric.** When `GEMINI_API_KEY` is absent or quota-exhausted, items are processed without themes. The pipeline continues normally (by design) but the site shows "all themes declining" because no new themed items arrive. The `log.json` `enrichment_rate` and `ai_note` fields surface this immediately. Target: enrichment_rate ≥ 0.95 per daily run.
+
+**All themes declining = pipeline signal, not trend signal.** When every theme shows `state: declining`, the most likely cause is that no new AI-enriched items have been added in the last 14 days (the `_VOLUME_WINDOW_DAYS`). Check GEMINI_API_KEY and pipeline logs before interpreting declining states as genuine trend signals.
+

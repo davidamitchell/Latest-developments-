@@ -14,13 +14,13 @@ from __future__ import annotations
 
 import argparse
 import logging
-import os
 import sys
 from datetime import UTC, date, datetime
 from pathlib import Path
 
 try:
     from dotenv import load_dotenv  # type: ignore[import-untyped]
+
     load_dotenv()
 except ImportError:
     pass
@@ -164,7 +164,9 @@ def main() -> int:
     today = datetime.strptime(today_str, "%Y-%m-%d").date()
     processed_path = _PROCESSED_DIR / f"{today_str}.jsonl"
 
-    logger.info("Digest run for %s — input: %s (dry_run=%s)", today_str, processed_path, args.dry_run)
+    logger.info(
+        "Digest run for %s — input: %s (dry_run=%s)", today_str, processed_path, args.dry_run
+    )
 
     items = read_processed_jsonl(processed_path)
     if not items:

@@ -71,29 +71,29 @@ class ProcessedItem:
     evidence_type: EvidenceType
 
     # ── Stage 1: Ingest / Validate ──
-    fetch_date: str = ""        # ISO date of fetch run, e.g. "2026-05-02"
+    fetch_date: str = ""  # ISO date of fetch run, e.g. "2026-05-02"
 
     # ── Stage 2: Clean ──
     cleaned_content: str = ""  # Normalised text, HTML stripped, whitespace collapsed
 
     # ── Stage 3: Concept Extraction ──
-    concepts: list[str] = field(default_factory=list)   # Key entities and techniques
-    actors: list[str] = field(default_factory=list)     # Organisations and people named
-    impact_vector: ImpactVector = "unknown"             # Primary impact area
+    concepts: list[str] = field(default_factory=list)  # Key entities and techniques
+    actors: list[str] = field(default_factory=list)  # Organisations and people named
+    impact_vector: ImpactVector = "unknown"  # Primary impact area
 
     # ── Stage 4: Theme Classification ──
-    theme: str = ""             # 1–3 word label, e.g. "agentic RAG"
+    theme: str = ""  # 1–3 word label, e.g. "agentic RAG"
     domain: Domain = "unknown"  # Canonical domain from taxonomy
 
     # ── Stage 5: Summary Extraction ──
-    summary: str = ""           # 2–3 sentence item summary
+    summary: str = ""  # 2–3 sentence item summary
 
     # ── Stage 6: Media / Marketing Identification ──
     is_marketing: bool = False
-    marketing_confidence: float = 0.0   # 0–1; 1 = near-certain marketing
+    marketing_confidence: float = 0.0  # 0–1; 1 = near-certain marketing
 
     # ── Stage 7: Hype Scoring ──
-    hype_risk: float = 0.0      # 0–1; derived from marketing flag + source incentive
+    hype_risk: float = 0.0  # 0–1; derived from marketing flag + source incentive
 
     # ── Stage 8: Credibility Scoring ──
     credibility_score: float = 0.5  # 0–1; 5-axis composite
@@ -231,6 +231,7 @@ class GraphEdge:
 # ── ProcessedItem JSONL I/O ──────────────────────────────────────────────────
 # Kept here (with the model) so consumers can read ProcessedItem records
 # without importing src.pipeline.run and its transitive stage dependencies.
+
 
 def write_processed_jsonl(items: list[ProcessedItem], path: Path) -> None:
     """Write ProcessedItem list to path as JSONL."""

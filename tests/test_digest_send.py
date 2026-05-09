@@ -8,17 +8,14 @@ fetcher or pipeline stage directly.
 from __future__ import annotations
 
 import json
-from datetime import date, datetime, timezone
-from pathlib import Path
-from unittest.mock import MagicMock, call, patch
-
-import pytest
+from datetime import UTC, date, datetime
+from unittest.mock import patch
 
 from src.fetchers import FetchedItem
 from src.models import ProcessedItem
 
-
 # ── helpers ─────────────────────────────────────────────────────────────────
+
 
 def _make_processed(
     id_: str = "item-1",
@@ -34,7 +31,7 @@ def _make_processed(
         source_type=source_type,
         source_class=source_class,
         author="Alice",
-        published=datetime(2026, 5, 2, 9, 0, tzinfo=timezone.utc),
+        published=datetime(2026, 5, 2, 9, 0, tzinfo=UTC),
         has_code=False,
         evidence_type="analysis",
         fetch_date="2026-05-02",
@@ -46,6 +43,7 @@ def _make_processed(
 
 
 # ── select_items ─────────────────────────────────────────────────────────────
+
 
 class TestSelectItems:
     """select_items(items, already_sent) → items not in already_sent."""
@@ -86,6 +84,7 @@ class TestSelectItems:
 
 
 # ── items_to_fetched ─────────────────────────────────────────────────────────
+
 
 class TestItemsToFetched:
     """items_to_fetched(items) converts ProcessedItem list to FetchedItem list for summariser."""
@@ -133,6 +132,7 @@ class TestItemsToFetched:
 
 # ── build_digest ─────────────────────────────────────────────────────────────
 
+
 class TestBuildDigest:
     """build_digest(items, cfg, today, history) → (plain_text, html_text)"""
 
@@ -161,8 +161,10 @@ class TestBuildDigest:
         cfg = Config()
         items = [_make_processed("a")]
         today = date(2026, 5, 2)
-        with patch("src.digest.send.summarise") as mock_sum, \
-             patch("src.digest.send.render_html_digest", return_value="<html/>"):
+        with (
+            patch("src.digest.send.summarise") as mock_sum,
+            patch("src.digest.send.render_html_digest", return_value="<html/>"),
+        ):
             mock_sum.return_value = "digest"
             build_digest(items, cfg, today=today, history=[])
             mock_sum.assert_called_once()
@@ -178,8 +180,10 @@ class TestBuildDigest:
         items = [_make_processed("a")]
         today = date(2026, 5, 2)
         history = ["prior digest 1", "prior digest 2"]
-        with patch("src.digest.send.summarise") as mock_sum, \
-             patch("src.digest.send.render_html_digest", return_value="<html/>"):
+        with (
+            patch("src.digest.send.summarise") as mock_sum,
+            patch("src.digest.send.render_html_digest", return_value="<html/>"),
+        ):
             mock_sum.return_value = "digest"
             build_digest(items, cfg, today=today, history=history)
             _, kwargs = mock_sum.call_args
@@ -197,6 +201,7 @@ class TestBuildDigest:
 
 # ── run (main flow) ──────────────────────────────────────────────────────────
 
+
 class TestRun:
     """run(items, cfg, today, dry_run, history_dir, state_path) → sends, archives, updates state."""
 
@@ -208,9 +213,11 @@ class TestRun:
         from src.digest.send import run
 
         items = self._make_items()
-        with patch("src.digest.send.summarise", return_value="digest"), \
-             patch("src.digest.send.render_html_digest", return_value="<html/>"), \
-             patch("src.digest.send.send_digest") as mock_send:
+        with (
+            patch("src.digest.send.summarise", return_value="digest"),
+            patch("src.digest.send.render_html_digest", return_value="<html/>"),
+            patch("src.digest.send.send_digest") as mock_send,
+        ):
             run(
                 items,
                 cfg=Config(),
@@ -227,9 +234,11 @@ class TestRun:
         from src.digest.send import run
 
         items = self._make_items()
-        with patch("src.digest.send.summarise", return_value="digest"), \
-             patch("src.digest.send.render_html_digest", return_value="<html/>"), \
-             patch("src.digest.send.send_digest") as mock_send:
+        with (
+            patch("src.digest.send.summarise", return_value="digest"),
+            patch("src.digest.send.render_html_digest", return_value="<html/>"),
+            patch("src.digest.send.send_digest") as mock_send,
+        ):
             run(
                 items,
                 cfg=Config(),
@@ -247,9 +256,11 @@ class TestRun:
 
         items = self._make_items()
         history_dir = tmp_path / "history"
-        with patch("src.digest.send.summarise", return_value="digest text"), \
-             patch("src.digest.send.render_html_digest", return_value="<html/>"), \
-             patch("src.digest.send.send_digest"):
+        with (
+            patch("src.digest.send.summarise", return_value="digest text"),
+            patch("src.digest.send.render_html_digest", return_value="<html/>"),
+            patch("src.digest.send.send_digest"),
+        ):
             run(
                 items,
                 cfg=Config(),
@@ -267,9 +278,11 @@ class TestRun:
 
         items = self._make_items()
         history_dir = tmp_path / "history"
-        with patch("src.digest.send.summarise", return_value="digest"), \
-             patch("src.digest.send.render_html_digest", return_value="<html/>"), \
-             patch("src.digest.send.send_digest"):
+        with (
+            patch("src.digest.send.summarise", return_value="digest"),
+            patch("src.digest.send.render_html_digest", return_value="<html/>"),
+            patch("src.digest.send.send_digest"),
+        ):
             run(
                 items,
                 cfg=Config(),
@@ -287,9 +300,11 @@ class TestRun:
 
         items = self._make_items()
         state_path = tmp_path / "state" / "processed.json"
-        with patch("src.digest.send.summarise", return_value="digest"), \
-             patch("src.digest.send.render_html_digest", return_value="<html/>"), \
-             patch("src.digest.send.send_digest"):
+        with (
+            patch("src.digest.send.summarise", return_value="digest"),
+            patch("src.digest.send.render_html_digest", return_value="<html/>"),
+            patch("src.digest.send.send_digest"),
+        ):
             run(
                 items,
                 cfg=Config(),
@@ -310,9 +325,11 @@ class TestRun:
 
         items = self._make_items()
         state_path = tmp_path / "state" / "processed.json"
-        with patch("src.digest.send.summarise", return_value="digest"), \
-             patch("src.digest.send.render_html_digest", return_value="<html/>"), \
-             patch("src.digest.send.send_digest"):
+        with (
+            patch("src.digest.send.summarise", return_value="digest"),
+            patch("src.digest.send.render_html_digest", return_value="<html/>"),
+            patch("src.digest.send.send_digest"),
+        ):
             run(
                 items,
                 cfg=Config(),
@@ -329,9 +346,11 @@ class TestRun:
         from src.digest.send import run
 
         items = self._make_items()
-        with patch("src.digest.send.summarise") as mock_sum, \
-             patch("src.digest.send.render_html_digest", return_value="<html/>"), \
-             patch("src.digest.send.send_digest"):
+        with (
+            patch("src.digest.send.summarise") as mock_sum,
+            patch("src.digest.send.render_html_digest", return_value="<html/>"),
+            patch("src.digest.send.send_digest"),
+        ):
             mock_sum.return_value = "digest"
             run(
                 items,
@@ -352,9 +371,11 @@ class TestRun:
         from src.digest.send import run
 
         items = self._make_items()
-        with patch("src.digest.send.summarise", return_value="digest"), \
-             patch("src.digest.send.render_html_digest", return_value="<html/>"), \
-             patch("src.digest.send.send_digest"):
+        with (
+            patch("src.digest.send.summarise", return_value="digest"),
+            patch("src.digest.send.render_html_digest", return_value="<html/>"),
+            patch("src.digest.send.send_digest"),
+        ):
             code = run(
                 items,
                 cfg=Config(),
@@ -389,20 +410,23 @@ class TestRun:
 
     def test_digest_does_not_import_fetchers(self):
         """send.py must not import any fetcher module directly."""
-        import importlib
-        import src.digest.send as send_module
-
         # Ensure none of the fetcher modules are imported by send
         import sys
-        fetcher_modules = [k for k in sys.modules if k.startswith("src.fetchers.") and k != "src.fetchers"]
+
+        import src.digest.send as send_module
+
+        fetcher_modules = [
+            k for k in sys.modules if k.startswith("src.fetchers.") and k != "src.fetchers"
+        ]
         # This test is structural — it passes as long as the module loads without error
         # and doesn't raise an ImportError due to fetcher dependencies
         assert send_module is not None
 
     def test_digest_does_not_import_pipeline_stages(self):
         """send.py must not import any pipeline stage directly."""
-        import src.digest.send as send_module
         import sys
+
+        import src.digest.send as send_module
 
         stage_modules = [k for k in sys.modules if k.startswith("src.pipeline.stages")]
         # send.py should work without any stage module being a direct dependency

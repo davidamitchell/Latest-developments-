@@ -69,6 +69,7 @@ def test_label_in_error_message() -> None:
 
 # ── _retry_after_delay ───────────────────────────────────────────────────────
 
+
 def test_retry_after_delay_falls_back_to_exponential() -> None:
     exc = RuntimeError("no header")
     assert _retry_after_delay(exc, base_delay=2.0, attempt=1) == 2.0
@@ -90,7 +91,9 @@ def test_retry_after_delay_reads_gemini_retry_info_details() -> None:
 
 def test_retry_after_delay_gemini_retry_info_takes_priority_over_header() -> None:
     response = MagicMock()
-    response.headers.get.side_effect = lambda k, default=None: "10" if k == "Retry-After" else default
+    response.headers.get.side_effect = lambda k, default=None: (
+        "10" if k == "Retry-After" else default
+    )
     exc = ClientError(429, {"error": "quota"})
     exc.response = response  # type: ignore[attr-defined]
     exc.details = [
@@ -105,7 +108,9 @@ def test_retry_after_delay_gemini_retry_info_takes_priority_over_header() -> Non
 
 def test_retry_after_delay_reads_header_from_response() -> None:
     response = MagicMock()
-    response.headers.get.side_effect = lambda k, default=None: "60" if k == "Retry-After" else default
+    response.headers.get.side_effect = lambda k, default=None: (
+        "60" if k == "Retry-After" else default
+    )
     exc = RuntimeError("429")
     exc.response = response  # type: ignore[attr-defined]
     assert _retry_after_delay(exc, base_delay=1.0, attempt=1) == 60.0
@@ -125,7 +130,9 @@ def test_retry_after_delay_ignores_non_numeric_header() -> None:
 def test_with_backoff_uses_retry_after_header() -> None:
     """with_backoff() sleeps for the Retry-After value when the response provides it."""
     response = MagicMock()
-    response.headers.get.side_effect = lambda k, default=None: "30" if k == "Retry-After" else default
+    response.headers.get.side_effect = lambda k, default=None: (
+        "30" if k == "Retry-After" else default
+    )
 
     exc = OSError("rate limited")
     exc.response = response  # type: ignore[attr-defined]
@@ -146,7 +153,9 @@ def test_with_backoff_uses_retry_after_header() -> None:
     mock_sleep.assert_called_once_with(30.0)
 
 
-def test_with_backoff_logs_detailed_429_timing_and_headers(caplog: pytest.LogCaptureFixture) -> None:
+def test_with_backoff_logs_detailed_429_timing_and_headers(
+    caplog: pytest.LogCaptureFixture,
+) -> None:
     response = MagicMock()
     response.status_code = 429
     response.headers = {"Retry-After": "30", "x-ratelimit-limit": "60"}
@@ -170,7 +179,10 @@ def test_with_backoff_logs_detailed_429_timing_and_headers(caplog: pytest.LogCap
         return "ok"
 
     caplog.set_level("WARNING")
-    with patch("src.retry.time.sleep"), patch("src.retry.time.monotonic", side_effect=[100.0, 147.0]):
+    with (
+        patch("src.retry.time.sleep"),
+        patch("src.retry.time.monotonic", side_effect=[100.0, 147.0]),
+    ):
         result = with_backoff(fn, max_attempts=2, base_delay=5.0, label="enrich:item-1")
 
     assert result == "ok"

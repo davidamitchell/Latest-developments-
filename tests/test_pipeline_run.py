@@ -32,12 +32,14 @@ def _make_fetched(id_: str = "item-1") -> FetchedItem:
 
 # ── process ─────────────────────────────────────────────────────────────────
 
+
 class TestProcess:
     """process(items, gemini_api_key, fetch_date) → (list[ProcessedItem], int failures)"""
 
     def _null_client(self):
         """A Gemini client mock that returns minimal valid combined-enrichment responses."""
         from google.genai.types import FinishReason
+
         client = MagicMock()
         resp = MagicMock()
         resp.text = (
@@ -148,11 +150,15 @@ class TestProcess:
         from src.pipeline.run import process
 
         client = MagicMock()
-        client.models.generate_content.side_effect = ClientError(429, {"error": "temporary upstream error"})
+        client.models.generate_content.side_effect = ClientError(
+            429, {"error": "temporary upstream error"}
+        )
         items = [_make_fetched("fail-1"), _make_fetched("fail-2")]
-        with patch("src.pipeline.run._make_gemini_client", return_value=client), \
-             patch("src.pipeline.run.time.sleep"), \
-             patch("src.retry.time.sleep"):
+        with (
+            patch("src.pipeline.run._make_gemini_client", return_value=client),
+            patch("src.pipeline.run.time.sleep"),
+            patch("src.retry.time.sleep"),
+        ):
             result, failures = process(items, gemini_api_key="fake-key", fetch_date="2026-05-02")
         assert failures == 2
         assert len(result) == 2
@@ -176,9 +182,7 @@ class TestProcess:
         quota_exc.details = [
             {
                 "@type": "type.googleapis.com/google.rpc.QuotaFailure",
-                "violations": [
-                    {"quotaMetric": _QUOTA_METRIC}
-                ],
+                "violations": [{"quotaMetric": _QUOTA_METRIC}],
             }
         ]
 
@@ -186,9 +190,11 @@ class TestProcess:
         client.models.generate_content.side_effect = quota_exc
         items = [_make_fetched("quota-1"), _make_fetched("quota-2"), _make_fetched("quota-3")]
 
-        with patch("src.pipeline.run._make_gemini_client", return_value=client), \
-             patch("src.pipeline.run.time.sleep"), \
-             patch("src.retry.time.sleep") as retry_sleep:
+        with (
+            patch("src.pipeline.run._make_gemini_client", return_value=client),
+            patch("src.pipeline.run.time.sleep"),
+            patch("src.retry.time.sleep") as retry_sleep,
+        ):
             result, failures = process(items, gemini_api_key="fake-key", fetch_date="2026-05-02")
 
         assert len(result) == 3
@@ -224,10 +230,12 @@ class TestProcess:
                 raise transient
             return item, True
 
-        with patch("src.pipeline.run._make_gemini_client", return_value=client), \
-             patch("src.pipeline.run.enrich", side_effect=enrich_side_effect), \
-             patch("src.pipeline.run.time.sleep"), \
-             patch("src.retry.time.sleep") as retry_sleep:
+        with (
+            patch("src.pipeline.run._make_gemini_client", return_value=client),
+            patch("src.pipeline.run.enrich", side_effect=enrich_side_effect),
+            patch("src.pipeline.run.time.sleep"),
+            patch("src.retry.time.sleep") as retry_sleep,
+        ):
             result, failures = process(items, gemini_api_key="fake-key", fetch_date="2026-05-02")
 
         assert len(result) == 1
@@ -241,12 +249,14 @@ class TestProcess:
         client = MagicMock()
         items = [_make_fetched("non-retryable")]
 
-        with patch("src.pipeline.run._make_gemini_client", return_value=client), \
-             patch("src.pipeline.run.enrich", side_effect=ValueError("bad payload")), \
-             patch("src.pipeline.run.time.sleep"), \
-             patch("src.retry.time.sleep") as retry_sleep, \
-             pytest.raises(ValueError, match="bad payload"):
-                process(items, gemini_api_key="fake-key", fetch_date="2026-05-02")
+        with (
+            patch("src.pipeline.run._make_gemini_client", return_value=client),
+            patch("src.pipeline.run.enrich", side_effect=ValueError("bad payload")),
+            patch("src.pipeline.run.time.sleep"),
+            patch("src.retry.time.sleep") as retry_sleep,
+            pytest.raises(ValueError, match="bad payload"),
+        ):
+            process(items, gemini_api_key="fake-key", fetch_date="2026-05-02")
 
         retry_sleep.assert_not_called()
 
@@ -263,12 +273,15 @@ class TestProcess:
 
 # ── _RateLimiter ─────────────────────────────────────────────────────────────
 
+
 class TestRateLimiter:
     def test_first_call_does_not_sleep(self):
         from src.pipeline.run import _RateLimiter
 
-        with patch("src.pipeline.run.time.sleep") as mock_sleep, \
-             patch("src.pipeline.run.time.monotonic", side_effect=[1000.0, 1000.0]):
+        with (
+            patch("src.pipeline.run.time.sleep") as mock_sleep,
+            patch("src.pipeline.run.time.monotonic", side_effect=[1000.0, 1000.0]),
+        ):
             rl = _RateLimiter(rpm=5)
             rl.wait()
         mock_sleep.assert_not_called()
@@ -279,8 +292,10 @@ class TestRateLimiter:
         # Simulate: first call at t=1000, second call immediately at t=1000.1
         # With 5 RPM the interval is 12s, so we expect ~11.9s sleep.
         monotonic_values = [1000.0, 1000.0, 1000.1, 1000.1]
-        with patch("src.pipeline.run.time.sleep") as mock_sleep, \
-             patch("src.pipeline.run.time.monotonic", side_effect=monotonic_values):
+        with (
+            patch("src.pipeline.run.time.sleep") as mock_sleep,
+            patch("src.pipeline.run.time.monotonic", side_effect=monotonic_values),
+        ):
             rl = _RateLimiter(rpm=5)
             rl.wait()  # first call — no sleep
             rl.wait()  # second call — should sleep
@@ -293,8 +308,10 @@ class TestRateLimiter:
 
         # Second call arrives 15s after first — no sleep needed.
         monotonic_values = [1000.0, 1000.0, 1015.0, 1015.0]
-        with patch("src.pipeline.run.time.sleep") as mock_sleep, \
-             patch("src.pipeline.run.time.monotonic", side_effect=monotonic_values):
+        with (
+            patch("src.pipeline.run.time.sleep") as mock_sleep,
+            patch("src.pipeline.run.time.monotonic", side_effect=monotonic_values),
+        ):
             rl = _RateLimiter(rpm=5)
             rl.wait()
             rl.wait()
@@ -302,6 +319,7 @@ class TestRateLimiter:
 
 
 # ── quota detection ───────────────────────────────────────────────────────────
+
 
 class TestQuotaDetection:
     def test_detects_quota_exhaustion_from_message_text(self):
@@ -311,11 +329,7 @@ class TestQuotaDetection:
 
         exc = ClientError(
             429,
-            {
-                "error": {
-                    "message": f"Quota exceeded for metric: {_QUOTA_METRIC}"
-                }
-            },
+            {"error": {"message": f"Quota exceeded for metric: {_QUOTA_METRIC}"}},
         )
         assert _is_quota_exhausted_error(exc) is True
 
@@ -391,7 +405,9 @@ class TestMergeAndWriteProcessed:
         assert [item.id for item in merged] == ["existing-1", "existing-2"]
         assert [item.id for item in reloaded] == ["existing-1", "existing-2"]
 
+
 # ── write_processed_jsonl ────────────────────────────────────────────────────
+
 
 class TestWriteProcessedJsonl:
     def _make_processed(self, id_: str) -> ProcessedItem:
@@ -459,6 +475,7 @@ class TestWriteProcessedJsonl:
 
 
 # ── read_processed_jsonl ─────────────────────────────────────────────────────
+
 
 class TestReadProcessedJsonl:
     def _make_processed(self, id_: str) -> ProcessedItem:

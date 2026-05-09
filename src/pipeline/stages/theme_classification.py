@@ -17,8 +17,16 @@ from src.models import Domain, ProcessedItem
 logger = logging.getLogger(__name__)
 
 _VALID_DOMAINS: set[str] = {
-    "multimodal", "agents", "infra", "reasoning",
-    "safety", "evals", "data", "hardware", "general", "unknown",
+    "multimodal",
+    "agents",
+    "infra",
+    "reasoning",
+    "safety",
+    "evals",
+    "data",
+    "hardware",
+    "general",
+    "unknown",
 }
 
 _SYSTEM_PROMPT = (
