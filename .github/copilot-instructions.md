@@ -120,6 +120,7 @@ LAYER 3B — SITE BUILD   ProcessedItem[] → trend analysis → docs/data/*.jso
 - Fetcher failures for a single source must not abort the entire run — log the error and continue
 - Network errors must be retried with exponential backoff (max 3 attempts)
 - Email failure is fatal and must exit non-zero
+- **Gemini quota and retry logic is shared.** The sentinel error types (`NonRetryableEnrichError`, `QuotaExhaustedEnrichError`), quota detection (`is_quota_exhausted_error`), and quota logging live in `src/pipeline/_quota.py`. Any new pipeline entrypoint that calls the Gemini API **must** import from `_quota.py` — do not re-implement these locally. Divergent implementations have diverged silently in the past.
 
 ### Testing
 - Tests live in `tests/`; use `pytest`
@@ -128,6 +129,7 @@ LAYER 3B — SITE BUILD   ProcessedItem[] → trend analysis → docs/data/*.jso
 - **Apply the full testing pyramid:** unit tests on all business logic; integration/smoke tests in `tests/test_smoke.py` to exercise the full pipeline end-to-end; unit tests are necessary but not sufficient.
 - **Bug fixes must start with a failing test.** Write a test that reproduces the bug first, confirm it fails, then apply the fix and confirm the test passes. Never commit a bug fix without a companion regression test.
 - **Apply partition testing** as defined in `.github/skills/tdd/SKILL.md`. Every function with conditional logic over its inputs requires partitions for: typical value, boundary, empty/zero, and invalid/malformed. Use real inputs for pure functions — mocks are for external dependencies only.
+- **Error-path partitions are mandatory for any function that wraps an external API call.** The partition set must include: success, API returns ok=False, transport error (retried), quota exhaustion (batch short-circuit), and programming error (propagates unchanged). Missing any of these means the error handling has never been exercised — this is how `backfill.py` shipped without quota short-circuit or programming-error propagation despite having tests.
 
 ---
 
