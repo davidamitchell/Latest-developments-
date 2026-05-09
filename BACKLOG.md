@@ -1140,7 +1140,7 @@ Currently `src/trends.py` does its own fetching (arXiv, HuggingFace, etc.) and r
 
 ## W-0029
 
-status: ready
+status: done
 created: 2026-05-09
 updated: 2026-05-09
 

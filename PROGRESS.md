@@ -874,3 +874,28 @@ Initialized `.github/skills` submodule and applied `code-review` skill to all ch
 3. **What single change would prevent this next time?** Run `make check` before committing session changes, not after, to avoid a separate lint-only commit.
 4. **Is this a pattern?** Docstring/comment drift happens when root cause diagnoses change mid-session. Comments should be reviewed during the code review pass, not just at time of writing.
 
+
+---
+
+## 2026-05-09 — W-0029: Backfill AI enrichment for unenriched items
+
+### What changed
+
+Implemented `src/pipeline/backfill.py` — a CLI ops tool that re-enriches `ProcessedItem` records where `theme == ""` using the Gemini API.
+
+**Root cause recap:** `gemini-2.5-flash` thinking tokens compete with `max_output_tokens=500`, exhausting the budget before the 8-line structured response is written. `finish_reason=MAX_TOKENS` (not `STOP`) caused every call to silently return `(item, False)`. Fixed in `cb6dfe0` via `thinking_budget=0`. But 165 items in `data/processed/` were already written without enrichment and `_merge_and_write` preserves existing IDs as-is.
+
+**What was delivered:**
+- `src/pipeline/backfill.py`: scans processed files, enriches items with `theme == ""`, writes back in-place. Supports `--all`, `--date`, `--dry-run`, `--debug`. `enrich` is a module-level wrapper (lazy import) so the module can be imported without triggering the google.genai C extension — enables patching in tests.
+- `tests/test_pipeline_backfill.py`: 9 TDD tests covering the full behaviour matrix.
+- `.github/workflows/backfill-enrichment.yml`: `workflow_dispatch` workflow to trigger backfill in production where `GEMINI_API_KEY` is available.
+- W-0029 marked `done` in `BACKLOG.md`.
+
+**To recover the 165 unenriched items:** trigger `backfill-enrichment.yml` with `scope: all` via `workflow_dispatch` on `claude/enrich-items-ai-themes-eI58y`, then run `rebuild-site.yml`.
+
+### Mini-Retro
+
+1. **Did the process work?** Yes — diagnosis first, then TDD, then implementation. Reading `learnings.md` before touching pipeline code surfaced the context immediately.
+2. **What slowed down?** Broken cryptography native extension in the container's system Python prevents `google.genai` from importing during tests. Solved by making `enrich` a module-level wrapper with a lazy inner import, allowing `patch("src.pipeline.backfill.enrich")` to work without google.genai being imported.
+3. **What single change would prevent this next time?** The "lazy import wrapper" pattern for google.genai-dependent modules should be documented in `learnings.md` so future tests don't hit the same import-time friction.
+4. **Is this a pattern?** Yes — any module that imports `google.genai` at module level will fail to collect in this test environment. The pattern to follow: wrap the call in a module-level function with a lazy inner import.

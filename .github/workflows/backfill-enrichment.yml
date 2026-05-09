@@ -1,0 +1,87 @@
+name: Backfill AI Enrichment
+
+# Ops tool: re-enriches ProcessedItems where theme == "" using the Gemini API.
+# Run this after any period where GEMINI_API_KEY was absent or quota-exhausted,
+# or after the thinking_budget=0 fix (cb6dfe0) to recover items that silently
+# stored unenriched due to finish_reason=MAX_TOKENS.
+#
+# After this workflow commits updated data/processed/ files, trigger
+# rebuild-site.yml manually to regenerate docs/data/*.json.
+
+on:
+  workflow_dispatch:
+    inputs:
+      scope:
+        description: "Which files to backfill: 'all' (all dates) or a specific YYYY-MM-DD"
+        required: true
+        default: "all"
+        type: string
+      dry_run:
+        description: "Dry run — report counts without writing files"
+        required: false
+        default: "false"
+        type: boolean
+      debug:
+        description: "Enable debug logging"
+        required: false
+        default: "false"
+        type: boolean
+
+concurrency:
+  group: backfill-enrichment
+  cancel-in-progress: false
+
+jobs:
+  backfill:
+    name: Backfill unenriched items
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          ref: ${{ github.ref }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Build backfill arguments
+        id: args
+        run: |
+          ARGS=""
+          SCOPE="${{ inputs.scope }}"
+          if [ "$SCOPE" = "all" ]; then
+            ARGS="$ARGS --all"
+          else
+            ARGS="$ARGS --date $SCOPE"
+          fi
+          if [ "${{ inputs.dry_run }}" = "true" ]; then ARGS="$ARGS --dry-run"; fi
+          if [ "${{ inputs.debug }}" = "true" ]; then ARGS="$ARGS --debug"; fi
+          echo "args=$ARGS" >> "$GITHUB_OUTPUT"
+
+      - name: Run enrichment backfill
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: python -m src.pipeline.backfill ${{ steps.args.outputs.args }}
+
+      - name: Commit updated processed data
+        if: ${{ inputs.dry_run != 'true' }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/processed/
+          if git diff --cached --quiet; then
+            echo "No changes after backfill — nothing to commit"
+          else
+            git commit -m "chore: backfill AI enrichment for unenriched items [skip ci]"
+            git push origin HEAD
+          fi
