@@ -1,0 +1,452 @@
+{
+  "generated": "2026-05-09T06:39:23.696347+00:00",
+  "run_id": "2026-05-09",
+  "total_items": 206,
+  "themed_items": 86,
+  "unthemed_items": 120,
+  "enrichment_rate": 0.417,
+  "qualifying_theme_items": 14,
+  "qualifying_themes": 6,
+  "source_count": 6,
+  "date_range": {
+    "first": "2026-03-03",
+    "last": "2026-05-09"
+  },
+  "ai_note": "AI enrichment incomplete \u2014 86/206 items themed (42%). Check GEMINI_API_KEY secret and pipeline logs.",
+  "files": [
+    {
+      "file": "2026-03-03.jsonl",
+      "total": 4,
+      "valid": 4,
+      "filtered_hist": 0,
+      "themed": 4
+    },
+    {
+      "file": "2026-03-04.jsonl",
+      "total": 2,
+      "valid": 2,
+      "filtered_hist": 0,
+      "themed": 2
+    },
+    {
+      "file": "2026-03-05.jsonl",
+      "total": 2,
+      "valid": 1,
+      "filtered_hist": 1,
+      "themed": 1
+    },
+    {
+      "file": "2026-03-06.jsonl",
+      "total": 1,
+      "valid": 1,
+      "filtered_hist": 0,
+      "themed": 1
+    },
+    {
+      "file": "2026-03-07.jsonl",
+      "total": 4,
+      "valid": 3,
+      "filtered_hist": 1,
+      "themed": 3
+    },
+    {
+      "file": "2026-03-08.jsonl",
+      "total": 1,
+      "valid": 1,
+      "filtered_hist": 0,
+      "themed": 1
+    },
+    {
+      "file": "2026-03-09.jsonl",
+      "total": 4,
+      "valid": 4,
+      "filtered_hist": 0,
+      "themed": 4
+    },
+    {
+      "file": "2026-03-10.jsonl",
+      "total": 4,
+      "valid": 4,
+      "filtered_hist": 0,
+      "themed": 4
+    },
+    {
+      "file": "2026-03-11.jsonl",
+      "total": 3,
+      "valid": 3,
+      "filtered_hist": 0,
+      "themed": 2
+    },
+    {
+      "file": "2026-03-12.jsonl",
+      "total": 5,
+      "valid": 5,
+      "filtered_hist": 0,
+      "themed": 5
+    },
+    {
+      "file": "2026-03-13.jsonl",
+      "total": 3,
+      "valid": 0,
+      "filtered_hist": 3,
+      "themed": 0
+    },
+    {
+      "file": "2026-03-14.jsonl",
+      "total": 6,
+      "valid": 0,
+      "filtered_hist": 6,
+      "themed": 0
+    },
+    {
+      "file": "2026-03-15.jsonl",
+      "total": 6,
+      "valid": 5,
+      "filtered_hist": 1,
+      "themed": 5
+    },
+    {
+      "file": "2026-03-16.jsonl",
+      "total": 2,
+      "valid": 0,
+      "filtered_hist": 2,
+      "themed": 0
+    },
+    {
+      "file": "2026-03-17.jsonl",
+      "total": 6,
+      "valid": 6,
+      "filtered_hist": 0,
+      "themed": 6
+    },
+    {
+      "file": "2026-03-18.jsonl",
+      "total": 5,
+      "valid": 5,
+      "filtered_hist": 0,
+      "themed": 5
+    },
+    {
+      "file": "2026-03-19.jsonl",
+      "total": 7,
+      "valid": 0,
+      "filtered_hist": 7,
+      "themed": 0
+    },
+    {
+      "file": "2026-03-20.jsonl",
+      "total": 8,
+      "valid": 0,
+      "filtered_hist": 8,
+      "themed": 0
+    },
+    {
+      "file": "2026-03-21.jsonl",
+      "total": 4,
+      "valid": 4,
+      "filtered_hist": 0,
+      "themed": 4
+    },
+    {
+      "file": "2026-03-22.jsonl",
+      "total": 2,
+      "valid": 2,
+      "filtered_hist": 0,
+      "themed": 2
+    },
+    {
+      "file": "2026-03-23.jsonl",
+      "total": 3,
+      "valid": 3,
+      "filtered_hist": 0,
+      "themed": 3
+    },
+    {
+      "file": "2026-03-24.jsonl",
+      "total": 2,
+      "valid": 0,
+      "filtered_hist": 2,
+      "themed": 0
+    },
+    {
+      "file": "2026-03-25.jsonl",
+      "total": 7,
+      "valid": 0,
+      "filtered_hist": 7,
+      "themed": 0
+    },
+    {
+      "file": "2026-03-26.jsonl",
+      "total": 5,
+      "valid": 0,
+      "filtered_hist": 5,
+      "themed": 0
+    },
+    {
+      "file": "2026-03-27.jsonl",
+      "total": 1,
+      "valid": 0,
+      "filtered_hist": 1,
+      "themed": 0
+    },
+    {
+      "file": "2026-03-28.jsonl",
+      "total": 6,
+      "valid": 6,
+      "filtered_hist": 0,
+      "themed": 6
+    },
+    {
+      "file": "2026-03-29.jsonl",
+      "total": 4,
+      "valid": 4,
+      "filtered_hist": 0,
+      "themed": 4
+    },
+    {
+      "file": "2026-03-30.jsonl",
+      "total": 5,
+      "valid": 0,
+      "filtered_hist": 5,
+      "themed": 0
+    },
+    {
+      "file": "2026-03-31.jsonl",
+      "total": 5,
+      "valid": 5,
+      "filtered_hist": 0,
+      "themed": 5
+    },
+    {
+      "file": "2026-04-01.jsonl",
+      "total": 2,
+      "valid": 0,
+      "filtered_hist": 2,
+      "themed": 0
+    },
+    {
+      "file": "2026-04-02.jsonl",
+      "total": 4,
+      "valid": 4,
+      "filtered_hist": 0,
+      "themed": 4
+    },
+    {
+      "file": "2026-04-03.jsonl",
+      "total": 8,
+      "valid": 0,
+      "filtered_hist": 8,
+      "themed": 0
+    },
+    {
+      "file": "2026-04-04.jsonl",
+      "total": 5,
+      "valid": 5,
+      "filtered_hist": 0,
+      "themed": 5
+    },
+    {
+      "file": "2026-04-05.jsonl",
+      "total": 6,
+      "valid": 0,
+      "filtered_hist": 6,
+      "themed": 0
+    },
+    {
+      "file": "2026-04-06.jsonl",
+      "total": 2,
+      "valid": 0,
+      "filtered_hist": 2,
+      "themed": 0
+    },
+    {
+      "file": "2026-04-07.jsonl",
+      "total": 5,
+      "valid": 0,
+      "filtered_hist": 5,
+      "themed": 0
+    },
+    {
+      "file": "2026-04-08.jsonl",
+      "total": 5,
+      "valid": 0,
+      "filtered_hist": 5,
+      "themed": 0
+    },
+    {
+      "file": "2026-04-09.jsonl",
+      "total": 5,
+      "valid": 5,
+      "filtered_hist": 0,
+      "themed": 0
+    },
+    {
+      "file": "2026-04-10.jsonl",
+      "total": 9,
+      "valid": 9,
+      "filtered_hist": 0,
+      "themed": 0
+    },
+    {
+      "file": "2026-04-11.jsonl",
+      "total": 3,
+      "valid": 0,
+      "filtered_hist": 3,
+      "themed": 0
+    },
+    {
+      "file": "2026-04-12.jsonl",
+      "total": 4,
+      "valid": 0,
+      "filtered_hist": 4,
+      "themed": 0
+    },
+    {
+      "file": "2026-04-13.jsonl",
+      "total": 8,
+      "valid": 8,
+      "filtered_hist": 0,
+      "themed": 0
+    },
+    {
+      "file": "2026-04-16.jsonl",
+      "total": 8,
+      "valid": 8,
+      "filtered_hist": 0,
+      "themed": 0
+    },
+    {
+      "file": "2026-04-17.jsonl",
+      "total": 8,
+      "valid": 8,
+      "filtered_hist": 0,
+      "themed": 0
+    },
+    {
+      "file": "2026-04-18.jsonl",
+      "total": 7,
+      "valid": 0,
+      "filtered_hist": 7,
+      "themed": 0
+    },
+    {
+      "file": "2026-04-19.jsonl",
+      "total": 6,
+      "valid": 6,
+      "filtered_hist": 0,
+      "themed": 6
+    },
+    {
+      "file": "2026-04-20.jsonl",
+      "total": 4,
+      "valid": 4,
+      "filtered_hist": 0,
+      "themed": 0
+    },
+    {
+      "file": "2026-04-21.jsonl",
+      "total": 7,
+      "valid": 7,
+      "filtered_hist": 0,
+      "themed": 0
+    },
+    {
+      "file": "2026-04-22.jsonl",
+      "total": 9,
+      "valid": 9,
+      "filtered_hist": 0,
+      "themed": 0
+    },
+    {
+      "file": "2026-04-23.jsonl",
+      "total": 7,
+      "valid": 7,
+      "filtered_hist": 0,
+      "themed": 0
+    },
+    {
+      "file": "2026-04-24.jsonl",
+      "total": 5,
+      "valid": 5,
+      "filtered_hist": 0,
+      "themed": 0
+    },
+    {
+      "file": "2026-04-25.jsonl",
+      "total": 3,
+      "valid": 3,
+      "filtered_hist": 0,
+      "themed": 3
+    },
+    {
+      "file": "2026-04-26.jsonl",
+      "total": 1,
+      "valid": 1,
+      "filtered_hist": 0,
+      "themed": 1
+    },
+    {
+      "file": "2026-04-27.jsonl",
+      "total": 4,
+      "valid": 4,
+      "filtered_hist": 0,
+      "themed": 0
+    },
+    {
+      "file": "2026-04-28.jsonl",
+      "total": 6,
+      "valid": 6,
+      "filtered_hist": 0,
+      "themed": 0
+    },
+    {
+      "file": "2026-04-29.jsonl",
+      "total": 1,
+      "valid": 0,
+      "filtered_hist": 1,
+      "themed": 0
+    },
+    {
+      "file": "2026-04-30.jsonl",
+      "total": 3,
+      "valid": 3,
+      "filtered_hist": 0,
+      "themed": 0
+    },
+    {
+      "file": "2026-05-01.jsonl",
+      "total": 5,
+      "valid": 0,
+      "filtered_hist": 5,
+      "themed": 0
+    },
+    {
+      "file": "2026-05-02.jsonl",
+      "total": 2,
+      "valid": 0,
+      "filtered_hist": 2,
+      "themed": 0
+    },
+    {
+      "file": "2026-05-03.jsonl",
+      "total": 3,
+      "valid": 3,
+      "filtered_hist": 0,
+      "themed": 0
+    },
+    {
+      "file": "2026-05-08.jsonl",
+      "total": 0,
+      "valid": 0,
+      "filtered_hist": 0,
+      "themed": 0
+    },
+    {
+      "file": "2026-05-09.jsonl",
+      "total": 33,
+      "valid": 33,
+      "filtered_hist": 0,
+      "themed": 0
+    }
+  ]
+}

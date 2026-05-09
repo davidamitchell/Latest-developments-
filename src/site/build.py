@@ -50,25 +50,53 @@ _VOLUME_WINDOW_DAYS = 14
 _MIN_THEME_APPEARANCES = 2
 
 
-def load_processed_items(data_dir: Path, window_days: int = 90) -> list[ProcessedItem]:
-    """Load all ProcessedItem records from data_dir/*.jsonl files.
+def load_processed_items(
+    data_dir: Path,
+    window_days: int = 90,
+) -> tuple[list[ProcessedItem], list[dict]]:
+    """Load ProcessedItem records from data_dir/*.jsonl, returning (items, file_log).
 
-    Reads every .jsonl file found in the directory. The window_days parameter
-    is reserved for future use (filtering by fetch_date); currently all files
-    are loaded.
+    Filters out "hist-" prefixed items — these are artefacts from the legacy
+    src/trends.py history-parsing pipeline and are not valid ProcessedItem
+    records (they have empty URLs and single-word titles).
+
+    Returns a tuple of:
+      - items: valid ProcessedItem list
+      - file_log: per-file audit dicts with keys file, total, valid, filtered
     """
     if not data_dir.exists():
         logger.debug("Processed data directory not found: %s", data_dir)
-        return []
+        return [], []
 
     all_items: list[ProcessedItem] = []
+    file_log: list[dict] = []
     for jsonl_file in sorted(data_dir.glob("*.jsonl")):
-        items = read_processed_jsonl(jsonl_file)
-        all_items.extend(items)
-        logger.debug("Loaded %d items from %s", len(items), jsonl_file)
+        raw = read_processed_jsonl(jsonl_file)
+        valid = [i for i in raw if not i.id.startswith("hist-")]
+        filtered = len(raw) - len(valid)
+        if filtered:
+            logger.debug(
+                "Filtered %d hist- items from %s", filtered, jsonl_file.name
+            )
+        all_items.extend(valid)
+        file_log.append(
+            {
+                "file": jsonl_file.name,
+                "total": len(raw),
+                "valid": len(valid),
+                "filtered_hist": filtered,
+                "themed": sum(1 for i in valid if i.theme),
+            }
+        )
+        logger.debug("Loaded %d valid items from %s", len(valid), jsonl_file)
 
-    logger.info("Loaded %d total ProcessedItem records from %s", len(all_items), data_dir)
-    return all_items
+    hist_total = sum(f["filtered_hist"] for f in file_log)
+    if hist_total:
+        logger.info("Filtered %d legacy hist- items across all files", hist_total)
+    logger.info(
+        "Loaded %d valid ProcessedItem records from %s", len(all_items), data_dir
+    )
+    return all_items, file_log
 
 
 def items_to_entries(
@@ -97,20 +125,38 @@ def _build_source_list(
     items: list[ProcessedItem],
     entries: list[tuple[str, str, str, str]],
 ) -> list[dict]:
-    """Build the per-source detail list for sources.json."""
+    """Build the per-source detail list for sources.json.
+
+    Counts item_count from ALL items (not just themed entries) so that sources
+    like arXiv or HuggingFace are visible even when AI enrichment hasn't run.
+    Theme data is populated from entries (which only contains themed items).
+    """
     per_source: dict[str, dict] = {}
-    for date_str, theme, cls, name in entries:
+
+    # Pass 1: count all items per source regardless of theme status
+    for item in items:
+        name = item.source_name
+        date_str = item.fetch_date or (
+            item.published.strftime("%Y-%m-%d") if item.published else ""
+        )
         if name not in per_source:
             per_source[name] = {
                 "name": name,
-                "source_class": cls,
+                "source_class": item.source_class,
                 "item_count": 0,
+                "themed_count": 0,
                 "dates": set(),
                 "theme_counts": Counter(),
             }
         per_source[name]["item_count"] += 1
-        per_source[name]["dates"].add(date_str)
-        per_source[name]["theme_counts"][theme] += 1
+        if date_str:
+            per_source[name]["dates"].add(date_str)
+
+    # Pass 2: augment with theme data from entries (themed items only)
+    for date_str, theme, _cls, name in entries:
+        if name in per_source:
+            per_source[name]["themed_count"] += 1
+            per_source[name]["theme_counts"][theme] += 1
 
     source_list = []
     for name, info in sorted(per_source.items(), key=lambda x: -x[1]["item_count"]):
@@ -121,6 +167,7 @@ def _build_source_list(
                 "name": name,
                 "source_class": info["source_class"],
                 "item_count": info["item_count"],
+                "themed_count": info["themed_count"],
                 "first_seen": dates_sorted[0] if dates_sorted else "",
                 "last_seen": dates_sorted[-1] if dates_sorted else "",
                 "days_active": len(info["dates"]),
@@ -194,19 +241,37 @@ def write_site_data(
     edges: list[dict],
     docs_data_dir: Path,
     items: list[ProcessedItem] | None = None,
+    file_log: list[dict] | None = None,
 ) -> None:
     """Write all docs/data/*.json files."""
     docs_data_dir.mkdir(parents=True, exist_ok=True)
     now_iso = datetime.now(UTC).isoformat()
     today_str = datetime.now(UTC).strftime("%Y-%m-%d")
 
+    _items = items or []
+    total_items = len(_items)
+    themed_items = sum(1 for i in _items if i.theme)
+    unthemed_items = total_items - themed_items
+    enrichment_rate = round(themed_items / total_items, 3) if total_items else 0.0
+
+    # Compute date range from fetch_date fields
+    dates = sorted(i.fetch_date for i in _items if i.fetch_date)
+    date_range = {"first": dates[0] if dates else "", "last": dates[-1] if dates else ""}
+
     (docs_data_dir / "meta.json").write_text(
         json.dumps(
             {
                 "last_run": now_iso,
                 "run_id": today_str,
-                "item_count": sum(m.item_count for m in metrics),
+                "total_items": total_items,
+                "themed_items": themed_items,
+                "unthemed_items": unthemed_items,
+                "enrichment_rate": enrichment_rate,
+                "item_count": total_items,
+                "qualifying_theme_items": sum(m.item_count for m in metrics),
                 "theme_count": len(metrics),
+                "source_count": len(source_list),
+                "date_range": date_range,
             },
             indent=2,
         )
@@ -259,10 +324,38 @@ def write_site_data(
         json.dumps({"generated": now_iso, "items": items_payload}, indent=2)
     )
 
+    # log.json: per-run audit record for the site Log view
+    (docs_data_dir / "log.json").write_text(
+        json.dumps(
+            {
+                "generated": now_iso,
+                "run_id": today_str,
+                "total_items": total_items,
+                "themed_items": themed_items,
+                "unthemed_items": unthemed_items,
+                "enrichment_rate": enrichment_rate,
+                "qualifying_theme_items": sum(m.item_count for m in metrics),
+                "qualifying_themes": len(metrics),
+                "source_count": len(source_list),
+                "date_range": date_range,
+                "ai_note": (
+                    "AI enrichment ran on all items"
+                    if enrichment_rate >= 0.95
+                    else f"AI enrichment incomplete — {themed_items}/{total_items} items themed "
+                    f"({round(enrichment_rate * 100)}%). "
+                    "Check GEMINI_API_KEY secret and pipeline logs."
+                ),
+                "files": file_log or [],
+            },
+            indent=2,
+        )
+    )
+
     logger.info(
-        "Wrote site data: %d themes, %d items, %d graph edges → %s",
+        "Wrote site data: %d themes, %d/%d themed items, %d graph edges → %s",
         len(metrics),
-        len(items_payload),
+        themed_items,
+        total_items,
         len(edges),
         docs_data_dir,
     )
@@ -282,7 +375,15 @@ def build(
     """
     today_str = datetime.now(UTC).strftime("%Y-%m-%d")
 
-    items = load_processed_items(processed_dir, window_days=window_days)
+    items, file_log = load_processed_items(processed_dir, window_days=window_days)
+    themed_count = sum(1 for i in items if i.theme)
+    logger.info(
+        "Loaded %d items (%d themed, %d unthemed) from %d files",
+        len(items),
+        themed_count,
+        len(items) - themed_count,
+        len(file_log),
+    )
     entries = items_to_entries(items)
     logger.info("Converted %d items to %d theme-day entries", len(items), len(entries))
 
@@ -341,15 +442,19 @@ def build(
 
     if dry_run:
         logger.info(
-            "[dry-run] Would write %d themes, %d items, %d graph edges to %s",
+            "[dry-run] Would write %d themes, %d/%d themed items, %d graph edges to %s",
             len(metrics),
+            themed_count,
             len(items),
             len(edges),
             docs_data_dir,
         )
         return
 
-    write_site_data(metrics, theme_nodes, source_list, edges, docs_data_dir, items=items)
+    write_site_data(
+        metrics, theme_nodes, source_list, edges, docs_data_dir,
+        items=items, file_log=file_log,
+    )
 
 
 def _parse_args() -> argparse.Namespace:

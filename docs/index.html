@@ -158,18 +158,47 @@
 
     <h2 class="section-heading">Key Insights</h2>
     <p style="font-size:0.75rem;color:var(--text-muted);margin:-10px 0 12px;letter-spacing:0.04em">
-      Graph-derived insights: each backed by ≥ 2 independent evidence paths.
-      Counter-signals shown explicitly.
+      Derived from trend state, hype risk, and cross-source diversity.
+      Signals backed by ≥ 2 source classes are marked confirmed.
     </p>
     <div id="insights-container">
       <div class="empty-state">
         <div class="empty-state-icon">🔍</div>
         <h3>No insights yet</h3>
-        <p>Insights are generated from theme relationships. Run the pipeline to populate.</p>
+        <p>Insights appear once the pipeline has run and produced trend data.</p>
       </div>
     </div>
 
-    <h2 class="section-heading">About this system</h2>
+    <h2 class="section-heading" style="margin-top:32px">Pipeline Log</h2>
+    <p style="font-size:0.75rem;color:var(--text-muted);margin:-10px 0 12px;letter-spacing:0.04em">
+      Last build run: what was loaded, how much was AI-enriched, per-file breakdown.
+    </p>
+    <div id="log-container">
+      <p style="color:var(--text-muted);font-size:0.75rem;letter-spacing:0.04em">No log data yet.</p>
+    </div>
+
+    <h2 class="section-heading" style="margin-top:32px">All Processed Items</h2>
+    <p style="font-size:0.75rem;color:var(--text-muted);margin:-10px 0 12px;letter-spacing:0.04em">
+      Every item loaded from <code>data/processed/</code>. Filter by source or theme.
+    </p>
+    <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+      <input id="items-search" type="text" placeholder="Filter by title, source, or theme…"
+             style="flex:1;min-width:200px;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:6px 10px;font-family:inherit;font-size:0.75rem;border-radius:4px;outline:none">
+      <select id="items-source-filter"
+              style="background:var(--surface);border:1px solid var(--border);color:var(--text);padding:6px 10px;font-family:inherit;font-size:0.75rem;border-radius:4px;outline:none">
+        <option value="">All sources</option>
+      </select>
+      <select id="items-theme-filter"
+              style="background:var(--surface);border:1px solid var(--border);color:var(--text);padding:6px 10px;font-family:inherit;font-size:0.75rem;border-radius:4px;outline:none">
+        <option value="">All themes</option>
+      </select>
+    </div>
+    <div id="items-count-bar" style="font-size:0.7rem;color:var(--text-muted);margin-bottom:8px;letter-spacing:0.04em"></div>
+    <div id="items-table-container" style="overflow-x:auto">
+      <p style="color:var(--text-muted);font-size:0.75rem;letter-spacing:0.04em">Loading items…</p>
+    </div>
+
+    <h2 class="section-heading" style="margin-top:32px">About this system</h2>
     <div class="chart-wrap prose">
       <p><strong>Source triangulation:</strong> Items are classified into five source classes
         (primary, operator, practitioner, media, market) and scored on five credibility axes:

@@ -1,77 +1,41 @@
 {
-  "generated": "2026-05-09T06:14:38.965516+00:00",
+  "generated": "2026-05-09T06:39:23.696347+00:00",
   "nodes": [
-    {
-      "id": "Agentic Workflows",
-      "domain": "agents",
-      "state": "declining",
-      "volume": 0.93
-    },
     {
       "id": "AI Workforce & Jobs",
       "domain": "general",
       "state": "declining",
-      "volume": 0.58
+      "volume": 0.39
     },
     {
-      "id": "AI Business Strategy",
-      "domain": "general",
+      "id": "Agentic Workflows",
+      "domain": "agents",
       "state": "declining",
-      "volume": 0.58
+      "volume": 0.39
     },
     {
       "id": "AI Infrastructure",
       "domain": "infra",
       "state": "declining",
-      "volume": 0.47
-    },
-    {
-      "id": "AI Safety & Alignment",
-      "domain": "safety",
-      "state": "declining",
-      "volume": 0.35
-    },
-    {
-      "id": "Local LLM Applications",
-      "domain": "general",
-      "state": "declining",
-      "volume": 0.35
-    },
-    {
-      "id": "Supply Chain Security",
-      "domain": "infra",
-      "state": "declining",
-      "volume": 0.35
-    },
-    {
-      "id": "Local LLM Inference",
-      "domain": "infra",
-      "state": "declining",
-      "volume": 0.35
-    },
-    {
-      "id": "LLM Capabilities",
-      "domain": "reasoning",
-      "state": "declining",
-      "volume": 0.35
+      "volume": 0.26
     },
     {
       "id": "Agent Reliability",
       "domain": "agents",
       "state": "declining",
-      "volume": 0.23
+      "volume": 0.26
     },
     {
-      "id": "Open-Source AI Agents",
-      "domain": "agents",
-      "state": "declining",
-      "volume": 0.23
-    },
-    {
-      "id": "AI Development Pace",
+      "id": "Local LLM Applications",
       "domain": "general",
       "state": "declining",
-      "volume": 0.23
+      "volume": 0.26
+    },
+    {
+      "id": "LLM Capabilities",
+      "domain": "reasoning",
+      "state": "declining",
+      "volume": 0.26
     }
   ],
   "edges": []

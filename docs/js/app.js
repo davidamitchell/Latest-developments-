@@ -123,12 +123,13 @@ function setupTabs() {
 }
 
 async function loadAll() {
-  const [meta, trendsData, themesData, sourcesData, itemsData] = await Promise.all([
+  const [meta, trendsData, themesData, sourcesData, itemsData, logData] = await Promise.all([
     fetchJson('meta.json'),
     fetchJson('trends.json'),
     fetchJson('themes.json'),
     fetchJson('sources.json'),
     fetchJson('items.json'),
+    fetchJson('log.json'),
   ]);
 
   // Build colour map from all theme names across both data files before rendering.
@@ -144,6 +145,7 @@ async function loadAll() {
   renderTrendsTab(trendsData);
   renderThemesTab(themesData, items);
   renderSourcesTab(sourcesData);
+  renderInsightsTab(trendsData, meta, items, logData);
 
   // Close button for the drill-down panel (set up once after render).
   document.getElementById('drill-down-close')?.addEventListener('click', () => {
@@ -473,6 +475,327 @@ function sourceClassDesc(cls) {
     market:       'Funding, filings, job postings. Lagging but real.',
   };
   return descs[cls] || '';
+}
+
+/* ── Insights tab ───────────────────────────────────────────────────── */
+
+function renderInsightsTab(trendsData, meta, items, logData) {
+  const trends = trendsData?.trends || [];
+  renderInsightCards(trends, meta);
+  renderLogSection(logData, meta);
+  renderItemsExplorer(items);
+}
+
+function renderInsightCards(trends, meta) {
+  const container = document.getElementById('insights-container');
+  if (!container) return;
+
+  if (trends.length === 0) {
+    showEmpty('insights-container', 'No insights yet', 'Run the pipeline at least once to generate trend data.');
+    return;
+  }
+
+  const cards = [];
+
+  // ── Data health ──────────────────────────────────────────────────
+  const totalItems  = meta?.total_items  || 0;
+  const themedItems = meta?.themed_items || 0;
+  const enrichRate  = meta?.enrichment_rate ?? (totalItems ? themedItems / totalItems : 0);
+
+  if (totalItems > 0 && enrichRate < 0.5) {
+    const pct = Math.round(enrichRate * 100);
+    cards.push({
+      kind: 'warning',
+      title: 'AI enrichment incomplete',
+      body: `Only ${themedItems} of ${totalItems} items (${pct}%) have been AI-enriched with themes and summaries. `
+          + 'Themes, trend states, and insights will be incomplete until GEMINI_API_KEY is active in the pipeline.',
+    });
+  }
+
+  // ── All themes declining ─────────────────────────────────────────
+  const allDeclining = trends.length > 0 && trends.every(t => t.state === 'declining');
+  if (allDeclining) {
+    cards.push({
+      kind: 'warning',
+      title: 'All trends currently declining',
+      body: 'Every tracked theme shows a declining state. This typically means no new AI-enriched items have '
+          + 'been added in the last 14 days. Check that the pipeline is running and GEMINI_API_KEY is set.',
+    });
+  }
+
+  // ── Confirmed signals (diversity ≥ 2) ───────────────────────────
+  const confirmed = trends.filter(t => (t.diversity || 0) >= 2);
+  if (confirmed.length > 0) {
+    const names = confirmed.map(t => t.theme).join(', ');
+    cards.push({
+      kind: 'signal',
+      title: `${confirmed.length} theme${confirmed.length > 1 ? 's' : ''} confirmed by ≥ 2 source types`,
+      body: names,
+      themes: confirmed.map(t => t.theme),
+    });
+  } else {
+    cards.push({
+      kind: 'gap',
+      title: 'No cross-source confirmation yet',
+      body: 'All themes currently have only a single source type (practitioner). '
+          + 'Adding primary (arXiv) or operator (Anthropic, OpenAI) sources will enable cross-class confirmation.',
+    });
+  }
+
+  // ── Hype alerts ──────────────────────────────────────────────────
+  const hyped = trends.filter(t => (t.hype_risk || 0) > 0.5);
+  if (hyped.length > 0) {
+    const names = hyped.map(t => `${t.theme} (${Math.round(t.hype_risk * 100)}%)`).join(', ');
+    cards.push({
+      kind: 'hype',
+      title: `${hyped.length} high-hype theme${hyped.length > 1 ? 's' : ''}`,
+      body: 'These themes have high media/language intensity relative to evidence density: ' + names,
+      themes: hyped.map(t => t.theme),
+    });
+  }
+
+  // ── Top theme by volume ──────────────────────────────────────────
+  const byVolume = [...trends].sort((a, b) => (b.volume || 0) - (a.volume || 0));
+  if (byVolume.length > 0) {
+    const top = byVolume[0];
+    cards.push({
+      kind: 'signal',
+      title: `Most active: ${top.theme}`,
+      body: `Volume score ${top.volume.toFixed(2)}, ${top.item_count} item${top.item_count !== 1 ? 's' : ''}, `
+          + `diversity ${top.diversity} source type${top.diversity !== 1 ? 's' : ''}. `
+          + `State: ${top.state}.`,
+      themes: [top.theme],
+    });
+  }
+
+  // ── Source coverage gap ──────────────────────────────────────────
+  const practitionerOnly = trends.filter(t =>
+    (t.source_classes || []).length === 1 &&
+    (t.source_classes || [])[0] === 'practitioner'
+  );
+  if (practitionerOnly.length === trends.length && trends.length > 0) {
+    cards.push({
+      kind: 'gap',
+      title: 'Practitioner-only coverage',
+      body: `All ${trends.length} themes are covered only by practitioner-class sources (YouTube, Hacker News). `
+          + 'Enable arXiv, operator blog, or media RSS sources in config/sources.yaml to enable triangulation.',
+    });
+  }
+
+  // ── Render cards ─────────────────────────────────────────────────
+  container.innerHTML = cards.map(card => {
+    const kindColor = {
+      signal:  '#00C3A5',
+      warning: '#ffa502',
+      hype:    '#ff6348',
+      gap:     '#555',
+    }[card.kind] || '#555';
+
+    const themeChips = (card.themes || []).map(t => {
+      const tc = safeColor(themeColor(t), '#999');
+      return `<span class="theme-pill" style="border-color:${hexAlpha(tc, 0.3)};color:${tc}">${escHtml(t)}</span>`;
+    }).join(' ');
+
+    return `
+      <div class="insight-card" style="border-left:3px solid ${kindColor};padding:14px 16px;
+           background:var(--surface);border-radius:4px;margin-bottom:12px">
+        <div style="font-size:0.8rem;font-weight:600;color:${kindColor};letter-spacing:0.04em;margin-bottom:6px">
+          ${escHtml(card.title)}
+        </div>
+        <p style="font-size:0.75rem;color:var(--text-muted);margin:0 0 ${themeChips ? '8px' : '0'};line-height:1.6">
+          ${escHtml(card.body)}
+        </p>
+        ${themeChips ? `<div style="display:flex;flex-wrap:wrap;gap:4px">${themeChips}</div>` : ''}
+      </div>`;
+  }).join('');
+}
+
+function renderLogSection(logData, meta) {
+  const container = document.getElementById('log-container');
+  if (!container) return;
+
+  const data = logData || meta;
+  if (!data) {
+    container.innerHTML = '<p style="color:var(--text-muted);font-size:0.75rem">No log data available.</p>';
+    return;
+  }
+
+  const totalItems   = data.total_items   ?? '—';
+  const themedItems  = data.themed_items  ?? '—';
+  const unthemed     = data.unthemed_items ?? '—';
+  const enrichRate   = data.enrichment_rate != null ? Math.round(data.enrichment_rate * 100) + '%' : '—';
+  const themeCount   = data.qualifying_themes ?? data.theme_count ?? '—';
+  const sourceCount  = data.source_count ?? '—';
+  const dateFirst    = data.date_range?.first || '—';
+  const dateLast     = data.date_range?.last  || '—';
+  const aiNote       = data.ai_note || '';
+  const files        = data.files || [];
+  const generated    = formatLocalDateTime(data.generated || '');
+
+  const aiNoteColor = data.enrichment_rate != null && data.enrichment_rate < 0.5 ? '#ffa502' : '#00C3A5';
+
+  const fileRows = files.map(f =>
+    `<tr>
+      <td style="font-size:0.7rem;color:var(--text);padding:3px 8px">${escHtml(f.file)}</td>
+      <td style="font-size:0.7rem;text-align:right;padding:3px 8px">${f.total}</td>
+      <td style="font-size:0.7rem;text-align:right;padding:3px 8px">${f.valid}</td>
+      <td style="font-size:0.7rem;text-align:right;padding:3px 8px;color:${f.themed === 0 ? '#ffa502' : 'var(--text-muted)'}">${f.themed}</td>
+      <td style="font-size:0.7rem;text-align:right;padding:3px 8px;color:${f.filtered_hist > 0 ? '#555' : 'var(--text-muted)'}">${f.filtered_hist}</td>
+    </tr>`
+  ).join('');
+
+  container.innerHTML = `
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:16px;font-size:0.75rem">
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-bottom:16px">
+        ${_logStat('Total items loaded', totalItems)}
+        ${_logStat('AI-enriched (themed)', themedItems)}
+        ${_logStat('Unenriched', unthemed)}
+        ${_logStat('Enrichment rate', enrichRate, data.enrichment_rate < 0.5 ? '#ffa502' : '#00C3A5')}
+        ${_logStat('Qualifying themes', themeCount)}
+        ${_logStat('Active sources', sourceCount)}
+        ${_logStat('Data from', dateFirst)}
+        ${_logStat('Data to', dateLast)}
+      </div>
+      ${aiNote ? `<p style="color:${aiNoteColor};margin:0 0 14px;line-height:1.5">${escHtml(aiNote)}</p>` : ''}
+      ${files.length > 0 ? `
+        <div style="overflow-x:auto">
+          <table style="border-collapse:collapse;width:100%">
+            <thead>
+              <tr style="color:var(--text-muted);font-size:0.65rem;letter-spacing:0.06em;text-transform:uppercase">
+                <th style="text-align:left;padding:3px 8px">File</th>
+                <th style="text-align:right;padding:3px 8px">Total</th>
+                <th style="text-align:right;padding:3px 8px">Valid</th>
+                <th style="text-align:right;padding:3px 8px">Themed</th>
+                <th style="text-align:right;padding:3px 8px">Hist filtered</th>
+              </tr>
+            </thead>
+            <tbody>${fileRows}</tbody>
+          </table>
+        </div>` : ''}
+      <p style="color:#333;font-size:0.65rem;margin:12px 0 0">Generated: ${generated}</p>
+    </div>`;
+}
+
+function _logStat(label, value, color) {
+  const c = color || 'var(--text)';
+  return `<div>
+    <div style="font-size:0.65rem;color:var(--text-muted);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:3px">${escHtml(label)}</div>
+    <div style="font-size:1.1rem;font-weight:600;color:${c}">${escHtml(String(value))}</div>
+  </div>`;
+}
+
+/* ── Items explorer ─────────────────────────────────────────────────── */
+
+let _allItems = [];
+
+function renderItemsExplorer(items) {
+  _allItems = items || [];
+
+  const sourceSelect = document.getElementById('items-source-filter');
+  const themeSelect  = document.getElementById('items-theme-filter');
+
+  if (sourceSelect && themeSelect) {
+    // Populate filter dropdowns from data
+    const sources = [...new Set(_allItems.map(i => i.source_name).filter(Boolean))].sort();
+    const themes  = [...new Set(_allItems.map(i => i.theme).filter(Boolean))].sort();
+
+    sourceSelect.innerHTML = '<option value="">All sources</option>'
+      + sources.map(s => `<option value="${escHtml(s)}">${escHtml(s)}</option>`).join('');
+    themeSelect.innerHTML  = '<option value="">All themes</option>'
+      + themes.map(t => `<option value="${escHtml(t)}">${escHtml(t)}</option>`).join('');
+
+    sourceSelect.addEventListener('change', _applyItemsFilter);
+    themeSelect.addEventListener('change',  _applyItemsFilter);
+  }
+
+  const searchInput = document.getElementById('items-search');
+  if (searchInput) {
+    searchInput.addEventListener('input', _applyItemsFilter);
+  }
+
+  _applyItemsFilter();
+}
+
+function _applyItemsFilter() {
+  const query  = (document.getElementById('items-search')?.value  || '').toLowerCase();
+  const source = document.getElementById('items-source-filter')?.value || '';
+  const theme  = document.getElementById('items-theme-filter')?.value  || '';
+
+  let filtered = _allItems;
+  if (source) filtered = filtered.filter(i => i.source_name === source);
+  if (theme)  filtered = filtered.filter(i => i.theme === theme);
+  if (query)  filtered = filtered.filter(i =>
+    (i.title        || '').toLowerCase().includes(query) ||
+    (i.source_name  || '').toLowerCase().includes(query) ||
+    (i.theme        || '').toLowerCase().includes(query) ||
+    (i.summary      || '').toLowerCase().includes(query)
+  );
+
+  const countBar = document.getElementById('items-count-bar');
+  if (countBar) {
+    countBar.textContent = `Showing ${filtered.length} of ${_allItems.length} items`;
+  }
+
+  _renderItemsTable(filtered);
+}
+
+function _renderItemsTable(items) {
+  const container = document.getElementById('items-table-container');
+  if (!container) return;
+
+  if (items.length === 0) {
+    container.innerHTML = '<p style="color:var(--text-muted);font-size:0.75rem;letter-spacing:0.04em">No items match the current filter.</p>';
+    return;
+  }
+
+  // Show at most 200 rows for performance
+  const visible = items.slice(0, 200);
+  const truncated = items.length > 200;
+
+  const rows = visible.map(item => {
+    const cls      = item.source_class || 'practitioner';
+    const clsColor = safeColor(CLASS_COLORS[cls], '#555');
+    const badge    = `<span class="source-badge" style="background:${hexAlpha(clsColor, 0.12)};color:${clsColor};border:1px solid ${hexAlpha(clsColor, 0.25)}">${escHtml(cls)}</span>`;
+    const themeStr = item.theme || '';
+    const tc       = themeStr ? safeColor(themeColor(themeStr), '#555') : '#333';
+    const themePill = themeStr
+      ? `<span class="theme-pill" style="border-color:${hexAlpha(tc, 0.25)};color:${tc}">${escHtml(themeStr)}</span>`
+      : '<span style="color:#333;font-size:0.7rem">—</span>';
+    const hype   = item.hype_risk != null ? Math.round(item.hype_risk * 100) + '%' : '—';
+    const cred   = item.credibility_score != null ? item.credibility_score.toFixed(2) : '—';
+    const titleHtml = item.url
+      ? `<a href="${escHtml(item.url)}" target="_blank" rel="noopener"
+             style="color:var(--text);text-decoration:none;font-size:0.75rem"
+             title="${escHtml(item.summary || item.title)}">${escHtml(item.title || '—')}</a>`
+      : `<span style="font-size:0.75rem;color:var(--text-muted)">${escHtml(item.title || '—')}</span>`;
+
+    return `<tr>
+      <td class="date-cell">${formatLocalDate(item.fetch_date)}</td>
+      <td>${titleHtml}</td>
+      <td class="source-name-cell">${escHtml(item.source_name || '—')}</td>
+      <td>${badge}</td>
+      <td>${themePill}</td>
+      <td class="num-cell" style="font-size:0.7rem">${hype}</td>
+      <td class="num-cell" style="font-size:0.7rem">${cred}</td>
+    </tr>`;
+  }).join('');
+
+  container.innerHTML = `
+    <table class="source-table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Title</th>
+          <th>Source</th>
+          <th>Class</th>
+          <th>Theme</th>
+          <th>Hype</th>
+          <th>Cred</th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>
+    ${truncated ? `<p style="font-size:0.7rem;color:#555;margin:8px 0 0;letter-spacing:0.04em">Showing first 200 of ${items.length}. Apply a filter to narrow results.</p>` : ''}`;
 }
 
 /* ── Helpers ────────────────────────────────────────────────────────── */

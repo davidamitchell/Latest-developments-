@@ -59,13 +59,14 @@ def _write_processed_jsonl(items: list[ProcessedItem], path: Path) -> None:
 # ── load_processed_items ─────────────────────────────────────────────────────
 
 class TestLoadProcessedItems:
-    """load_processed_items(data_dir, window_days) → list[ProcessedItem]"""
+    """load_processed_items(data_dir, window_days) → (list[ProcessedItem], list[dict])"""
 
-    def test_returns_list(self, tmp_path):
+    def test_returns_tuple(self, tmp_path):
         from src.site.build import load_processed_items
 
-        result = load_processed_items(tmp_path / "processed", window_days=30)
-        assert isinstance(result, list)
+        items, file_log = load_processed_items(tmp_path / "processed", window_days=30)
+        assert isinstance(items, list)
+        assert isinstance(file_log, list)
 
     def test_loads_items_from_jsonl_files(self, tmp_path):
         from src.site.build import load_processed_items
@@ -74,7 +75,7 @@ class TestLoadProcessedItems:
         items = [_make_processed("a"), _make_processed("b")]
         _write_processed_jsonl(items, proc_dir / "2026-05-02.jsonl")
 
-        result = load_processed_items(proc_dir, window_days=30)
+        result, _ = load_processed_items(proc_dir, window_days=30)
         assert len(result) == 2
         assert {r.id for r in result} == {"a", "b"}
 
@@ -85,14 +86,15 @@ class TestLoadProcessedItems:
         _write_processed_jsonl([_make_processed("d1", fetch_date="2026-05-01")], proc_dir / "2026-05-01.jsonl")
         _write_processed_jsonl([_make_processed("d2", fetch_date="2026-05-02")], proc_dir / "2026-05-02.jsonl")
 
-        result = load_processed_items(proc_dir, window_days=30)
+        result, _ = load_processed_items(proc_dir, window_days=30)
         assert len(result) == 2
 
     def test_returns_empty_for_missing_directory(self, tmp_path):
         from src.site.build import load_processed_items
 
-        result = load_processed_items(tmp_path / "no-such-dir", window_days=30)
-        assert result == []
+        items, file_log = load_processed_items(tmp_path / "no-such-dir", window_days=30)
+        assert items == []
+        assert file_log == []
 
     def test_all_results_are_processed_items(self, tmp_path):
         from src.site.build import load_processed_items
@@ -100,8 +102,34 @@ class TestLoadProcessedItems:
         proc_dir = tmp_path / "processed"
         _write_processed_jsonl([_make_processed("x")], proc_dir / "2026-05-02.jsonl")
 
-        result = load_processed_items(proc_dir, window_days=30)
+        result, _ = load_processed_items(proc_dir, window_days=30)
         assert all(isinstance(r, ProcessedItem) for r in result)
+
+    def test_filters_hist_prefix_items(self, tmp_path):
+        from src.site.build import load_processed_items
+
+        proc_dir = tmp_path / "processed"
+        hist_item = _make_processed("hist-abc123")
+        real_item = _make_processed("real-item")
+        _write_processed_jsonl([hist_item, real_item], proc_dir / "2026-05-02.jsonl")
+
+        result, file_log = load_processed_items(proc_dir, window_days=30)
+        ids = {r.id for r in result}
+        assert "hist-abc123" not in ids
+        assert "real-item" in ids
+        assert len(result) == 1
+        assert file_log[0]["filtered_hist"] == 1
+
+    def test_file_log_has_expected_keys(self, tmp_path):
+        from src.site.build import load_processed_items
+
+        proc_dir = tmp_path / "processed"
+        _write_processed_jsonl([_make_processed("x")], proc_dir / "2026-05-02.jsonl")
+
+        _, file_log = load_processed_items(proc_dir, window_days=30)
+        assert len(file_log) == 1
+        entry = file_log[0]
+        assert {"file", "total", "valid", "filtered_hist", "themed"} <= entry.keys()
 
 
 # ── items_to_entries ─────────────────────────────────────────────────────────
@@ -244,6 +272,34 @@ class TestWriteSiteData:
         assert (docs_dir / "items.json").exists()
         data = json.loads((docs_dir / "items.json").read_text())
         assert "items" in data
+
+    def test_writes_log_json(self, tmp_path):
+        from src.site.build import write_site_data
+
+        docs_dir = tmp_path / "docs" / "data"
+        metrics, nodes, sources, edges = self._make_minimal_inputs()
+        file_log = [{"file": "2026-05-02.jsonl", "total": 1, "valid": 1, "filtered_hist": 0, "themed": 1}]
+        write_site_data(metrics, nodes, sources, edges, docs_dir,
+                        items=[_make_processed("item-1")], file_log=file_log)
+        assert (docs_dir / "log.json").exists()
+        data = json.loads((docs_dir / "log.json").read_text())
+        assert "total_items" in data
+        assert "themed_items" in data
+        assert "enrichment_rate" in data
+        assert data["files"] == file_log
+
+    def test_meta_json_has_enrichment_fields(self, tmp_path):
+        from src.site.build import write_site_data
+
+        docs_dir = tmp_path / "docs" / "data"
+        metrics, nodes, sources, edges = self._make_minimal_inputs()
+        items = [_make_processed("i1"), _make_processed("i2", theme="")]
+        write_site_data(metrics, nodes, sources, edges, docs_dir, items=items)
+        data = json.loads((docs_dir / "meta.json").read_text())
+        assert data["total_items"] == 2
+        assert data["themed_items"] == 1
+        assert data["unthemed_items"] == 1
+        assert data["enrichment_rate"] == 0.5
 
 
 # ── build (integration) ──────────────────────────────────────────────────────

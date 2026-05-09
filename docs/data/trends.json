@@ -1,96 +1,53 @@
 {
-  "generated": "2026-05-09T06:14:38.965516+00:00",
+  "generated": "2026-05-09T06:39:23.696347+00:00",
   "trends": [
-    {
-      "theme": "Agentic Workflows",
-      "domain": "agents",
-      "definition": "Automated, goal-driven processes enabled by AI agents, often involving planning and tool use.",
-      "state": "declining",
-      "confidence": 0.488,
-      "volume": 0.93,
-      "velocity": -0.4,
-      "diversity": 2,
-      "adoption_proxy": 0.3,
-      "stability": 0.646,
-      "hype_risk": 0.0,
-      "item_count": 8,
-      "last_seen": "2026-04-29",
-      "source_classes": [
-        "practitioner"
-      ],
-      "source_class_counts": {
-        "practitioner": 8
-      },
-      "history": [
-        {
-          "date": "2026-03-16",
-          "volume": 3,
-          "state": "unknown"
-        },
-        {
-          "date": "2026-03-23",
-          "volume": 2,
-          "state": "declining"
-        },
-        {
-          "date": "2026-04-13",
-          "volume": 2,
-          "state": "unknown"
-        },
-        {
-          "date": "2026-04-27",
-          "volume": 1,
-          "state": "declining"
-        }
-      ]
-    },
     {
       "theme": "AI Workforce & Jobs",
       "domain": "general",
       "definition": "Impact of AI on human employment, job roles, skills, and the future of work.",
       "state": "declining",
-      "confidence": 0.43,
-      "volume": 0.58,
+      "confidence": 0.232,
+      "volume": 0.39,
       "velocity": -1.0,
-      "diversity": 2,
+      "diversity": 1,
       "adoption_proxy": 0.3,
       "stability": 1.0,
       "hype_risk": 0.0,
-      "item_count": 5,
+      "item_count": 3,
       "last_seen": "2026-03-15",
       "source_classes": [
         "practitioner"
       ],
       "source_class_counts": {
-        "practitioner": 5
+        "practitioner": 3
       },
       "history": [
         {
           "date": "2026-03-09",
-          "volume": 5,
+          "volume": 3,
           "state": "declining"
         }
       ]
     },
     {
-      "theme": "AI Business Strategy",
-      "domain": "general",
-      "definition": "How organizations integrate AI into core operations, product development, and competitive advantage.",
+      "theme": "Agentic Workflows",
+      "domain": "agents",
+      "definition": "Automated, goal-driven processes enabled by AI agents, often involving planning and tool use.",
       "state": "declining",
-      "confidence": 0.43,
-      "volume": 0.58,
-      "velocity": -1.0,
-      "diversity": 2,
+      "confidence": 0.232,
+      "volume": 0.39,
+      "velocity": -0.5,
+      "diversity": 1,
       "adoption_proxy": 0.3,
-      "stability": 0.717,
+      "stability": 1.0,
       "hype_risk": 0.0,
-      "item_count": 5,
-      "last_seen": "2026-04-12",
+      "item_count": 3,
+      "last_seen": "2026-04-19",
       "source_classes": [
         "practitioner"
       ],
       "source_class_counts": {
-        "practitioner": 5
+        "practitioner": 3
       },
       "history": [
         {
@@ -99,13 +56,13 @@
           "state": "unknown"
         },
         {
-          "date": "2026-03-30",
-          "volume": 2,
-          "state": "emerging"
+          "date": "2026-03-23",
+          "volume": 1,
+          "state": "unknown"
         },
         {
-          "date": "2026-04-06",
-          "volume": 2,
+          "date": "2026-04-13",
+          "volume": 1,
           "state": "declining"
         }
       ]
@@ -115,20 +72,20 @@
       "domain": "infra",
       "definition": "Hardware, software, and data systems required to develop, train, and deploy AI models.",
       "state": "declining",
-      "confidence": 0.412,
-      "volume": 0.47,
+      "confidence": 0.377,
+      "volume": 0.26,
       "velocity": -1.0,
       "diversity": 2,
       "adoption_proxy": 0.3,
       "stability": 1.0,
       "hype_risk": 0.0,
-      "item_count": 4,
-      "last_seen": "2026-04-08",
+      "item_count": 2,
+      "last_seen": "2026-03-28",
       "source_classes": [
         "practitioner"
       ],
       "source_class_counts": {
-        "practitioner": 4
+        "practitioner": 2
       },
       "history": [
         {
@@ -138,191 +95,6 @@
         },
         {
           "date": "2026-03-23",
-          "volume": 1,
-          "state": "unknown"
-        },
-        {
-          "date": "2026-03-30",
-          "volume": 1,
-          "state": "unknown"
-        },
-        {
-          "date": "2026-04-06",
-          "volume": 1,
-          "state": "declining"
-        }
-      ]
-    },
-    {
-      "theme": "AI Safety & Alignment",
-      "domain": "safety",
-      "definition": "Research ensuring AI systems operate beneficially, without unintended harm or misaligned goals.",
-      "state": "declining",
-      "confidence": 0.225,
-      "volume": 0.35,
-      "velocity": -1.0,
-      "diversity": 1,
-      "adoption_proxy": 0.3,
-      "stability": 0.667,
-      "hype_risk": 0.0,
-      "item_count": 3,
-      "last_seen": "2026-03-19",
-      "source_classes": [
-        "practitioner"
-      ],
-      "source_class_counts": {
-        "practitioner": 3
-      },
-      "history": [
-        {
-          "date": "2026-03-09",
-          "volume": 2,
-          "state": "unknown"
-        },
-        {
-          "date": "2026-03-16",
-          "volume": 1,
-          "state": "declining"
-        }
-      ]
-    },
-    {
-      "theme": "Local LLM Applications",
-      "domain": "general",
-      "definition": "Developing and deploying large language model use cases on edge devices or private infrastructure.",
-      "state": "declining",
-      "confidence": 0.225,
-      "volume": 0.35,
-      "velocity": -1.0,
-      "diversity": 1,
-      "adoption_proxy": 0.3,
-      "stability": 1.0,
-      "hype_risk": 0.0,
-      "item_count": 3,
-      "last_seen": "2026-04-04",
-      "source_classes": [
-        "practitioner"
-      ],
-      "source_class_counts": {
-        "practitioner": 3
-      },
-      "history": [
-        {
-          "date": "2026-03-16",
-          "volume": 1,
-          "state": "unknown"
-        },
-        {
-          "date": "2026-03-23",
-          "volume": 1,
-          "state": "unknown"
-        },
-        {
-          "date": "2026-03-30",
-          "volume": 1,
-          "state": "declining"
-        }
-      ]
-    },
-    {
-      "theme": "Supply Chain Security",
-      "domain": "infra",
-      "definition": "Protecting AI models, data, and development pipelines from malicious attacks or vulnerabilities.",
-      "state": "declining",
-      "confidence": 0.392,
-      "volume": 0.35,
-      "velocity": -1.0,
-      "diversity": 2,
-      "adoption_proxy": 0.3,
-      "stability": 0.667,
-      "hype_risk": 0.0,
-      "item_count": 3,
-      "last_seen": "2026-03-30",
-      "source_classes": [
-        "practitioner"
-      ],
-      "source_class_counts": {
-        "practitioner": 3
-      },
-      "history": [
-        {
-          "date": "2026-03-23",
-          "volume": 2,
-          "state": "unknown"
-        },
-        {
-          "date": "2026-03-30",
-          "volume": 1,
-          "state": "declining"
-        }
-      ]
-    },
-    {
-      "theme": "Local LLM Inference",
-      "domain": "infra",
-      "definition": "Running large language models efficiently on local hardware with limited resources.",
-      "state": "declining",
-      "confidence": 0.225,
-      "volume": 0.35,
-      "velocity": -1.0,
-      "diversity": 1,
-      "adoption_proxy": 0.3,
-      "stability": 0.667,
-      "hype_risk": 0.0,
-      "item_count": 3,
-      "last_seen": "2026-04-03",
-      "source_classes": [
-        "practitioner"
-      ],
-      "source_class_counts": {
-        "practitioner": 3
-      },
-      "history": [
-        {
-          "date": "2026-03-23",
-          "volume": 1,
-          "state": "unknown"
-        },
-        {
-          "date": "2026-03-30",
-          "volume": 2,
-          "state": "declining"
-        }
-      ]
-    },
-    {
-      "theme": "LLM Capabilities",
-      "domain": "reasoning",
-      "definition": "The range of tasks and cognitive abilities exhibited by large language models.",
-      "state": "declining",
-      "confidence": 0.392,
-      "volume": 0.35,
-      "velocity": -1.0,
-      "diversity": 2,
-      "adoption_proxy": 0.3,
-      "stability": 1.0,
-      "hype_risk": 0.0,
-      "item_count": 3,
-      "last_seen": "2026-04-07",
-      "source_classes": [
-        "practitioner"
-      ],
-      "source_class_counts": {
-        "practitioner": 3
-      },
-      "history": [
-        {
-          "date": "2026-03-23",
-          "volume": 1,
-          "state": "unknown"
-        },
-        {
-          "date": "2026-03-30",
-          "volume": 1,
-          "state": "unknown"
-        },
-        {
-          "date": "2026-04-06",
           "volume": 1,
           "state": "declining"
         }
@@ -333,8 +105,8 @@
       "domain": "agents",
       "definition": "Ensuring AI agents perform consistently and dependably to achieve their intended goals.",
       "state": "declining",
-      "confidence": 0.205,
-      "volume": 0.23,
+      "confidence": 0.21,
+      "volume": 0.26,
       "velocity": -1.0,
       "diversity": 1,
       "adoption_proxy": 0.3,
@@ -362,47 +134,19 @@
       ]
     },
     {
-      "theme": "Open-Source AI Agents",
-      "domain": "agents",
-      "definition": "Development and use of publicly available and modifiable AI agent frameworks and models.",
-      "state": "declining",
-      "confidence": 0.205,
-      "volume": 0.23,
-      "velocity": -1.0,
-      "diversity": 1,
-      "adoption_proxy": 0.3,
-      "stability": 1.0,
-      "hype_risk": 0.0,
-      "item_count": 2,
-      "last_seen": "2026-03-15",
-      "source_classes": [
-        "practitioner"
-      ],
-      "source_class_counts": {
-        "practitioner": 2
-      },
-      "history": [
-        {
-          "date": "2026-03-09",
-          "volume": 2,
-          "state": "declining"
-        }
-      ]
-    },
-    {
-      "theme": "AI Development Pace",
+      "theme": "Local LLM Applications",
       "domain": "general",
-      "definition": "The speed and acceleration of progress in artificial intelligence research and deployment.",
+      "definition": "Developing and deploying large language model use cases on edge devices or private infrastructure.",
       "state": "declining",
-      "confidence": 0.205,
-      "volume": 0.23,
+      "confidence": 0.21,
+      "volume": 0.26,
       "velocity": -1.0,
       "diversity": 1,
       "adoption_proxy": 0.3,
       "stability": 1.0,
       "hype_risk": 0.0,
       "item_count": 2,
-      "last_seen": "2026-03-24",
+      "last_seen": "2026-04-04",
       "source_classes": [
         "practitioner"
       ],
@@ -416,7 +160,40 @@
           "state": "unknown"
         },
         {
+          "date": "2026-03-30",
+          "volume": 1,
+          "state": "declining"
+        }
+      ]
+    },
+    {
+      "theme": "LLM Capabilities",
+      "domain": "reasoning",
+      "definition": "The range of tasks and cognitive abilities exhibited by large language models.",
+      "state": "declining",
+      "confidence": 0.377,
+      "volume": 0.26,
+      "velocity": -1.0,
+      "diversity": 2,
+      "adoption_proxy": 0.3,
+      "stability": 1.0,
+      "hype_risk": 0.0,
+      "item_count": 2,
+      "last_seen": "2026-04-02",
+      "source_classes": [
+        "practitioner"
+      ],
+      "source_class_counts": {
+        "practitioner": 2
+      },
+      "history": [
+        {
           "date": "2026-03-23",
+          "volume": 1,
+          "state": "unknown"
+        },
+        {
+          "date": "2026-03-30",
           "volume": 1,
           "state": "declining"
         }
