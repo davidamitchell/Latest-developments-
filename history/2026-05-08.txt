@@ -1,0 +1,22 @@
+Daily AI Digest — 08 May 2026
+========================================
+
+[AI summarisation failed: ClientError — no model processing was applied. Raw links only.]
+
+## Google AI Blog
+
+- See what happens when creative legends use AI to make ads for small businesses. (08 May)
+  https://blog.google/company-news/inside-google/company-announcements/the-small-brief
+- 5 gardening tips you can try right in Search (06 May)
+  https://blog.google/products-and-platforms/products/search/gardening-tips
+- Google is partnering with XPRIZE and Range Media Partners on the $3.5 million Future Vision film competition. (05 May)
+  https://blog.google/innovation-and-ai/technology/ai/future-vision-film-competition-xprize
+- The latest AI news we announced in April 2026 (04 May)
+  https://blog.google/innovation-and-ai/technology/ai/google-ai-updates-april-2026
+- Reduce friction and latency for long-running jobs with Webhooks in Gemini API (04 May)
+  https://blog.google/innovation-and-ai/technology/developers-tools/event-driven-webhooks
+
+## DeepMind Blog
+
+- AlphaEvolve: How our Gemini-powered coding agent is scaling impact across fields (06 May)
+  https://deepmind.google/blog/alphaevolve-impact

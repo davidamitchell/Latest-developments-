@@ -1,75 +1,75 @@
 {
-  "generated": "2026-05-03T08:45:29.418591+00:00",
+  "generated": "2026-05-09T06:14:38.965516+00:00",
   "nodes": [
     {
       "id": "Agentic Workflows",
-      "domain": "unknown",
+      "domain": "agents",
       "state": "declining",
       "volume": 0.93
     },
     {
       "id": "AI Workforce & Jobs",
-      "domain": "unknown",
+      "domain": "general",
       "state": "declining",
       "volume": 0.58
     },
     {
       "id": "AI Business Strategy",
-      "domain": "unknown",
+      "domain": "general",
       "state": "declining",
       "volume": 0.58
     },
     {
       "id": "AI Infrastructure",
-      "domain": "unknown",
+      "domain": "infra",
       "state": "declining",
       "volume": 0.47
     },
     {
       "id": "AI Safety & Alignment",
-      "domain": "unknown",
+      "domain": "safety",
       "state": "declining",
       "volume": 0.35
     },
     {
       "id": "Local LLM Applications",
-      "domain": "unknown",
+      "domain": "general",
       "state": "declining",
       "volume": 0.35
     },
     {
       "id": "Supply Chain Security",
-      "domain": "unknown",
+      "domain": "infra",
       "state": "declining",
       "volume": 0.35
     },
     {
       "id": "Local LLM Inference",
-      "domain": "unknown",
+      "domain": "infra",
       "state": "declining",
       "volume": 0.35
     },
     {
       "id": "LLM Capabilities",
-      "domain": "unknown",
+      "domain": "reasoning",
       "state": "declining",
       "volume": 0.35
     },
     {
       "id": "Agent Reliability",
-      "domain": "unknown",
+      "domain": "agents",
       "state": "declining",
       "volume": 0.23
     },
     {
       "id": "Open-Source AI Agents",
-      "domain": "unknown",
+      "domain": "agents",
       "state": "declining",
       "volume": 0.23
     },
     {
       "id": "AI Development Pace",
-      "domain": "unknown",
+      "domain": "general",
       "state": "declining",
       "volume": 0.23
     }

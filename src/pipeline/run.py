@@ -41,6 +41,10 @@ logger = logging.getLogger(__name__)
 
 _RAW_DIR = Path("data/raw")
 _PROCESSED_DIR = Path("data/processed")
+# Tokens seen in Gemini 429 quota responses (QuotaFailure details / error text).
+_QUOTA_METRIC_TOKEN = "generate_content_free_tier_requests"
+_QUOTA_PERDAY_TOKEN = "generaterequestsperday"
+_QUOTA_METRIC_PHRASE = "quota exceeded for metric"
 
 
 class _NonRetryableEnrichError(Exception):
@@ -49,6 +53,52 @@ class _NonRetryableEnrichError(Exception):
     Raised when enrich() throws a programming/runtime error that is
     not a Gemini transport condition (ClientError/ServerError).
     """
+
+
+class _QuotaExhaustedEnrichError(Exception):
+    """Signal that Gemini free-tier quota is exhausted for this run."""
+
+
+def _is_quota_exhausted_error(exc: Exception) -> bool:
+    """Return True when a Gemini transport error indicates quota exhaustion."""
+    code = getattr(exc, "code", None)
+    status_code = getattr(exc, "status_code", None)
+    if (code is not None and code != 429) or (status_code is not None and status_code != 429):
+        return False
+
+    details = getattr(exc, "details", None)
+    if isinstance(details, list):
+        for entry in details:
+            if not isinstance(entry, dict):
+                continue
+            if entry.get("@type") != "type.googleapis.com/google.rpc.QuotaFailure":
+                continue
+            for violation in entry.get("violations", []):
+                if not isinstance(violation, dict):
+                    continue
+                metric = violation.get("quotaMetric", "").lower()
+                quota_id = violation.get("quotaId", "").lower()
+                if _QUOTA_METRIC_TOKEN in metric or _QUOTA_PERDAY_TOKEN in quota_id:
+                    return True
+
+    text = str(exc).lower()
+    return (
+        _QUOTA_METRIC_TOKEN in text
+        or _QUOTA_PERDAY_TOKEN in text
+        or _QUOTA_METRIC_PHRASE in text
+    )
+
+
+def _log_quota_exhausted(item_id: str, remaining: int) -> None:
+    logger.warning(
+        "Gemini quota exhausted while enriching %r; skipping AI enrichment for remaining %d item(s)",
+        item_id,
+        remaining,
+    )
+
+
+def _remaining_item_count(total: int, idx: int) -> int:
+    return total - idx - 1
 
 
 class _RateLimiter:
@@ -102,24 +152,27 @@ def process(
 
     client = _make_gemini_client(gemini_api_key) if gemini_api_key else None
     rate_limiter = _RateLimiter(rpm=rpm) if client is not None else None
+    ai_disabled_for_quota = False
     results: list[ProcessedItem] = []
     ai_failures = 0
 
-    for fetched in items:
+    for idx, fetched in enumerate(items):
         # Stage 1 — Ingest
         processed = ingest(fetched, fetch_date=fetch_date)
 
         # Stage 2 — Clean
         processed = clean(processed, raw_content=fetched.content)
 
-        if client is not None:
+        if client is not None and not ai_disabled_for_quota:
             from google.genai.errors import ClientError, ServerError
 
             def _make_enrich_once(current: ProcessedItem):
                 def _enrich_once() -> tuple[ProcessedItem, bool]:
                     try:
                         return enrich(current, client, max_output_tokens=enrich_max_output_tokens)
-                    except (ClientError, ServerError):
+                    except (ClientError, ServerError) as exc:
+                        if _is_quota_exhausted_error(exc):
+                            raise _QuotaExhaustedEnrichError from exc
                         raise
                     except Exception as exc:
                         raise _NonRetryableEnrichError from exc
@@ -136,12 +189,25 @@ def process(
                     max_attempts=3,
                     base_delay=60.0,
                     label=f"enrich:{processed.id}",
-                    no_retry=(_NonRetryableEnrichError,),
+                    no_retry=(_NonRetryableEnrichError, _QuotaExhaustedEnrichError),
                 )
+            except _QuotaExhaustedEnrichError:
+                processed = pre_enrich
+                ok = False
+                ai_disabled_for_quota = True
+                remaining = _remaining_item_count(len(items), idx)
+                _log_quota_exhausted(processed.id, remaining)
             except RuntimeError as exc:
                 if isinstance(exc.__cause__, (ClientError, ServerError)):
                     processed = pre_enrich
-                    logger.warning("AI enrichment failed for %r after retries: %s", processed.id, exc.__cause__)
+                    if _is_quota_exhausted_error(exc.__cause__):
+                        ai_disabled_for_quota = True
+                        remaining = _remaining_item_count(len(items), idx)
+                        _log_quota_exhausted(processed.id, remaining)
+                    else:
+                        logger.warning(
+                            "AI enrichment failed for %r after retries: %s", processed.id, exc.__cause__
+                        )
                     ok = False
                 else:
                     raise
@@ -217,8 +283,14 @@ def main() -> int:
 
     items = read_raw_jsonl(raw_path)
     if not items:
-        logger.info("No raw items found for %s — writing empty processed file", today)
-        write_processed_jsonl([], out_path)
+        logger.info("No raw items found for %s — preserving existing processed file if present", today)
+        merged = _merge_and_write(out_path, [])
+        logger.info(
+            "Processing complete — %d new item(s) added; %d total in %s",
+            0,
+            len(merged),
+            out_path,
+        )
         return 0
 
     # GEMINI_API_KEY is intentionally optional: when absent, AI stages (3–6)

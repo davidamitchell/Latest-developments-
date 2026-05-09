@@ -83,37 +83,37 @@ sources:
     name: "Groq SDK Releases"
     url: "https://github.com/groq/groq-python/releases.atom"
     source_class: operator
-    enabled: true
+    enabled: false
 
   - type: rss
     name: "Cerebras SDK Releases"
     url: "https://github.com/Cerebras/cerebras-cloud-sdk-python/releases.atom"
     source_class: operator
-    enabled: true
+    enabled: false
 
   - type: rss
     name: "Mistral Inference Releases"
     url: "https://github.com/mistralai/mistral-inference/releases.atom"
     source_class: operator
-    enabled: true
+    enabled: false
 
   - type: rss
     name: "Ollama Releases"
     url: "https://github.com/ollama/ollama/releases.atom"
     source_class: practitioner
-    enabled: true
+    enabled: false
 
   - type: rss
     name: "llama.cpp Releases"
     url: "https://github.com/ggerganov/llama.cpp/releases.atom"
     source_class: practitioner
-    enabled: true
+    enabled: false
 
   - type: rss
     name: "LocalAI Releases"
     url: "https://github.com/mudler/LocalAI/releases.atom"
     source_class: practitioner
-    enabled: true
+    enabled: false
 
   # ── YouTube channels ──────────────────────────────────────────────────────
 
@@ -122,27 +122,27 @@ sources:
     channel_id: "UC0C-17n9iuUQPylguM1d-lQ"
     source_class: practitioner
     enabled: true
-    max_videos: 5
+    max_videos: 8
 
   - type: youtube
     name: "Wes Roth"
     channel_id: "UCqcbQf6yw5KzRoDDcZ_wBSw"
     source_class: practitioner
     enabled: true
-    max_videos: 3
+    max_videos: 5
 
   - type: youtube
     name: "Matthew Berman"
     channel_id: "UCawZsQWqfGSbCI5yjkdVkTA"
     source_class: practitioner
     enabled: true
-    max_videos: 3
+    max_videos: 5
 
   - type: youtube
     name: "The AI Daily Brief"
     channel_id: "UCKelCK4ZaO6HeEI1KQjqzWA"
     source_class: media
-    enabled: true
+    enabled: false
     max_videos: 3
 
   # ── Substack newsletters ──────────────────────────────────────────────────
@@ -160,7 +160,7 @@ sources:
     source_class: practitioner
     enabled: true
     min_score: 100
-    max_stories: 10
+    max_stories: 8
     keywords:
       - "LLM"
       - "large language model"
@@ -189,26 +189,26 @@ sources:
       - cs.CL
       - cs.CV
       - cs.RO
-    max_papers: 30
+    max_papers: 8
 
   - type: huggingface
     name: "HuggingFace Models"
     source_class: primary
     enabled: true
-    max_models: 50
-    min_downloads: 100
+    max_models: 15
+    min_downloads: 1000
 
   - type: paperswithcode
     name: "Papers with Code"
     source_class: primary
     enabled: true
-    page_size: 20
+    page_size: 15
     min_stars: 0
 
   - type: operator_changelog
     name: "Operator Changelogs"
     source_class: operator
-    enabled: true
+    enabled: false
     feeds:
       - "https://www.anthropic.com/rss.xml"
       - "https://openai.com/blog/rss.xml"
@@ -218,14 +218,14 @@ sources:
   - type: replicate
     name: "Replicate Models"
     source_class: operator
-    enabled: true
-    limit: 20
+    enabled: false
+    limit: 5
 
   - type: openreview
     name: "OpenReview Papers"
     source_class: primary
     enabled: true
-    limit: 25
+    limit: 15
     venues:
       - "ICLR.cc/2025/Conference/-/Accepted"
       - "NeurIPS.cc/2025/Conference/-/Accepted"
@@ -234,8 +234,8 @@ sources:
   - type: openrouter
     name: "OpenRouter Pricing"
     source_class: market
-    enabled: true
-    limit: 100
+    enabled: false
+    limit: 10
 
 # ---------------------------------------------------------------------------
 # digest — email digest settings

@@ -268,6 +268,15 @@ def read_raw_jsonl(path: Path) -> list[FetchedItem]:
     return items
 
 
+def _merge_and_write_raw(path: Path, new_items: list[FetchedItem]) -> list[FetchedItem]:
+    """Merge new_items into path by id; write and return merged list."""
+    existing = read_raw_jsonl(path)
+    existing_ids = {item.id for item in existing}
+    merged = existing + [item for item in new_items if item.id not in existing_ids]
+    write_raw_jsonl(merged, path)
+    return merged
+
+
 def _parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description="Fetch all sources → data/raw/YYYY-MM-DD.jsonl")
     p.add_argument("--config", default="config/sources.yaml", help="Path to sources.yaml")
@@ -297,8 +306,13 @@ def main() -> int:
     already_processed = load_state()
     items = fetch_all(cfg, already_processed)
 
-    write_raw_jsonl(items, out_path)
-    logger.info("Fetch complete — %d new item(s) written to %s", len(items), out_path)
+    merged = _merge_and_write_raw(out_path, items)
+    logger.info(
+        "Fetch complete — %d new item(s) added; %d total in %s",
+        len(items),
+        len(merged),
+        out_path,
+    )
     return 0
 
 

@@ -11,6 +11,8 @@ import pytest
 from src.fetchers import FetchedItem
 from src.models import ProcessedItem
 
+_QUOTA_METRIC = "generativelanguage.googleapis.com/generate_content_free_tier_requests"
+
 
 def _make_fetched(id_: str = "item-1") -> FetchedItem:
     return FetchedItem(
@@ -140,13 +142,13 @@ class TestProcess:
         assert failures == 0
 
     def test_ai_failure_counted(self):
-        """When the Gemini client raises a transport error, failures are counted."""
+        """Non-quota Gemini transport errors are counted per item."""
         from google.genai.errors import ClientError
 
         from src.pipeline.run import process
 
         client = MagicMock()
-        client.models.generate_content.side_effect = ClientError(429, {"error": "quota exceeded"})
+        client.models.generate_content.side_effect = ClientError(429, {"error": "temporary upstream error"})
         items = [_make_fetched("fail-1"), _make_fetched("fail-2")]
         with patch("src.pipeline.run._make_gemini_client", return_value=client), \
              patch("src.pipeline.run.time.sleep"), \
@@ -154,6 +156,49 @@ class TestProcess:
             result, failures = process(items, gemini_api_key="fake-key", fetch_date="2026-05-02")
         assert failures == 2
         assert len(result) == 2
+
+    def test_quota_exhaustion_stops_ai_for_remaining_items(self):
+        """When free-tier quota is exhausted, process() stops further AI calls in this run."""
+        from google.genai.errors import ClientError
+
+        from src.pipeline.run import process
+
+        quota_exc = ClientError(
+            429,
+            {
+                "error": {
+                    "code": 429,
+                    "message": f"Quota exceeded for metric: {_QUOTA_METRIC}",
+                    "status": "RESOURCE_EXHAUSTED",
+                }
+            },
+        )
+        quota_exc.details = [
+            {
+                "@type": "type.googleapis.com/google.rpc.QuotaFailure",
+                "violations": [
+                    {"quotaMetric": _QUOTA_METRIC}
+                ],
+            }
+        ]
+
+        client = MagicMock()
+        client.models.generate_content.side_effect = quota_exc
+        items = [_make_fetched("quota-1"), _make_fetched("quota-2"), _make_fetched("quota-3")]
+
+        with patch("src.pipeline.run._make_gemini_client", return_value=client), \
+             patch("src.pipeline.run.time.sleep"), \
+             patch("src.retry.time.sleep") as retry_sleep:
+            result, failures = process(items, gemini_api_key="fake-key", fetch_date="2026-05-02")
+
+        assert len(result) == 3
+        assert failures == 1
+        # First item hits quota and is not retried; remaining items skip AI.
+        assert client.models.generate_content.call_count == 1
+        assert all(item.summary == "" for item in result[1:])
+        assert all(item.concepts == [] for item in result[1:])
+        assert all(item.credibility_score > 0.0 for item in result)
+        retry_sleep.assert_not_called()
 
     def test_process_retries_client_error_using_server_retry_delay(self):
         from google.genai.errors import ClientError
@@ -255,6 +300,96 @@ class TestRateLimiter:
             rl.wait()
         mock_sleep.assert_not_called()
 
+
+# ── quota detection ───────────────────────────────────────────────────────────
+
+class TestQuotaDetection:
+    def test_detects_quota_exhaustion_from_message_text(self):
+        from google.genai.errors import ClientError
+
+        from src.pipeline.run import _is_quota_exhausted_error
+
+        exc = ClientError(
+            429,
+            {
+                "error": {
+                    "message": f"Quota exceeded for metric: {_QUOTA_METRIC}"
+                }
+            },
+        )
+        assert _is_quota_exhausted_error(exc) is True
+
+    def test_detects_quota_exhaustion_from_quota_id(self):
+        from google.genai.errors import ClientError
+
+        from src.pipeline.run import _is_quota_exhausted_error
+
+        exc = ClientError(429, {"error": "quota"})
+        exc.details = [
+            {
+                "@type": "type.googleapis.com/google.rpc.QuotaFailure",
+                "violations": [{"quotaId": "GenerateRequestsPerDayPerProjectPerModel-FreeTier"}],
+            }
+        ]
+        assert _is_quota_exhausted_error(exc) is True
+
+    def test_ignores_non_dict_details_and_non_quota_payloads(self):
+        from google.genai.errors import ClientError
+
+        from src.pipeline.run import _is_quota_exhausted_error
+
+        exc = ClientError(429, {"error": "temporary issue"})
+        exc.details = [
+            "not-a-dict",
+            {"@type": "type.googleapis.com/google.rpc.QuotaFailure", "violations": ["not-a-dict"]},
+        ]
+        assert _is_quota_exhausted_error(exc) is False
+
+    def test_non_429_errors_are_not_treated_as_quota_exhaustion(self):
+        from google.genai.errors import ClientError
+
+        from src.pipeline.run import _is_quota_exhausted_error
+
+        exc = ClientError(500, {"error": f"Quota exceeded for metric: {_QUOTA_METRIC}"})
+        assert _is_quota_exhausted_error(exc) is False
+
+    def test_remaining_item_count_helper(self):
+        from src.pipeline.run import _remaining_item_count
+
+        assert _remaining_item_count(5, 0) == 4
+        assert _remaining_item_count(5, 4) == 0
+
+
+class TestMergeAndWriteProcessed:
+    def _make_processed(self, id_: str) -> ProcessedItem:
+        return ProcessedItem(
+            id=id_,
+            title="T",
+            url="https://example.com",
+            source_name="S",
+            source_type="rss",
+            source_class="practitioner",
+            author="",
+            published=None,
+            has_code=False,
+            evidence_type="unknown",
+            fetch_date="2026-05-02",
+            cleaned_content="cleaned text",
+        )
+
+    def test_preserves_existing_items_when_no_new_items(self, tmp_path):
+        from src.models import read_processed_jsonl, write_processed_jsonl
+        from src.pipeline.run import _merge_and_write
+
+        path = tmp_path / "processed.jsonl"
+        existing = [self._make_processed("existing-1"), self._make_processed("existing-2")]
+        write_processed_jsonl(existing, path)
+
+        merged = _merge_and_write(path, [])
+        reloaded = read_processed_jsonl(path)
+
+        assert [item.id for item in merged] == ["existing-1", "existing-2"]
+        assert [item.id for item in reloaded] == ["existing-1", "existing-2"]
 
 # ── write_processed_jsonl ────────────────────────────────────────────────────
 

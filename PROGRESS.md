@@ -749,7 +749,7 @@ Three gaps identified by working the backlog:
 - `ruff check` on changed files: pass
 - `pytest tests/test_retry.py tests/test_pipeline_run.py tests/test_themes.py`: pass
 - `pytest --collect-only`: pass (627 collected)
-- `make check`: fails due pre-existing unrelated lint issues in untouched files
+- `make check`: fails due to pre-existing unrelated lint issues in untouched files
 
 ### Mini-Retro
 
@@ -757,3 +757,57 @@ Three gaps identified by working the backlog:
 2. **What slowed down or went wrong?** Existing fallback tests in `test_themes.py` became slow after introducing `with_backoff` and needed `time.sleep` patching.
 3. **What single change would prevent this next time?** When adding retries, immediately patch sleep in failure-path tests to avoid long-running suites.
 4. **Is this a pattern?** Yes — introducing retry wrappers often changes test runtime characteristics; test harnesses should explicitly stub delay calls.
+
+---
+
+## 2026-05-09 — Increase source volume for broader pipeline testing
+
+**What changed:** Increased source and item volume in `config/sources.yaml` to move beyond the ultra-conservative quota-protection profile used during 429 triage.
+
+- Re-enabled additional RSS sources: Ethan Mollick, Simon Willison, Together AI, Lambda.
+- Re-enabled YouTube channels: Nate Jones, Wes Roth, Matthew Berman; increased `max_videos` caps.
+- Re-enabled Substack source: Nate's Newsletter.
+- Re-enabled singleton sources: Hacker News, HuggingFace Models, Papers with Code, OpenReview Papers.
+- Increased item caps:
+  - `hackernews.max_stories`: 3 → 8
+  - `arxiv.max_papers`: 2 → 8
+  - `huggingface.max_models`: 8 → 15
+  - `huggingface.min_downloads`: 5000 → 1000
+  - `paperswithcode.page_size`: 10 → 15
+  - `openreview.limit`: 10 → 15
+
+**Validation:**
+- `pytest tests/test_config.py -q`: pass
+- `make check`: fails due to pre-existing unrelated lint issues in untouched files
+
+### Mini-Retro
+
+1. **Did the process work?** Yes. Prior commit history made it straightforward to selectively restore volume without touching runtime logic.
+2. **What slowed down or went wrong?** None in this slice; the only failing validation remains existing unrelated lint debt.
+3. **What single change would prevent this next time?** Add a documented “low-volume vs high-volume” source preset approach to avoid repeated manual toggling in `sources.yaml`.
+4. **Is this a pattern?** Yes — volume tuning requests are recurring; a preset/config profile split would reduce churn.
+
+---
+
+## 2026-05-08 — Prevent same-day pipeline reruns from overwriting data
+
+**What changed:** Investigated Pipeline #18 logs and commits (`256f271`, `c442922`) and confirmed that rerunning the pipeline on the same day could overwrite both `data/raw/YYYY-MM-DD.jsonl` and `data/processed/YYYY-MM-DD.jsonl` with empty files when no new items were fetched.
+
+- `src/pipeline/fetch.py`: added `_merge_and_write_raw()` and switched `main()` to merge newly fetched items into existing same-day raw data instead of overwriting the file.
+- `src/pipeline/run.py`: changed the no-raw-items path to preserve existing processed data by merging with `[]` rather than writing an empty file.
+- Added regression coverage:
+  - `tests/test_pipeline_fetch.py`: merge-and-write raw preserves existing items and appends only unique new IDs.
+  - `tests/test_pipeline_run.py`: merge-and-write processed preserves existing items when no new input is present.
+
+**Validation:**
+- `pytest tests/test_pipeline_fetch.py -q`: pass
+- `pytest tests/test_pipeline_run.py -q`: pass
+- `pytest tests/test_smoke.py::TestRunMain::test_exits_zero_with_no_raw_items -q`: pass
+- `make check`: fails due pre-existing unrelated lint issues in untouched files
+
+### Mini-Retro
+
+1. **Did the process work?** Yes. Pipeline #18 logs and its bot commits made the overwrite path clear before any code changes.
+2. **What slowed down or went wrong?** The repo has existing unrelated lint failures, so full-lint validation remains noisy for targeted fixes.
+3. **What single change would prevent this next time?** Add a dedicated regression test around same-day rerun semantics for both raw and processed outputs whenever pipeline persistence logic changes.
+4. **Is this a pattern?** Yes — date-keyed outputs are vulnerable to accidental clobbering when reruns write whole files instead of merging.
