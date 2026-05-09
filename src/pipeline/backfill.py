@@ -85,24 +85,89 @@ def backfill_file(
     item_map: dict[str, ProcessedItem] = {i.id: i for i in items}
     enriched_count = 0
     failed_count = 0
+    quota_exhausted = False
 
-    for item in unenriched:
+    from src.pipeline._quota import (  # noqa: I001, PLC0415
+        NonRetryableEnrichError as _NonRetryableEnrichError,
+        QuotaExhaustedEnrichError as _QuotaExhaustedEnrichError,
+        is_quota_exhausted_error as _is_quota_exhausted_error,
+        log_quota_exhausted as _log_quota_exhausted,
+    )
+
+    for idx, item in enumerate(unenriched):
+        if quota_exhausted:
+            failed_count += 1
+            continue
+
         rate_limiter.wait()  # type: ignore[union-attr]
 
-        def _attempt(current: ProcessedItem = item):
-            return enrich(current, client, max_output_tokens=max_output_tokens)  # type: ignore[arg-type]
+        def _make_attempt(current: ProcessedItem = item):
+            def _attempt():
+                try:
+                    return enrich(current, client, max_output_tokens=max_output_tokens)  # type: ignore[arg-type]
+                except Exception as exc:
+                    # Pass quota-sentinel through so the outer handler can stop the batch.
+                    if isinstance(exc, _QuotaExhaustedEnrichError):
+                        raise
+                    # Only classify as a Gemini transport error if the exception
+                    # originated from google.genai — avoids importing the C-extension
+                    # backed google.genai.errors for non-Gemini exceptions (e.g.
+                    # AttributeError from a programming mistake in enrich()).
+                    if type(exc).__module__.startswith("google.genai"):
+                        from google.genai.errors import (  # noqa: PLC0415, B023
+                            ClientError,
+                            ServerError,
+                        )
 
+                        if isinstance(exc, (ClientError, ServerError)):  # noqa: B023
+                            if _is_quota_exhausted_error(exc):
+                                raise _QuotaExhaustedEnrichError from exc
+                            raise  # let with_backoff retry ServerError / non-quota ClientError
+                    raise _NonRetryableEnrichError from exc
+
+            return _attempt
+
+        pre_enrich = item
         try:
             enriched_item, ok = with_backoff(
-                _attempt,
+                _make_attempt(item),
                 max_attempts=3,
                 base_delay=60.0,
                 label=f"backfill:{item.id}",
+                no_retry=(_NonRetryableEnrichError, _QuotaExhaustedEnrichError),
             )
-        except Exception as exc:
-            logger.warning("Backfill failed for %r after retries: %s", item.id, exc)
+        except _QuotaExhaustedEnrichError:
+            enriched_item = pre_enrich
             ok = False
-            enriched_item = item
+            quota_exhausted = True
+            remaining = len(unenriched) - idx - 1
+            _log_quota_exhausted(item.id, remaining)
+        except RuntimeError as exc:
+            cause = exc.__cause__
+            cause_module = type(cause).__module__ if cause is not None else ""
+            is_gemini_transport = False
+            if cause_module.startswith("google.genai"):
+                from google.genai.errors import ClientError, ServerError  # noqa: PLC0415
+
+                is_gemini_transport = isinstance(cause, (ClientError, ServerError))
+
+            if is_gemini_transport:
+                enriched_item = pre_enrich
+                if _is_quota_exhausted_error(exc.__cause__):
+                    quota_exhausted = True
+                    remaining = len(unenriched) - idx - 1
+                    _log_quota_exhausted(item.id, remaining)
+                else:
+                    logger.warning(
+                        "AI enrichment failed for %r after retries: %s",
+                        item.id,
+                        exc.__cause__,
+                    )
+                ok = False
+            else:
+                raise
+        except _NonRetryableEnrichError as exc:
+            raise exc.__cause__ from None  # type: ignore[misc]
 
         if ok:
             item_map[item.id] = enriched_item

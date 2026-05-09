@@ -6,6 +6,8 @@ import dataclasses
 import json
 from unittest.mock import MagicMock, patch
 
+import pytest
+
 from src.models import ProcessedItem, write_processed_jsonl
 
 
@@ -169,6 +171,47 @@ class TestBackfillFile:
         assert failed == 1
         result = json.loads(path.read_text().strip())
         assert result["theme"] == ""
+
+    def test_quota_exhaustion_short_circuits_remaining_items(self, tmp_path):
+        """When quota is exhausted on item N, items N+1..end are skipped without API calls."""
+        from src.pipeline._quota import QuotaExhaustedEnrichError
+        from src.pipeline.backfill import _NullRateLimiter, backfill_file
+
+        path = tmp_path / "2026-05-09.jsonl"
+        items = [_make_processed(str(i), theme="") for i in range(3)]
+        write_processed_jsonl(items, path)
+
+        call_count = 0
+
+        def _quota_on_first(item, client, max_output_tokens=500):
+            nonlocal call_count
+            call_count += 1
+            if call_count == 1:
+                raise QuotaExhaustedEnrichError
+            return item, True
+
+        with patch("src.pipeline.backfill.enrich", side_effect=_quota_on_first):
+            enriched, failed = backfill_file(path, MagicMock(), _NullRateLimiter(), 500)
+
+        assert call_count == 1
+        assert enriched == 0
+        assert failed == 3
+
+    def test_programming_error_propagates(self, tmp_path):
+        """Non-transport errors (e.g. AttributeError) are re-raised, not swallowed."""
+        from src.pipeline.backfill import _NullRateLimiter, backfill_file
+
+        path = tmp_path / "2026-05-09.jsonl"
+        write_processed_jsonl([_make_processed("a", theme="")], path)
+
+        def _broken(item, client, max_output_tokens=500):
+            raise AttributeError("unexpected None")
+
+        with (
+            pytest.raises(AttributeError, match="unexpected None"),
+            patch("src.pipeline.backfill.enrich", side_effect=_broken),
+        ):
+            backfill_file(path, MagicMock(), _NullRateLimiter(), 500)
 
     def test_rate_limiter_called_per_unenriched_item(self, tmp_path):
         """Rate limiter .wait() is called once per item that needs enrichment."""
