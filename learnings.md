@@ -289,3 +289,35 @@ git push origin HEAD   # always — picks up any locally-committed-but-not-pushe
 ### Is this a pattern?
 
 Yes. Every failure in this backfill sequence came from an untested side-effect path. The common theme: the happy path (enrich items, write files) was tested; the operational paths (git commit, git push, quota stop) were not. Operational paths are exactly where production failures hide.
+
+---
+
+## 2026-05-10 — Silent enrichment failure: GEMINI_API_KEY not set
+
+### What happened
+
+The site showed 35% enrichment. The backfill ran and reported "nothing to enrich". The daily pipeline was producing 78 items per run with `theme=""` for every item.
+
+### Root cause
+
+`GEMINI_API_KEY` was not set as a GitHub Secret.
+
+- `src/pipeline/run.py` (the daily pipeline) intentionally skips enrichment when the key is absent: logs a WARNING and continues. Items are stored with `theme=""`. This is by design for dry-run/testing.
+- `src/pipeline/backfill.py` checks for the key and exits with code 1 if absent.
+- The backfill workflow had `continue-on-error: true` on the enrichment step, which silently swallowed the exit-1. The workflow showed green. The user saw "nothing to enrich".
+
+### Fix applied
+
+1. Added "Verify GEMINI_API_KEY is configured" as the FIRST step in `backfill-enrichment.yml` — fails immediately with a clear `::error::` annotation if the key is absent.
+2. Removed `continue-on-error: true` from the enrichment step — failures are now visible as red workflow runs. The `if: always()` on the commit step already ensures partial progress is saved.
+3. Added a `::warning::` annotation to the "process" job in `fetch-and-process.yml` when the key is absent — visible in the Actions UI on every pipeline run.
+
+### Rule
+
+**Any step where a missing secret causes silent degradation (not failure) must have an explicit check step that surfaces the absence before the degraded work runs.** The pipeline's graceful-skip design is correct for testing; the ops tool (backfill) must fail loudly.
+
+**`continue-on-error: true` hides real failures.** Only use it when partial success is genuinely acceptable and you have a downstream step that checks and surfaces the outcome. If the step failing means the whole run is invalid, remove `continue-on-error` and let the step fail visibly.
+
+### Is this a pattern?
+
+Yes — the same class as the git-config-ordering bugs: a swallowed failure that looked like success. The pattern: `continue-on-error: true` + no downstream diagnostic step = invisible failures.

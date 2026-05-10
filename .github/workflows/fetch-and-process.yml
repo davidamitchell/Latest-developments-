@@ -113,6 +113,16 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
+      - name: Warn if GEMINI_API_KEY is not configured
+        # The pipeline continues without enrichment when the key is absent (by design),
+        # but all items will have theme="" which degrades site quality. Surface this early.
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          if [ -z "$GEMINI_API_KEY" ]; then
+            echo "::warning::GEMINI_API_KEY is not set — AI enrichment (themes, summaries) will be skipped for ALL items today. Add the secret: Settings → Secrets → Actions → GEMINI_API_KEY"
+          fi
+
       - name: Run processing pipeline
         # Reads data/raw/YYYY-MM-DD.jsonl, runs all pipeline stages
         # (clean, concept extraction, theme classification, summary extraction,
