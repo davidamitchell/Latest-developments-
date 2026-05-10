@@ -8,8 +8,8 @@ name: Backfill AI Enrichment
 # Use max_items (default 50) to chunk large backfills across multiple runs —
 # each run commits partial progress so no work is lost on timeout or failure.
 #
-# After this workflow commits updated data/processed/ files, trigger
-# rebuild-site.yml manually to regenerate docs/data/*.json.
+# After committing enriched data, this workflow automatically triggers
+# rebuild-site.yml so the site reflects the latest enrichment state.
 
 on:
   workflow_dispatch:
@@ -45,6 +45,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      actions: write
 
     steps:
       - name: Checkout repository
@@ -106,3 +107,9 @@ jobs:
           # Always push — picks up per-file commits from --commit-progress even
           # when there are no new uncommitted changes.
           git push origin HEAD
+
+      - name: Trigger site rebuild
+        if: always() && inputs.dry_run != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run rebuild-site.yml --ref main
