@@ -5,9 +5,6 @@ name: Backfill AI Enrichment
 # or after the thinking_budget=0 fix (cb6dfe0) to recover items that silently
 # stored unenriched due to finish_reason=MAX_TOKENS.
 #
-# PREREQUISITE: GEMINI_API_KEY must be set in repo Settings → Secrets → Actions.
-# Without it this workflow fails immediately with a clear error message.
-#
 # Use max_items (default 50) to chunk large backfills across multiple runs —
 # each run commits partial progress so no work is lost on timeout or failure.
 #
@@ -51,19 +48,6 @@ jobs:
       actions: write
 
     steps:
-      - name: Verify GEMINI_API_KEY is configured
-        env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-        run: |
-          if [ -z "$GEMINI_API_KEY" ]; then
-            echo "::error::GEMINI_API_KEY secret is not set."
-            echo "Add your Gemini API key at: Settings → Secrets → Actions → New repository secret"
-            echo "Name: GEMINI_API_KEY"
-            echo "Without this key the pipeline cannot enrich items with AI themes."
-            exit 1
-          fi
-          echo "GEMINI_API_KEY is configured."
-
       - name: Checkout repository
         uses: actions/checkout@v4
         with:

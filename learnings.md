@@ -292,32 +292,26 @@ Yes. Every failure in this backfill sequence came from an untested side-effect p
 
 ---
 
-## 2026-05-10 — Silent enrichment failure: GEMINI_API_KEY not set
+## 2026-05-10 — "Nothing to enrich" was a silent quota-exhaustion failure
 
 ### What happened
 
-The site showed 35% enrichment. The backfill ran and reported "nothing to enrich". The daily pipeline was producing 78 items per run with `theme=""` for every item.
+The site showed 35% enrichment. The backfill ran and committed 3 March files (2026-03-11, 2026-03-24, 2026-03-26), each with 1 unenriched item. It then hit a Gemini 429 (quota exhausted) on the first April file's first item, stopped, and exited with code 2. `continue-on-error: true` swallowed the non-zero exit. The user saw "0 enriched, 0 files updated" and interpreted it as "nothing to enrich".
 
 ### Root cause
 
-`GEMINI_API_KEY` was not set as a GitHub Secret.
-
-- `src/pipeline/run.py` (the daily pipeline) intentionally skips enrichment when the key is absent: logs a WARNING and continues. Items are stored with `theme=""`. This is by design for dry-run/testing.
-- `src/pipeline/backfill.py` checks for the key and exits with code 1 if absent.
-- The backfill workflow had `continue-on-error: true` on the enrichment step, which silently swallowed the exit-1. The workflow showed green. The user saw "nothing to enrich".
+`continue-on-error: true` on the enrichment step turned a quota-exhaustion failure (exit code 2) into an apparent success. The exit code and error log were invisible in the workflow summary.
 
 ### Fix applied
 
-1. Added "Verify GEMINI_API_KEY is configured" as the FIRST step in `backfill-enrichment.yml` — fails immediately with a clear `::error::` annotation if the key is absent.
-2. Removed `continue-on-error: true` from the enrichment step — failures are now visible as red workflow runs. The `if: always()` on the commit step already ensures partial progress is saved.
-3. Added a `::warning::` annotation to the "process" job in `fetch-and-process.yml` when the key is absent — visible in the Actions UI on every pipeline run.
+Removed `continue-on-error: true` from the "Run enrichment backfill" step. The `if: always()` on the commit step already ensures partial progress is committed and pushed even when the enrichment step fails. Quota failures now produce a red workflow run with visible error output.
 
 ### Rule
 
-**Any step where a missing secret causes silent degradation (not failure) must have an explicit check step that surfaces the absence before the degraded work runs.** The pipeline's graceful-skip design is correct for testing; the ops tool (backfill) must fail loudly.
+**`continue-on-error: true` hides real failures.** The correct pattern when you need "run the commit step even if enrichment partially failed" is `if: always()` on the commit step — not `continue-on-error: true` on the enrichment step. These are different: `if: always()` lets the commit run while letting the enrichment failure propagate; `continue-on-error` hides the failure entirely.
 
-**`continue-on-error: true` hides real failures.** Only use it when partial success is genuinely acceptable and you have a downstream step that checks and surfaces the outcome. If the step failing means the whole run is invalid, remove `continue-on-error` and let the step fail visibly.
+**Quota exhaustion + silent swallow = "found nothing" symptom.** When backfill reports 0 enriched and exits 2, and that's swallowed, the next run will hit quota again on the same file, get the same result, and look identical to "no items need enrichment". The correct diagnosis: look at the workflow step exit code and logs, not just the final enriched count.
 
 ### Is this a pattern?
 
-Yes — the same class as the git-config-ordering bugs: a swallowed failure that looked like success. The pattern: `continue-on-error: true` + no downstream diagnostic step = invisible failures.
+Yes — same class as the git-push-omission bugs: a swallowed exit code that made failure look like success. The fix is always the same: remove the swallow, let failures be visible.
