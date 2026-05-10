@@ -52,14 +52,14 @@ class _NullRateLimiter:
         pass
 
 
-def enrich(item: ProcessedItem, client: object, max_output_tokens: int = 500):
+def enrich(item: ProcessedItem, client: object, max_output_tokens: int = 500, model: str = "gemini-2.0-flash"):
     """Thin wrapper around stages.enrich.enrich; imported lazily to avoid triggering
     google.genai at module load time (which requires the cryptography C extension).
     Module-level name so tests can patch src.pipeline.backfill.enrich directly.
     """
     from src.pipeline.stages.enrich import enrich as _enrich  # noqa: PLC0415
 
-    return _enrich(item, client, max_output_tokens=max_output_tokens)  # type: ignore[arg-type]
+    return _enrich(item, client, max_output_tokens=max_output_tokens, model=model)  # type: ignore[arg-type]
 
 
 def backfill_file(
@@ -69,6 +69,7 @@ def backfill_file(
     max_output_tokens: int,
     dry_run: bool = False,
     budget: int | None = None,
+    model: str = "gemini-2.0-flash",
 ) -> tuple[int, int, bool]:
     """Enrich items with theme == '' in a single processed file.
 
@@ -122,7 +123,7 @@ def backfill_file(
         def _make_attempt(current: ProcessedItem = item):
             def _attempt():
                 try:
-                    return enrich(current, client, max_output_tokens=max_output_tokens)  # type: ignore[arg-type]
+                    return enrich(current, client, max_output_tokens=max_output_tokens, model=model)  # type: ignore[arg-type]
                 except Exception as exc:
                     # Pass quota-sentinel through so the outer handler can stop the batch.
                     if isinstance(exc, _QuotaExhaustedEnrichError):
@@ -239,6 +240,7 @@ def backfill_all(
     date_filter: str | None = None,
     max_items: int | None = None,
     commit_progress: bool = False,
+    model: str = "gemini-2.0-flash",
 ) -> tuple[int, int, int]:
     """Backfill all (or a single date's) processed files.
 
@@ -265,7 +267,7 @@ def backfill_all(
     for path in paths:
         budget = (max_items - total_enriched) if max_items is not None else None
         enriched, failed, stop = backfill_file(
-            path, client, rate_limiter, max_output_tokens, dry_run=dry_run, budget=budget
+            path, client, rate_limiter, max_output_tokens, dry_run=dry_run, budget=budget, model=model
         )
         total_enriched += enriched
         total_failed += failed
@@ -349,6 +351,7 @@ def main() -> int:
         date_filter=date_filter,
         max_items=args.max_items,
         commit_progress=args.commit_progress,
+        model=cfg.pipeline.gemini_model,
     )
 
     logger.info(

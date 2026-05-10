@@ -41,7 +41,7 @@ def _make_processed(id_: str = "item-1", theme: str = "", summary: str = "") -> 
 def _make_enrich_ok(theme: str = "inference scaling"):
     """Patch target for enrich() that succeeds without importing google.genai."""
 
-    def _enrich(item, client, max_output_tokens=500):
+    def _enrich(item, client, max_output_tokens=500, model="gemini-2.0-flash"):
         enriched = dataclasses.replace(
             item,
             theme=theme,
@@ -61,7 +61,7 @@ def _make_enrich_ok(theme: str = "inference scaling"):
 def _make_enrich_fail():
     """Patch target for enrich() that returns ok=False."""
 
-    def _enrich(item, client, max_output_tokens=500):
+    def _enrich(item, client, max_output_tokens=500, model="gemini-2.0-flash"):
         return item, False
 
     return _enrich
@@ -132,7 +132,7 @@ class TestBackfillFile:
 
         call_count = 0
 
-        def _counting_enrich(item, client, max_output_tokens=500):
+        def _counting_enrich(item, client, max_output_tokens=500, model="gemini-2.0-flash"):
             nonlocal call_count
             call_count += 1
             return _make_enrich_ok("new theme")(item, client, max_output_tokens)
@@ -196,7 +196,7 @@ class TestBackfillFile:
 
         call_count = 0
 
-        def _quota_on_first(item, client, max_output_tokens=500):
+        def _quota_on_first(item, client, max_output_tokens=500, model="gemini-2.0-flash"):
             nonlocal call_count
             call_count += 1
             if call_count == 1:
@@ -224,7 +224,7 @@ class TestBackfillFile:
         class Fake429(Exception):
             code = 429
 
-        def _429_on_first(item, client, max_output_tokens=500):
+        def _429_on_first(item, client, max_output_tokens=500, model="gemini-2.0-flash"):
             nonlocal call_count
             call_count += 1
             if call_count == 1:
@@ -252,7 +252,7 @@ class TestBackfillFile:
 
         call_count = 0
 
-        def _count_calls(item, client, max_output_tokens=500):
+        def _count_calls(item, client, max_output_tokens=500, model="gemini-2.0-flash"):
             nonlocal call_count
             call_count += 1
             return _make_enrich_ok()(item, client, max_output_tokens)
@@ -273,7 +273,7 @@ class TestBackfillFile:
         path = tmp_path / "2026-05-09.jsonl"
         write_processed_jsonl([_make_processed("a", theme="")], path)
 
-        def _broken(item, client, max_output_tokens=500):
+        def _broken(item, client, max_output_tokens=500, model="gemini-2.0-flash"):
             raise AttributeError("unexpected None")
 
         with (
@@ -363,7 +363,7 @@ class TestBackfillAll:
 
         call_count = 0
 
-        def _count(item, client, max_output_tokens=500):
+        def _count(item, client, max_output_tokens=500, model="gemini-2.0-flash"):
             nonlocal call_count
             call_count += 1
             return _make_enrich_ok()(item, client, max_output_tokens)
@@ -433,7 +433,7 @@ class TestBackfillAll:
 
         call_count = 0
 
-        def _quota_always(item, client, max_output_tokens=500):
+        def _quota_always(item, client, max_output_tokens=500, model="gemini-2.0-flash"):
             nonlocal call_count
             call_count += 1
             raise QuotaExhaustedEnrichError

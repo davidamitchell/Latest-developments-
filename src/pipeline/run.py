@@ -96,8 +96,9 @@ def process(
     items: list[FetchedItem],
     gemini_api_key: str | None,
     fetch_date: str,
-    rpm: int = 5,
+    rpm: int = 15,
     enrich_max_output_tokens: int = 500,
+    gemini_model: str = "gemini-2.0-flash",
 ) -> tuple[list[ProcessedItem], int]:
     """Run all 8 pipeline stages over items; return (results, ai_failures).
 
@@ -105,7 +106,7 @@ def process(
     their fields remain at defaults. Non-AI stages always run.
     ai_failures counts items where the combined Gemini call raised an exception.
 
-    rpm and enrich_max_output_tokens can be overridden via pipeline config.
+    rpm, enrich_max_output_tokens, and gemini_model can be overridden via pipeline config.
     """
     if not items:
         return [], 0
@@ -129,7 +130,7 @@ def process(
             def _make_enrich_once(current: ProcessedItem):
                 def _enrich_once() -> tuple[ProcessedItem, bool]:
                     try:
-                        return enrich(current, client, max_output_tokens=enrich_max_output_tokens)
+                        return enrich(current, client, max_output_tokens=enrich_max_output_tokens, model=gemini_model)
                     except (ClientError, ServerError) as exc:
                         if _is_quota_exhausted_error(exc):
                             raise _QuotaExhaustedEnrichError from exc
@@ -275,6 +276,7 @@ def main() -> int:
         fetch_date=today,
         rpm=cfg.pipeline.gemini_rpm,
         enrich_max_output_tokens=cfg.pipeline.enrich_max_output_tokens,
+        gemini_model=cfg.pipeline.gemini_model,
     )
 
     merged = _merge_and_write(out_path, processed)

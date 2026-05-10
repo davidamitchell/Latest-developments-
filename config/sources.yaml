@@ -297,13 +297,18 @@ digest:
 # ---------------------------------------------------------------------------
 # pipeline — processing pipeline settings
 #
-# gemini_rpm: requests per minute sent to Gemini; default 5 (free-tier limit).
-#   At 5 RPM, 100 items take a minimum of 20 minutes.
-#   Raise this only when using a paid tier with a higher quota.
+# gemini_model: model used for per-item AI enrichment (stages 3–6).
+#   gemini-2.0-flash: 15 RPM / 1500 RPD on the free tier — best throughput.
+#   gemini-2.5-flash: 10 RPM / 500 RPD — better reasoning, lower free quota.
+#   Theme clustering (site build) and email digest always use gemini-2.5-flash
+#   regardless of this setting; those are 1 call/run and benefit from quality.
+# gemini_rpm: must match the model's free-tier RPM limit.
+#   gemini-2.0-flash → 15, gemini-2.5-flash → 10, gemini-2.0-flash-lite → 30
 # enrich_max_output_tokens: Gemini token budget per enrichment call; default 500.
 # ---------------------------------------------------------------------------
 pipeline:
-  gemini_rpm: 5
+  gemini_model: "gemini-2.0-flash"
+  gemini_rpm: 15
   enrich_max_output_tokens: 500
 
 # ---------------------------------------------------------------------------
