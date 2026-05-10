@@ -325,8 +325,8 @@ def main() -> int:
 
     from src.pipeline.run import _make_gemini_client, _RateLimiter
 
-    client = _make_gemini_client(api_key)
-    rate_limiter = _RateLimiter(rpm=cfg.pipeline.gemini_rpm)
+    client, http_client = _make_gemini_client(api_key)
+    rate_limiter = _RateLimiter(rpm=cfg.pipeline.gemini_rpm, http_client=http_client)
 
     if args.date:
         date_filter = args.date
