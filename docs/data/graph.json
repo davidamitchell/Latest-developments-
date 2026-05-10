@@ -1,5 +1,5 @@
 {
-  "generated": "2026-05-10T02:27:20.353083+00:00",
+  "generated": "2026-05-10T02:34:15.391642+00:00",
   "nodes": [
     {
       "id": "AI Workforce & Jobs",
@@ -38,5 +38,66 @@
       "volume": 0.26
     }
   ],
-  "edges": []
+  "edges": [
+    {
+      "source": "AI Infrastructure",
+      "target": "Agentic Workflows",
+      "rel_type": "causal",
+      "weight": 1
+    },
+    {
+      "source": "LLM Capabilities",
+      "target": "Agentic Workflows",
+      "rel_type": "causal",
+      "weight": 1
+    },
+    {
+      "source": "Agent Reliability",
+      "target": "AI Workforce & Jobs",
+      "rel_type": "causal",
+      "weight": 1
+    },
+    {
+      "source": "AI Infrastructure",
+      "target": "Local LLM Applications",
+      "rel_type": "causal",
+      "weight": 1
+    },
+    {
+      "source": "LLM Capabilities",
+      "target": "AI Workforce & Jobs",
+      "rel_type": "causal",
+      "weight": 1
+    },
+    {
+      "source": "Agentic Workflows",
+      "target": "AI Workforce & Jobs",
+      "rel_type": "causal",
+      "weight": 1
+    },
+    {
+      "source": "Agent Reliability",
+      "target": "LLM Capabilities",
+      "rel_type": "compositional",
+      "weight": 1
+    },
+    {
+      "source": "Local LLM Applications",
+      "target": "AI Infrastructure",
+      "rel_type": "compositional",
+      "weight": 1
+    },
+    {
+      "source": "Agent Reliability",
+      "target": "Agentic Workflows",
+      "rel_type": "causal",
+      "weight": 1
+    },
+    {
+      "source": "LLM Capabilities",
+      "target": "Local LLM Applications",
+      "rel_type": "compositional",
+      "weight": 1
+    }
+  ]
 }
