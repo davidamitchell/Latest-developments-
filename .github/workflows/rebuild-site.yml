@@ -9,20 +9,24 @@ name: Rebuild Site
 # (history/ is the email digest's concern — this workflow reads data/processed/ directly.)
 #
 # Triggers:
-#   - Called by pipeline.yml orchestrator (parallel with email-digest, after fetch-and-process)
+#   - Push to main that touches data/processed/ (daily pipeline, backfill)
 #   - workflow_dispatch (standalone manual run)
+#
+# Deployment: artifact-based via actions/deploy-pages (not commit-to-branch).
+# GitHub Pages must be configured to serve from "GitHub Actions" (not branch/docs/).
+# Settings → Pages → Source: GitHub Actions
 
 on:
-  # Called by pipeline.yml (orchestrator).
-  workflow_call:
+  push:
+    branches: [main]
+    paths:
+      - "data/processed/**"
 
-  # Standalone manual run.
   workflow_dispatch:
-    inputs:
-      no_fetch:
-        description: "No-op — kept for backward compatibility"
-        type: boolean
-        default: false
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
 
 jobs:
   rebuild:
@@ -30,14 +34,19 @@ jobs:
     runs-on: ubuntu-latest
 
     permissions:
-      contents: write
+      contents: read
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          ref: ${{ github.ref }}
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -55,22 +64,16 @@ jobs:
         # Implementation: src/site/build.py (W-0028)
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-        run: |
-          if [ "${{ inputs.no_fetch }}" = "true" ]; then
-            python -m src.site.build --no-fetch
-          else
-            python -m src.site.build
-          fi
+        run: python -m src.site.build
 
-      - name: Commit updated site data
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add docs/data/
-          TODAY=$(date -u +%Y-%m-%d)
-          if git diff --cached --quiet; then
-            echo "Site data unchanged — nothing to commit"
-          else
-            git commit -m "chore: rebuild site data ${TODAY} [skip ci]"
-            git push origin HEAD
-          fi
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs/
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
