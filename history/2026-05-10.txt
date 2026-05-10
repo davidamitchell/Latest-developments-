@@ -1,0 +1,10 @@
+Daily AI Digest — 10 May 2026
+========================================
+
+## Ollama Releases
+
+### v0.30.0-rc11
+Source: Ollama Releases [RSS]
+URL: https://github.com/ollama/ollama/releases/tag/v0.30.0-rc11
+Theme: Ollama Stability
+Summary: This release candidate, along with other recent `v0.30
