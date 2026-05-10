@@ -349,9 +349,9 @@ def main() -> int:
         logger.error("GEMINI_API_KEY not set — cannot run backfill without an API key")
         return 1
 
-    from src.pipeline.run import _make_gemini_client, _ModelCascade
+    from src.pipeline._gemini import _ModelCascade, make_gemini_client
 
-    client, http_client = _make_gemini_client(api_key)
+    client, http_client = make_gemini_client(api_key)
     cascade = _ModelCascade(cfg.pipeline.gemini_model, cfg.pipeline.gemini_rpm, http_client)
     rate_limiter = _NullRateLimiter()  # cascade handles pacing; rate_limiter is a no-op fallback
 

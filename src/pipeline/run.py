@@ -16,11 +16,8 @@ import argparse
 import logging
 import os
 import sys
-import time
 from datetime import UTC, datetime
 from pathlib import Path
-
-import httpx
 
 try:
     from dotenv import load_dotenv  # type: ignore[import-untyped]
@@ -50,6 +47,13 @@ from src.pipeline.stages.credibility_scoring import score_credibility
 from src.pipeline.stages.enrich import enrich
 from src.pipeline.stages.hype_scoring import score_hype
 from src.pipeline.stages.ingest import ingest
+from src.pipeline._gemini import (
+    _HeaderCapturingClient,
+    _ModelCascade,
+    _MODEL_CASCADE,
+    _RateLimiter,
+    make_gemini_client as _make_gemini_client,
+)
 from src.retry import with_backoff
 
 logger = logging.getLogger(__name__)
@@ -60,208 +64,6 @@ _PROCESSED_DIR = Path("data/processed")
 
 def _remaining_item_count(total: int, idx: int) -> int:
     return total - idx - 1
-
-
-class _HeaderCapturingClient(httpx.Client):
-    """httpx.Client subclass that records x-ratelimit-* headers from each response.
-
-    Passed to genai.Client via HttpOptions so the rate limiter can read real
-    quota state without hardcoding per-model limits.
-    """
-
-    def __init__(self, **kwargs: object) -> None:
-        kwargs.setdefault("follow_redirects", True)
-        super().__init__(**kwargs)  # type: ignore[arg-type]
-        self.ratelimit_headers: dict[str, str] = {}
-
-    def send(self, request: httpx.Request, **kwargs: object) -> httpx.Response:  # type: ignore[override]
-        response = super().send(request, **kwargs)  # type: ignore[arg-type]
-        self.ratelimit_headers = {
-            k.lower(): v
-            for k, v in response.headers.items()
-            if k.lower().startswith("x-ratelimit")
-        }
-        return response
-
-
-def _parse_reset_seconds(reset_str: str) -> float | None:
-    """Parse x-ratelimit-reset-requests into seconds until reset.
-
-    Handles: bare float ("60"), duration with suffix ("4s"), ISO-8601 timestamp.
-    Returns None when the string is empty or unparseable.
-    """
-    s = reset_str.strip()
-    if not s:
-        return None
-    if s.endswith("s"):
-        try:
-            return max(float(s[:-1]), 0.0)
-        except ValueError:
-            pass
-    try:
-        return max(float(s), 0.0)
-    except ValueError:
-        pass
-    try:
-        from datetime import timezone
-        reset_dt = datetime.fromisoformat(s.replace("Z", "+00:00"))
-        return max((reset_dt - datetime.now(timezone.utc)).total_seconds(), 0.0)
-    except (ValueError, OverflowError):
-        pass
-    return None
-
-
-class _RateLimiter:
-    """Adaptive pacer for Gemini API calls.
-
-    Uses a fixed minimum interval (60 / rpm) as a floor. After each API call
-    the captured x-ratelimit-* response headers are inspected:
-      - remaining == 0  → wait for the reset window before the next call
-      - remaining <= 3  → triple the interval to coast to the window boundary
-      - remaining > 3   → restore the minimum interval
-
-    When headers are absent (e.g. network error, mocked client in tests) the
-    fixed interval is used unchanged.
-    """
-
-    def __init__(self, rpm: int = 15, http_client: _HeaderCapturingClient | None = None) -> None:
-        self._min_interval = 60.0 / rpm
-        self._interval = self._min_interval
-        self._last: float = 0.0
-        self._http_client = http_client
-
-    def _update_from_headers(self, headers: dict[str, str]) -> None:
-        remaining_str = headers.get("x-ratelimit-remaining-requests")
-        if not remaining_str:
-            return
-        try:
-            remaining = int(remaining_str)
-        except ValueError:
-            logger.debug("Rate limiter: non-integer x-ratelimit-remaining-requests %r", remaining_str)
-            return
-
-        if remaining <= 0:
-            reset_str = headers.get("x-ratelimit-reset-requests", "")
-            wait = _parse_reset_seconds(reset_str) or 60.0
-            logger.warning("Rate limiter: quota window exhausted — waiting %.1fs for reset", wait)
-            self._interval = wait
-        elif remaining <= 3:
-            self._interval = max(self._min_interval * 3, 20.0)
-            logger.debug(
-                "Rate limiter: %d request(s) remaining — slowing to %.1fs interval",
-                remaining, self._interval,
-            )
-        else:
-            self._interval = self._min_interval
-
-    def wait(self) -> None:
-        if self._http_client and self._http_client.ratelimit_headers:
-            self._update_from_headers(self._http_client.ratelimit_headers)
-        now = time.monotonic()
-        gap = self._interval - (now - self._last)
-        if gap > 0:
-            logger.debug("Rate limiter: waiting %.1fs before next Gemini call", gap)
-            time.sleep(gap)
-        self._last = time.monotonic()
-
-
-def _make_gemini_client(api_key: str) -> tuple[object, _HeaderCapturingClient]:
-    """Construct a Gemini client wired to a header-capturing httpx transport.
-
-    Returns (genai_client, http_client). Pass http_client to _RateLimiter so it
-    can read x-ratelimit-* headers and adapt pacing without hardcoded per-model limits.
-
-    Retry policy is handled at the application level in process() via
-    src.retry.with_backoff so Gemini retryDelay hints can be honoured.
-    """
-    from google import genai
-    from google.genai import types
-
-    http_client = _HeaderCapturingClient()
-    client = genai.Client(
-        api_key=api_key,
-        http_options=types.HttpOptions(httpx_client=http_client),
-    )
-    return client, http_client
-
-
-_MODEL_CASCADE: list[str] = [
-    "gemini-3-flash",
-    "gemini-3.1-flash-lite",
-    "gemini-2.5-flash",
-    "gemini-2.5-flash-lite",
-]
-
-
-class _ModelCascade:
-    """Walks through Gemini models in cascade order as each model's daily quota is exhausted.
-
-    Starts at starting_model (must appear in _MODEL_CASCADE; treated as a solo
-    option otherwise).  Each advance() resets the rate limiter so the new model
-    gets a fresh pacing window.  The shared _HeaderCapturingClient is cleared of
-    stale headers on advance so the new model's first response is read cleanly.
-
-    Two triggers for advance():
-      1. QuotaExhaustedEnrichError exception — reliable daily-quota signal
-      2. check_daily_quota_header() — proactive: x-ratelimit-remaining-*-per-day == 0
-    """
-
-    def __init__(
-        self, starting_model: str, rpm: int, http_client: _HeaderCapturingClient
-    ) -> None:
-        try:
-            idx = _MODEL_CASCADE.index(starting_model)
-            self._models = _MODEL_CASCADE[idx:]
-        except ValueError:
-            self._models = [starting_model]
-        self._idx = 0
-        self._rpm = rpm
-        self._http_client = http_client
-        self._limiter = _RateLimiter(rpm=rpm, http_client=http_client)
-
-    @property
-    def model(self) -> str:
-        return self._models[min(self._idx, len(self._models) - 1)]
-
-    @property
-    def all_exhausted(self) -> bool:
-        return self._idx >= len(self._models)
-
-    def advance(self) -> bool:
-        """Switch to the next model. Returns True if one is available, False if done."""
-        prev = self.model
-        self._idx += 1
-        if not self.all_exhausted:
-            logger.warning("Quota exhausted for %r — switching to %r", prev, self.model)
-            self._http_client.ratelimit_headers = {}
-            self._limiter = _RateLimiter(rpm=self._rpm, http_client=self._http_client)
-            return True
-        logger.error("All models in cascade exhausted — AI enrichment disabled for this run")
-        return False
-
-    def wait(self) -> None:
-        self._limiter.wait()
-
-    def check_daily_quota_header(self) -> bool:
-        """True when response headers signal this model's daily allowance is zero.
-
-        Checks likely header names for per-day quota (distinct from the per-minute
-        x-ratelimit-remaining-requests consumed by the rate limiter).
-        """
-        headers = self._http_client.ratelimit_headers
-        for key in (
-            "x-ratelimit-remaining-requests-per-day",
-            "x-ratelimit-remaining-tokens-per-day",
-            "x-ratelimit-remaining-day",
-        ):
-            val = headers.get(key)
-            if val is not None:
-                try:
-                    if int(val) <= 0:
-                        return True
-                except ValueError:
-                    pass
-        return False
 
 
 def process(
