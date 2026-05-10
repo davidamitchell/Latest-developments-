@@ -321,6 +321,8 @@ Four workflows, each with one responsibility. Two data contracts passed between 
 2. Every `--flag` the workflow passes: verify it appears in the module's `_parse_args()` — argparse silently drops unknown args
 3. Every `${{ secrets.KEY }}` env var: verify the module reads it with `os.environ.get("KEY")` or equivalent
 4. If using `workflow_call` in an orchestrator: the orchestrator must declare `permissions: contents: write` if any called workflow commits to the repo
+5. If any step or Python script calls `git commit`: verify `git config user.name/email` is set in an **earlier** step — git commit fails silently when no identity is configured.
+6. If a Python script commits via subprocess and a later step is the only place that pushes: the later step must **always** push (not only when uncommitted changes exist) — otherwise locally-committed-but-not-pushed commits are silently discarded when the job ends.
 
 **fetch-and-process.yml** (primary pipeline):
 - Job 1 `fetch`: instantiates all enabled fetchers, deduplicates, writes `data/raw/YYYY-MM-DD.jsonl`, commits

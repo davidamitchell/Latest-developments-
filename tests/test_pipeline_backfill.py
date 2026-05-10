@@ -376,6 +376,52 @@ class TestBackfillAll:
         assert call_count == 2
         assert enriched == 2
 
+    def test_commit_progress_called_per_enriched_file(self, tmp_path):
+        """When commit_progress=True, _git_commit_file is called once per file that gained enrichments."""
+        from src.pipeline.backfill import _NullRateLimiter, backfill_all
+
+        for date in ("2026-04-01", "2026-04-02"):
+            p = tmp_path / f"{date}.jsonl"
+            write_processed_jsonl([_make_processed(f"item-{date}", theme="")], p)
+
+        with (
+            patch("src.pipeline.backfill.enrich", side_effect=_make_enrich_ok()),
+            patch("src.pipeline.backfill._git_commit_file") as mock_commit,
+        ):
+            backfill_all(tmp_path, MagicMock(), _NullRateLimiter(), 500, commit_progress=True)
+
+        assert mock_commit.call_count == 2
+
+    def test_commit_progress_not_called_by_default(self, tmp_path):
+        """_git_commit_file is not called unless commit_progress=True is explicitly passed."""
+        from src.pipeline.backfill import _NullRateLimiter, backfill_all
+
+        path = tmp_path / "2026-04-01.jsonl"
+        write_processed_jsonl([_make_processed("a", theme="")], path)
+
+        with (
+            patch("src.pipeline.backfill.enrich", side_effect=_make_enrich_ok()),
+            patch("src.pipeline.backfill._git_commit_file") as mock_commit,
+        ):
+            backfill_all(tmp_path, MagicMock(), _NullRateLimiter(), 500)
+
+        mock_commit.assert_not_called()
+
+    def test_commit_progress_not_called_for_already_enriched_files(self, tmp_path):
+        """_git_commit_file is not called for files where no items needed enrichment."""
+        from src.pipeline.backfill import _NullRateLimiter, backfill_all
+
+        path = tmp_path / "2026-04-01.jsonl"
+        write_processed_jsonl([_make_processed("a", theme="existing")], path)
+
+        with (
+            patch("src.pipeline.backfill.enrich", MagicMock()),
+            patch("src.pipeline.backfill._git_commit_file") as mock_commit,
+        ):
+            backfill_all(tmp_path, MagicMock(), _NullRateLimiter(), 500, commit_progress=True)
+
+        mock_commit.assert_not_called()
+
     def test_quota_stop_halts_subsequent_files(self, tmp_path):
         """When quota is hit in file 1, file 2 is not touched."""
         from src.pipeline._quota import QuotaExhaustedEnrichError

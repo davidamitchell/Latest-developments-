@@ -84,6 +84,12 @@ jobs:
           if [ "${{ inputs.debug }}" = "true" ]; then ARGS="$ARGS --debug"; fi
           echo "args=$ARGS" >> "$GITHUB_OUTPUT"
 
+      - name: Configure git identity
+        if: inputs.dry_run != 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
       - name: Run enrichment backfill
         continue-on-error: true
         env:
@@ -93,12 +99,10 @@ jobs:
       - name: Commit any remaining processed data
         if: always() && inputs.dry_run != 'true'
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
           git add data/processed/
-          if git diff --cached --quiet; then
-            echo "No changes after backfill — nothing to commit"
-          else
+          if ! git diff --cached --quiet; then
             git commit -m "chore: backfill AI enrichment for unenriched items [skip ci]"
-            git push origin HEAD
           fi
+          # Always push — picks up per-file commits from --commit-progress even
+          # when there are no new uncommitted changes.
+          git push origin HEAD

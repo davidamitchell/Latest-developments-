@@ -6,7 +6,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+- **AI enrichment backfill** (`src/pipeline/backfill.py`): ops tool to re-enrich `ProcessedItem` records where `theme == ""`. Supports `--all`, `--date`, `--dry-run`, `--max-items N`, `--commit-progress`. Triggered via `backfill-enrichment.yml` workflow dispatch.
+
 ### Fixed
+- **Backfill quota stop on any 429**: previously only quota-metric 429s stopped the batch; plain rate-limit 429s kept retrying until timeout. Now any HTTP 429 stops the batch immediately via `is_rate_limited()` in `_quota.py`.
+- **Backfill chunking**: added `--max-items N` (default 50 in workflow) so large backfills run in bounded chunks rather than one unbounded shot. Prevents GitHub Actions 6-hour timeout.
+- **Backfill retry delay**: `base_delay` reduced from 60 s to 5 s — the `_RateLimiter` already handles inter-call spacing.
+- **Backfill per-file progress commits**: `--commit-progress` now correctly persists to GitHub — git identity configured before the Python script runs, and the safety-net step always pushes unconditionally.
 - **Same-day pipeline rerun data overwrite (2026-05-08)**:
   1. `src/pipeline/fetch.py` now merges new items into `data/raw/YYYY-MM-DD.jsonl` instead of overwriting the file.
   2. `src/pipeline/run.py` now preserves existing `data/processed/YYYY-MM-DD.jsonl` when a rerun has no new raw items.
