@@ -1,5 +1,5 @@
 {
-  "generated": "2026-05-09T10:07:11.294040+00:00",
+  "generated": "2026-05-10T02:27:20.353083+00:00",
   "classes": {
     "primary": {
       "count": 14,
@@ -72,7 +72,7 @@
       "name": "Wes Roth",
       "source_class": "practitioner",
       "item_count": 24,
-      "themed_count": 9,
+      "themed_count": 10,
       "first_seen": "2026-03-03",
       "last_seen": "2026-05-09",
       "days_active": 19,
@@ -80,8 +80,8 @@
         "LLM Misuse",
         "AI Commentary",
         "Agi Speculation",
-        "Agi Philosophy",
-        "AI Hardware Ecosystem"
+        "Unknown Release",
+        "Agi Philosophy"
       ]
     },
     {
