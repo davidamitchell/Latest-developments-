@@ -185,6 +185,85 @@ def _make_gemini_client(api_key: str) -> tuple[object, _HeaderCapturingClient]:
     return client, http_client
 
 
+_MODEL_CASCADE: list[str] = [
+    "gemini-3-flash",
+    "gemini-3.1-flash-lite",
+    "gemini-2.5-flash",
+    "gemini-2.5-flash-lite",
+]
+
+
+class _ModelCascade:
+    """Walks through Gemini models in cascade order as each model's daily quota is exhausted.
+
+    Starts at starting_model (must appear in _MODEL_CASCADE; treated as a solo
+    option otherwise).  Each advance() resets the rate limiter so the new model
+    gets a fresh pacing window.  The shared _HeaderCapturingClient is cleared of
+    stale headers on advance so the new model's first response is read cleanly.
+
+    Two triggers for advance():
+      1. QuotaExhaustedEnrichError exception — reliable daily-quota signal
+      2. check_daily_quota_header() — proactive: x-ratelimit-remaining-*-per-day == 0
+    """
+
+    def __init__(
+        self, starting_model: str, rpm: int, http_client: _HeaderCapturingClient
+    ) -> None:
+        try:
+            idx = _MODEL_CASCADE.index(starting_model)
+            self._models = _MODEL_CASCADE[idx:]
+        except ValueError:
+            self._models = [starting_model]
+        self._idx = 0
+        self._rpm = rpm
+        self._http_client = http_client
+        self._limiter = _RateLimiter(rpm=rpm, http_client=http_client)
+
+    @property
+    def model(self) -> str:
+        return self._models[min(self._idx, len(self._models) - 1)]
+
+    @property
+    def all_exhausted(self) -> bool:
+        return self._idx >= len(self._models)
+
+    def advance(self) -> bool:
+        """Switch to the next model. Returns True if one is available, False if done."""
+        prev = self.model
+        self._idx += 1
+        if not self.all_exhausted:
+            logger.warning("Quota exhausted for %r — switching to %r", prev, self.model)
+            self._http_client.ratelimit_headers = {}
+            self._limiter = _RateLimiter(rpm=self._rpm, http_client=self._http_client)
+            return True
+        logger.error("All models in cascade exhausted — AI enrichment disabled for this run")
+        return False
+
+    def wait(self) -> None:
+        self._limiter.wait()
+
+    def check_daily_quota_header(self) -> bool:
+        """True when response headers signal this model's daily allowance is zero.
+
+        Checks likely header names for per-day quota (distinct from the per-minute
+        x-ratelimit-remaining-requests consumed by the rate limiter).
+        """
+        headers = self._http_client.ratelimit_headers
+        for key in (
+            "x-ratelimit-remaining-requests-per-day",
+            "x-ratelimit-remaining-tokens-per-day",
+            "x-ratelimit-remaining-day",
+        ):
+            val = headers.get(key)
+            if val is not None:
+                try:
+                    if int(val) <= 0:
+                        return True
+                except ValueError:
+                    pass
+        return False
+
+
 def process(
     items: list[FetchedItem],
     gemini_api_key: str | None,
@@ -206,11 +285,10 @@ def process(
 
     if gemini_api_key:
         client, http_client = _make_gemini_client(gemini_api_key)
-        rate_limiter = _RateLimiter(rpm=rpm, http_client=http_client)
+        cascade = _ModelCascade(gemini_model, rpm, http_client)
     else:
         client = None
-        rate_limiter = None
-    ai_disabled_for_quota = False
+        cascade = None
     results: list[ProcessedItem] = []
     ai_failures = 0
 
@@ -221,13 +299,15 @@ def process(
         # Stage 2 — Clean
         processed = clean(processed, raw_content=fetched.content)
 
-        if client is not None and not ai_disabled_for_quota:
+        if client is not None and cascade is not None and not cascade.all_exhausted:
             from google.genai.errors import ClientError, ServerError
 
-            def _make_enrich_once(current: ProcessedItem):
+            _active_model = cascade.model  # snapshot before pacing/call
+
+            def _make_enrich_once(current: ProcessedItem, _m: str = _active_model):
                 def _enrich_once() -> tuple[ProcessedItem, bool]:
                     try:
-                        return enrich(current, client, max_output_tokens=enrich_max_output_tokens, model=gemini_model)
+                        return enrich(current, client, max_output_tokens=enrich_max_output_tokens, model=_m)
                     except (ClientError, ServerError) as exc:
                         if _is_quota_exhausted_error(exc):
                             raise _QuotaExhaustedEnrichError from exc
@@ -237,8 +317,7 @@ def process(
 
                 return _enrich_once
 
-            # Pace to ≤rpm RPM before each Gemini call to stay under the free-tier quota.
-            rate_limiter.wait()  # type: ignore[union-attr]
+            cascade.wait()
             # Stages 3–6 — combined AI enrichment (1 Gemini call per item)
             pre_enrich = processed
             try:
@@ -252,16 +331,16 @@ def process(
             except _QuotaExhaustedEnrichError:
                 processed = pre_enrich
                 ok = False
-                ai_disabled_for_quota = True
                 remaining = _remaining_item_count(len(items), idx)
                 _log_quota_exhausted(processed.id, remaining)
+                cascade.advance()
             except RuntimeError as exc:
                 if isinstance(exc.__cause__, (ClientError, ServerError)):
                     processed = pre_enrich
                     if _is_quota_exhausted_error(exc.__cause__):
-                        ai_disabled_for_quota = True
                         remaining = _remaining_item_count(len(items), idx)
                         _log_quota_exhausted(processed.id, remaining)
+                        cascade.advance()
                     else:
                         logger.warning(
                             "AI enrichment failed for %r after retries: %s",
@@ -275,6 +354,8 @@ def process(
                 raise exc.__cause__ from None
             if not ok:
                 ai_failures += 1
+            elif cascade.check_daily_quota_header():
+                cascade.advance()
 
         # Stage 7 — Hype Scoring (deterministic)
         processed = score_hype(processed)
