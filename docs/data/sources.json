@@ -1,5 +1,5 @@
 {
-  "generated": "2026-05-10T02:34:15.391642+00:00",
+  "generated": "2026-05-10T08:56:05.865794+00:00",
   "classes": {
     "primary": {
       "count": 14,
@@ -15,7 +15,7 @@
       ]
     },
     "practitioner": {
-      "count": 219,
+      "count": 236,
       "sources": [
         "Hacker News",
         "Matthew Berman",
@@ -39,11 +39,11 @@
     {
       "name": "Hacker News",
       "source_class": "practitioner",
-      "item_count": 97,
-      "themed_count": 37,
+      "item_count": 101,
+      "themed_count": 41,
       "first_seen": "2026-03-03",
-      "last_seen": "2026-05-09",
-      "days_active": 30,
+      "last_seen": "2026-05-10",
+      "days_active": 31,
       "top_themes": [
         "Local LLM Applications",
         "LLM Tooling Issues",
@@ -55,11 +55,11 @@
     {
       "name": "Nate Jones",
       "source_class": "practitioner",
-      "item_count": 70,
-      "themed_count": 40,
+      "item_count": 72,
+      "themed_count": 42,
       "first_seen": "2026-03-03",
-      "last_seen": "2026-05-09",
-      "days_active": 38,
+      "last_seen": "2026-05-10",
+      "days_active": 39,
       "top_themes": [
         "AI Workforce & Jobs",
         "Agentic Workflows",
@@ -95,24 +95,35 @@
       "top_themes": []
     },
     {
-      "name": "Ollama Releases",
-      "source_class": "practitioner",
-      "item_count": 10,
-      "themed_count": 0,
-      "first_seen": "2026-05-09",
-      "last_seen": "2026-05-09",
-      "days_active": 1,
-      "top_themes": []
-    },
-    {
       "name": "llama.cpp Releases",
       "source_class": "practitioner",
-      "item_count": 10,
-      "themed_count": 0,
+      "item_count": 16,
+      "themed_count": 6,
       "first_seen": "2026-05-09",
-      "last_seen": "2026-05-09",
-      "days_active": 1,
-      "top_themes": []
+      "last_seen": "2026-05-10",
+      "days_active": 2,
+      "top_themes": [
+        "Sycl Optimization",
+        "Cross-Platform Support",
+        "Moe Architecture Support",
+        "Os/Hardware Support",
+        "Bf16 Sycl Support"
+      ]
+    },
+    {
+      "name": "Ollama Releases",
+      "source_class": "practitioner",
+      "item_count": 14,
+      "themed_count": 4,
+      "first_seen": "2026-05-09",
+      "last_seen": "2026-05-10",
+      "days_active": 2,
+      "top_themes": [
+        "Windows Fixes",
+        "Windows Arm64 Fix",
+        "Windows Build Fix",
+        "Merge Conflicts"
+      ]
     },
     {
       "name": "arXiv",
@@ -137,12 +148,14 @@
     {
       "name": "Matthew Berman",
       "source_class": "practitioner",
-      "item_count": 5,
-      "themed_count": 0,
+      "item_count": 6,
+      "themed_count": 1,
       "first_seen": "2026-05-09",
-      "last_seen": "2026-05-09",
-      "days_active": 1,
-      "top_themes": []
+      "last_seen": "2026-05-10",
+      "days_active": 2,
+      "top_themes": [
+        "AI In Gaming"
+      ]
     },
     {
       "name": "The AI Daily Brief",

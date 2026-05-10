@@ -1,5 +1,5 @@
 {
-  "generated": "2026-05-10T02:34:15.391642+00:00",
+  "generated": "2026-05-10T08:56:05.865794+00:00",
   "themes": [
     {
       "name": "AI Workforce & Jobs",
@@ -83,6 +83,21 @@
       "state": "declining",
       "item_count": 2,
       "last_seen": "2026-04-02",
+      "source_classes": [
+        "practitioner"
+      ],
+      "source_class_counts": {
+        "practitioner": 2
+      },
+      "hype_risk": 0.0
+    },
+    {
+      "name": "Sycl Optimization",
+      "domain": "hardware",
+      "definition": "Improving the performance and efficiency of AI computations using the SYCL open standard for heterogeneous computing.",
+      "state": "unknown",
+      "item_count": 2,
+      "last_seen": "2026-05-10",
       "source_classes": [
         "practitioner"
       ],
