@@ -1,13 +1,16 @@
 name: Pipeline
 
-# Orchestrator — runs the full pipeline in order:
+# Orchestrator — runs the fetch/process/email pipeline on a schedule.
 #   1. fetch-and-process  (fetch all sources → raw data → processed data)
-#   2. email-digest       (send email, commit state/history)     ┐ parallel
-#   3. rebuild-site       (build docs/data/*.json, deploy Pages) ┘
+#   2. email-digest       (send email, commit state/history)
+#
+# Site rebuild is NOT triggered here. rebuild-site.yml fires automatically
+# via push path trigger whenever data/processed/ changes on main.
+# It can also be triggered independently via workflow_dispatch.
 #
 # This is the only workflow with a schedule. The individual workflows
-# (fetch-and-process, email-digest, rebuild-site) can still be triggered
-# independently via workflow_dispatch for debugging or catch-up runs.
+# (fetch-and-process, email-digest) can still be triggered independently
+# via workflow_dispatch for debugging or catch-up runs.
 
 on:
   schedule:
@@ -37,7 +40,7 @@ concurrency:
   cancel-in-progress: false
 
 # Reusable workflows inherit the caller's token. contents:write is required
-# because fetch-and-process, email-digest, and rebuild-site all commit back to main.
+# because fetch-and-process and email-digest commit back to main.
 permissions:
   contents: write
 
@@ -58,11 +61,4 @@ jobs:
     with:
       debug: ${{ inputs.debug || false }}
       dry_run: ${{ inputs.dry_run || false }}
-    secrets: inherit
-
-  site:
-    name: Rebuild Site
-    needs: [fetch-and-process, email]
-    if: ${{ always() && needs.fetch-and-process.result == 'success' }}
-    uses: ./.github/workflows/rebuild-site.yml
     secrets: inherit

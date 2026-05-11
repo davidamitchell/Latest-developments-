@@ -161,6 +161,7 @@ def enrich(
     item: ProcessedItem,
     client: GenerativeModel,
     max_output_tokens: int = 500,
+    model: str = "gemini-2.0-flash",
 ) -> tuple[ProcessedItem, bool]:
     """Run combined AI enrichment; return (enriched_item, ok).
 
@@ -184,16 +185,9 @@ def enrich(
     config = types.GenerateContentConfig(
         system_instruction=_SYSTEM_PROMPT,
         max_output_tokens=max_output_tokens,
-        # Disable thinking for structured extraction — this task needs format
-        # adherence, not chain-of-thought reasoning. With thinking enabled,
-        # gemini-2.5-flash thinking tokens compete for the max_output_tokens
-        # budget, truncating the structured response (finish_reason=MAX_TOKENS)
-        # and leaving items unenriched. Setting thinking_budget=0 keeps the
-        # full output budget for the 8-line structured format.
-        thinking_config=types.ThinkingConfig(thinking_budget=0),
     )
     response = client.models.generate_content(
-        model="gemini-2.5-flash",
+        model=model,
         contents=prompt,
         config=config,
     )

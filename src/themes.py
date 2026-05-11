@@ -225,7 +225,8 @@ def cluster_themes(
     existing_normalized = [normalize_theme_name(t) for t in existing_themes]
     prompt = _build_clustering_prompt(records, existing_normalized)
 
-    client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY", ""))
+    from src.pipeline._gemini import make_gemini_client  # noqa: PLC0415
+    client, _ = make_gemini_client(os.environ.get("GEMINI_API_KEY", ""))
 
     try:
         response = with_backoff(

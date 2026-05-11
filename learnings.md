@@ -289,3 +289,29 @@ git push origin HEAD   # always — picks up any locally-committed-but-not-pushe
 ### Is this a pattern?
 
 Yes. Every failure in this backfill sequence came from an untested side-effect path. The common theme: the happy path (enrich items, write files) was tested; the operational paths (git commit, git push, quota stop) were not. Operational paths are exactly where production failures hide.
+
+---
+
+## 2026-05-10 — "Nothing to enrich" was a silent quota-exhaustion failure
+
+### What happened
+
+The site showed 35% enrichment. The backfill ran and committed 3 March files (2026-03-11, 2026-03-24, 2026-03-26), each with 1 unenriched item. It then hit a Gemini 429 (quota exhausted) on the first April file's first item, stopped, and exited with code 2. `continue-on-error: true` swallowed the non-zero exit. The user saw "0 enriched, 0 files updated" and interpreted it as "nothing to enrich".
+
+### Root cause
+
+`continue-on-error: true` on the enrichment step turned a quota-exhaustion failure (exit code 2) into an apparent success. The exit code and error log were invisible in the workflow summary.
+
+### Fix applied
+
+Removed `continue-on-error: true` from the "Run enrichment backfill" step. The `if: always()` on the commit step already ensures partial progress is committed and pushed even when the enrichment step fails. Quota failures now produce a red workflow run with visible error output.
+
+### Rule
+
+**`continue-on-error: true` hides real failures.** The correct pattern when you need "run the commit step even if enrichment partially failed" is `if: always()` on the commit step — not `continue-on-error: true` on the enrichment step. These are different: `if: always()` lets the commit run while letting the enrichment failure propagate; `continue-on-error` hides the failure entirely.
+
+**Quota exhaustion + silent swallow = "found nothing" symptom.** When backfill reports 0 enriched and exits 2, and that's swallowed, the next run will hit quota again on the same file, get the same result, and look identical to "no items need enrichment". The correct diagnosis: look at the workflow step exit code and logs, not just the final enriched count.
+
+### Is this a pattern?
+
+Yes — same class as the git-push-omission bugs: a swallowed exit code that made failure look like success. The fix is always the same: remove the swallow, let failures be visible.

@@ -16,7 +16,6 @@ import argparse
 import logging
 import os
 import sys
-import time
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -48,6 +47,13 @@ from src.pipeline.stages.credibility_scoring import score_credibility
 from src.pipeline.stages.enrich import enrich
 from src.pipeline.stages.hype_scoring import score_hype
 from src.pipeline.stages.ingest import ingest
+from src.pipeline._gemini import (
+    _HeaderCapturingClient,
+    _ModelCascade,
+    _MODEL_CASCADE,
+    _RateLimiter,
+    make_gemini_client as _make_gemini_client,
+)
 from src.retry import with_backoff
 
 logger = logging.getLogger(__name__)
@@ -60,44 +66,13 @@ def _remaining_item_count(total: int, idx: int) -> int:
     return total - idx - 1
 
 
-class _RateLimiter:
-    """Token-bucket pacer for the Gemini free tier (default: 5 RPM).
-
-    Calling .wait() before each API request ensures the pipeline never fires
-    more than `rpm` requests per 60-second window, keeping us under the
-    GenerateRequestsPerMinutePerProjectPerModel-FreeTier quota.
-    """
-
-    def __init__(self, rpm: int = 5) -> None:
-        self._interval = 60.0 / rpm
-        self._last: float = 0.0
-
-    def wait(self) -> None:
-        now = time.monotonic()
-        gap = self._interval - (now - self._last)
-        if gap > 0:
-            logger.debug("Rate limiter: waiting %.1fs before next Gemini call", gap)
-            time.sleep(gap)
-        self._last = time.monotonic()
-
-
-def _make_gemini_client(api_key: str):
-    """Construct and return a Gemini client.
-
-    Retry policy is handled at the application level in process() via
-    src.retry.with_backoff so Gemini retryDelay hints can be honoured.
-    """
-    from google import genai
-
-    return genai.Client(api_key=api_key)
-
-
 def process(
     items: list[FetchedItem],
     gemini_api_key: str | None,
     fetch_date: str,
-    rpm: int = 5,
+    rpm: int = 15,
     enrich_max_output_tokens: int = 500,
+    gemini_model: str = "gemini-2.0-flash",
 ) -> tuple[list[ProcessedItem], int]:
     """Run all 8 pipeline stages over items; return (results, ai_failures).
 
@@ -105,14 +80,17 @@ def process(
     their fields remain at defaults. Non-AI stages always run.
     ai_failures counts items where the combined Gemini call raised an exception.
 
-    rpm and enrich_max_output_tokens can be overridden via pipeline config.
+    rpm, enrich_max_output_tokens, and gemini_model can be overridden via pipeline config.
     """
     if not items:
         return [], 0
 
-    client = _make_gemini_client(gemini_api_key) if gemini_api_key else None
-    rate_limiter = _RateLimiter(rpm=rpm) if client is not None else None
-    ai_disabled_for_quota = False
+    if gemini_api_key:
+        client, http_client = _make_gemini_client(gemini_api_key)
+        cascade = _ModelCascade(gemini_model, rpm, http_client)
+    else:
+        client = None
+        cascade = None
     results: list[ProcessedItem] = []
     ai_failures = 0
 
@@ -123,13 +101,15 @@ def process(
         # Stage 2 — Clean
         processed = clean(processed, raw_content=fetched.content)
 
-        if client is not None and not ai_disabled_for_quota:
+        if client is not None and cascade is not None and not cascade.all_exhausted:
             from google.genai.errors import ClientError, ServerError
 
-            def _make_enrich_once(current: ProcessedItem):
+            _active_model = cascade.model  # snapshot before pacing/call
+
+            def _make_enrich_once(current: ProcessedItem, _m: str = _active_model):
                 def _enrich_once() -> tuple[ProcessedItem, bool]:
                     try:
-                        return enrich(current, client, max_output_tokens=enrich_max_output_tokens)
+                        return enrich(current, client, max_output_tokens=enrich_max_output_tokens, model=_m)
                     except (ClientError, ServerError) as exc:
                         if _is_quota_exhausted_error(exc):
                             raise _QuotaExhaustedEnrichError from exc
@@ -139,8 +119,7 @@ def process(
 
                 return _enrich_once
 
-            # Pace to ≤rpm RPM before each Gemini call to stay under the free-tier quota.
-            rate_limiter.wait()  # type: ignore[union-attr]
+            cascade.wait()
             # Stages 3–6 — combined AI enrichment (1 Gemini call per item)
             pre_enrich = processed
             try:
@@ -154,16 +133,16 @@ def process(
             except _QuotaExhaustedEnrichError:
                 processed = pre_enrich
                 ok = False
-                ai_disabled_for_quota = True
                 remaining = _remaining_item_count(len(items), idx)
                 _log_quota_exhausted(processed.id, remaining)
+                cascade.advance()
             except RuntimeError as exc:
                 if isinstance(exc.__cause__, (ClientError, ServerError)):
                     processed = pre_enrich
                     if _is_quota_exhausted_error(exc.__cause__):
-                        ai_disabled_for_quota = True
                         remaining = _remaining_item_count(len(items), idx)
                         _log_quota_exhausted(processed.id, remaining)
+                        cascade.advance()
                     else:
                         logger.warning(
                             "AI enrichment failed for %r after retries: %s",
@@ -177,6 +156,8 @@ def process(
                 raise exc.__cause__ from None
             if not ok:
                 ai_failures += 1
+            elif cascade.check_daily_quota_header():
+                cascade.advance()
 
         # Stage 7 — Hype Scoring (deterministic)
         processed = score_hype(processed)
@@ -275,6 +256,7 @@ def main() -> int:
         fetch_date=today,
         rpm=cfg.pipeline.gemini_rpm,
         enrich_max_output_tokens=cfg.pipeline.enrich_max_output_tokens,
+        gemini_model=cfg.pipeline.gemini_model,
     )
 
     merged = _merge_and_write(out_path, processed)

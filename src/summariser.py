@@ -628,7 +628,8 @@ def summarise(
 
     logger.info("Summarising %d item(s) with %s", len(items), config.model)
 
-    client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY", ""))
+    from src.pipeline._gemini import make_gemini_client  # noqa: PLC0415
+    client, _ = make_gemini_client(os.environ.get("GEMINI_API_KEY", ""))
     max_attempts = 4
     backoff_base = 15  # seconds — 15, 30, 60
     last_error: genai_errors.APIError | None = None

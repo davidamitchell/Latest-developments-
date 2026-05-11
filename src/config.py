@@ -74,13 +74,15 @@ class LoggingConfig:
 class PipelineConfig:
     """Processing pipeline settings.
 
+    gemini_model is the model used for per-item AI enrichment (stages 3–6).
     gemini_rpm controls the rate limiter in src/pipeline/run.py.
     enrich_max_output_tokens controls the Gemini token budget per enrichment call.
-    Both can be adjusted in config/sources.yaml under the 'pipeline' section
+    All can be adjusted in config/sources.yaml under the 'pipeline' section
     without touching production code.
     """
 
-    gemini_rpm: int = 5
+    gemini_model: str = "gemini-2.0-flash"
+    gemini_rpm: int = 15
     enrich_max_output_tokens: int = 500
 
 
@@ -210,7 +212,8 @@ def load_config(path: Path = Path("config/sources.yaml")) -> Config:
 
     pl = raw.get("pipeline") or {}
     pipeline = PipelineConfig(
-        gemini_rpm=pl.get("gemini_rpm", 5),
+        gemini_model=pl.get("gemini_model", "gemini-2.0-flash"),
+        gemini_rpm=pl.get("gemini_rpm", 15),
         enrich_max_output_tokens=pl.get("enrich_max_output_tokens", 500),
     )
 

@@ -52,14 +52,14 @@ class _NullRateLimiter:
         pass
 
 
-def enrich(item: ProcessedItem, client: object, max_output_tokens: int = 500):
+def enrich(item: ProcessedItem, client: object, max_output_tokens: int = 500, model: str = "gemini-2.0-flash"):
     """Thin wrapper around stages.enrich.enrich; imported lazily to avoid triggering
     google.genai at module load time (which requires the cryptography C extension).
     Module-level name so tests can patch src.pipeline.backfill.enrich directly.
     """
     from src.pipeline.stages.enrich import enrich as _enrich  # noqa: PLC0415
 
-    return _enrich(item, client, max_output_tokens=max_output_tokens)  # type: ignore[arg-type]
+    return _enrich(item, client, max_output_tokens=max_output_tokens, model=model)  # type: ignore[arg-type]
 
 
 def backfill_file(
@@ -69,11 +69,15 @@ def backfill_file(
     max_output_tokens: int,
     dry_run: bool = False,
     budget: int | None = None,
+    model: str = "gemini-2.0-flash",
+    cascade: object | None = None,
 ) -> tuple[int, int, bool]:
     """Enrich items with theme == '' in a single processed file.
 
     Returns (enriched_count, failed_count, stop).  stop=True signals the caller
-    to halt processing of subsequent files (quota exhausted or budget reached).
+    to halt processing of subsequent files (all quota exhausted or budget reached).
+    When cascade is provided it overrides rate_limiter and model, automatically
+    advancing through models as daily quota is exhausted.
     When dry_run is True, counts are computed but the file is not written.
     """
     items = read_processed_jsonl(path)
@@ -96,9 +100,10 @@ def backfill_file(
     item_map: dict[str, ProcessedItem] = {i.id: i for i in items}
     enriched_count = 0
     failed_count = 0
-    quota_exhausted = False
+    quota_exhausted = False  # only used when cascade is None
     budget_used = 0
     stop = False
+    _use_cascade = cascade is not None
 
     from src.pipeline._quota import (  # noqa: I001, PLC0415
         NonRetryableEnrichError as _NonRetryableEnrichError,
@@ -108,7 +113,12 @@ def backfill_file(
     )
 
     for idx, item in enumerate(unenriched):
-        if quota_exhausted:
+        # All models exhausted — mark remaining items failed, exit loop
+        if _use_cascade and cascade.all_exhausted:  # type: ignore[union-attr]
+            failed_count += 1
+            continue
+
+        if not _use_cascade and quota_exhausted:
             failed_count += 1
             continue
 
@@ -116,13 +126,18 @@ def backfill_file(
             stop = True
             break
 
-        rate_limiter.wait()  # type: ignore[union-attr]
+        if _use_cascade:
+            cascade.wait()  # type: ignore[union-attr]
+        else:
+            rate_limiter.wait()  # type: ignore[union-attr]
         budget_used += 1
 
-        def _make_attempt(current: ProcessedItem = item):
+        _enrich_model = cascade.model if _use_cascade else model  # type: ignore[union-attr]
+
+        def _make_attempt(current: ProcessedItem = item, _m: str = _enrich_model):
             def _attempt():
                 try:
-                    return enrich(current, client, max_output_tokens=max_output_tokens)  # type: ignore[arg-type]
+                    return enrich(current, client, max_output_tokens=max_output_tokens, model=_m)  # type: ignore[arg-type]
                 except Exception as exc:
                     # Pass quota-sentinel through so the outer handler can stop the batch.
                     if isinstance(exc, _QuotaExhaustedEnrichError):
@@ -160,9 +175,12 @@ def backfill_file(
         except _QuotaExhaustedEnrichError:
             enriched_item = pre_enrich
             ok = False
-            quota_exhausted = True
             remaining = len(unenriched) - idx - 1
             _log_quota_exhausted(item.id, remaining)
+            if _use_cascade:
+                cascade.advance()  # type: ignore[union-attr]
+            else:
+                quota_exhausted = True
         except RuntimeError as exc:
             cause = exc.__cause__
             cause_module = type(cause).__module__ if cause is not None else ""
@@ -175,9 +193,12 @@ def backfill_file(
             if is_gemini_transport:
                 enriched_item = pre_enrich
                 if _is_quota_exhausted_error(exc.__cause__):
-                    quota_exhausted = True
                     remaining = len(unenriched) - idx - 1
                     _log_quota_exhausted(item.id, remaining)
+                    if _use_cascade:
+                        cascade.advance()  # type: ignore[union-attr]
+                    else:
+                        quota_exhausted = True
                 else:
                     logger.warning(
                         "AI enrichment failed for %r after retries: %s",
@@ -193,12 +214,16 @@ def backfill_file(
         if ok:
             item_map[item.id] = enriched_item
             enriched_count += 1
-            logger.debug("Enriched %r → theme=%r", item.id, enriched_item.theme)
+            logger.debug("Enriched %r → theme=%r (model=%s)", item.id, enriched_item.theme, _enrich_model)
+            if _use_cascade and cascade.check_daily_quota_header():  # type: ignore[union-attr]
+                cascade.advance()  # type: ignore[union-attr]
         else:
             failed_count += 1
             logger.warning("Enrichment returned ok=False for %r — keeping defaults", item.id)
 
-    if quota_exhausted:
+    if _use_cascade:
+        stop = cascade.all_exhausted  # type: ignore[union-attr]
+    elif quota_exhausted:
         stop = True
 
     # Preserve original insertion order
@@ -239,6 +264,8 @@ def backfill_all(
     date_filter: str | None = None,
     max_items: int | None = None,
     commit_progress: bool = False,
+    model: str = "gemini-2.0-flash",
+    cascade: object | None = None,
 ) -> tuple[int, int, int]:
     """Backfill all (or a single date's) processed files.
 
@@ -265,7 +292,8 @@ def backfill_all(
     for path in paths:
         budget = (max_items - total_enriched) if max_items is not None else None
         enriched, failed, stop = backfill_file(
-            path, client, rate_limiter, max_output_tokens, dry_run=dry_run, budget=budget
+            path, client, rate_limiter, max_output_tokens,
+            dry_run=dry_run, budget=budget, model=model, cascade=cascade,
         )
         total_enriched += enriched
         total_failed += failed
@@ -321,10 +349,11 @@ def main() -> int:
         logger.error("GEMINI_API_KEY not set — cannot run backfill without an API key")
         return 1
 
-    from src.pipeline.run import _make_gemini_client, _RateLimiter
+    from src.pipeline._gemini import _ModelCascade, make_gemini_client
 
-    client = _make_gemini_client(api_key)
-    rate_limiter = _RateLimiter(rpm=cfg.pipeline.gemini_rpm)
+    client, http_client = make_gemini_client(api_key)
+    cascade = _ModelCascade(cfg.pipeline.gemini_model, cfg.pipeline.gemini_rpm, http_client)
+    rate_limiter = _NullRateLimiter()  # cascade handles pacing; rate_limiter is a no-op fallback
 
     if args.date:
         date_filter = args.date
@@ -349,6 +378,8 @@ def main() -> int:
         date_filter=date_filter,
         max_items=args.max_items,
         commit_progress=args.commit_progress,
+        model=cfg.pipeline.gemini_model,
+        cascade=cascade,
     )
 
     logger.info(
