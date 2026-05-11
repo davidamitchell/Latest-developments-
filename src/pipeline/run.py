@@ -36,6 +36,9 @@ from src.pipeline._quota import (
     QuotaExhaustedEnrichError as _QuotaExhaustedEnrichError,
 )
 from src.pipeline._quota import (
+    is_model_not_found_error as _is_model_not_found_error,
+)
+from src.pipeline._quota import (
     is_quota_exhausted_error as _is_quota_exhausted_error,
 )
 from src.pipeline._quota import (
@@ -111,7 +114,7 @@ def process(
                     try:
                         return enrich(current, client, max_output_tokens=enrich_max_output_tokens, model=_m)
                     except (ClientError, ServerError) as exc:
-                        if _is_quota_exhausted_error(exc):
+                        if _is_quota_exhausted_error(exc) or _is_model_not_found_error(exc):
                             raise _QuotaExhaustedEnrichError from exc
                         raise
                     except Exception as exc:

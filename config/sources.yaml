@@ -316,7 +316,7 @@ digest:
 # enrich_max_output_tokens: Gemini token budget per enrichment call; default 500.
 # ---------------------------------------------------------------------------
 pipeline:
-  gemini_model: "gemini-3-flash"
+  gemini_model: "gemini-3.0-flash"
   gemini_rpm: 15
   enrich_max_output_tokens: 500
 

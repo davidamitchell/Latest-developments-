@@ -108,6 +108,7 @@ def backfill_file(
     from src.pipeline._quota import (  # noqa: I001, PLC0415
         NonRetryableEnrichError as _NonRetryableEnrichError,
         QuotaExhaustedEnrichError as _QuotaExhaustedEnrichError,
+        is_model_not_found_error as _is_model_not_found_error,
         is_quota_exhausted_error as _is_quota_exhausted_error,
         log_quota_exhausted as _log_quota_exhausted,
     )
@@ -156,7 +157,7 @@ def backfill_file(
                         )
 
                         if isinstance(exc, (ClientError, ServerError)):  # noqa: B023
-                            if _is_quota_exhausted_error(exc):
+                            if _is_quota_exhausted_error(exc) or _is_model_not_found_error(exc):
                                 raise _QuotaExhaustedEnrichError from exc
                             raise  # let with_backoff retry ServerError / non-quota ClientError
                     raise _NonRetryableEnrichError from exc

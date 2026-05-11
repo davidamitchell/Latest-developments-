@@ -63,6 +63,18 @@ def is_rate_limited(exc: Exception) -> bool:
     return code == 429 or status_code == 429
 
 
+def is_model_not_found_error(exc: Exception) -> bool:
+    """Return True for HTTP 404 model-not-found errors.
+
+    Treated as a cascade trigger: the model doesn't exist (wrong ID, deprecated,
+    or not yet available in this region), so advance to the next model rather
+    than retrying or counting it as a hard failure.
+    """
+    code = getattr(exc, "code", None)
+    status_code = getattr(exc, "status_code", None)
+    return code == 404 or status_code == 404
+
+
 def log_quota_exhausted(item_id: str, remaining: int) -> None:
     logger.warning(
         "Gemini quota exhausted while enriching %r; skipping AI enrichment for remaining %d item(s)",
