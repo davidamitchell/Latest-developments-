@@ -1,95 +1,89 @@
 {
-  "generated": "2026-05-10T08:56:05.865794+00:00",
+  "generated": "2026-05-11T10:41:49.971332+00:00",
   "nodes": [
     {
       "id": "AI Workforce & Jobs",
       "domain": "general",
       "state": "declining",
-      "volume": 0.31
+      "volume": 0.3
     },
     {
       "id": "Agentic Workflows",
       "domain": "agents",
       "state": "declining",
-      "volume": 0.31
+      "volume": 0.3
+    },
+    {
+      "id": "Retrieval-Augmented Generation",
+      "domain": "reasoning",
+      "state": "unknown",
+      "volume": 0.3
     },
     {
       "id": "AI Infrastructure",
       "domain": "infra",
       "state": "declining",
-      "volume": 0.21
+      "volume": 0.2
     },
     {
       "id": "Agent Reliability",
       "domain": "agents",
       "state": "declining",
-      "volume": 0.21
+      "volume": 0.2
     },
     {
       "id": "Local LLM Applications",
       "domain": "general",
       "state": "declining",
-      "volume": 0.21
+      "volume": 0.2
     },
     {
       "id": "LLM Capabilities",
       "domain": "reasoning",
       "state": "declining",
-      "volume": 0.21
+      "volume": 0.2
     },
     {
       "id": "Sycl Optimization",
       "domain": "hardware",
       "state": "unknown",
-      "volume": 0.21
+      "volume": 0.2
     }
   ],
   "edges": [
     {
-      "source": "AI Infrastructure",
-      "target": "Agentic Workflows",
-      "rel_type": "causal",
-      "weight": 1
-    },
-    {
-      "source": "AI Infrastructure",
-      "target": "Local LLM Applications",
-      "rel_type": "causal",
-      "weight": 1
-    },
-    {
       "source": "LLM Capabilities",
       "target": "Agentic Workflows",
-      "rel_type": "causal",
-      "weight": 1
-    },
-    {
-      "source": "Agent Reliability",
-      "target": "Agentic Workflows",
-      "rel_type": "causal",
-      "weight": 1
-    },
-    {
-      "source": "Sycl Optimization",
-      "target": "AI Infrastructure",
-      "rel_type": "causal",
-      "weight": 1
-    },
-    {
-      "source": "Sycl Optimization",
-      "target": "Local LLM Applications",
       "rel_type": "causal",
       "weight": 1
     },
     {
       "source": "Agentic Workflows",
-      "target": "AI Workforce & Jobs",
+      "target": "Agent Reliability",
       "rel_type": "causal",
       "weight": 1
     },
     {
-      "source": "LLM Capabilities",
+      "source": "Retrieval-Augmented Generation",
+      "target": "LLM Capabilities",
+      "rel_type": "causal",
+      "weight": 1
+    },
+    {
+      "source": "Retrieval-Augmented Generation",
       "target": "Agent Reliability",
+      "rel_type": "compositional",
+      "weight": 1
+    },
+    {
+      "source": "Sycl Optimization",
+      "target": "AI Infrastructure",
+      "rel_type": "compositional",
+      "weight": 1
+    },
+    {
+      "source": "AI Infrastructure",
+      "target": "Local LLM Applications",
       "rel_type": "causal",
       "weight": 1
     },
@@ -100,9 +94,21 @@
       "weight": 1
     },
     {
-      "source": "AI Infrastructure",
-      "target": "Sycl Optimization",
-      "rel_type": "compositional",
+      "source": "Agentic Workflows",
+      "target": "AI Workforce & Jobs",
+      "rel_type": "causal",
+      "weight": 1
+    },
+    {
+      "source": "Agent Reliability",
+      "target": "AI Workforce & Jobs",
+      "rel_type": "causal",
+      "weight": 1
+    },
+    {
+      "source": "Sycl Optimization",
+      "target": "Local LLM Applications",
+      "rel_type": "causal",
       "weight": 1
     }
   ]

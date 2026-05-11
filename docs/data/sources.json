@@ -1,21 +1,23 @@
 {
-  "generated": "2026-05-10T08:56:05.865794+00:00",
+  "generated": "2026-05-11T10:41:49.971332+00:00",
   "classes": {
     "primary": {
-      "count": 14,
+      "count": 62,
       "sources": [
         "Hugging Face",
         "arXiv"
       ]
     },
     "operator": {
-      "count": 18,
+      "count": 22,
       "sources": [
+        "Google AI Blog",
+        "Groq SDK Releases",
         "OpenAI Blog"
       ]
     },
     "practitioner": {
-      "count": 236,
+      "count": 247,
       "sources": [
         "Hacker News",
         "Matthew Berman",
@@ -39,27 +41,27 @@
     {
       "name": "Hacker News",
       "source_class": "practitioner",
-      "item_count": 101,
-      "themed_count": 41,
+      "item_count": 103,
+      "themed_count": 43,
       "first_seen": "2026-03-03",
-      "last_seen": "2026-05-10",
-      "days_active": 31,
+      "last_seen": "2026-05-11",
+      "days_active": 32,
       "top_themes": [
+        "Retrieval-Augmented Generation",
         "Local LLM Applications",
         "LLM Tooling Issues",
         "LLM Resource Optimization",
-        "AI Security Audits",
-        "LLM Productivity Impact"
+        "AI Security Audits"
       ]
     },
     {
       "name": "Nate Jones",
       "source_class": "practitioner",
-      "item_count": 72,
-      "themed_count": 42,
+      "item_count": 73,
+      "themed_count": 43,
       "first_seen": "2026-03-03",
-      "last_seen": "2026-05-10",
-      "days_active": 39,
+      "last_seen": "2026-05-11",
+      "days_active": 40,
       "top_themes": [
         "AI Workforce & Jobs",
         "Agentic Workflows",
@@ -69,13 +71,29 @@
       ]
     },
     {
+      "name": "arXiv",
+      "source_class": "primary",
+      "item_count": 48,
+      "themed_count": 8,
+      "first_seen": "2026-05-09",
+      "last_seen": "2026-05-11",
+      "days_active": 2,
+      "top_themes": [
+        "Graph Algorithm Reasoning",
+        "Reasoning Bias",
+        "Redistricting Optimization",
+        "Recursive Reasoning Termination",
+        "Emergent Coalitions"
+      ]
+    },
+    {
       "name": "Wes Roth",
       "source_class": "practitioner",
-      "item_count": 24,
-      "themed_count": 10,
+      "item_count": 25,
+      "themed_count": 11,
       "first_seen": "2026-03-03",
-      "last_seen": "2026-05-09",
-      "days_active": 19,
+      "last_seen": "2026-05-11",
+      "days_active": 20,
       "top_themes": [
         "LLM Misuse",
         "AI Commentary",
@@ -85,23 +103,13 @@
       ]
     },
     {
-      "name": "OpenAI Blog",
-      "source_class": "operator",
-      "item_count": 18,
-      "themed_count": 0,
-      "first_seen": "2026-05-09",
-      "last_seen": "2026-05-09",
-      "days_active": 1,
-      "top_themes": []
-    },
-    {
       "name": "llama.cpp Releases",
       "source_class": "practitioner",
-      "item_count": 16,
-      "themed_count": 6,
+      "item_count": 22,
+      "themed_count": 12,
       "first_seen": "2026-05-09",
-      "last_seen": "2026-05-10",
-      "days_active": 2,
+      "last_seen": "2026-05-11",
+      "days_active": 3,
       "top_themes": [
         "Sycl Optimization",
         "Cross-Platform Support",
@@ -111,38 +119,39 @@
       ]
     },
     {
+      "name": "OpenAI Blog",
+      "source_class": "operator",
+      "item_count": 20,
+      "themed_count": 0,
+      "first_seen": "2026-05-09",
+      "last_seen": "2026-05-11",
+      "days_active": 2,
+      "top_themes": []
+    },
+    {
       "name": "Ollama Releases",
       "source_class": "practitioner",
-      "item_count": 14,
-      "themed_count": 4,
+      "item_count": 15,
+      "themed_count": 5,
       "first_seen": "2026-05-09",
-      "last_seen": "2026-05-10",
-      "days_active": 2,
+      "last_seen": "2026-05-11",
+      "days_active": 3,
       "top_themes": [
         "Windows Fixes",
         "Windows Arm64 Fix",
         "Windows Build Fix",
-        "Merge Conflicts"
+        "Merge Conflicts",
+        "Lint Fixes"
       ]
-    },
-    {
-      "name": "arXiv",
-      "source_class": "primary",
-      "item_count": 8,
-      "themed_count": 0,
-      "first_seen": "2026-05-09",
-      "last_seen": "2026-05-09",
-      "days_active": 1,
-      "top_themes": []
     },
     {
       "name": "Hugging Face",
       "source_class": "primary",
-      "item_count": 6,
+      "item_count": 14,
       "themed_count": 0,
       "first_seen": "2026-05-03",
-      "last_seen": "2026-05-09",
-      "days_active": 2,
+      "last_seen": "2026-05-11",
+      "days_active": 3,
       "top_themes": []
     },
     {
@@ -166,6 +175,30 @@
       "last_seen": "2026-05-09",
       "days_active": 1,
       "top_themes": []
+    },
+    {
+      "name": "Google AI Blog",
+      "source_class": "operator",
+      "item_count": 1,
+      "themed_count": 1,
+      "first_seen": "2026-05-11",
+      "last_seen": "2026-05-11",
+      "days_active": 1,
+      "top_themes": [
+        "Finance Expansion"
+      ]
+    },
+    {
+      "name": "Groq SDK Releases",
+      "source_class": "operator",
+      "item_count": 1,
+      "themed_count": 1,
+      "first_seen": "2026-05-11",
+      "last_seen": "2026-05-11",
+      "days_active": 1,
+      "top_themes": [
+        "Sdk Release"
+      ]
     }
   ]
 }

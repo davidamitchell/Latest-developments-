@@ -1,13 +1,13 @@
 {
-  "generated": "2026-05-10T08:56:05.865794+00:00",
+  "generated": "2026-05-11T10:41:49.971332+00:00",
   "trends": [
     {
       "theme": "AI Workforce & Jobs",
       "domain": "general",
       "definition": "Impact of AI on human employment, job roles, skills, and the future of work.",
       "state": "declining",
-      "confidence": 0.218,
-      "volume": 0.31,
+      "confidence": 0.217,
+      "volume": 0.3,
       "velocity": -1.0,
       "diversity": 1,
       "adoption_proxy": 0.3,
@@ -34,8 +34,8 @@
       "domain": "agents",
       "definition": "Automated, goal-driven processes enabled by AI agents, often involving planning and tool use.",
       "state": "declining",
-      "confidence": 0.218,
-      "volume": 0.31,
+      "confidence": 0.217,
+      "volume": 0.3,
       "velocity": -1.0,
       "diversity": 1,
       "adoption_proxy": 0.3,
@@ -68,12 +68,45 @@
       ]
     },
     {
+      "theme": "Retrieval-Augmented Generation",
+      "domain": "reasoning",
+      "definition": "Improving LLM outputs by retrieving relevant external knowledge before generating a response.",
+      "state": "unknown",
+      "confidence": 0.217,
+      "volume": 0.3,
+      "velocity": 1.0,
+      "diversity": 1,
+      "adoption_proxy": 0.3,
+      "stability": 0.667,
+      "hype_risk": 0.0,
+      "item_count": 3,
+      "last_seen": "2026-05-11",
+      "source_classes": [
+        "practitioner"
+      ],
+      "source_class_counts": {
+        "practitioner": 3
+      },
+      "history": [
+        {
+          "date": "2026-03-30",
+          "volume": 1,
+          "state": "unknown"
+        },
+        {
+          "date": "2026-05-11",
+          "volume": 2,
+          "state": "unknown"
+        }
+      ]
+    },
+    {
       "theme": "AI Infrastructure",
       "domain": "infra",
       "definition": "Hardware, software, and data systems required to develop, train, and deploy AI models.",
       "state": "declining",
-      "confidence": 0.368,
-      "volume": 0.21,
+      "confidence": 0.367,
+      "volume": 0.2,
       "velocity": -1.0,
       "diversity": 2,
       "adoption_proxy": 0.3,
@@ -105,8 +138,8 @@
       "domain": "agents",
       "definition": "Ensuring AI agents perform consistently and dependably to achieve their intended goals.",
       "state": "declining",
-      "confidence": 0.202,
-      "volume": 0.21,
+      "confidence": 0.2,
+      "volume": 0.2,
       "velocity": -1.0,
       "diversity": 1,
       "adoption_proxy": 0.3,
@@ -138,8 +171,8 @@
       "domain": "general",
       "definition": "Developing and deploying large language model use cases on edge devices or private infrastructure.",
       "state": "declining",
-      "confidence": 0.202,
-      "volume": 0.21,
+      "confidence": 0.2,
+      "volume": 0.2,
       "velocity": -1.0,
       "diversity": 1,
       "adoption_proxy": 0.3,
@@ -171,8 +204,8 @@
       "domain": "reasoning",
       "definition": "The range of tasks and cognitive abilities exhibited by large language models.",
       "state": "declining",
-      "confidence": 0.368,
-      "volume": 0.21,
+      "confidence": 0.367,
+      "volume": 0.2,
       "velocity": -1.0,
       "diversity": 2,
       "adoption_proxy": 0.3,
@@ -204,8 +237,8 @@
       "domain": "hardware",
       "definition": "Improving the performance and efficiency of AI computations using the SYCL open standard for heterogeneous computing.",
       "state": "unknown",
-      "confidence": 0.202,
-      "volume": 0.21,
+      "confidence": 0.2,
+      "volume": 0.2,
       "velocity": 1.0,
       "diversity": 1,
       "adoption_proxy": 0.3,

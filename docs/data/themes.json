@@ -1,5 +1,5 @@
 {
-  "generated": "2026-05-10T08:56:05.865794+00:00",
+  "generated": "2026-05-11T10:41:49.971332+00:00",
   "themes": [
     {
       "name": "AI Workforce & Jobs",
@@ -23,6 +23,21 @@
       "state": "declining",
       "item_count": 3,
       "last_seen": "2026-04-19",
+      "source_classes": [
+        "practitioner"
+      ],
+      "source_class_counts": {
+        "practitioner": 3
+      },
+      "hype_risk": 0.0
+    },
+    {
+      "name": "Retrieval-Augmented Generation",
+      "domain": "reasoning",
+      "definition": "Improving LLM outputs by retrieving relevant external knowledge before generating a response.",
+      "state": "unknown",
+      "item_count": 3,
+      "last_seen": "2026-05-11",
       "source_classes": [
         "practitioner"
       ],
