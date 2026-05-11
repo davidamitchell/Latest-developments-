@@ -1,0 +1,9 @@
+Daily AI Digest — 11 May 2026
+========================================
+
+## Google AI Blog
+
+### The new AI-powered Google Finance is expanding to Europe.
+Source: Google AI Blog [RSS]
+Theme: AI Application
+Summary: Google Finance is expanding its AI-powered features to Europe with local language support, offering advanced capabilities for financial analysis. This demonstrates Google's strategy to integrate AI directly into consumer-facing platforms, potentially enhancing financial insights and user
