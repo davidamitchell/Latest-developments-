@@ -1,6 +1,6 @@
 """Shared Gemini client factory used by the pipeline, summariser, and theme clustering.
 
-Single definition of three concerns:
+Single definition of four concerns:
 
   _HeaderCapturingClient     — httpx.Client that records x-ratelimit-* response headers
   _RateLimiter               — adaptive per-minute pacer driven by those headers
@@ -206,7 +206,10 @@ def build_flash_model_cascade(api_key: str, starting_model: str) -> list[str]:
         return result
 
     except Exception as exc:
-        logger.warning("ListModels failed (%s) — using fallback cascade", exc)
+        # Redact API key from exception string before logging — httpx.HTTPStatusError
+        # includes the full request URL (with ?key=...) in its __str__.
+        safe_msg = re.sub(r"key=[^&\s]+", "key=***", str(exc))
+        logger.warning("ListModels failed (%s) — using fallback cascade", safe_msg)
         return _build_fallback(starting_model)
 
 
@@ -254,6 +257,8 @@ class _ModelCascade:
 
     def advance(self) -> bool:
         """Switch to the next model. Returns True if one is available, False if done."""
+        if self.all_exhausted:
+            return False
         prev = self.model
         self._idx += 1
         if not self.all_exhausted:
