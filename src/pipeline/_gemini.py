@@ -127,42 +127,56 @@ class _RateLimiter:
 
 # Safe fallback used when ListModels cannot be reached.
 _FALLBACK_CASCADE: list[str] = [
+    "gemini-2.5-pro",
     "gemini-2.5-flash",
     "gemini-2.5-flash-lite",
 ]
 
 
-def _flash_sort_key(model_id: str) -> tuple[int, int, int, int]:
-    """Sort key so higher-capability flash models come first.
+def _model_sort_key(model_id: str) -> tuple[int, int, int, int]:
+    """Sort key implementing the desired cascade tier order.
 
-    Priority: newest major.minor → non-lite → non-experimental.
-    Unrecognised IDs sort last.
+    Tier 0 — Pro (highest capability, lowest daily quota)
+    Tier 1 — Flash (balanced)
+    Tier 2 — Flash-Lite (highest daily quota, lightest capability)
+    Tier 3 — Unrecognised (sorted last)
+
+    Within each tier: newest major.minor first, stable before experimental.
     """
-    m = re.match(r"gemini-(\d+)(?:\.(\d+))?-flash(-lite)?", model_id)
+    if re.search(r"gemini-\d.*-flash-lite", model_id):
+        tier = 2
+    elif re.search(r"gemini-\d.*-flash", model_id):
+        tier = 1
+    elif re.search(r"gemini-\d.*-pro", model_id):
+        tier = 0
+    else:
+        tier = 3
+
+    m = re.match(r"gemini-(\d+)(?:\.(\d+))?", model_id)
     if not m:
-        return (0, 0, 1, 1)
+        return (tier, 0, 0, 0)
     major = int(m.group(1))
     minor = int(m.group(2) or "0")
-    is_lite = 1 if m.group(3) else 0
-    suffix = model_id[m.end():]
-    is_experimental = 1 if re.search(r"preview|exp|experimental", suffix, re.IGNORECASE) else 0
-    return (-major, -minor, is_lite, is_experimental)
+    is_experimental = 1 if re.search(r"preview|exp\b|experimental", model_id, re.IGNORECASE) else 0
+    return (tier, -major, -minor, is_experimental)
 
 
-def build_flash_model_cascade(api_key: str, starting_model: str) -> list[str]:
-    """Query ListModels and return an ordered flash-model cascade.
+def build_model_cascade(api_key: str, fallback_hint: str) -> list[str]:
+    """Query ListModels and return the full ordered model cascade.
 
-    Calls the Gemini REST API, filters to generateContent-capable flash models,
-    and sorts them newest-first (highest major.minor), non-lite before lite,
-    stable before experimental.
+    Calls the Gemini REST API, filters to generateContent-capable Pro and Flash
+    models (excluding unversioned legacy IDs like 'gemini-pro'), and sorts them
+    by tier then version:
 
-    If starting_model appears in the list, models sorted before it are dropped
-    (the operator chose it as the capability floor, so older models aren't
-    useful fallbacks).  If it is absent from the API response it is prepended
-    so it gets one live attempt before the confirmed-available models take over.
+        Tier 0 — Pro     (gemini-X.Y-pro)          highest capability
+        Tier 1 — Flash   (gemini-X.Y-flash)         balanced
+        Tier 2 — Flash-Lite (gemini-X.Y-flash-lite) highest daily quota
 
-    Falls back to _FALLBACK_CASCADE on any network or API error, with
-    starting_model prepended if it isn't already present.
+    Within each tier: newest version first, stable before experimental.
+
+    Returns the complete sorted list so every available model is a potential
+    fallback as daily quota is exhausted.  Falls back to _FALLBACK_CASCADE on
+    any network or API error, with fallback_hint prepended when absent.
     """
     url = (
         "https://generativelanguage.googleapis.com/v1beta/models"
@@ -174,43 +188,34 @@ def build_flash_model_cascade(api_key: str, starting_model: str) -> list[str]:
             resp.raise_for_status()
             data = resp.json()
 
-        flash_ids: list[str] = []
+        model_ids: list[str] = []
         for model in data.get("models", []):
             name: str = model.get("name", "")
             methods: list[str] = model.get("supportedGenerationMethods", [])
             if not name.startswith("models/"):
                 continue
             model_id = name[len("models/"):]
-            if "flash" not in model_id.lower():
+            # Only versioned flash/pro models (exclude legacy 'gemini-pro', 'gemini-ultra')
+            if not re.match(r"gemini-\d+(?:\.\d+)?-(pro|flash)", model_id):
                 continue
             if "generateContent" not in methods:
                 continue
-            flash_ids.append(model_id)
+            model_ids.append(model_id)
 
-        if not flash_ids:
-            logger.warning("ListModels returned no flash models — using fallback cascade")
-            return _build_fallback(starting_model)
+        if not model_ids:
+            logger.warning("ListModels returned no usable models — using fallback cascade")
+            return _build_fallback(fallback_hint)
 
-        flash_ids.sort(key=_flash_sort_key)
-        logger.info("Available flash models (sorted): %s", ", ".join(flash_ids))
-
-        if starting_model in flash_ids:
-            start = flash_ids.index(starting_model)
-            result = flash_ids[start:]
-        else:
-            # Not yet in ListModels — prepend it for one live attempt, then
-            # continue with whatever the API says is available.
-            logger.info("%r not in ListModels response — prepending as first attempt", starting_model)
-            result = [starting_model] + flash_ids
-
-        return result
+        model_ids.sort(key=_model_sort_key)
+        logger.info("Available models (sorted by tier+version): %s", ", ".join(model_ids))
+        return model_ids
 
     except Exception as exc:
         # Redact API key from exception string before logging — httpx.HTTPStatusError
         # includes the full request URL (with ?key=...) in its __str__.
         safe_msg = re.sub(r"key=[^&\s]+", "key=***", str(exc))
         logger.warning("ListModels failed (%s) — using fallback cascade", safe_msg)
-        return _build_fallback(starting_model)
+        return _build_fallback(fallback_hint)
 
 
 def _build_fallback(starting_model: str) -> list[str]:
@@ -223,7 +228,7 @@ def _build_fallback(starting_model: str) -> list[str]:
 class _ModelCascade:
     """Walks through Gemini models in cascade order as each model's daily quota is exhausted.
 
-    Accepts an ordered list of model IDs (typically from build_flash_model_cascade).
+    Accepts an ordered list of model IDs (typically from build_model_cascade).
     Each advance() resets the rate limiter so the new model gets a fresh pacing
     window.  The shared _HeaderCapturingClient is cleared of stale headers on
     advance so the new model's first response is read cleanly.

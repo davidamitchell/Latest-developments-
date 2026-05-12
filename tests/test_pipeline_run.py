@@ -66,12 +66,12 @@ class TestProcess:
 
     @contextmanager
     def _patch_gemini(self, client=None):
-        """Patch _make_gemini_client (tuple) and _build_flash_model_cascade for tests."""
+        """Patch _make_gemini_client (tuple) and _build_model_cascade for tests."""
         if client is None:
             client = self._null_client()
         with (
             patch("src.pipeline.run._make_gemini_client", return_value=(client, self._mock_http_client())),
-            patch("src.pipeline.run._build_flash_model_cascade", return_value=["gemini-2.5-flash"]),
+            patch("src.pipeline.run._build_model_cascade", return_value=["gemini-2.5-flash"]),
         ):
             yield
 

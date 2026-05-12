@@ -297,17 +297,20 @@ digest:
 # ---------------------------------------------------------------------------
 # pipeline — processing pipeline settings
 #
-# gemini_model: model used for per-item AI enrichment (stages 3–6).
-#   Each model has its own independent free-tier quota pool:
-#   gemini-2.0-flash            15 RPM / 1500 RPD — best free-tier throughput
-#   gemini-2.5-flash            10 RPM /  500 RPD — stronger reasoning
-#   gemini-2.5-flash-lite       30 RPM / 1500 RPD — fastest, lighter capability
-#   gemini-3-flash-preview      (check aistudio.google.com for current limits)
-#   gemini-3.1-flash-lite-preview (check aistudio.google.com for current limits)
+# gemini_model: fallback hint used only when the ListModels API is unreachable.
+#   At runtime the pipeline calls ListModels, discovers all available Pro and
+#   Flash models, and builds the cascade automatically in this priority order:
 #
-#   The pipeline queries ListModels at startup and prunes unavailable entries
-#   from the cascade automatically — so preview IDs that haven't rolled out yet
-#   are skipped without manual intervention.
+#     Tier 0 — Pro        (gemini-X.Y-pro)       highest capability, lowest RPD
+#     Tier 1 — Flash      (gemini-X.Y-flash)      balanced
+#     Tier 2 — Flash-Lite (gemini-X.Y-flash-lite) highest RPD, lightest
+#
+#   Within each tier: newest major.minor version first, stable before preview.
+#   The cascade falls through to the next model only when daily quota (RPD) is
+#   exhausted — never on rate-limit (RPM), which is handled by back-off.
+#
+#   This setting is prepended to the fallback cascade when the API is down, so
+#   set it to your preferred starting model (default: gemini-2.5-pro).
 #
 #   Theme clustering and email digest always use gemini-2.5-flash regardless
 #   of this setting (1 call/run; quality matters more than throughput there).
@@ -320,7 +323,7 @@ digest:
 # enrich_max_output_tokens: Gemini token budget per enrichment call; default 500.
 # ---------------------------------------------------------------------------
 pipeline:
-  gemini_model: "gemini-3-flash-preview"
+  gemini_model: "gemini-2.5-pro"
   gemini_rpm: 15
   enrich_max_output_tokens: 500
 
