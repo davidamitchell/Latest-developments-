@@ -7,6 +7,13 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Added
+- **Dynamic Gemini model discovery** (`_gemini.py`): `fetch_available_model_ids()` calls the ListModels REST endpoint at startup; `_ModelCascade` accepts the result and prunes cascade entries not in the account's model list before the first API call is made.
+- **404 cascade advance** (`_quota.py`, `backfill.py`, `run.py`): `ModelNotFoundEnrichError` sentinel + `is_model_not_found_error()` — HTTP 404 from an unknown/not-yet-rolled-out model ID now advances the cascade immediately (same as quota exhaustion) rather than retrying three times and marking the item failed.
+
+### Changed
+- **Gemini model IDs updated**: `_MODEL_CASCADE` now uses `gemini-3-flash-preview` and `gemini-3.1-flash-lite-preview` (correct API identifiers per current Gemini model registry); `sources.yaml` `gemini_model` updated to match.
+
+### Added
 - **AI enrichment backfill** (`src/pipeline/backfill.py`): ops tool to re-enrich `ProcessedItem` records where `theme == ""`. Supports `--all`, `--date`, `--dry-run`, `--max-items N`, `--commit-progress`. Triggered via `backfill-enrichment.yml` workflow dispatch.
 
 ### Fixed

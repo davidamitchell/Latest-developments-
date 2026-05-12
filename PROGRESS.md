@@ -1,6 +1,18 @@
 # Progress
 
-Last updated: 2026-05-04
+Last updated: 2026-05-12
+
+---
+
+## 2026-05-12 — Robust Gemini model cascade (PR #56)
+
+**What changed:** Three-part hardening of the Gemini model cascade in `src/pipeline/_gemini.py`, `_quota.py`, `backfill.py`, and `run.py`:
+
+1. **Model IDs corrected** — `_MODEL_CASCADE` and `sources.yaml` now use `gemini-3-flash-preview` and `gemini-3.1-flash-lite-preview`, the actual identifiers returned by the Gemini model registry.
+
+2. **ListModels pruning** — `fetch_available_model_ids(api_key)` queries `generativelanguage.googleapis.com/v1beta/models` at startup; `_ModelCascade` accepts `available_model_ids` and silently drops cascade entries not present in the account's model list before the first call.
+
+3. **404 → cascade advance** — Added `ModelNotFoundEnrichError` + `is_model_not_found_error()` to `_quota.py`. Both `backfill.py` and `run.py` now treat HTTP 404 (invalid model) like quota exhaustion: `cascade.advance()` is called immediately, burning through unknown preview IDs in one item each and landing on `gemini-2.5-flash` (confirmed working).
 
 ---
 
