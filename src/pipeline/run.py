@@ -29,11 +29,26 @@ except ImportError:
 from src.fetchers import FetchedItem
 from src.logger import setup_logging
 from src.models import ProcessedItem, read_processed_jsonl, write_processed_jsonl
+from src.pipeline._gemini import (
+    _ModelCascade,
+)
+from src.pipeline._gemini import (
+    fetch_available_model_ids as _fetch_available_model_ids,
+)
+from src.pipeline._gemini import (
+    make_gemini_client as _make_gemini_client,
+)
+from src.pipeline._quota import (
+    ModelNotFoundEnrichError as _ModelNotFoundEnrichError,
+)
 from src.pipeline._quota import (
     NonRetryableEnrichError as _NonRetryableEnrichError,
 )
 from src.pipeline._quota import (
     QuotaExhaustedEnrichError as _QuotaExhaustedEnrichError,
+)
+from src.pipeline._quota import (
+    is_model_not_found_error as _is_model_not_found_error,
 )
 from src.pipeline._quota import (
     is_quota_exhausted_error as _is_quota_exhausted_error,
@@ -47,13 +62,6 @@ from src.pipeline.stages.credibility_scoring import score_credibility
 from src.pipeline.stages.enrich import enrich
 from src.pipeline.stages.hype_scoring import score_hype
 from src.pipeline.stages.ingest import ingest
-from src.pipeline._gemini import (
-    _HeaderCapturingClient,
-    _ModelCascade,
-    _MODEL_CASCADE,
-    _RateLimiter,
-    make_gemini_client as _make_gemini_client,
-)
 from src.retry import with_backoff
 
 logger = logging.getLogger(__name__)
@@ -87,7 +95,8 @@ def process(
 
     if gemini_api_key:
         client, http_client = _make_gemini_client(gemini_api_key)
-        cascade = _ModelCascade(gemini_model, rpm, http_client)
+        available_model_ids = _fetch_available_model_ids(gemini_api_key)
+        cascade = _ModelCascade(gemini_model, rpm, http_client, available_model_ids)
     else:
         client = None
         cascade = None
@@ -113,6 +122,8 @@ def process(
                     except (ClientError, ServerError) as exc:
                         if _is_quota_exhausted_error(exc):
                             raise _QuotaExhaustedEnrichError from exc
+                        if _is_model_not_found_error(exc):
+                            raise _ModelNotFoundEnrichError from exc
                         raise
                     except Exception as exc:
                         raise _NonRetryableEnrichError from exc
@@ -128,7 +139,7 @@ def process(
                     max_attempts=3,
                     base_delay=60.0,
                     label=f"enrich:{processed.id}",
-                    no_retry=(_NonRetryableEnrichError, _QuotaExhaustedEnrichError),
+                    no_retry=(_NonRetryableEnrichError, _QuotaExhaustedEnrichError, _ModelNotFoundEnrichError),
                 )
             except _QuotaExhaustedEnrichError:
                 processed = pre_enrich
@@ -136,12 +147,20 @@ def process(
                 remaining = _remaining_item_count(len(items), idx)
                 _log_quota_exhausted(processed.id, remaining)
                 cascade.advance()
+            except _ModelNotFoundEnrichError:
+                processed = pre_enrich
+                ok = False
+                logger.warning("Model %r not found (404) — advancing cascade", cascade.model)
+                cascade.advance()
             except RuntimeError as exc:
                 if isinstance(exc.__cause__, (ClientError, ServerError)):
                     processed = pre_enrich
                     if _is_quota_exhausted_error(exc.__cause__):
                         remaining = _remaining_item_count(len(items), idx)
                         _log_quota_exhausted(processed.id, remaining)
+                        cascade.advance()
+                    elif _is_model_not_found_error(exc.__cause__):
+                        logger.warning("Model %r not found (404) — advancing cascade", cascade.model)
                         cascade.advance()
                     else:
                         logger.warning(

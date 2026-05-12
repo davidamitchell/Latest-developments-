@@ -124,11 +124,35 @@ class _RateLimiter:
 
 
 _MODEL_CASCADE: list[str] = [
-    "gemini-3-flash",
-    "gemini-3.1-flash-lite",
+    "gemini-3-flash-preview",
+    "gemini-3.1-flash-lite-preview",
     "gemini-2.5-flash",
     "gemini-2.5-flash-lite",
 ]
+
+
+def fetch_available_model_ids(api_key: str) -> frozenset[str]:
+    """Call the Gemini ListModels REST endpoint and return available model IDs.
+
+    Returns a frozenset of bare model IDs (without the 'models/' prefix).
+    Falls back to an empty frozenset on any error — callers treat empty as "no filter".
+    """
+    url = f"https://generativelanguage.googleapis.com/v1beta/models?key={api_key}&pageSize=200"
+    try:
+        with httpx.Client(follow_redirects=True, timeout=15.0) as client:
+            response = client.get(url)
+            response.raise_for_status()
+            data = response.json()
+        ids: set[str] = set()
+        for model in data.get("models", []):
+            name: str = model.get("name", "")
+            if name.startswith("models/"):
+                ids.add(name[len("models/"):])
+        logger.info("ListModels returned %d model IDs", len(ids))
+        return frozenset(ids)
+    except Exception as exc:
+        logger.warning("Could not fetch available model IDs: %s — cascade will use all entries", exc)
+        return frozenset()
 
 
 class _ModelCascade:
@@ -139,19 +163,44 @@ class _ModelCascade:
     gets a fresh pacing window.  The shared _HeaderCapturingClient is cleared of
     stale headers on advance so the new model's first response is read cleanly.
 
-    Two triggers for advance():
+    Three triggers for advance():
       1. QuotaExhaustedEnrichError exception — reliable daily-quota signal
-      2. check_daily_quota_header() — proactive: x-ratelimit-remaining-*-per-day == 0
+      2. ModelNotFoundEnrichError exception — model ID invalid (HTTP 404)
+      3. check_daily_quota_header() — proactive: x-ratelimit-remaining-*-per-day == 0
+
+    Pass available_model_ids (from fetch_available_model_ids) to prune models
+    that are not in the account's model list before the first call is made.
     """
 
     def __init__(
-        self, starting_model: str, rpm: int, http_client: _HeaderCapturingClient
+        self,
+        starting_model: str,
+        rpm: int,
+        http_client: _HeaderCapturingClient,
+        available_model_ids: frozenset[str] | None = None,
     ) -> None:
         try:
             idx = _MODEL_CASCADE.index(starting_model)
-            self._models = _MODEL_CASCADE[idx:]
+            candidates = _MODEL_CASCADE[idx:]
         except ValueError:
-            self._models = [starting_model]
+            candidates = [starting_model]
+
+        if available_model_ids:
+            # Keep starting_model even if not in available list (so the first
+            # call surfaces the real error rather than silently skipping it).
+            pruned = [m for m in candidates if m in available_model_ids]
+            if pruned:
+                candidates = pruned
+                logger.info(
+                    "Model cascade pruned to available models: %s",
+                    ", ".join(candidates),
+                )
+            else:
+                logger.warning(
+                    "None of the cascade models appear in ListModels response — using full cascade"
+                )
+
+        self._models = candidates
         self._idx = 0
         self._rpm = rpm
         self._http_client = http_client

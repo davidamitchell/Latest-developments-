@@ -28,6 +28,10 @@ class QuotaExhaustedEnrichError(Exception):
     """Signal that Gemini free-tier quota is exhausted for this run."""
 
 
+class ModelNotFoundEnrichError(Exception):
+    """Signal that the current model ID is invalid (HTTP 404) — advance the cascade."""
+
+
 def is_quota_exhausted_error(exc: Exception) -> bool:
     """Return True when a Gemini transport error indicates quota exhaustion."""
     code = getattr(exc, "code", None)
@@ -54,6 +58,13 @@ def is_quota_exhausted_error(exc: Exception) -> bool:
     return (
         _QUOTA_METRIC_TOKEN in text or _QUOTA_PERDAY_TOKEN in text or _QUOTA_METRIC_PHRASE in text
     )
+
+
+def is_model_not_found_error(exc: Exception) -> bool:
+    """Return True when a Gemini transport error indicates the model ID is invalid (404)."""
+    code = getattr(exc, "code", None)
+    status_code = getattr(exc, "status_code", None)
+    return code == 404 or status_code == 404
 
 
 def is_rate_limited(exc: Exception) -> bool:
