@@ -2,9 +2,10 @@
 
 Single definition of three concerns:
 
-  _HeaderCapturingClient   — httpx.Client that records x-ratelimit-* response headers
-  _RateLimiter             — adaptive per-minute pacer driven by those headers
-  _ModelCascade            — walks through models in order as daily quota is exhausted
+  _HeaderCapturingClient     — httpx.Client that records x-ratelimit-* response headers
+  _RateLimiter               — adaptive per-minute pacer driven by those headers
+  _ModelCascade              — walks through models in order as daily quota is exhausted
+  build_flash_model_cascade  — queries ListModels at runtime to build the ordered cascade
 
 All code that makes Gemini API calls should obtain a client via make_gemini_client()
 so header capture is universal and the rate-limit state is shared.
@@ -13,6 +14,7 @@ so header capture is universal and the rate-limit state is shared.
 from __future__ import annotations
 
 import logging
+import re
 import time
 from datetime import UTC, datetime
 
@@ -123,88 +125,124 @@ class _RateLimiter:
         self._last = time.monotonic()
 
 
-_MODEL_CASCADE: list[str] = [
-    "gemini-3-flash-preview",
-    "gemini-3.1-flash-lite-preview",
+# Safe fallback used when ListModels cannot be reached.
+_FALLBACK_CASCADE: list[str] = [
     "gemini-2.5-flash",
     "gemini-2.5-flash-lite",
 ]
 
 
-def fetch_available_model_ids(api_key: str) -> frozenset[str]:
-    """Call the Gemini ListModels REST endpoint and return available model IDs.
+def _flash_sort_key(model_id: str) -> tuple[int, int, int, int]:
+    """Sort key so higher-capability flash models come first.
 
-    Returns a frozenset of bare model IDs (without the 'models/' prefix).
-    Falls back to an empty frozenset on any error — callers treat empty as "no filter".
+    Priority: newest major.minor → non-lite → non-experimental.
+    Unrecognised IDs sort last.
     """
-    url = f"https://generativelanguage.googleapis.com/v1beta/models?key={api_key}&pageSize=200"
+    m = re.match(r"gemini-(\d+)(?:\.(\d+))?-flash(-lite)?", model_id)
+    if not m:
+        return (0, 0, 1, 1)
+    major = int(m.group(1))
+    minor = int(m.group(2) or "0")
+    is_lite = 1 if m.group(3) else 0
+    suffix = model_id[m.end():]
+    is_experimental = 1 if re.search(r"preview|exp|experimental", suffix, re.IGNORECASE) else 0
+    return (-major, -minor, is_lite, is_experimental)
+
+
+def build_flash_model_cascade(api_key: str, starting_model: str) -> list[str]:
+    """Query ListModels and return an ordered flash-model cascade.
+
+    Calls the Gemini REST API, filters to generateContent-capable flash models,
+    and sorts them newest-first (highest major.minor), non-lite before lite,
+    stable before experimental.
+
+    If starting_model appears in the list, models sorted before it are dropped
+    (the operator chose it as the capability floor, so older models aren't
+    useful fallbacks).  If it is absent from the API response it is prepended
+    so it gets one live attempt before the confirmed-available models take over.
+
+    Falls back to _FALLBACK_CASCADE on any network or API error, with
+    starting_model prepended if it isn't already present.
+    """
+    url = (
+        "https://generativelanguage.googleapis.com/v1beta/models"
+        f"?key={api_key}&pageSize=200"
+    )
     try:
-        with httpx.Client(follow_redirects=True, timeout=15.0) as client:
-            response = client.get(url)
-            response.raise_for_status()
-            data = response.json()
-        ids: set[str] = set()
+        with httpx.Client(follow_redirects=True, timeout=15.0) as http:
+            resp = http.get(url)
+            resp.raise_for_status()
+            data = resp.json()
+
+        flash_ids: list[str] = []
         for model in data.get("models", []):
             name: str = model.get("name", "")
-            if name.startswith("models/"):
-                ids.add(name[len("models/"):])
-        logger.info("ListModels returned %d model IDs", len(ids))
-        return frozenset(ids)
+            methods: list[str] = model.get("supportedGenerationMethods", [])
+            if not name.startswith("models/"):
+                continue
+            model_id = name[len("models/"):]
+            if "flash" not in model_id.lower():
+                continue
+            if "generateContent" not in methods:
+                continue
+            flash_ids.append(model_id)
+
+        if not flash_ids:
+            logger.warning("ListModels returned no flash models — using fallback cascade")
+            return _build_fallback(starting_model)
+
+        flash_ids.sort(key=_flash_sort_key)
+        logger.info("Available flash models (sorted): %s", ", ".join(flash_ids))
+
+        if starting_model in flash_ids:
+            start = flash_ids.index(starting_model)
+            result = flash_ids[start:]
+        else:
+            # Not yet in ListModels — prepend it for one live attempt, then
+            # continue with whatever the API says is available.
+            logger.info("%r not in ListModels response — prepending as first attempt", starting_model)
+            result = [starting_model] + flash_ids
+
+        return result
+
     except Exception as exc:
-        logger.warning("Could not fetch available model IDs: %s — cascade will use all entries", exc)
-        return frozenset()
+        logger.warning("ListModels failed (%s) — using fallback cascade", exc)
+        return _build_fallback(starting_model)
+
+
+def _build_fallback(starting_model: str) -> list[str]:
+    if starting_model in _FALLBACK_CASCADE:
+        idx = _FALLBACK_CASCADE.index(starting_model)
+        return list(_FALLBACK_CASCADE[idx:])
+    return [starting_model] + list(_FALLBACK_CASCADE)
 
 
 class _ModelCascade:
     """Walks through Gemini models in cascade order as each model's daily quota is exhausted.
 
-    Starts at starting_model (must appear in _MODEL_CASCADE; treated as a sole
-    option otherwise).  Each advance() resets the rate limiter so the new model
-    gets a fresh pacing window.  The shared _HeaderCapturingClient is cleared of
-    stale headers on advance so the new model's first response is read cleanly.
+    Accepts an ordered list of model IDs (typically from build_flash_model_cascade).
+    Each advance() resets the rate limiter so the new model gets a fresh pacing
+    window.  The shared _HeaderCapturingClient is cleared of stale headers on
+    advance so the new model's first response is read cleanly.
 
     Three triggers for advance():
       1. QuotaExhaustedEnrichError exception — reliable daily-quota signal
       2. ModelNotFoundEnrichError exception — model ID invalid (HTTP 404)
       3. check_daily_quota_header() — proactive: x-ratelimit-remaining-*-per-day == 0
-
-    Pass available_model_ids (from fetch_available_model_ids) to prune models
-    that are not in the account's model list before the first call is made.
     """
 
     def __init__(
         self,
-        starting_model: str,
+        models: list[str],
         rpm: int,
         http_client: _HeaderCapturingClient,
-        available_model_ids: frozenset[str] | None = None,
     ) -> None:
-        try:
-            idx = _MODEL_CASCADE.index(starting_model)
-            candidates = _MODEL_CASCADE[idx:]
-        except ValueError:
-            candidates = [starting_model]
-
-        if available_model_ids:
-            # Keep starting_model even if not in available list (so the first
-            # call surfaces the real error rather than silently skipping it).
-            pruned = [m for m in candidates if m in available_model_ids]
-            if pruned:
-                candidates = pruned
-                logger.info(
-                    "Model cascade pruned to available models: %s",
-                    ", ".join(candidates),
-                )
-            else:
-                logger.warning(
-                    "None of the cascade models appear in ListModels response — using full cascade"
-                )
-
-        self._models = candidates
+        self._models = list(models) if models else list(_FALLBACK_CASCADE)
         self._idx = 0
         self._rpm = rpm
         self._http_client = http_client
         self._limiter = _RateLimiter(rpm=rpm, http_client=http_client)
+        logger.info("Model cascade: %s", ", ".join(self._models))
 
     @property
     def model(self) -> str:

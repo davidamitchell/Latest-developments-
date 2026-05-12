@@ -31,11 +31,7 @@ from src.logger import setup_logging
 from src.models import ProcessedItem, read_processed_jsonl, write_processed_jsonl
 from src.pipeline._gemini import (
     _ModelCascade,
-)
-from src.pipeline._gemini import (
-    fetch_available_model_ids as _fetch_available_model_ids,
-)
-from src.pipeline._gemini import (
+    build_flash_model_cascade as _build_flash_model_cascade,
     make_gemini_client as _make_gemini_client,
 )
 from src.pipeline._quota import (
@@ -95,8 +91,8 @@ def process(
 
     if gemini_api_key:
         client, http_client = _make_gemini_client(gemini_api_key)
-        available_model_ids = _fetch_available_model_ids(gemini_api_key)
-        cascade = _ModelCascade(gemini_model, rpm, http_client, available_model_ids)
+        models = _build_flash_model_cascade(gemini_api_key, gemini_model)
+        cascade = _ModelCascade(models, rpm, http_client)
     else:
         client = None
         cascade = None

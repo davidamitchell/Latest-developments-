@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from contextlib import contextmanager
 from datetime import UTC, datetime
 from unittest.mock import MagicMock, patch
 
@@ -58,11 +59,27 @@ class TestProcess:
         client.models.generate_content.return_value = resp
         return client
 
+    def _mock_http_client(self):
+        m = MagicMock()
+        m.ratelimit_headers = {}
+        return m
+
+    @contextmanager
+    def _patch_gemini(self, client=None):
+        """Patch _make_gemini_client (tuple) and _build_flash_model_cascade for tests."""
+        if client is None:
+            client = self._null_client()
+        with (
+            patch("src.pipeline.run._make_gemini_client", return_value=(client, self._mock_http_client())),
+            patch("src.pipeline.run._build_flash_model_cascade", return_value=["gemini-2.5-flash"]),
+        ):
+            yield
+
     def test_returns_list(self):
         from src.pipeline.run import process
 
         items = [_make_fetched("a"), _make_fetched("b")]
-        with patch("src.pipeline.run._make_gemini_client", return_value=self._null_client()):
+        with self._patch_gemini():
             result, _ = process(items, gemini_api_key="fake-key", fetch_date="2026-05-02")
         assert isinstance(result, list)
 
@@ -70,7 +87,7 @@ class TestProcess:
         from src.pipeline.run import process
 
         items = [_make_fetched("a"), _make_fetched("b")]
-        with patch("src.pipeline.run._make_gemini_client", return_value=self._null_client()):
+        with self._patch_gemini():
             result, _ = process(items, gemini_api_key="fake-key", fetch_date="2026-05-02")
         assert len(result) == 2
 
@@ -78,7 +95,7 @@ class TestProcess:
         from src.pipeline.run import process
 
         items = [_make_fetched("x")]
-        with patch("src.pipeline.run._make_gemini_client", return_value=self._null_client()):
+        with self._patch_gemini():
             result, _ = process(items, gemini_api_key="fake-key", fetch_date="2026-05-02")
         assert all(isinstance(r, ProcessedItem) for r in result)
 
@@ -86,7 +103,7 @@ class TestProcess:
         from src.pipeline.run import process
 
         items = [_make_fetched("id-1"), _make_fetched("id-2")]
-        with patch("src.pipeline.run._make_gemini_client", return_value=self._null_client()):
+        with self._patch_gemini():
             result, _ = process(items, gemini_api_key="fake-key", fetch_date="2026-05-02")
         result_ids = {r.id for r in result}
         assert result_ids == {"id-1", "id-2"}
@@ -95,7 +112,7 @@ class TestProcess:
         from src.pipeline.run import process
 
         items = [_make_fetched("d1")]
-        with patch("src.pipeline.run._make_gemini_client", return_value=self._null_client()):
+        with self._patch_gemini():
             result, _ = process(items, gemini_api_key="fake-key", fetch_date="2026-05-02")
         assert all(r.fetch_date == "2026-05-02" for r in result)
 
@@ -103,7 +120,7 @@ class TestProcess:
         from src.pipeline.run import process
 
         items = [_make_fetched("c1")]
-        with patch("src.pipeline.run._make_gemini_client", return_value=self._null_client()):
+        with self._patch_gemini():
             result, _ = process(items, gemini_api_key="fake-key", fetch_date="2026-05-02")
         assert all(len(r.cleaned_content) > 0 for r in result)
 
@@ -111,7 +128,7 @@ class TestProcess:
         from src.pipeline.run import process
 
         items = [_make_fetched("cs1")]
-        with patch("src.pipeline.run._make_gemini_client", return_value=self._null_client()):
+        with self._patch_gemini():
             result, _ = process(items, gemini_api_key="fake-key", fetch_date="2026-05-02")
         assert all(0.0 <= r.credibility_score <= 1.0 for r in result)
 
@@ -119,14 +136,14 @@ class TestProcess:
         from src.pipeline.run import process
 
         items = [_make_fetched("h1")]
-        with patch("src.pipeline.run._make_gemini_client", return_value=self._null_client()):
+        with self._patch_gemini():
             result, _ = process(items, gemini_api_key="fake-key", fetch_date="2026-05-02")
         assert all(0.0 <= r.hype_risk <= 1.0 for r in result)
 
     def test_empty_input_returns_empty_list(self):
         from src.pipeline.run import process
 
-        with patch("src.pipeline.run._make_gemini_client", return_value=self._null_client()):
+        with self._patch_gemini():
             result, failures = process([], gemini_api_key="fake-key", fetch_date="2026-05-02")
         assert result == []
         assert failures == 0
@@ -155,8 +172,8 @@ class TestProcess:
         )
         items = [_make_fetched("fail-1"), _make_fetched("fail-2")]
         with (
-            patch("src.pipeline.run._make_gemini_client", return_value=client),
-            patch("src.pipeline.run.time.sleep"),
+            self._patch_gemini(client=client),
+            patch("src.pipeline._gemini.time.sleep"),
             patch("src.retry.time.sleep"),
         ):
             result, failures = process(items, gemini_api_key="fake-key", fetch_date="2026-05-02")
@@ -191,8 +208,8 @@ class TestProcess:
         items = [_make_fetched("quota-1"), _make_fetched("quota-2"), _make_fetched("quota-3")]
 
         with (
-            patch("src.pipeline.run._make_gemini_client", return_value=client),
-            patch("src.pipeline.run.time.sleep"),
+            self._patch_gemini(client=client),
+            patch("src.pipeline._gemini.time.sleep"),
             patch("src.retry.time.sleep") as retry_sleep,
         ):
             result, failures = process(items, gemini_api_key="fake-key", fetch_date="2026-05-02")
@@ -231,9 +248,9 @@ class TestProcess:
             return item, True
 
         with (
-            patch("src.pipeline.run._make_gemini_client", return_value=client),
+            self._patch_gemini(client=client),
             patch("src.pipeline.run.enrich", side_effect=enrich_side_effect),
-            patch("src.pipeline.run.time.sleep"),
+            patch("src.pipeline._gemini.time.sleep"),
             patch("src.retry.time.sleep") as retry_sleep,
         ):
             result, failures = process(items, gemini_api_key="fake-key", fetch_date="2026-05-02")
@@ -250,9 +267,9 @@ class TestProcess:
         items = [_make_fetched("non-retryable")]
 
         with (
-            patch("src.pipeline.run._make_gemini_client", return_value=client),
+            self._patch_gemini(client=client),
             patch("src.pipeline.run.enrich", side_effect=ValueError("bad payload")),
-            patch("src.pipeline.run.time.sleep"),
+            patch("src.pipeline._gemini.time.sleep"),
             patch("src.retry.time.sleep") as retry_sleep,
             pytest.raises(ValueError, match="bad payload"),
         ):
@@ -260,13 +277,13 @@ class TestProcess:
 
         retry_sleep.assert_not_called()
 
-    @patch("src.pipeline.run.time.sleep")
+    @patch("src.pipeline._gemini.time.sleep")
     def test_rate_limiter_paces_gemini_calls(self, mock_sleep):
         """The rate limiter sleeps between consecutive Gemini calls."""
         from src.pipeline.run import process
 
         items = [_make_fetched("rl-1"), _make_fetched("rl-2"), _make_fetched("rl-3")]
-        with patch("src.pipeline.run._make_gemini_client", return_value=self._null_client()):
+        with self._patch_gemini():
             process(items, gemini_api_key="fake-key", fetch_date="2026-05-02")
         assert mock_sleep.call_count >= 2
 
@@ -276,25 +293,25 @@ class TestProcess:
 
 class TestRateLimiter:
     def test_first_call_does_not_sleep(self):
-        from src.pipeline.run import _RateLimiter
+        from src.pipeline._gemini import _RateLimiter
 
         with (
-            patch("src.pipeline.run.time.sleep") as mock_sleep,
-            patch("src.pipeline.run.time.monotonic", side_effect=[1000.0, 1000.0]),
+            patch("src.pipeline._gemini.time.sleep") as mock_sleep,
+            patch("src.pipeline._gemini.time.monotonic", side_effect=[1000.0, 1000.0]),
         ):
             rl = _RateLimiter(rpm=5)
             rl.wait()
         mock_sleep.assert_not_called()
 
     def test_rapid_second_call_sleeps(self):
-        from src.pipeline.run import _RateLimiter
+        from src.pipeline._gemini import _RateLimiter
 
         # Simulate: first call at t=1000, second call immediately at t=1000.1
         # With 5 RPM the interval is 12s, so we expect ~11.9s sleep.
         monotonic_values = [1000.0, 1000.0, 1000.1, 1000.1]
         with (
-            patch("src.pipeline.run.time.sleep") as mock_sleep,
-            patch("src.pipeline.run.time.monotonic", side_effect=monotonic_values),
+            patch("src.pipeline._gemini.time.sleep") as mock_sleep,
+            patch("src.pipeline._gemini.time.monotonic", side_effect=monotonic_values),
         ):
             rl = _RateLimiter(rpm=5)
             rl.wait()  # first call — no sleep
@@ -304,13 +321,13 @@ class TestRateLimiter:
         assert 11.0 < slept < 12.5
 
     def test_call_after_full_interval_does_not_sleep(self):
-        from src.pipeline.run import _RateLimiter
+        from src.pipeline._gemini import _RateLimiter
 
         # Second call arrives 15s after first — no sleep needed.
         monotonic_values = [1000.0, 1000.0, 1015.0, 1015.0]
         with (
-            patch("src.pipeline.run.time.sleep") as mock_sleep,
-            patch("src.pipeline.run.time.monotonic", side_effect=monotonic_values),
+            patch("src.pipeline._gemini.time.sleep") as mock_sleep,
+            patch("src.pipeline._gemini.time.monotonic", side_effect=monotonic_values),
         ):
             rl = _RateLimiter(rpm=5)
             rl.wait()
