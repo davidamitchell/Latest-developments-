@@ -16,6 +16,7 @@ import argparse
 import logging
 import os
 import sys
+from collections.abc import Callable
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -31,7 +32,11 @@ from src.logger import setup_logging
 from src.models import ProcessedItem, read_processed_jsonl, write_processed_jsonl
 from src.pipeline._gemini import (
     _ModelCascade,
+)
+from src.pipeline._gemini import (
     make_gemini_client as _make_gemini_client,
+)
+from src.pipeline._gemini import (
     resolve_cascade as _resolve_cascade,
 )
 from src.pipeline._quota import (
@@ -77,6 +82,7 @@ def process(
     rpm: int = 15,
     enrich_max_output_tokens: int = 500,
     gemini_model: str = "gemini-2.0-flash",
+    on_item_processed: Callable[[ProcessedItem], None] | None = None,
 ) -> tuple[list[ProcessedItem], int]:
     """Run all 8 pipeline stages over items; return (results, ai_failures).
 
@@ -181,6 +187,8 @@ def process(
         processed = score_credibility(processed)
 
         results.append(processed)
+        if on_item_processed is not None:
+            on_item_processed(processed)
 
     if client is not None and items:
         failure_rate = ai_failures / len(items)
@@ -272,6 +280,7 @@ def main() -> int:
         rpm=cfg.pipeline.gemini_rpm,
         enrich_max_output_tokens=cfg.pipeline.enrich_max_output_tokens,
         gemini_model=cfg.pipeline.gemini_model,
+        on_item_processed=lambda item: _merge_and_write(out_path, [item]),
     )
 
     merged = _merge_and_write(out_path, processed)

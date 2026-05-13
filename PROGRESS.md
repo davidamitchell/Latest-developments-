@@ -937,3 +937,26 @@ Implemented `src/pipeline/backfill.py` — a CLI ops tool that re-enriches `Proc
 2. **What slowed down?** Each bug only appeared in production, not in tests, because operational paths (git commit, git push, quota stop) had no test coverage. The happy path was tested; everything else was not.
 3. **What single change would prevent this next time?** Write tests for operational side-effects before writing the production code. `commit_progress` had no test from the start — the rule "every flag-gated side effect needs a test" would have caught it.
 4. **Is this a pattern?** Yes. All three failures are the same class: untested operational paths. Production failure is the only feedback mechanism when operational paths have no tests. The fix is mandatory: any subprocess call, any git operation, any quota-stop behaviour needs a unit test that mocks the side effect and asserts call count.
+## 2026-05-13 — Pipeline errors: 404 model fallback + incremental processed persistence
+
+**What changed:**
+- Investigated recent GitHub Actions runs/logs (Backfill AI Enrichment) and confirmed the model cascade/progress-commit path in production logs.
+- Added regression coverage in `tests/test_pipeline_quota.py` for model-not-found detection when Gemini errors only expose `404 NOT_FOUND` in text payloads.
+- Fixed `_quota.is_model_not_found_error()` to recognise text-based 404/NOT_FOUND model errors in addition to `code/status_code` attributes.
+- Added per-item progress persistence hook in `src/pipeline/run.py` so processed output is merged/written as each item finishes, reducing all-or-nothing loss on interruptions.
+- Updated `.github/workflows/fetch-and-process.yml` so "Commit processed data" runs with `if: always()` to allow partial processed output to be committed/pushed even when processing fails.
+- Added a process-level callback regression test in `tests/test_pipeline_run.py`.
+
+**Validation run:**
+- Pre-change baseline:
+  - `make check` fails due unrelated existing lint issues in other files.
+  - `make test` fails due unrelated existing tests (`tests/test_pipeline_stages.py::test_thinking_disabled_in_config`, `tests/test_themes.py::test_client_created_without_http_retry_options`).
+- Change-focused:
+  - `pytest tests/test_pipeline_quota.py tests/test_pipeline_run.py -q` → passed.
+
+### Mini-Retro
+
+1. **Did the process work?** Yes. The CI-log-first investigation narrowed the fix to shared quota/model detection and pipeline persistence with minimal code edits.
+2. **What slowed down or went wrong?** Repository baseline is currently red (pre-existing lint and test failures), so full-suite validation cannot be used as a green signal for this slice.
+3. **What single change would prevent this next time?** Restore a green baseline on main for lint/tests so task-level regressions are easier to isolate.
+4. **Is this a pattern?** Yes — repeated sessions are hitting unrelated baseline failures; this should be treated as maintenance debt rather than task-specific noise.

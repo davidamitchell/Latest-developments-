@@ -17,6 +17,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **AI enrichment backfill** (`src/pipeline/backfill.py`): ops tool to re-enrich `ProcessedItem` records where `theme == ""`. Supports `--all`, `--date`, `--dry-run`, `--max-items N`, `--commit-progress`. Triggered via `backfill-enrichment.yml` workflow dispatch.
 
 ### Fixed
+- **Pipeline model-not-found fallback hardening (2026-05-13)**:
+  1. `_quota.is_model_not_found_error()` now detects 404/NOT_FOUND model errors from exception text payloads (not only `code/status_code` attributes), so invalid model IDs reliably advance the Gemini cascade.
+  2. `src/pipeline/run.py` now persists processed output incrementally per item, reducing all-or-nothing loss during interrupted runs.
+  3. `.github/workflows/fetch-and-process.yml` now runs the "Commit processed data" step with `if: always()` so partial processed progress can still be committed/pushed after pipeline failures.
 - **Backfill quota stop on any 429**: previously only quota-metric 429s stopped the batch; plain rate-limit 429s kept retrying until timeout. Now any HTTP 429 stops the batch immediately via `is_rate_limited()` in `_quota.py`.
 - **Backfill chunking**: added `--max-items N` (default 50 in workflow) so large backfills run in bounded chunks rather than one unbounded shot. Prevents GitHub Actions 6-hour timeout.
 - **Backfill retry delay**: `base_delay` reduced from 60 s to 5 s — the `_RateLimiter` already handles inter-call spacing.

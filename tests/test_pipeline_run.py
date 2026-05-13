@@ -91,6 +91,21 @@ class TestProcess:
             result, _ = process(items, gemini_api_key="fake-key", fetch_date="2026-05-02")
         assert len(result) == 2
 
+    def test_progress_callback_called_for_each_processed_item(self):
+        from src.pipeline.run import process
+
+        items = [_make_fetched("a"), _make_fetched("b")]
+        callback = MagicMock()
+        with self._patch_gemini():
+            process(
+                items,
+                gemini_api_key="fake-key",
+                fetch_date="2026-05-02",
+                on_item_processed=callback,
+            )
+        assert callback.call_count == 2
+        assert [call.args[0].id for call in callback.call_args_list] == ["a", "b"]
+
     def test_all_results_are_processed_items(self):
         from src.pipeline.run import process
 
