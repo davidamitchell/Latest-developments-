@@ -7,7 +7,8 @@ The pipeline is source-type-agnostic; it only sees FetchedItem.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from contextlib import suppress
+from dataclasses import dataclass
 from datetime import datetime
 from typing import Any, Protocol, runtime_checkable
 
@@ -58,10 +59,8 @@ class FetchedItem:
         """Deserialise from a dict produced by to_dict()."""
         published = None
         if d.get("published"):
-            try:
+            with suppress(ValueError):
                 published = datetime.fromisoformat(d["published"])
-            except ValueError:
-                pass
         return cls(
             id=d["id"],
             title=d["title"],

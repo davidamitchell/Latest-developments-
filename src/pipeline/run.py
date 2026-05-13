@@ -29,6 +29,12 @@ except ImportError:
 from src.fetchers import FetchedItem
 from src.logger import setup_logging
 from src.models import ProcessedItem, read_processed_jsonl, write_processed_jsonl
+from src.pipeline._gemini import (
+    _ModelCascade,
+)
+from src.pipeline._gemini import (
+    make_gemini_client as _make_gemini_client,
+)
 from src.pipeline._quota import (
     NonRetryableEnrichError as _NonRetryableEnrichError,
 )
@@ -47,17 +53,9 @@ from src.pipeline.stages.credibility_scoring import score_credibility
 from src.pipeline.stages.enrich import enrich
 from src.pipeline.stages.hype_scoring import score_hype
 from src.pipeline.stages.ingest import ingest
-from src.pipeline._gemini import (
-    _HeaderCapturingClient,
-    _ModelCascade,
-    _MODEL_CASCADE,
-    _RateLimiter,
-    make_gemini_client as _make_gemini_client,
-)
 from src.retry import with_backoff
 
 logger = logging.getLogger(__name__)
-
 _RAW_DIR = Path("data/raw")
 _PROCESSED_DIR = Path("data/processed")
 
@@ -109,7 +107,9 @@ def process(
             def _make_enrich_once(current: ProcessedItem, _m: str = _active_model):
                 def _enrich_once() -> tuple[ProcessedItem, bool]:
                     try:
-                        return enrich(current, client, max_output_tokens=enrich_max_output_tokens, model=_m)
+                        return enrich(
+                            current, client, max_output_tokens=enrich_max_output_tokens, model=_m
+                        )
                     except (ClientError, ServerError) as exc:
                         if _is_quota_exhausted_error(exc):
                             raise _QuotaExhaustedEnrichError from exc
