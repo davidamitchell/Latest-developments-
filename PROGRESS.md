@@ -949,8 +949,8 @@ Implemented `src/pipeline/backfill.py` — a CLI ops tool that re-enriches `Proc
 
 **Validation run:**
 - Pre-change baseline:
-  - `make check` fails due unrelated existing lint issues in other files.
-  - `make test` fails due unrelated existing tests (`tests/test_pipeline_stages.py::test_thinking_disabled_in_config`, `tests/test_themes.py::test_client_created_without_http_retry_options`).
+  - `make check` fails due to unrelated existing lint issues in other files.
+  - `make test` fails due to unrelated existing tests (`tests/test_pipeline_stages.py::test_thinking_disabled_in_config`, `tests/test_themes.py::test_client_created_without_http_retry_options`).
 - Change-focused:
   - `pytest tests/test_pipeline_quota.py tests/test_pipeline_run.py -q` → passed.
 
