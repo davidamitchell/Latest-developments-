@@ -960,3 +960,29 @@ Implemented `src/pipeline/backfill.py` — a CLI ops tool that re-enriches `Proc
 2. **What slowed down or went wrong?** Repository baseline is currently red (pre-existing lint and test failures), so full-suite validation cannot be used as a green signal for this slice.
 3. **What single change would prevent this next time?** Restore a green baseline on main for lint/tests so task-level regressions are easier to isolate.
 4. **Is this a pattern?** Yes — repeated sessions are hitting unrelated baseline failures; this should be treated as maintenance debt rather than task-specific noise.
+
+## 2026-05-13 — PR #58 review fixes (false-positive guard + callback resilience)
+
+**What changed:**
+- Tightened `_quota.is_model_not_found_error()` text matching so model-not-found inference requires model-specific hints and supports compact/space-formatted `code:404` payload variants.
+- Added missing test partitions in `tests/test_pipeline_quota.py`:
+  - `status_code == 404`
+  - multiple supported text variants
+  - negative cases for quota (429), generic transport errors, and non-model `not_found` text.
+- Hardened `process()` callback execution in `src/pipeline/run.py`: callback exceptions are now logged at warning level and do not abort item processing.
+- Reduced redundant end-of-run I/O: `main()` now skips the final full merge/write when per-item persistence succeeded for all items; falls back to full merge if callback persistence had any failure.
+- Updated `fetch-and-process.yml` commit step to always run `git push origin HEAD` so any locally-created commits are never stranded by conditional push logic.
+- Added callback partition tests in `tests/test_pipeline_run.py` for:
+  - `on_item_processed=None`
+  - callback raising exceptions while processing continues.
+
+**Validation run:**
+- `ruff check src/pipeline/_quota.py src/pipeline/run.py tests/test_pipeline_quota.py tests/test_pipeline_run.py` → passed
+- `pytest tests/test_pipeline_quota.py tests/test_pipeline_run.py -q` → passed (44 tests)
+
+### Mini-Retro
+
+1. **Did the process work?** Yes. The review feedback was specific enough to map directly to targeted code paths and partition tests.
+2. **What slowed down or went wrong?** Text-pattern matching initially missed the compact JSON form (`"code":404`) and was caught by the new partition test.
+3. **What single change would prevent this next time?** For string-shape parsers, include both spaced and compact serialisation variants in the first test draft.
+4. **Is this a pattern?** Yes — string-based fallback logic is fragile unless negative and formatting-variant partitions are included from the start.

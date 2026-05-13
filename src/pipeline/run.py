@@ -188,7 +188,12 @@ def process(
 
         results.append(processed)
         if on_item_processed is not None:
-            on_item_processed(processed)
+            try:
+                on_item_processed(processed)
+            except Exception as exc:
+                logger.warning(
+                    "on_item_processed callback failed for item %s: %s", processed.id, exc
+                )
 
     if client is not None and items:
         failure_rate = ai_failures / len(items)
@@ -273,6 +278,16 @@ def main() -> int:
     if not api_key:
         logger.warning("GEMINI_API_KEY not set — AI stages (3–6) will be skipped")
 
+    callback_failed = False
+
+    def _persist_item(item: ProcessedItem) -> None:
+        nonlocal callback_failed
+        try:
+            _merge_and_write(out_path, [item])
+        except Exception:
+            callback_failed = True
+            raise
+
     processed, ai_failures = process(
         items,
         gemini_api_key=api_key,
@@ -280,10 +295,10 @@ def main() -> int:
         rpm=cfg.pipeline.gemini_rpm,
         enrich_max_output_tokens=cfg.pipeline.enrich_max_output_tokens,
         gemini_model=cfg.pipeline.gemini_model,
-        on_item_processed=lambda item: _merge_and_write(out_path, [item]),
+        on_item_processed=_persist_item,
     )
 
-    merged = _merge_and_write(out_path, processed)
+    merged = _merge_and_write(out_path, processed) if callback_failed else read_processed_jsonl(out_path)
     logger.info(
         "Processing complete — %d new item(s) added; %d total in %s",
         len(processed),

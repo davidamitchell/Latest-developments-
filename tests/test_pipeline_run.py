@@ -106,6 +106,42 @@ class TestProcess:
         assert callback.call_count == 2
         assert [call.args[0].id for call in callback.call_args_list] == ["a", "b"]
 
+    def test_none_progress_callback_does_not_raise(self):
+        from src.pipeline.run import process
+
+        items = [_make_fetched("a")]
+        with self._patch_gemini():
+            result, failures = process(
+                items,
+                gemini_api_key="fake-key",
+                fetch_date="2026-05-02",
+                on_item_processed=None,
+            )
+
+        assert len(result) == 1
+        assert failures == 0
+
+    def test_progress_callback_exception_logs_and_processing_continues(self):
+        from src.pipeline.run import process
+
+        items = [_make_fetched("a"), _make_fetched("b")]
+        callback = MagicMock(side_effect=RuntimeError("disk write failed"))
+        with self._patch_gemini(), patch("src.pipeline.run.logger.warning") as warn:
+            result, failures = process(
+                items,
+                gemini_api_key="fake-key",
+                fetch_date="2026-05-02",
+                on_item_processed=callback,
+            )
+
+        assert len(result) == 2
+        assert failures == 0
+        assert callback.call_count == 2
+        assert any(
+            call.args and str(call.args[0]).startswith("on_item_processed callback failed")
+            for call in warn.call_args_list
+        )
+
     def test_all_results_are_processed_items(self):
         from src.pipeline.run import process
 

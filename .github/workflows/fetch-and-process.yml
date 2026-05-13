@@ -144,8 +144,8 @@ jobs:
             echo "No new processed data — nothing to commit"
           else
             git commit -m "chore: processed pipeline data ${TODAY} [skip ci]"
-            git push origin HEAD
           fi
+          git push origin HEAD
 
       - name: Send failure alert
         if: failure()

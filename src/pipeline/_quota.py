@@ -68,12 +68,20 @@ def is_model_not_found_error(exc: Exception) -> bool:
         return True
 
     text = str(exc).lower()
+    has_model_hint = "model" in text or "models/" in text
     return (
-        "not_found" in text
+        ("not_found" in text and has_model_hint)
         or "model is not found" in text
         or ("models/" in text and "not found" in text)
-        or '"code": 404' in text
-        or "'code': 404" in text
+        or (
+            (
+                '"code": 404' in text
+                or '"code":404' in text
+                or "'code': 404" in text
+                or "'code':404" in text
+            )
+            and has_model_hint
+        )
     )
 
 
