@@ -109,8 +109,10 @@ def backfill_file(
     _use_cascade = cascade is not None
 
     from src.pipeline._quota import (  # noqa: I001, PLC0415
+        ModelNotFoundEnrichError as _ModelNotFoundEnrichError,
         NonRetryableEnrichError as _NonRetryableEnrichError,
         QuotaExhaustedEnrichError as _QuotaExhaustedEnrichError,
+        is_model_not_found_error as _is_model_not_found_error,
         is_quota_exhausted_error as _is_quota_exhausted_error,
         log_quota_exhausted as _log_quota_exhausted,
     )
@@ -161,6 +163,8 @@ def backfill_file(
                         if isinstance(exc, (ClientError, ServerError)):  # noqa: B023
                             if _is_quota_exhausted_error(exc):
                                 raise _QuotaExhaustedEnrichError from exc
+                            if _is_model_not_found_error(exc):
+                                raise _ModelNotFoundEnrichError from exc
                             raise  # let with_backoff retry ServerError / non-quota ClientError
                     raise _NonRetryableEnrichError from exc
 
@@ -173,7 +177,11 @@ def backfill_file(
                 max_attempts=3,
                 base_delay=5.0,
                 label=f"backfill:{item.id}",
-                no_retry=(_NonRetryableEnrichError, _QuotaExhaustedEnrichError),
+                no_retry=(
+                    _NonRetryableEnrichError,
+                    _QuotaExhaustedEnrichError,
+                    _ModelNotFoundEnrichError,
+                ),
             )
         except _QuotaExhaustedEnrichError:
             enriched_item = pre_enrich
@@ -183,6 +191,15 @@ def backfill_file(
             if _use_cascade:
                 cascade.advance()  # type: ignore[union-attr]
             else:
+                quota_exhausted = True
+        except _ModelNotFoundEnrichError:
+            enriched_item = pre_enrich
+            ok = False
+            if _use_cascade:
+                logger.warning("Model %r not found (404) — advancing cascade", cascade.model)  # type: ignore[union-attr]
+                cascade.advance()  # type: ignore[union-attr]
+            else:
+                logger.warning("Model %r not found (404) — no cascade available, skipping", model)
                 quota_exhausted = True
         except RuntimeError as exc:
             cause = exc.__cause__
@@ -201,6 +218,17 @@ def backfill_file(
                     if _use_cascade:
                         cascade.advance()  # type: ignore[union-attr]
                     else:
+                        quota_exhausted = True
+                elif _is_model_not_found_error(exc.__cause__):  # type: ignore[arg-type]
+                    if _use_cascade:
+                        logger.warning(
+                            "Model %r not found (404) — advancing cascade", cascade.model
+                        )  # type: ignore[union-attr]
+                        cascade.advance()  # type: ignore[union-attr]
+                    else:
+                        logger.warning(
+                            "Model %r not found (404) — no cascade available, skipping", model
+                        )
                         quota_exhausted = True
                 else:
                     logger.warning(
@@ -360,10 +388,11 @@ def main() -> int:
         logger.error("GEMINI_API_KEY not set — cannot run backfill without an API key")
         return 1
 
-    from src.pipeline._gemini import _ModelCascade, make_gemini_client
+    from src.pipeline._gemini import _ModelCascade, make_gemini_client, resolve_cascade
 
     client, http_client = make_gemini_client(api_key)
-    cascade = _ModelCascade(cfg.pipeline.gemini_model, cfg.pipeline.gemini_rpm, http_client)
+    models = resolve_cascade(client)
+    cascade = _ModelCascade(models, cfg.pipeline.gemini_rpm, http_client)
     rate_limiter = _NullRateLimiter()  # cascade handles pacing; rate_limiter is a no-op fallback
 
     if args.date:
