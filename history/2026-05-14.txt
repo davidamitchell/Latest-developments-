@@ -1,0 +1,12 @@
+Daily AI Digest — 14 May 2026
+========================================
+
+Here's a summary of the latest AI/ML developments:
+
+## Ollama Releases
+
+### v0.30.0
+Source: Ollama Releases [RSS]
+URL: https://github.com/ollama/ollama/releases/tag/v0.30.0-rc15
+Theme: Ollama Architecture Change
+Summary: This release
