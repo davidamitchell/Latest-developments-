@@ -120,7 +120,9 @@ def process(
             def _make_enrich_once(current: ProcessedItem, _m: str = _active_model):
                 def _enrich_once() -> tuple[ProcessedItem, bool]:
                     try:
-                        return enrich(current, client, max_output_tokens=enrich_max_output_tokens, model=_m)
+                        return enrich(
+                            current, client, max_output_tokens=enrich_max_output_tokens, model=_m
+                        )
                     except (ClientError, ServerError) as exc:
                         if _is_quota_exhausted_error(exc):
                             raise _QuotaExhaustedEnrichError from exc
@@ -141,7 +143,11 @@ def process(
                     max_attempts=3,
                     base_delay=60.0,
                     label=f"enrich:{processed.id}",
-                    no_retry=(_NonRetryableEnrichError, _QuotaExhaustedEnrichError, _ModelNotFoundEnrichError),
+                    no_retry=(
+                        _NonRetryableEnrichError,
+                        _QuotaExhaustedEnrichError,
+                        _ModelNotFoundEnrichError,
+                    ),
                 )
             except _QuotaExhaustedEnrichError:
                 processed = pre_enrich
@@ -162,7 +168,9 @@ def process(
                         _log_quota_exhausted(processed.id, remaining)
                         cascade.advance()
                     elif _is_model_not_found_error(exc.__cause__):
-                        logger.warning("Model %r not found (404) — advancing cascade", cascade.model)
+                        logger.warning(
+                            "Model %r not found (404) — advancing cascade", cascade.model
+                        )
                         cascade.advance()
                     else:
                         logger.warning(
@@ -298,7 +306,9 @@ def main() -> int:
         on_item_processed=_persist_item,
     )
 
-    merged = _merge_and_write(out_path, processed) if callback_failed else read_processed_jsonl(out_path)
+    merged = (
+        _merge_and_write(out_path, processed) if callback_failed else read_processed_jsonl(out_path)
+    )
     logger.info(
         "Processing complete — %d new item(s) added; %d total in %s",
         len(processed),
