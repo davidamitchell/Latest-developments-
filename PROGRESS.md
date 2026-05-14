@@ -937,3 +937,52 @@ Implemented `src/pipeline/backfill.py` — a CLI ops tool that re-enriches `Proc
 2. **What slowed down?** Each bug only appeared in production, not in tests, because operational paths (git commit, git push, quota stop) had no test coverage. The happy path was tested; everything else was not.
 3. **What single change would prevent this next time?** Write tests for operational side-effects before writing the production code. `commit_progress` had no test from the start — the rule "every flag-gated side effect needs a test" would have caught it.
 4. **Is this a pattern?** Yes. All three failures are the same class: untested operational paths. Production failure is the only feedback mechanism when operational paths have no tests. The fix is mandatory: any subprocess call, any git operation, any quota-stop behaviour needs a unit test that mocks the side effect and asserts call count.
+## 2026-05-13 — Pipeline errors: 404 model fallback + incremental processed persistence
+
+**What changed:**
+- Investigated recent GitHub Actions runs/logs (Backfill AI Enrichment) and confirmed the model cascade/progress-commit path in production logs.
+- Added regression coverage in `tests/test_pipeline_quota.py` for model-not-found detection when Gemini errors only expose `404 NOT_FOUND` in text payloads.
+- Fixed `_quota.is_model_not_found_error()` to recognise text-based 404/NOT_FOUND model errors in addition to `code/status_code` attributes.
+- Added per-item progress persistence hook in `src/pipeline/run.py` so processed output is merged/written as each item finishes, reducing all-or-nothing loss on interruptions.
+- Updated `.github/workflows/fetch-and-process.yml` so "Commit processed data" runs with `if: always()` to allow partial processed output to be committed/pushed even when processing fails.
+- Added a process-level callback regression test in `tests/test_pipeline_run.py`.
+
+**Validation run:**
+- Pre-change baseline:
+  - `make check` fails due to unrelated existing lint issues in other files.
+  - `make test` fails due to unrelated existing tests (`tests/test_pipeline_stages.py::test_thinking_disabled_in_config`, `tests/test_themes.py::test_client_created_without_http_retry_options`).
+- Change-focused:
+  - `pytest tests/test_pipeline_quota.py tests/test_pipeline_run.py -q` → passed.
+
+### Mini-Retro
+
+1. **Did the process work?** Yes. The CI-log-first investigation narrowed the fix to shared quota/model detection and pipeline persistence with minimal code edits.
+2. **What slowed down or went wrong?** Repository baseline is currently red (pre-existing lint and test failures), so full-suite validation cannot be used as a green signal for this slice.
+3. **What single change would prevent this next time?** Restore a green baseline on main for lint/tests so task-level regressions are easier to isolate.
+4. **Is this a pattern?** Yes — repeated sessions are hitting unrelated baseline failures; this should be treated as maintenance debt rather than task-specific noise.
+
+## 2026-05-13 — PR #58 review fixes (false-positive guard + callback resilience)
+
+**What changed:**
+- Tightened `_quota.is_model_not_found_error()` text matching so model-not-found inference requires model-specific hints and supports compact/space-formatted `code:404` payload variants.
+- Added missing test partitions in `tests/test_pipeline_quota.py`:
+  - `status_code == 404`
+  - multiple supported text variants
+  - negative cases for quota (429), generic transport errors, and non-model `not_found` text.
+- Hardened `process()` callback execution in `src/pipeline/run.py`: callback exceptions are now logged at warning level and do not abort item processing.
+- Reduced redundant end-of-run I/O: `main()` now skips the final full merge/write when per-item persistence succeeded for all items; falls back to full merge if callback persistence had any failure.
+- Updated `fetch-and-process.yml` commit step to always run `git push origin HEAD` so any locally-created commits are never stranded by conditional push logic.
+- Added callback partition tests in `tests/test_pipeline_run.py` for:
+  - `on_item_processed=None`
+  - callback raising exceptions while processing continues.
+
+**Validation run:**
+- `ruff check src/pipeline/_quota.py src/pipeline/run.py tests/test_pipeline_quota.py tests/test_pipeline_run.py` → passed
+- `pytest tests/test_pipeline_quota.py tests/test_pipeline_run.py -q` → passed (44 tests)
+
+### Mini-Retro
+
+1. **Did the process work?** Yes. The review feedback was specific enough to map directly to targeted code paths and partition tests.
+2. **What slowed down or went wrong?** Text-pattern matching initially missed the compact JSON form (`"code":404`) and was caught by the new partition test.
+3. **What single change would prevent this next time?** For string-shape parsers, include both spaced and compact serialisation variants in the first test draft.
+4. **Is this a pattern?** Yes — string-based fallback logic is fragile unless negative and formatting-variant partitions are included from the start.

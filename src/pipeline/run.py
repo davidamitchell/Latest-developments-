@@ -16,6 +16,7 @@ import argparse
 import logging
 import os
 import sys
+from collections.abc import Callable
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -31,7 +32,11 @@ from src.logger import setup_logging
 from src.models import ProcessedItem, read_processed_jsonl, write_processed_jsonl
 from src.pipeline._gemini import (
     _ModelCascade,
+)
+from src.pipeline._gemini import (
     make_gemini_client as _make_gemini_client,
+)
+from src.pipeline._gemini import (
     resolve_cascade as _resolve_cascade,
 )
 from src.pipeline._quota import (
@@ -77,6 +82,7 @@ def process(
     rpm: int = 15,
     enrich_max_output_tokens: int = 500,
     gemini_model: str = "gemini-2.0-flash",
+    on_item_processed: Callable[[ProcessedItem], None] | None = None,
 ) -> tuple[list[ProcessedItem], int]:
     """Run all 8 pipeline stages over items; return (results, ai_failures).
 
@@ -114,7 +120,9 @@ def process(
             def _make_enrich_once(current: ProcessedItem, _m: str = _active_model):
                 def _enrich_once() -> tuple[ProcessedItem, bool]:
                     try:
-                        return enrich(current, client, max_output_tokens=enrich_max_output_tokens, model=_m)
+                        return enrich(
+                            current, client, max_output_tokens=enrich_max_output_tokens, model=_m
+                        )
                     except (ClientError, ServerError) as exc:
                         if _is_quota_exhausted_error(exc):
                             raise _QuotaExhaustedEnrichError from exc
@@ -135,7 +143,11 @@ def process(
                     max_attempts=3,
                     base_delay=60.0,
                     label=f"enrich:{processed.id}",
-                    no_retry=(_NonRetryableEnrichError, _QuotaExhaustedEnrichError, _ModelNotFoundEnrichError),
+                    no_retry=(
+                        _NonRetryableEnrichError,
+                        _QuotaExhaustedEnrichError,
+                        _ModelNotFoundEnrichError,
+                    ),
                 )
             except _QuotaExhaustedEnrichError:
                 processed = pre_enrich
@@ -156,7 +168,9 @@ def process(
                         _log_quota_exhausted(processed.id, remaining)
                         cascade.advance()
                     elif _is_model_not_found_error(exc.__cause__):
-                        logger.warning("Model %r not found (404) — advancing cascade", cascade.model)
+                        logger.warning(
+                            "Model %r not found (404) — advancing cascade", cascade.model
+                        )
                         cascade.advance()
                     else:
                         logger.warning(
@@ -181,6 +195,13 @@ def process(
         processed = score_credibility(processed)
 
         results.append(processed)
+        if on_item_processed is not None:
+            try:
+                on_item_processed(processed)
+            except Exception as exc:
+                logger.warning(
+                    "on_item_processed callback failed for item %s: %s", processed.id, exc
+                )
 
     if client is not None and items:
         failure_rate = ai_failures / len(items)
@@ -265,6 +286,16 @@ def main() -> int:
     if not api_key:
         logger.warning("GEMINI_API_KEY not set — AI stages (3–6) will be skipped")
 
+    callback_failed = False
+
+    def _persist_item(item: ProcessedItem) -> None:
+        nonlocal callback_failed
+        try:
+            _merge_and_write(out_path, [item])
+        except Exception:
+            callback_failed = True
+            raise
+
     processed, ai_failures = process(
         items,
         gemini_api_key=api_key,
@@ -272,9 +303,12 @@ def main() -> int:
         rpm=cfg.pipeline.gemini_rpm,
         enrich_max_output_tokens=cfg.pipeline.enrich_max_output_tokens,
         gemini_model=cfg.pipeline.gemini_model,
+        on_item_processed=_persist_item,
     )
 
-    merged = _merge_and_write(out_path, processed)
+    merged = (
+        _merge_and_write(out_path, processed) if callback_failed else read_processed_jsonl(out_path)
+    )
     logger.info(
         "Processing complete — %d new item(s) added; %d total in %s",
         len(processed),
