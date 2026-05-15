@@ -66,7 +66,6 @@ from src.pipeline.stages.ingest import ingest
 from src.retry import with_backoff
 
 logger = logging.getLogger(__name__)
-
 _RAW_DIR = Path("data/raw")
 _PROCESSED_DIR = Path("data/processed")
 

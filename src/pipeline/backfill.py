@@ -52,7 +52,12 @@ class _NullRateLimiter:
         pass
 
 
-def enrich(item: ProcessedItem, client: object, max_output_tokens: int = 500, model: str = "gemini-2.0-flash"):
+def enrich(
+    item: ProcessedItem,
+    client: object,
+    max_output_tokens: int = 500,
+    model: str = "gemini-2.0-flash",
+):
     """Thin wrapper around stages.enrich.enrich; imported lazily to avoid triggering
     google.genai at module load time (which requires the cryptography C extension).
     Module-level name so tests can patch src.pipeline.backfill.enrich directly.
@@ -86,9 +91,7 @@ def backfill_file(
     if not unenriched:
         return 0, 0, False
 
-    logger.info(
-        "%s: %d unenriched item(s) of %d total", path.name, len(unenriched), len(items)
-    )
+    logger.info("%s: %d unenriched item(s) of %d total", path.name, len(unenriched), len(items))
 
     if dry_run:
         logger.info("Dry run — skipping enrichment calls for %s", path.name)
@@ -174,7 +177,11 @@ def backfill_file(
                 max_attempts=3,
                 base_delay=5.0,
                 label=f"backfill:{item.id}",
-                no_retry=(_NonRetryableEnrichError, _QuotaExhaustedEnrichError, _ModelNotFoundEnrichError),
+                no_retry=(
+                    _NonRetryableEnrichError,
+                    _QuotaExhaustedEnrichError,
+                    _ModelNotFoundEnrichError,
+                ),
             )
         except _QuotaExhaustedEnrichError:
             enriched_item = pre_enrich
@@ -214,10 +221,14 @@ def backfill_file(
                         quota_exhausted = True
                 elif _is_model_not_found_error(exc.__cause__):  # type: ignore[arg-type]
                     if _use_cascade:
-                        logger.warning("Model %r not found (404) — advancing cascade", cascade.model)  # type: ignore[union-attr]
+                        logger.warning(
+                            "Model %r not found (404) — advancing cascade", cascade.model
+                        )  # type: ignore[union-attr]
                         cascade.advance()  # type: ignore[union-attr]
                     else:
-                        logger.warning("Model %r not found (404) — no cascade available, skipping", model)
+                        logger.warning(
+                            "Model %r not found (404) — no cascade available, skipping", model
+                        )
                         quota_exhausted = True
                 else:
                     logger.warning(
@@ -234,7 +245,9 @@ def backfill_file(
         if ok:
             item_map[item.id] = enriched_item
             enriched_count += 1
-            logger.debug("Enriched %r → theme=%r (model=%s)", item.id, enriched_item.theme, _enrich_model)
+            logger.debug(
+                "Enriched %r → theme=%r (model=%s)", item.id, enriched_item.theme, _enrich_model
+            )
             if _use_cascade and cascade.check_daily_quota_header():  # type: ignore[union-attr]
                 cascade.advance()  # type: ignore[union-attr]
         else:
@@ -249,9 +262,7 @@ def backfill_file(
     # Preserve original insertion order
     ordered = [item_map[i.id] for i in items]
     write_processed_jsonl(ordered, path)
-    logger.info(
-        "%s: enriched %d, failed %d", path.name, enriched_count, failed_count
-    )
+    logger.info("%s: enriched %d, failed %d", path.name, enriched_count, failed_count)
     return enriched_count, failed_count, stop
 
 
@@ -264,7 +275,9 @@ def _git_commit_file(path: Path) -> None:
             return  # nothing to commit
         subprocess.run(
             [
-                "git", "commit", "-m",
+                "git",
+                "commit",
+                "-m",
                 f"chore: backfill AI enrichment {path.name} [skip ci]",
             ],
             check=True,
@@ -312,8 +325,14 @@ def backfill_all(
     for path in paths:
         budget = (max_items - total_enriched) if max_items is not None else None
         enriched, failed, stop = backfill_file(
-            path, client, rate_limiter, max_output_tokens,
-            dry_run=dry_run, budget=budget, model=model, cascade=cascade,
+            path,
+            client,
+            rate_limiter,
+            max_output_tokens,
+            dry_run=dry_run,
+            budget=budget,
+            model=model,
+            cascade=cascade,
         )
         total_enriched += enriched
         total_failed += failed

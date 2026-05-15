@@ -37,9 +37,7 @@ class _HeaderCapturingClient(httpx.Client):
     def send(self, request: httpx.Request, **kwargs: object) -> httpx.Response:  # type: ignore[override]
         response = super().send(request, **kwargs)  # type: ignore[arg-type]
         self.ratelimit_headers = {
-            k.lower(): v
-            for k, v in response.headers.items()
-            if k.lower().startswith("x-ratelimit")
+            k.lower(): v for k, v in response.headers.items() if k.lower().startswith("x-ratelimit")
         }
         return response
 
@@ -96,7 +94,9 @@ class _RateLimiter:
         try:
             remaining = int(remaining_str)
         except ValueError:
-            logger.debug("Rate limiter: non-integer x-ratelimit-remaining-requests %r", remaining_str)
+            logger.debug(
+                "Rate limiter: non-integer x-ratelimit-remaining-requests %r", remaining_str
+            )
             return
 
         if remaining <= 0:
@@ -108,7 +108,8 @@ class _RateLimiter:
             self._interval = max(self._min_interval * 3, 20.0)
             logger.debug(
                 "Rate limiter: %d request(s) remaining — slowing to %.1fs interval",
-                remaining, self._interval,
+                remaining,
+                self._interval,
             )
         else:
             self._interval = self._min_interval
@@ -209,8 +210,7 @@ def resolve_cascade(client: object) -> list[str]:
             f for f, _ in _DESIRED_CASCADE if f != fragment and f.startswith(fragment + "-")
         ]
         matches = [
-            mid for mid in available
-            if fragment in mid and not any(s in mid for s in more_specific)
+            mid for mid in available if fragment in mid and not any(s in mid for s in more_specific)
         ]
         if not matches:
             logger.warning("Cascade: no available model matching %r — skipping", fragment)

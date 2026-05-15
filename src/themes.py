@@ -8,13 +8,14 @@ import os
 import re
 from collections import Counter
 
-from google import genai
+from google import genai as _genai
 from google.genai import types
 
 from src.models import CanonicalRecord, GraphEdge, ThemeNode
 from src.retry import with_backoff
 
 logger = logging.getLogger(__name__)
+genai = _genai  # Backward-compat export used by tests.
 
 # ── Canonical domain taxonomy ────────────────────────────────────────
 DOMAIN_TAXONOMY: list[str] = [
@@ -226,6 +227,7 @@ def cluster_themes(
     prompt = _build_clustering_prompt(records, existing_normalized)
 
     from src.pipeline._gemini import make_gemini_client  # noqa: PLC0415
+
     client, _ = make_gemini_client(os.environ.get("GEMINI_API_KEY", ""))
 
     try:

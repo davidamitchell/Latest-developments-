@@ -937,6 +937,21 @@ Implemented `src/pipeline/backfill.py` — a CLI ops tool that re-enriches `Proc
 2. **What slowed down?** Each bug only appeared in production, not in tests, because operational paths (git commit, git push, quota stop) had no test coverage. The happy path was tested; everything else was not.
 3. **What single change would prevent this next time?** Write tests for operational side-effects before writing the production code. `commit_progress` had no test from the start — the rule "every flag-gated side effect needs a test" would have caught it.
 4. **Is this a pattern?** Yes. All three failures are the same class: untested operational paths. Production failure is the only feedback mechanism when operational paths have no tests. The fix is mandatory: any subprocess call, any git operation, any quota-stop behaviour needs a unit test that mocks the side effect and asserts call count.
+## 2026-05-13 — CI lint/format failures on dependabot urllib3 bump PR
+
+- Investigated failed CI runs for branch `dependabot/uv/uv-c30c77f42d` via GitHub Actions logs.
+- Reproduced lint failures locally and fixed all reported Ruff violations across `src/`, `tests/`, and `scripts/`.
+- Ran formatter on files failing `ruff format --check` so CI format check passes.
+- Validation run: `python -m ruff check .` and `python -m ruff format --check .` both pass.
+- Targeted regression run: `python -m pytest tests/test_digest_send.py tests/test_pipeline_backfill.py tests/test_smoke.py -q` (64 passed).
+
+### Mini-Retro
+
+1. **Did the process work?** Yes. Pulling CI logs first made the failure scope explicit and enabled a focused fix.
+2. **What slowed down or went wrong?** Running the full suite surfaced multiple unrelated pre-existing test failures that are outside this lint-fix scope.
+3. **What single change would prevent this next time?** Keep CI-triage-first as the default for PR feedback that mentions workflow failures.
+4. **Is this a pattern?** Yes — lint failures can hide downstream format/test failures due early-step fail-fast in CI.
+
 ## 2026-05-13 — Pipeline errors: 404 model fallback + incremental processed persistence
 
 **What changed:**

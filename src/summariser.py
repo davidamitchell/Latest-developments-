@@ -11,7 +11,7 @@ import urllib.parse
 from datetime import UTC, date, datetime
 from pathlib import Path
 
-from google import genai
+from google import genai as _genai
 from google.genai import errors as genai_errors
 from google.genai import types
 
@@ -19,6 +19,7 @@ from src.config import DigestConfig
 from src.fetchers import FetchedItem
 
 logger = logging.getLogger(__name__)
+genai = _genai  # Backward-compat export used by tests.
 
 _CONFIG_DIR = Path(__file__).parent.parent / "config"
 _TEMPLATES_DIR = Path(__file__).parent / "templates"
@@ -629,6 +630,7 @@ def summarise(
     logger.info("Summarising %d item(s) with %s", len(items), config.model)
 
     from src.pipeline._gemini import make_gemini_client  # noqa: PLC0415
+
     client, _ = make_gemini_client(os.environ.get("GEMINI_API_KEY", ""))
     max_attempts = 4
     backoff_base = 15  # seconds — 15, 30, 60

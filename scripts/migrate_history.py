@@ -132,10 +132,7 @@ class _RawItem:
 
 
 def _is_failure_file(lines: list[str]) -> bool:
-    for line in lines[:5]:
-        if "AI summarisation failed" in line:
-            return True
-    return False
+    return any("AI summarisation failed" in line for line in lines[:5])
 
 
 def _parse_format_c(lines: list[str], fetch_date: str) -> list[_RawItem]:
@@ -216,7 +213,7 @@ def _parse_format_ab(lines: list[str], fetch_date: str) -> list[_RawItem]:
                 url_summary[parts[0].strip()] = parts[1].strip()
 
     # Parse items
-    _SKIP_SECTIONS = {"suggested sources", "tl;dr", "trends", "item themes", "item summaries"}
+    skip_sections = {"suggested sources", "tl;dr", "trends", "item themes", "item summaries"}
 
     current: _RawItem | None = None
 
@@ -233,7 +230,7 @@ def _parse_format_ab(lines: list[str], fetch_date: str) -> list[_RawItem]:
         if line_s.startswith("## ") and not line_s.startswith("### "):
             _flush()
             section = line_s[3:].strip()
-            if section.lower() not in _SKIP_SECTIONS:
+            if section.lower() not in skip_sections:
                 current_source = section
             continue
 
@@ -270,9 +267,8 @@ def _parse_format_ab(lines: list[str], fetch_date: str) -> list[_RawItem]:
 
     _flush()
 
-    # Build reverse theme→url and theme→summary for items missing URLs
+    # Build reverse theme→url for items missing URLs
     theme_to_url: dict[str, str] = {v: k for k, v in url_theme.items() if v}
-    theme_to_summary: dict[str, str] = {v: k for k, v in url_summary.items() if v}
 
     # Back-fill URL/theme/summary
     for item in items:

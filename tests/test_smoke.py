@@ -122,7 +122,6 @@ class TestFetchMain:
 
     def test_deduplication_excludes_already_processed(self, tmp_path: Path) -> None:
         """Items already in state are not written to the raw file."""
-        item = _make_fetched("already-seen")
         cfg_path = _minimal_sources_yaml(tmp_path)
         written: list = []
         with (

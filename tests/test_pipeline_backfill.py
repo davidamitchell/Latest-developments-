@@ -90,7 +90,9 @@ class TestBackfillFile:
         item = _make_processed("a", theme="")
         write_processed_jsonl([item], path)
 
-        with patch("src.pipeline.backfill.enrich", side_effect=_make_enrich_ok("inference scaling")):
+        with patch(
+            "src.pipeline.backfill.enrich", side_effect=_make_enrich_ok("inference scaling")
+        ):
             enriched, failed, stop = backfill_file(path, MagicMock(), _NullRateLimiter(), 500)
 
         assert enriched == 1
@@ -221,17 +223,17 @@ class TestBackfillFile:
 
         call_count = 0
 
-        class Fake429(Exception):
+        class Fake429Error(Exception):
             code = 429
 
         def _429_on_first(item, client, max_output_tokens=500, model="gemini-2.0-flash"):
             nonlocal call_count
             call_count += 1
             if call_count == 1:
-                raise Fake429("rate limited")
+                raise Fake429Error("rate limited")
             return item, True
 
-        # Fake429 has __module__ = "builtins" so bypasses the google.genai isinstance check —
+        # Fake429Error has __module__ = "builtins" so bypasses the google.genai isinstance check —
         # the is_rate_limited path must fire before the module check to catch it.
         with (
             patch("src.pipeline.backfill.enrich", side_effect=_429_on_first),

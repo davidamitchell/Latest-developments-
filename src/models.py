@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import json
 import logging
+from contextlib import suppress
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
@@ -130,10 +131,8 @@ class ProcessedItem:
         """Deserialise from a dict produced by to_dict()."""
         published = None
         if d.get("published"):
-            try:
+            with suppress(ValueError):
                 published = datetime.fromisoformat(d["published"])
-            except ValueError:
-                pass
         return cls(
             id=d["id"],
             title=d["title"],

@@ -193,7 +193,6 @@ class TestBuildDigest:
         from src.config import Config
         from src.digest.send import build_digest
 
-        cfg = Config()
         plain, html = build_digest([], Config(), today=date(2026, 5, 2), history=[])
         assert plain == ""
         assert html == ""
@@ -411,23 +410,15 @@ class TestRun:
     def test_digest_does_not_import_fetchers(self):
         """send.py must not import any fetcher module directly."""
         # Ensure none of the fetcher modules are imported by send
-        import sys
-
         import src.digest.send as send_module
 
-        fetcher_modules = [
-            k for k in sys.modules if k.startswith("src.fetchers.") and k != "src.fetchers"
-        ]
         # This test is structural — it passes as long as the module loads without error
         # and doesn't raise an ImportError due to fetcher dependencies
         assert send_module is not None
 
     def test_digest_does_not_import_pipeline_stages(self):
         """send.py must not import any pipeline stage directly."""
-        import sys
-
         import src.digest.send as send_module
 
-        stage_modules = [k for k in sys.modules if k.startswith("src.pipeline.stages")]
         # send.py should work without any stage module being a direct dependency
         assert send_module is not None
