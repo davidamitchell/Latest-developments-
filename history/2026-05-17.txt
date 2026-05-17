@@ -1,0 +1,10 @@
+Daily AI Digest — 17 May 2026
+========================================
+
+## Ollama Releases
+
+### v0.25.0-rc0: ci: speed up release builds (#15982)
+Source: Ollama Releases [RSS]
+URL: https://github.com/ollama/ollama/releases/tag/v0.25.0-rc0
+Theme: CI/CD Optimization
+Summary:
