@@ -1,0 +1,10 @@
+Daily AI Digest — 19 May 2026
+========================================
+
+## Ollama Releases
+
+### v0.30.0
+Source: Ollama Releases [RSS]
+URL: https://github.com/ollama/ollama/releases/tag/v0.30.0-rc20
+Theme: Ollama Architecture
+Summary: Ollama `v0.30.0` introduces a significant architectural change,
