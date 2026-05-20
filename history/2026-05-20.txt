@@ -1,0 +1,10 @@
+Daily AI Digest — 20 May 2026
+========================================
+
+## Google AI Blog
+
+### I/O 2026: Gemini 3.5: frontier intelligence with action
+Source: Google AI Blog [RSS]
+URL: https://blog.google/innovation-and-ai/models-and-research/gemini-models/gemini-3-5
+Theme: LLM Release
+Summary: Google released Gemini 
