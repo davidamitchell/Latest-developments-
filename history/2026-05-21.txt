@@ -1,0 +1,13 @@
+Daily AI Digest — 21 May 2026
+========================================
+
+## Google AI Blog
+
+### We’re announcing new community investments in Missouri.
+*Skipped: Not directly AI/ML technical content.*
+
+### 100 things we announced at I/O 2026
+*Skipped: High-level overview, specific AI announcements are covered by other items.*
+
+### A new experiment brings better group meetings to Google Beam
+*
