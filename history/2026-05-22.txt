@@ -1,0 +1,13 @@
+Daily AI Digest — 22 May 2026
+========================================
+
+## DeepMind Blog
+
+### We’re launching the Google DeepMind Accelerator program in Asia Pacific to tackle environmental risks
+*Skipped: Focuses on a business accelerator program, not direct AI/ML technical advancements, model releases, or research.*
+
+## Ollama Releases
+
+### v0.30.0
+Source: Ollama Releases [RSS]
+URL: https://github.
