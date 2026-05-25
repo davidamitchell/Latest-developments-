@@ -1,0 +1,13 @@
+Daily AI Digest — 25 May 2026
+========================================
+
+## Google AI Blog
+
+### Catch up on the Dialogues stage at Google I/O 2026.
+*Skipped: High-level recap without direct technical substance.*
+
+## Ollama Releases
+
+### v0.30.0-rc24
+Theme: Ollama Update
+Summary: This is a minor version bump for Ollama `v0
