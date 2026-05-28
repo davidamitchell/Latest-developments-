@@ -1,0 +1,8 @@
+Daily AI Digest — 28 May 2026
+========================================
+
+## Groq SDK Releases
+
+### v1.4.0
+Theme: SDK Update
+Summary: Groq Python SDK v1.4.0 introduces support for eagerly validating Pydantic iterators. This minor update enhances type safety and data integrity within the SDK, which is crucial for developing robust applications that interface with Groq's inference engine. The primary benefit is improved reliability
