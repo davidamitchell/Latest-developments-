@@ -1,0 +1,95 @@
+Daily AI Digest — 29 May 2026
+========================================
+
+[AI summarisation failed: ClientError — no model processing was applied. Raw links only.]
+
+## Google AI Blog
+
+- Catch up on 12 major I/O 2026 moments (28 May)
+  https://blog.google/innovation-and-ai/technology/ai/io-2026-keynote-moment-videos
+
+## Ollama Releases
+
+- v0.30.0 (28 May)
+  https://github.com/ollama/ollama/releases/tag/v0.30.0-rc29
+
+## llama.cpp Releases
+
+- b9404 (29 May)
+  https://github.com/ggml-org/llama.cpp/releases/tag/b9404
+- b9403 (29 May)
+  https://github.com/ggml-org/llama.cpp/releases/tag/b9403
+- b9402 (29 May)
+  https://github.com/ggml-org/llama.cpp/releases/tag/b9402
+- b9401 (29 May)
+  https://github.com/ggml-org/llama.cpp/releases/tag/b9401
+- b9400 (29 May)
+  https://github.com/ggml-org/llama.cpp/releases/tag/b9400
+
+## LocalAI Releases
+
+- v4.3.4 (28 May)
+  https://github.com/mudler/LocalAI/releases/tag/v4.3.4
+- v4.3.3 (28 May)
+  https://github.com/mudler/LocalAI/releases/tag/v4.3.3
+
+## Nate Jones
+
+- The trap hidden inside Salesforce #salesforce #crm #startup (29 May)
+  https://www.youtube.com/watch?v=HC3PU1ZjyCU
+- How Claude AI actually solves hard problems #claude #aitools (29 May)
+  https://www.youtube.com/watch?v=Na29eKTInFk
+- A Cursor Agent Wiped a Database in 9 Seconds. Agent Analytics Would Have Seen It Coming. (28 May)
+  https://www.youtube.com/watch?v=n0nC1kmztSk
+
+## Wes Roth
+
+- Claude Opus 4.8 Is Too Smart… and TOO HONEST (28 May)
+  https://www.youtube.com/watch?v=F_6go08nHv4
+
+## Matthew Berman
+
+- Anthropic just dropped Opus 4.8... (WOAH) (29 May)
+  https://www.youtube.com/watch?v=t3uBGhpii6w
+- OPUS 4.8!!! (also maybe GPT5.6??) (28 May)
+  https://www.youtube.com/watch?v=4n_pxHZfTC8
+
+## Hacker News
+
+- Claude Opus 4.8 (28 May)
+  https://news.ycombinator.com/item?id=48311647
+- Disagreement among frontier LLMs on real-world fact-checks (28 May)
+  https://news.ycombinator.com/item?id=48307887
+- Anthropic raises $65B in Series H funding at $965B post-money valuation (28 May)
+  https://news.ycombinator.com/item?id=48313048
+- Show HN: Continue? Y/N: A 60-second game about AI agent permission fatigue (28 May)
+  https://news.ycombinator.com/item?id=48308376
+- Various LLM Smells (28 May)
+  https://news.ycombinator.com/item?id=48313810
+
+## arXiv
+
+- Behavior-Induced Mirror-Prox Temporal-Difference Learning for Faster Off-Policy Prediction (29 May)
+  https://arxiv.org/abs/2605.28849
+- Behavior-Aware Auxiliary Corrections for Off-Policy Temporal-Difference Prediction (29 May)
+  https://arxiv.org/abs/2605.28855
+- The Cognitive Categorical Transformer: Category-Theoretic Inductive Biases for Language Modeling (29 May)
+  https://arxiv.org/abs/2605.28864
+- Ultra-Reduced-Impact-Encased-Logging (URIEL): propose a new method for selective sustainable logging and post-harvest silvicultural treatment in tropical forest using airborne robotics systems (29 May)
+  https://arxiv.org/abs/2605.28883
+- Review Arcade: On the Human Alignment and Gameability of LLM Reviews (29 May)
+  https://arxiv.org/abs/2605.28897
+
+## Hugging Face
+
+- Evolai Mamba2 0P47B V1 (elgin-group) (29 May)
+  https://huggingface.co/elgin-group/evolai-mamba2-0p47b-v1
+
+## OpenAI Blog
+
+- How Endava builds an agentic organization with Codex (28 May)
+  https://openai.com/index/endava
+- MUFG aims to become AI-native with OpenAI (28 May)
+  https://openai.com/index/mufg
+- OpenAI’s Frontier Governance Framework (28 May)
+  https://openai.com/index/openai-frontier-governance-framework
