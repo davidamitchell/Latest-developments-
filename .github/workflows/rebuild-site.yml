@@ -9,7 +9,8 @@ name: Rebuild Site
 # (history/ is the email digest's concern — this workflow reads data/processed/ directly.)
 #
 # Triggers:
-#   - Push to main that touches data/processed/ (daily pipeline, backfill)
+#   - workflow_run: fires when "Pipeline" or "Fetch and Process" completes on main
+#     (immune to [skip ci] which suppresses push-triggered workflows)
 #   - workflow_dispatch (standalone manual run)
 #
 # Deployment: artifact-based via actions/deploy-pages (not commit-to-branch).
@@ -17,10 +18,10 @@ name: Rebuild Site
 # Settings → Pages → Source: GitHub Actions
 
 on:
-  push:
+  workflow_run:
+    workflows: ["Pipeline", "Fetch and Process"]
+    types: [completed]
     branches: [main]
-    paths:
-      - "data/processed/**"
 
   workflow_dispatch:
 
@@ -32,6 +33,7 @@ jobs:
   rebuild:
     name: Build site data and deploy
     runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
 
     permissions:
       contents: read
