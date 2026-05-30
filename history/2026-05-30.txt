@@ -1,0 +1,91 @@
+Daily AI Digest — 30 May 2026
+========================================
+
+[AI summarisation failed: ClientError — no model processing was applied. Raw links only.]
+
+## Google AI Blog
+
+- Take our I/O 2026 quiz, vibe coded in Google AI Studio. (29 May)
+  https://blog.google/innovation-and-ai/technology/ai/io-2026-vibe-coded-quiz
+- 9 demos of Gemini Omni and Gemini 3.5 in action (29 May)
+  https://blog.google/innovation-and-ai/models-and-research/gemini-models/gemini-omni-3-5-videos
+- Check out real-life AI prototypes from the Futures Lab. (29 May)
+  https://blog.google/innovation-and-ai/technology/ai/university-waterloo-labs
+
+## Ollama Releases
+
+- v0.30.0 (29 May)
+  https://github.com/ollama/ollama/releases/tag/v0.30.0-rc31
+- v0.30.0-rc30 (29 May)
+  https://github.com/ollama/ollama/releases/tag/v0.30.0-rc30
+
+## llama.cpp Releases
+
+- b9415 (29 May)
+  https://github.com/ggml-org/llama.cpp/releases/tag/b9415
+- b9414 (29 May)
+  https://github.com/ggml-org/llama.cpp/releases/tag/b9414
+- b9413 (29 May)
+  https://github.com/ggml-org/llama.cpp/releases/tag/b9413
+- b9412 (29 May)
+  https://github.com/ggml-org/llama.cpp/releases/tag/b9412
+- b9411 (29 May)
+  https://github.com/ggml-org/llama.cpp/releases/tag/b9411
+
+## LocalAI Releases
+
+- v4.3.5 (29 May)
+  https://github.com/mudler/LocalAI/releases/tag/v4.3.5
+
+## Nate Jones
+
+- How AI is quietly replacing databases #ai #tech (30 May)
+  https://www.youtube.com/watch?v=WPe45FOh7G8
+- The death of the filing cabinet #ai #tech (30 May)
+  https://www.youtube.com/watch?v=59NCmQ3hxz4
+- Cheap software made your PM job harder, not easier. Here&#39;s the new job. (29 May)
+  https://www.youtube.com/watch?v=b6J387xJvHg
+
+## Wes Roth
+
+- Ghost AI let&#39;s AI Agents build disposable worlds (30 May)
+  https://www.youtube.com/watch?v=hGCrvDDpl5w
+
+## Matthew Berman
+
+- Self Improving AI actually solves everything (29 May)
+  https://www.youtube.com/watch?v=IYN2jfJHJd4
+- The Pope is into AI (29 May)
+  https://www.youtube.com/watch?v=HoMvCjnpAJ8
+
+## The AI Daily Brief
+
+- First Impressions of the New Opus 4.8 (30 May)
+  https://www.youtube.com/watch?v=zf8BfgJghd8
+- The Annual AI Slowdown Panic Is Here (29 May)
+  https://www.youtube.com/watch?v=Af18iulLsSs
+
+## Hacker News
+
+- Claude Code – Everything you can configure that the docs don't tell you (29 May)
+  https://news.ycombinator.com/item?id=48318174
+- Notes from the Mistral AI Now Summit (29 May)
+  https://news.ycombinator.com/item?id=48325340
+- Real-time LLM Inference on Standard GPUs: 3k tokens/s per request (29 May)
+  https://news.ycombinator.com/item?id=48321076
+
+## Hugging Face
+
+- Evolai Test (donate110) (30 May)
+  https://huggingface.co/donate110/evolai_test
+
+## OpenAI Blog
+
+- Boston Children’s uses AI to unlock new diagnoses (29 May)
+  https://openai.com/index/boston-childrens-hospital
+- How Braintrust turns customer requests into code with Codex (29 May)
+  https://openai.com/index/braintrust
+- Strengthening societal resilience with Rosalind Biodefense (29 May)
+  https://openai.com/index/strengthening-societal-resilience-with-rosalind-biodefense
+- A shared playbook for trustworthy third party evaluations (29 May)
+  https://openai.com/index/trustworthy-third-party-evaluations-foundations
