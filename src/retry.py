@@ -38,8 +38,8 @@ def _server_retry_delay(exc: Exception) -> float | None:
             header = response.headers.get("Retry-After") or response.headers.get("retry-after")
             if header:
                 return max(0.0, float(header))
-        except Exception:
-            pass
+        except Exception as exc:
+            logger.debug("Could not parse Retry-After header: %s", exc)
     return None
 
 

@@ -106,16 +106,11 @@ class OperatorChangelogFetcher:
         return items
 
     def _fetch_feed(self, feed_url: str, already_processed: set[str]) -> list[FetchedItem]:
-        try:
-            xml_bytes: bytes = with_backoff(
-                lambda url=feed_url: _fetch_url(url),
-                label=f"operator feed {feed_url}",
-                no_retry=(_PermanentHTTPError,),
-            )
-        except _PermanentHTTPError:
-            raise
-        except Exception:
-            raise
+        xml_bytes: bytes = with_backoff(
+            lambda url=feed_url: _fetch_url(url),
+            label=f"operator feed {feed_url}",
+            no_retry=(_PermanentHTTPError,),
+        )
 
         root = ET.fromstring(xml_bytes)
         entries = _parse_entries(root)
