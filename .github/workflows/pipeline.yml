@@ -56,7 +56,10 @@ jobs:
   email:
     name: Email Digest
     needs: fetch-and-process
-    if: ${{ !inputs.skip_email }}
+    # always() ensures the digest is sent even when fetch-and-process exits with
+    # code 2 (>50 % enrichment failures) — new items were still committed and
+    # subscribers should receive what was successfully processed.
+    if: ${{ always() && !inputs.skip_email }}
     uses: ./.github/workflows/email-digest.yml
     with:
       debug: ${{ inputs.debug || false }}
