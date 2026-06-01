@@ -1,0 +1,8 @@
+Daily AI Digest — 01 Jun 2026
+========================================
+
+## llama.cpp Releases
+
+### b9445
+Theme: CI/CD Optimization
+Summary: This `llama.cpp` release streamlines its Continuous Integration (CI) pipeline by removing redundant jobs and combining builds for various backends (e.g., OpenVINO CPU/GPU, x86 Vulkan). These CI optimizations aim to improve efficiency and reduce resource consumption in
