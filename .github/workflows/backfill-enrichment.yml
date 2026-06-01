@@ -41,11 +41,26 @@ on:
   # with whatever quota remains, or in the next day's fresh quota window.
   workflow_call:
     inputs:
+      scope:
+        description: "Which files to backfill: 'all' (all dates) or a specific YYYY-MM-DD"
+        required: false
+        default: "all"
+        type: string
       max_items:
         description: "Stop after enriching this many items (0 = unlimited)"
         required: false
         default: "20"
         type: string
+      dry_run:
+        description: "Dry run — report counts without writing files"
+        required: false
+        default: false
+        type: boolean
+      debug:
+        description: "Enable debug logging"
+        required: false
+        default: false
+        type: boolean
 
 concurrency:
   group: backfill-enrichment
