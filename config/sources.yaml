@@ -326,8 +326,9 @@ digest:
 #   not a ceiling on how slow we'll back off when quota runs low.
 #
 # enrich_max_output_tokens: Gemini token budget per enrichment call; default 500.
-#   With thinking_budget=0 the model no longer burns output tokens on reasoning,
-#   so 500 is sufficient, but 800 provides headroom against longer SUMMARY fields.
+#   With thinking_budget=0 (see src/pipeline/stages/enrich.py) the model no
+#   longer burns output tokens on reasoning, so 500 is sufficient, but 800
+#   provides headroom against longer SUMMARY fields.
 # ---------------------------------------------------------------------------
 pipeline:
   gemini_model: "gemini-2.5-pro"

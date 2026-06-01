@@ -116,7 +116,7 @@ jobs:
           echo "args=$ARGS" >> "$GITHUB_OUTPUT"
 
       - name: Configure git identity
-        if: "!inputs.dry_run"
+        if: ${{ !inputs.dry_run }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -127,7 +127,7 @@ jobs:
         run: python -m src.pipeline.backfill ${{ steps.args.outputs.args }}
 
       - name: Commit any remaining processed data
-        if: "always() && !inputs.dry_run"
+        if: ${{ always() && !inputs.dry_run }}
         run: |
           git add data/processed/
           if ! git diff --cached --quiet; then
@@ -141,7 +141,7 @@ jobs:
         # Only trigger an explicit rebuild for standalone runs (workflow_dispatch).
         # When called from pipeline.yml (workflow_call), rebuild-site.yml fires
         # automatically via its workflow_run trigger on the Pipeline conclusion.
-        if: "always() && !inputs.dry_run && github.event_name == 'workflow_dispatch'"
+        if: ${{ always() && !inputs.dry_run && github.event_name == 'workflow_dispatch' }}
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh workflow run rebuild-site.yml --ref main
