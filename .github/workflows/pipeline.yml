@@ -62,3 +62,16 @@ jobs:
       debug: ${{ inputs.debug || false }}
       dry_run: ${{ inputs.dry_run || false }}
     secrets: inherit
+
+  backfill:
+    name: Backfill Unenriched Items
+    # Runs after email so there are no concurrent git pushes to main.
+    # if: always() ensures this runs even when fetch-and-process exits code 2
+    # or when the email step is skipped — the site should always reflect the
+    # latest enrichment state.
+    needs: [fetch-and-process, email]
+    if: always()
+    uses: ./.github/workflows/backfill-enrichment.yml
+    with:
+      max_items: "20"
+    secrets: inherit

@@ -79,41 +79,44 @@ sources:
     source_class: operator
     enabled: true
 
+  # SDK/library release feeds are disabled — they produce pure version-bump
+  # items (e.g. "v0.8.3 released") with no substantive analysis content and
+  # exhaust Gemini enrichment quota on noise.
   - type: rss
     name: "Groq SDK Releases"
     url: "https://github.com/groq/groq-python/releases.atom"
     source_class: operator
-    enabled: true
+    enabled: false
 
   - type: rss
     name: "Cerebras SDK Releases"
     url: "https://github.com/Cerebras/cerebras-cloud-sdk-python/releases.atom"
     source_class: operator
-    enabled: true
+    enabled: false
 
   - type: rss
     name: "Mistral Inference Releases"
     url: "https://github.com/mistralai/mistral-inference/releases.atom"
     source_class: operator
-    enabled: true
+    enabled: false
 
   - type: rss
     name: "Ollama Releases"
     url: "https://github.com/ollama/ollama/releases.atom"
     source_class: practitioner
-    enabled: true
+    enabled: false
 
   - type: rss
     name: "llama.cpp Releases"
     url: "https://github.com/ggerganov/llama.cpp/releases.atom"
     source_class: practitioner
-    enabled: true
+    enabled: false
 
   - type: rss
     name: "LocalAI Releases"
     url: "https://github.com/mudler/LocalAI/releases.atom"
     source_class: practitioner
-    enabled: true
+    enabled: false
 
   # ── YouTube channels ──────────────────────────────────────────────────────
 
@@ -321,11 +324,13 @@ digest:
 #   not a ceiling on how slow we'll back off when quota runs low.
 #
 # enrich_max_output_tokens: Gemini token budget per enrichment call; default 500.
+#   With thinking_budget=0 the model no longer burns output tokens on reasoning,
+#   so 500 is sufficient, but 800 provides headroom against longer SUMMARY fields.
 # ---------------------------------------------------------------------------
 pipeline:
   gemini_model: "gemini-2.5-pro"
   gemini_rpm: 15
-  enrich_max_output_tokens: 500
+  enrich_max_output_tokens: 800
 
 # ---------------------------------------------------------------------------
 # history — shared global section

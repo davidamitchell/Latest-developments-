@@ -185,6 +185,11 @@ def enrich(
     config = types.GenerateContentConfig(
         system_instruction=_SYSTEM_PROMPT,
         max_output_tokens=max_output_tokens,
+        # Disable thinking tokens — this is a structured extraction task that
+        # does not benefit from reasoning.  Without thinking_budget=0 the model
+        # consumes part of max_output_tokens on internal thoughts, leaving too
+        # few tokens for the actual response and triggering MAX_TOKENS failures.
+        thinking_config=types.ThinkingConfig(thinking_budget=0),
     )
     response = client.models.generate_content(
         model=model,

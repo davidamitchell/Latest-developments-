@@ -12,6 +12,7 @@ name: Backfill AI Enrichment
 # so the site reflects the latest enrichment state.
 
 on:
+  # Manual one-off runs (with full input control).
   workflow_dispatch:
     inputs:
       scope:
@@ -34,6 +35,17 @@ on:
         required: false
         default: "false"
         type: boolean
+
+  # Called by pipeline.yml after the daily fetch-and-process run so any items
+  # that couldn't be enriched (quota exhaustion, transient errors) are retried
+  # with whatever quota remains, or in the next day's fresh quota window.
+  workflow_call:
+    inputs:
+      max_items:
+        description: "Stop after enriching this many items (0 = unlimited)"
+        required: false
+        default: "20"
+        type: string
 
 concurrency:
   group: backfill-enrichment
@@ -67,8 +79,9 @@ jobs:
         id: args
         run: |
           ARGS=""
+          # scope: workflow_dispatch supplies it; workflow_call defaults to "all"
           SCOPE="${{ inputs.scope }}"
-          if [ "$SCOPE" = "all" ]; then
+          if [ -z "$SCOPE" ] || [ "$SCOPE" = "all" ]; then
             ARGS="$ARGS --all"
           else
             ARGS="$ARGS --date $SCOPE"
@@ -77,6 +90,7 @@ jobs:
           if [ -n "$MAX_ITEMS" ] && [ "$MAX_ITEMS" != "0" ]; then
             ARGS="$ARGS --max-items $MAX_ITEMS"
           fi
+          # dry_run and debug are only available from workflow_dispatch
           if [ "${{ inputs.dry_run }}" = "true" ]; then
             ARGS="$ARGS --dry-run"
           else
@@ -108,7 +122,10 @@ jobs:
           git push origin HEAD
 
       - name: Trigger site rebuild
-        if: always() && inputs.dry_run != 'true'
+        # Only trigger an explicit rebuild for standalone runs (workflow_dispatch).
+        # When called from pipeline.yml (workflow_call), rebuild-site.yml fires
+        # automatically via its workflow_run trigger on the Pipeline conclusion.
+        if: always() && inputs.dry_run != 'true' && github.event_name == 'workflow_dispatch'
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh workflow run rebuild-site.yml --ref main

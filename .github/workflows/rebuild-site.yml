@@ -33,7 +33,7 @@ jobs:
   rebuild:
     name: Build site data and deploy
     runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion != 'cancelled' }}
 
     permissions:
       contents: read
