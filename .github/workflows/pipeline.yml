@@ -66,8 +66,9 @@ jobs:
   backfill:
     name: Backfill Unenriched Items
     # Runs after email so there are no concurrent git pushes to main.
-    # if: always() ensures backfill runs even when fetch-and-process exits code 2
-    # or when the email step is skipped — unenriched items from today (or previous
+    # if: always() ensures backfill runs even when fetch-and-process exits with
+    # code 2 (>50 % AI enrichment failures — see src/pipeline/run.py) or when
+    # the email step is skipped — unenriched items from today (or previous
     # days) should be retried with whatever quota remains after the main run.
     needs: [fetch-and-process, email]
     if: always()

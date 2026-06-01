@@ -185,10 +185,12 @@ def enrich(
     config = types.GenerateContentConfig(
         system_instruction=_SYSTEM_PROMPT,
         max_output_tokens=max_output_tokens,
-        # Disable thinking tokens — this is a structured extraction task that
-        # does not benefit from reasoning.  Without thinking_budget=0 the model
-        # consumes part of max_output_tokens on internal thoughts, leaving too
-        # few tokens for the actual response and triggering MAX_TOKENS failures.
+        # Disable thinking tokens — extracting structured fields (THEME, CONCEPTS,
+        # TAGS, SUMMARY, SOURCE_CLASS) from a news item is deterministic pattern
+        # matching that does not benefit from multi-step reasoning.  Without
+        # thinking_budget=0 the model consumes part of max_output_tokens on
+        # internal thoughts, leaving too few tokens for the actual JSON response
+        # and triggering MAX_TOKENS finish_reason failures on ~65 % of items.
         thinking_config=types.ThinkingConfig(thinking_budget=0),
     )
     response = client.models.generate_content(

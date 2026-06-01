@@ -81,7 +81,9 @@ sources:
 
   # SDK/library release feeds are disabled — they produce pure version-bump
   # items (e.g. "v0.8.3 released") with no substantive analysis content and
-  # exhaust Gemini enrichment quota on noise.
+  # exhaust Gemini enrichment quota on noise.  Consider re-enabling individual
+  # feeds only after adding a pre-enrichment filter that skips items whose
+  # titles match a semver-only pattern (e.g. /^v?\d+\.\d+/).
   - type: rss
     name: "Groq SDK Releases"
     url: "https://github.com/groq/groq-python/releases.atom"
