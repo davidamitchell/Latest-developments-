@@ -254,7 +254,10 @@ class TestClusterThemes:
             cluster_themes(records, [])
 
         call_kwargs = mock_client.call_args.kwargs
-        assert call_kwargs.get("http_options") is None
+        http_options = call_kwargs.get("http_options")
+        # An HttpOptions is injected for header capture, but SDK-level retry must not be set.
+        assert http_options is not None
+        assert http_options.retry_options is None
 
     def test_retries_on_client_error_429(self):
         """cluster_themes retries 429 ClientError and sleeps for RetryInfo.retryDelay."""

@@ -56,9 +56,26 @@ jobs:
   email:
     name: Email Digest
     needs: fetch-and-process
-    if: ${{ !inputs.skip_email }}
+    # always() ensures the digest is sent even when fetch-and-process exits with
+    # code 2 (>50 % enrichment failures) — new items were still committed and
+    # subscribers should receive what was successfully processed.
+    if: ${{ always() && !inputs.skip_email }}
     uses: ./.github/workflows/email-digest.yml
     with:
       debug: ${{ inputs.debug || false }}
       dry_run: ${{ inputs.dry_run || false }}
+    secrets: inherit
+
+  backfill:
+    name: Backfill Unenriched Items
+    # Runs after email so there are no concurrent git pushes to main.
+    # if: always() ensures backfill runs even when fetch-and-process exits with
+    # code 2 (>50 % AI enrichment failures — see src/pipeline/run.py) or when
+    # the email step is skipped — unenriched items from today (or previous
+    # days) should be retried with whatever quota remains after the main run.
+    needs: [fetch-and-process, email]
+    if: always()
+    uses: ./.github/workflows/backfill-enrichment.yml
+    with:
+      max_items: "20"
     secrets: inherit
